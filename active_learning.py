@@ -1,7 +1,8 @@
+from pytorch_lightning import Trainer
+
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
 from models import PytorchModel
-from model_training import ModelTrainer
 
 
 class ActiveLearningPipeline:
@@ -12,7 +13,7 @@ class ActiveLearningPipeline:
                  epochs: int) -> None:
         self.data_module = data_module
         self.model = model
-        self.model_trainer = ModelTrainer()
+        self.model_trainer = Trainer(deterministic=True, max_epochs=epochs)
         self.strategy = strategy
         self.epochs = epochs
 
@@ -25,7 +26,4 @@ class ActiveLearningPipeline:
 
         self.data_module.label_items(items_to_label)
 
-        self.model_trainer.fit(self.model,
-                               self.data_module.train_dataloader(),
-                               self.data_module.val_dataloader(),
-                               self.epochs)
+        self.model_trainer.fit(self.model, self.data_module)

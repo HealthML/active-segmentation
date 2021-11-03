@@ -2,8 +2,6 @@ from pytorch_lightning.core.datamodule import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 from typing import Optional
 from typing import Any, List, Union
-from tensorflow.keras.utils import Sequence
-
 
 class ActiveLearningDataModule(LightningDataModule):
     _training_set = None
@@ -34,7 +32,7 @@ class ActiveLearningDataModule(LightningDataModule):
         self._test_set = self._create_test_set()
         self._unlabeled_set = self._create_unlabeled_set()
 
-    def _create_training_set(self) -> Union[Dataset, Sequence, None]:
+    def _create_training_set(self) -> Optional[Dataset]:
         """
         :return: Pytorch data_module or Keras sequence representing the training set.
         """
@@ -42,7 +40,7 @@ class ActiveLearningDataModule(LightningDataModule):
         # this method should be overwritten in derived classes to create the training set
         return None
 
-    def _create_validation_set(self) -> Union[Dataset, Sequence, None]:
+    def _create_validation_set(self) -> Optional[Dataset]:
         """
         :return: Pytorch data_module or Keras sequence representing the validation set.
         """
@@ -50,7 +48,7 @@ class ActiveLearningDataModule(LightningDataModule):
         # this method should be overwritten in derived classes to create the validation set
         return None
 
-    def _create_test_set(self) -> Union[Dataset, Sequence, None]:
+    def _create_test_set(self) -> Optional[Dataset]:
         """
         :return: Pytorch data_module or Keras sequence representing the test set.
         """
@@ -58,7 +56,7 @@ class ActiveLearningDataModule(LightningDataModule):
         # this method should be overwritten in derived classes to create the test set
         return None
 
-    def _create_unlabeled_set(self) -> Union[Dataset, Sequence, None]:
+    def _create_unlabeled_set(self) -> Optional[Dataset]:
         """
         :return: Pytorch data_module or Keras sequence representing the unlabeled set.
         """
@@ -76,54 +74,40 @@ class ActiveLearningDataModule(LightningDataModule):
         # this method should be overwritten in derived classes to implement the labeling logic
         return None
 
-    def train_dataloader(self) -> Union[DataLoader, Sequence, None]:
+    def train_dataloader(self) -> Optional[DataLoader]:
         """
         :return: Pytorch dataloader or Keras sequence representing the training set.
         """
 
         if self._training_set:
-            if isinstance(self._training_set, Sequence):
-                return self._training_set
-            else:
-                return DataLoader(self._training_set, batch_size=self.batch_size)
+            return DataLoader(self._training_set, batch_size=self.batch_size)
         return None
 
-    def val_dataloader(self) -> Union[DataLoader, Sequence, None]:
+    def val_dataloader(self) -> Optional[DataLoader]:
         """
         :return: Pytorch dataloader or Keras sequence representing the validation set.
         """
 
         if self._validation_set:
-            if isinstance(self._validation_set, Sequence):
-                return self._validation_set
-            else:
-                return DataLoader(self._validation_set, batch_size=self.batch_size)
+            return DataLoader(self._validation_set, batch_size=self.batch_size)
         return None
 
-    def test_dataloader(self) -> Union[DataLoader, Sequence, None]:
+    def test_dataloader(self) -> Optional[DataLoader]:
         """
         :return: Pytorch dataloader or Keras sequence representing the test set.
         """
 
         if self._test_set:
-            if isinstance(self._test_set, Sequence):
-                return self._test_set
-            else:
-                return DataLoader(self._test_set, batch_size=self.batch_size)
+            return DataLoader(self._test_set, batch_size=self.batch_size)
         return None
 
-    def unlabeled_dataloader(self) -> Union[DataLoader, Sequence, None]:
+    def unlabeled_dataloader(self) -> Optional[DataLoader]:
         """
         :return: Pytorch dataloader or Keras sequence representing the unlabeled set.
         """
 
         if self._unlabeled_set:
-            if isinstance(self._unlabeled_set, Sequence):
-                return self._unlabeled_set
-            else:
-                for image in DataLoader(self._unlabeled_set, batch_size=self.batch_size):
-                    print("image dl", image)
-                return DataLoader(self._unlabeled_set, batch_size=self.batch_size)
+            return DataLoader(self._unlabeled_set, batch_size=self.batch_size)
         return None
 
     def training_set_size(self) -> int:
