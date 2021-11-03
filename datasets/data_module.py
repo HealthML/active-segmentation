@@ -2,6 +2,10 @@ from pytorch_lightning.core.datamodule import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 from typing import Optional
 from typing import Any, List, Union
+import warnings
+warnings.filterwarnings("ignore", ".*does not have many workers.*")
+warnings.filterwarnings("ignore", ".*DataModule.setup has already been called, so it will not be called again.*")
+
 
 class ActiveLearningDataModule(LightningDataModule):
     _training_set = None
