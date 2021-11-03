@@ -4,13 +4,16 @@ import torch
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
 
+from .metrics import BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDiceLoss
+
 
 class PytorchModel(LightningModule):
-    def __init__(self, learning_rate=0.0001, optimizer="adam", **kwargs):
+    def __init__(self, learning_rate=0.0001, optimizer="adam", loss="dice", **kwargs):
         super().__init__(**kwargs)
 
         self.learning_rate = learning_rate
         self.optimizer = optimizer
+        self.loss = self.configure_loss(loss)
 
     @abc.abstractmethod
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
@@ -42,12 +45,26 @@ class PytorchModel(LightningModule):
         return None
 
     def configure_optimizers(self):
+        # this method is called by the PyTorch lightning framework before starting model training
+
         if self.optimizer == "adam":
             return Adam(self.parameters(), lr=self.learning_rate)
         elif self.optimizer == "sgd":
             return SGD(self.parameters(), lr=self.learning_rate)
         else:
             raise ValueError("Invalid optimizer name.")
+
+    def configure_loss(self, loss: str):
+        if loss == "bce_dice":
+            return BCEDiceLoss()
+        elif loss == "dice_loss":
+            return DiceLoss()
+        elif loss == "fp":
+            return FalsePositiveLoss()
+        elif loss == "fp_dice":
+            return FalsePositiveDiceLoss()
+        else:
+            raise ValueError("Invalid loss name.")
 
     def predict(self, batch: torch.Tensor) -> numpy.ndarray:
         """

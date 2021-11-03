@@ -12,11 +12,12 @@ def run_active_learning_pipeline(
         data_dir: str = "./data",
         batch_size: int = 16,
         epochs: int = 50,
+        loss = "dice",
         optimizer: str = "adam",
 ):
 
     if architecture == "fcn_resnet50":
-        model = PytorchFCNResnet50(optimizer=optimizer)
+        model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
     else:
         raise ValueError("Invalid model architecture.")
 

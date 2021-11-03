@@ -31,7 +31,7 @@ class PytorchFCNResnet50(PytorchModel):
         x, y = batch
 
         logits = self(x)["out"]
-        loss = nn.CrossEntropyLoss()(logits, y)
+        loss = self.loss(logits, y)
         return loss
 
     def validation_step(self, batch, batch_idx):
