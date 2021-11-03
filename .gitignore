@@ -12,3 +12,6 @@ data
 # python modules
 venv
 env
+
+# Pycharm
+.idea
