@@ -13,7 +13,7 @@ class ActiveLearningDataModule(LightningDataModule):
     _test_set = None
     _unlabeled_set = None
 
-    def __init__(self, data_dir: str, batch_size, **kwargs):
+    def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.
         :param batch_size: Batch size.
@@ -23,6 +23,7 @@ class ActiveLearningDataModule(LightningDataModule):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
+        self.shuffle = shuffle
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -84,7 +85,7 @@ class ActiveLearningDataModule(LightningDataModule):
         """
 
         if self._training_set:
-            return DataLoader(self._training_set, batch_size=self.batch_size)
+            return DataLoader(self._training_set, batch_size=self.batch_size, shuffle=self.shuffle)
         return None
 
     def val_dataloader(self) -> Optional[DataLoader]:
