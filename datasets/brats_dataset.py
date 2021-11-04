@@ -60,8 +60,8 @@ class BraTSDataset(Dataset):
         image_index = math.ceil(index / BraTSDataset.IMAGE_DIMENSIONS[0])
         slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
         if image_index != self._current_image_index:
-            self._current_image = self.__read_image_as_array(filepath=self.image_paths[self._current_image_index], norm=True)
             self._current_image_index = image_index
+            self._current_image = self.__read_image_as_array(filepath=self.image_paths[self._current_image_index], norm=True)
             self._current_mask = self.__read_image_as_array(filepath=self.annotation_paths[self._current_image_index],
                                                             norm=False, clip=self.clip_mask)
 
@@ -76,7 +76,7 @@ class BraTSDataset(Dataset):
         return x, y
 
     def __len__(self) -> int:
-        return self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
+        return self.num_images * (BraTSDataset.IMAGE_DIMENSIONS[0] - 1)
 
     def add_image(self, image_path: str, annotation_path: str) -> None:
         """
