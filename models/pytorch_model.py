@@ -55,9 +55,11 @@ class PytorchModel(LightningModule):
             raise ValueError("Invalid optimizer name.")
 
     def configure_loss(self, loss: str):
+        if loss == "bce":
+            return torch.nn.CrossEntropyLoss()
         if loss == "bce_dice":
             return BCEDiceLoss()
-        elif loss == "dice_loss":
+        elif loss == "dice":
             return DiceLoss()
         elif loss == "fp":
             return FalsePositiveLoss()
