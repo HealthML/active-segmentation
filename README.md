@@ -43,5 +43,6 @@ python3 main.py \
     --strategy "base" \
     --batch_size 16 \
     --epochs 1 \
-    --optimizer "adam"
+    --optimizer "adam" \
+    --loss "bce"
 ```
