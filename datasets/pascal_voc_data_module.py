@@ -16,14 +16,14 @@ class PILMaskToTensor:
 
 
 class PascalVOCDataModule(ActiveLearningDataModule):
-    def __init__(self, data_dir: str, batch_size, **kwargs):
+    def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.
         :param batch_size: Batch size.
         :param kwargs: Further, dataset specific parameters.
         """
 
-        super().__init__(data_dir, batch_size, **kwargs)
+        super().__init__(data_dir, batch_size, shuffle, **kwargs)
 
         self.data_folder = os.path.join(data_dir, "voc-segmentation")
         self.__download_dataset = not os.path.exists(self.data_folder)
