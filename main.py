@@ -1,6 +1,6 @@
 import fire
 from active_learning import ActiveLearningPipeline
-from models import PytorchFCNResnet50
+from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
 
@@ -18,6 +18,8 @@ def run_active_learning_pipeline(
 
     if architecture == "fcn_resnet50":
         model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
+    elif architecture == "u_net":
+        model = PytorchUNet(optimizer=optimizer, loss=loss)
     else:
         raise ValueError("Invalid model architecture.")
 
