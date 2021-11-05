@@ -2,7 +2,7 @@
 import fire
 from active_learning import ActiveLearningPipeline
 from models import PytorchFCNResnet50
-from datasets import PascalVOCDataModule
+from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
 
 
@@ -40,6 +40,8 @@ def run_active_learning_pipeline(
 
     if dataset == "pascal-voc":
         data_module = PascalVOCDataModule(data_dir, batch_size)
+    elif dataset == "brats":
+        data_module = BraTSDataModule(data_dir, batch_size)
     else:
         raise ValueError("Invalid data_module name.")
 
