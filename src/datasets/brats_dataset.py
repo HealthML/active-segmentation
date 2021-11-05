@@ -67,7 +67,7 @@ class BraTSDataset(Dataset):
         self.target_transform = target_transform
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        image_index = math.ceil(index / BraTSDataset.IMAGE_DIMENSIONS[0])
+        image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
         slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
         if image_index != self._current_image_index:
             self._current_image_index = image_index
@@ -88,10 +88,10 @@ class BraTSDataset(Dataset):
         if self.target_transform:
             y = self.target_transform(y)
 
-        return x, y
+        return torch.unsqueeze(x, 0), y
 
     def __len__(self) -> int:
-        return self.num_images * (BraTSDataset.IMAGE_DIMENSIONS[0] - 1)
+        return self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
 
     def add_image(self, image_path: str, annotation_path: str) -> None:
         """
