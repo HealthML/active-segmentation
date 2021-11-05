@@ -44,7 +44,6 @@ class UNet(nn.Module):
 
     def forward(self, x):
         x = x.float()
-        print("shape x", x.dtype)
         enc1 = self.encoder1(x)
         enc2 = self.encoder2(self.pool1(enc1))
         enc3 = self.encoder3(self.pool2(enc2))
