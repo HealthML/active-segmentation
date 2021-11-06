@@ -10,9 +10,8 @@ class PytorchFCNResnet50(PytorchModel):
         super().__init__(**kwargs)
 
         self.model = models.segmentation.fcn_resnet50(
-            pretrained=True,
-            progress=True,
-            num_classes=21)
+            pretrained=True, progress=True, num_classes=21
+        )
 
     # wrap model interface
     def eval(self):

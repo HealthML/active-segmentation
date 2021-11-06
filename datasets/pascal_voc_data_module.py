@@ -28,8 +28,12 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         self.data_folder = os.path.join(data_dir, "voc-segmentation")
         self.__download_dataset = not os.path.exists(self.data_folder)
 
-        self.__image_transformation = transforms.Compose([transforms.Resize((255, 255)), transforms.ToTensor()])
-        self.__annotation_transformation = transforms.Compose([transforms.Resize((255, 255)), PILMaskToTensor()])
+        self.__image_transformation = transforms.Compose(
+            [transforms.Resize((255, 255)), transforms.ToTensor()]
+        )
+        self.__annotation_transformation = transforms.Compose(
+            [transforms.Resize((255, 255)), PILMaskToTensor()]
+        )
         self.__training_set_size = 4
         self.__validation_set_size = 4
 
@@ -38,22 +42,35 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         return None
 
     def _create_training_set(self) -> Union[Dataset, None]:
-        training_set = datasets.VOCSegmentation(self.data_folder,
-                                                year="2012",
-                                                image_set="train",
-                                                download=self.__download_dataset,
-                                                transform=self.__image_transformation,
-                                                target_transform=self.__annotation_transformation)
-        return random_split(training_set, [self.__training_set_size, len(training_set) - self.__training_set_size])[0]
+        training_set = datasets.VOCSegmentation(
+            self.data_folder,
+            year="2012",
+            image_set="train",
+            download=self.__download_dataset,
+            transform=self.__image_transformation,
+            target_transform=self.__annotation_transformation,
+        )
+        return random_split(
+            training_set,
+            [self.__training_set_size, len(training_set) - self.__training_set_size],
+        )[0]
 
     def _create_validation_set(self) -> Union[Dataset, None]:
-        validation_set = datasets.VOCSegmentation(self.data_folder,
-                                                  year="2012",
-                                                  image_set="val",
-                                                  download=self.__download_dataset,
-                                                  transform=self.__image_transformation,
-                                                  target_transform=self.__annotation_transformation)
-        return random_split(validation_set, [self.__validation_set_size, len(validation_set) - self.__validation_set_size])[0]
+        validation_set = datasets.VOCSegmentation(
+            self.data_folder,
+            year="2012",
+            image_set="val",
+            download=self.__download_dataset,
+            transform=self.__image_transformation,
+            target_transform=self.__annotation_transformation,
+        )
+        return random_split(
+            validation_set,
+            [
+                self.__validation_set_size,
+                len(validation_set) - self.__validation_set_size,
+            ],
+        )[0]
 
     def _create_test_set(self) -> Union[Dataset, None]:
         # faked test set
