@@ -1,5 +1,7 @@
 import torch
 
+from .losses import DiceLoss
+
 def dsc(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     """
     Computes Dice similarity coefficient (DSC) for two binary segmentation masks.
@@ -34,23 +36,6 @@ def recall(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tens
     true_positives = flattened_target.sum()
     intersection = (flattened_target * flattened_input).sum()
     return (intersection + smoothing) / (true_positives + smoothing)
-
-class DiceLoss(torch.nn.Module):
-    def __init__(self, smoothing=1):
-        super(DiceLoss, self).__init__()
-        self.smoothing = smoothing
-
-    def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        """
-        Computes dice loss for binary segmentation masks.
-
-        :param input: Predicted binary segmentation mask.
-        :param target: Target binary segmentation mask.
-        :return: Loss value as 1-element tensor.
-        """
-
-        loss = 1 - dsc(target, input)
-        return loss
 
 class BCEDiceLoss(torch.nn.Module):
     def __init__(self, smoothing=1):
