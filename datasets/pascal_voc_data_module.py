@@ -10,7 +10,8 @@ from .data_module import ActiveLearningDataModule
 
 
 class PILMaskToTensor:
-    """ TBD """
+    """TBD"""
+
     # pylint: disable=too-few-public-methods
     def __call__(self, target):
         target = np.array(target)
@@ -19,7 +20,8 @@ class PILMaskToTensor:
 
 
 class PascalVOCDataModule(ActiveLearningDataModule):
-    """ Pascal voc data loader """
+    """Pascal voc data loader"""
+
     def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.

@@ -9,7 +9,8 @@ from .metrics import BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDice
 
 
 class PytorchModel(LightningModule):
-    """ TBD """
+    """TBD"""
+
     def __init__(self, learning_rate=0.0001, optimizer="adam", loss="dice", **kwargs):
         super().__init__(**kwargs)
 

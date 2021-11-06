@@ -12,7 +12,8 @@ warnings.filterwarnings(
 
 
 class ActiveLearningDataModule(LightningDataModule):
-    """ TBD """
+    """TBD"""
+
     # pylint: disable=assignment-from-none,no-self-use,unused-argument
     _training_set = None
     _validation_set = None
