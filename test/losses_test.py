@@ -2,7 +2,7 @@ import torch
 from typing import Callable, Optional, Tuple
 import unittest
 
-from models import DiceLoss
+from models import DiceLoss, FalsePositiveLoss
 
 
 def standard_slice_1():
@@ -203,13 +203,8 @@ class TestDiceLoss(unittest.TestCase):
         dice_loss = DiceLoss(reduction=reduction, smoothing=smoothing)
         loss = dice_loss(prediction, target)
 
-        print("loss", loss)
-        print("expected loss", expected_loss)
-
         self.assertTrue(loss.shape == expected_loss.shape, "Returns loss tensor with correct shape.")
-        # self.assertTrue(loss.requires_grad, "Loss tensor requires gradient.")
         torch.testing.assert_allclose(loss, expected_loss, msg="Correctly computes loss value.")
-        # self.assertTrue(torch.equal(loss, expected_loss), "Correctly computes loss value.")
 
     def test_standard_case(self):
         self._test_dice_loss(standard_slice_1, standard_slice_2, smoothing=0)
@@ -332,7 +327,107 @@ class TestDiceLoss(unittest.TestCase):
                              expected_loss=torch.tensor(2 * expected_loss))
 
 
+class TestFalsePositiveLoss(unittest.TestCase):
 
+    def _test_fp_loss(self, get_first_slice: Callable[[], Tuple[torch.Tensor, torch.Tensor, int, int, int, int]],
+                        get_second_slice: Callable[[], Tuple[torch.Tensor, torch.Tensor, int, int, int, int]],
+                        reduction: Optional[str] = "none",
+                        smoothing: float = 1,
+                        expected_loss: Optional[torch.Tensor] = None):
+
+        predictions_first_slice, target_first_slice, tp_first, fp_first, _, fn_first = get_first_slice()
+        predictions_second_slice, target_second_slice, tp_second, fp_second, _, fn_second = get_second_slice()
+
+        prediction = torch.stack([predictions_first_slice, predictions_second_slice])
+        target = torch.stack([target_first_slice, target_second_slice])
+
+        if expected_loss is None:
+            loss_first_slice = fp_first / (tp_first + fp_first + smoothing)
+            loss_second_slice = fp_second / (tp_second + fp_second + smoothing)
+
+            if reduction == "mean":
+                expected_loss = torch.tensor((loss_first_slice + loss_second_slice) / 2)
+            elif reduction == "sum":
+                expected_loss = torch.tensor(loss_first_slice + loss_second_slice)
+            else:
+                expected_loss = torch.tensor([[loss_first_slice], [loss_second_slice]])
+
+        fp_loss = FalsePositiveLoss(reduction=reduction, smoothing=smoothing)
+        loss = fp_loss(prediction, target)
+
+        self.assertTrue(loss.shape == expected_loss.shape, "Returns loss tensor with correct shape.")
+        torch.testing.assert_allclose(loss, expected_loss, msg="Correctly computes loss value.")
+
+    def test_standard_case(self):
+        _, _, tp_1, fp_1, _, _ = standard_slice_1()
+        _, _, tp_2, fp_2, _, _ = standard_slice_2()
+
+        self._test_fp_loss(standard_slice_1, standard_slice_2, smoothing=0,
+                           expected_loss=torch.tensor([[fp_1 / (tp_1 + fp_1)], [fp_2 / (tp_2 + fp_2)]]))
+        self._test_fp_loss(standard_slice_1, standard_slice_2, smoothing=0, reduction="mean",
+                           expected_loss=torch.tensor((fp_1 / (tp_1 + fp_1) + fp_2 / (tp_2 + fp_2)) / 2))
+        self._test_fp_loss(standard_slice_1, standard_slice_2, smoothing=0, reduction="sum",
+                           expected_loss=torch.tensor(fp_1 / (tp_1 + fp_1) + fp_2 / (tp_2 + fp_2)))
+
+        self._test_fp_loss(standard_slice_1, standard_slice_2, smoothing=1,
+                           expected_loss=torch.tensor([[fp_1 / (tp_1+fp_1+1)], [fp_2 / (tp_2+fp_2+1)]]))
+        self._test_fp_loss(standard_slice_1, standard_slice_2, smoothing=1, reduction="mean",
+                           expected_loss=torch.tensor((fp_1 / (tp_1+fp_1+1) + fp_2 / (tp_2+fp_2+1)) / 2))
+        self._test_fp_loss(standard_slice_1, standard_slice_2, smoothing=1, reduction="sum",
+                           expected_loss=torch.tensor(fp_1 / (tp_1+fp_1+1) + fp_2 / (tp_2+fp_2+1)))
+
+    def test_no_false_positives(self):
+        _, _, tp, _, _, _ = slice_all_true()
+
+        self._test_fp_loss(slice_all_true, slice_all_true, smoothing=0, expected_loss=torch.tensor([[0.], [0.]]))
+        self._test_fp_loss(slice_all_true, slice_all_true, smoothing=0, reduction="mean", expected_loss=torch.tensor(0))
+        self._test_fp_loss(slice_all_true, slice_all_true, smoothing=0, reduction="sum", expected_loss=torch.tensor(0))
+
+        self._test_fp_loss(slice_all_true, slice_all_true, smoothing=1, expected_loss=torch.tensor([[0.], [0.]]))
+        self._test_fp_loss(slice_all_true, slice_all_true, smoothing=1, reduction="mean", expected_loss=torch.tensor(0))
+        self._test_fp_loss(slice_all_true, slice_all_true, smoothing=1, reduction="sum", expected_loss=torch.tensor(0))
+
+    def test_all_false(self):
+        _, _, _, fp, _, _ = slice_all_false()
+
+        self._test_fp_loss(slice_all_false, slice_all_false, smoothing=0, expected_loss=torch.tensor([[1.], [1.]]))
+        self._test_fp_loss(slice_all_false, slice_all_false, smoothing=0, reduction="mean",
+                           expected_loss=torch.tensor(1.))
+        self._test_fp_loss(slice_all_false, slice_all_false, smoothing=0, reduction="sum",
+                           expected_loss=torch.tensor(2.))
+
+        self._test_fp_loss(slice_all_false, slice_all_false, smoothing=1,
+                           expected_loss=torch.tensor([[fp / (fp + 1)], [fp / (fp + 1)]]))
+        self._test_fp_loss(slice_all_false, slice_all_false, smoothing=1, reduction="mean",
+                           expected_loss=torch.tensor(fp / (fp + 1)))
+        self._test_fp_loss(slice_all_false, slice_all_false, smoothing=1, reduction="sum",
+                           expected_loss=torch.tensor(2 * fp / (fp + 1)))
+
+    def test_no_positives(self):
+        predictions_first_slice, target_first_slice, tp_first, fp_first, _, fn_first = slice_all_true_negatives()
+        predictions_second_slice, target_second_slice, tp_second, fp_second, _, fn_second = slice_all_true_negatives()
+
+        prediction = torch.stack([predictions_first_slice, predictions_second_slice])
+        target = torch.stack([target_first_slice, target_second_slice])
+
+        fp_loss = FalsePositiveLoss(smoothing=0, reduction="none")
+        loss = fp_loss(prediction, target)
+        self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
+
+        fp_loss = FalsePositiveLoss(smoothing=0, reduction="mean")
+        loss = fp_loss(prediction, target)
+        self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
+
+        fp_loss = FalsePositiveLoss(smoothing=0, reduction="sum")
+        loss = fp_loss(prediction, target)
+        self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
+
+        self._test_fp_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1,
+                             expected_loss=torch.tensor([[0.], [0.]]))
+        self._test_fp_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1, reduction="mean",
+                             expected_loss=torch.tensor(0.))
+        self._test_fp_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1, reduction="sum",
+                             expected_loss=torch.tensor(0.))
 
 if __name__ == '__main__':
     unittest.main()
