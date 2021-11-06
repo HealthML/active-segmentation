@@ -112,12 +112,21 @@ class FalsePositiveLoss(SegmentationLoss):
         super(FalsePositiveLoss, self).__init__(smoothing, reduction)
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        """
-        Computes false positive loss for binary segmentation masks.
+        r"""
 
-        :param prediction: Predicted binary segmentation mask.
-        :param target: Target binary segmentation mask.
-        :return: Loss value as 1-element tensor.
+        Args:
+            prediction (Tensor): Predicted segmentation mask with each channel being either a sharp segmentation mask or
+                the output of a sigmoid layer.
+            target (Tensor): Target segmentation mask with the same number of channels as the prediction.
+        Returns:
+            Tensor: False positive loss.
+
+        Shape:
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes`, or
+             `(N, height, width)` for binary segmentation tasks.
+            - Target: :math:`(N, C, height, width)`, where each value is in
+              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
         assert prediction.shape == target.shape
@@ -133,3 +142,39 @@ class FalsePositiveLoss(SegmentationLoss):
         fp_loss = false_positives / (self.smoothing + positives)
 
         return self._reduce_loss(fp_loss)
+
+
+class FalsePositiveDiceLoss(SegmentationLoss):
+    """
+    Implements a loss function that combines the Dice loss with the false positive loss.
+
+    Args:
+        smoothing (int, optional): Laplacian smoothing factor.
+        reduction (str, optional): Reduction function that is to be used to aggregate the loss values of the images of
+            one batch, must be either "mean", "sum" or "none".
+    """
+
+    def __init__(self, smoothing: int = 1, reduction: str = "mean"):
+        super(FalsePositiveDiceLoss, self).__init__(smoothing, reduction)
+        self.fp_loss = FalsePositiveLoss(smoothing)
+        self.dice_loss = DiceLoss(smoothing)
+
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        r"""
+
+        Args:
+            prediction (Tensor): Predicted segmentation mask with each channel being either a sharp segmentation mask or
+                the output of a sigmoid layer.
+            target (Tensor): Target segmentation mask with the same number of channels as the prediction.
+        Returns:
+            Tensor: Combined loss.
+
+        Shape:
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes`, or
+             `(N, height, width)` for binary segmentation tasks.
+            - Target: :math:`(N, C, height, width)`, where each value is in
+              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
+        """
+
+        return self.fp_loss(prediction, target) + self.dice_loss(prediction, target)
