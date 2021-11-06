@@ -51,7 +51,7 @@ class PytorchModel(LightningModule):
 
     def configure_optimizers(self):
         """
-        this method is called by the PyTorch lightning framework before starting model training
+        This method is called by the PyTorch lightning framework before starting model training.
         :return:
         """
 
