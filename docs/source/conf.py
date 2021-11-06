@@ -31,7 +31,35 @@ release = '0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinxcontrib.katex',
+    'sphinx.ext.autosectionlabel',
+    'sphinx_copybutton',
+]
+
+# build the templated autosummary files
+autosummary_generate = True
+numpydoc_show_class_members = False
+napoleon_use_ivar = True
+
+# Disable docstring inheritance
+autodoc_inherit_docstrings = False
+
+# Disable displaying type annotations, these can be very verbose
+autodoc_typehints = 'none'
+
+# Enable overriding of function signatures in the first line of the docstring.
+autodoc_docstring_signature = True
+
+html_css_files = [
+    'https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
