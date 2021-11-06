@@ -1,10 +1,7 @@
-query\_strategies package
+query\_strategies
 ==============================================
 
-Submodules
-----------
-
-query\_strategies.query\_strategy module
+QueryStrategy
 -------------------------------------------------------------
 
 .. automodule:: query_strategies.query_strategy
@@ -12,10 +9,3 @@ query\_strategies.query\_strategy module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: query_strategies
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,10 +1,8 @@
-active\_segmentation.datasets package
+datasets
 =====================================
 
-Submodules
-----------
 
-datasets.brats\_data\_module module
+BraTSDataModule
 --------------------------------------------------------
 
 .. automodule:: datasets.brats_data_module
@@ -12,7 +10,7 @@ datasets.brats\_data\_module module
    :undoc-members:
    :show-inheritance:
 
-datasets.brats\_dataset module
+BraTSDataset
 ---------------------------------------------------
 
 .. automodule:: datasets.brats_dataset
@@ -20,7 +18,7 @@ datasets.brats\_dataset module
    :undoc-members:
    :show-inheritance:
 
-src.datasets.data\_module module
+DataModule
 -------------------------------------------------
 
 .. automodule:: datasets.data_module
@@ -28,7 +26,7 @@ src.datasets.data\_module module
    :undoc-members:
    :show-inheritance:
 
-pascal\_voc\_data\_module module
+PascalVocDataModule
 --------------------------------------------------------------
 
 .. automodule:: datasets.pascal_voc_data_module
@@ -36,10 +34,3 @@ pascal\_voc\_data\_module module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: datasets
-   :members:
-   :undoc-members:
-   :show-inheritance:

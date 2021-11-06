@@ -1,4 +1,4 @@
-active_learning_framework package
+active_learning_framework
 =================================
 
 Subpackages

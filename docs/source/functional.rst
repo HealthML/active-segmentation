@@ -1,10 +1,7 @@
-functional package
+functional
 ======================
 
-Submodules
-----------
-
-functional.losses module
+losses
 ----------------------------
 
 .. automodule:: functional.losses
@@ -12,7 +9,7 @@ functional.losses module
    :undoc-members:
    :show-inheritance:
 
-functional.metrics module
+metrics
 -----------------------------
 
 .. automodule:: functional.metrics

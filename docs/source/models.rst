@@ -1,10 +1,7 @@
-models package
+models
 ===================================
 
-Submodules
-----------
-
-models.pytorch\_fcn\_resnet50 module
+PytorchFCNResnet50
 ---------------------------------------------------------
 
 .. automodule:: models.pytorch_fcn_resnet50
@@ -12,7 +9,7 @@ models.pytorch\_fcn\_resnet50 module
    :undoc-members:
    :show-inheritance:
 
-models.pytorch\_model module
+PytorchModel
 -------------------------------------------------
 
 .. automodule:: models.pytorch_model
@@ -20,7 +17,7 @@ models.pytorch\_model module
    :undoc-members:
    :show-inheritance:
 
-models.pytorch\_u\_net module
+PytorchUNet
 --------------------------------------------------
 
 .. automodule:: models.pytorch_u_net
@@ -28,19 +25,10 @@ models.pytorch\_u\_net module
    :undoc-members:
    :show-inheritance:
 
-models.u\_net module
+UNet
 -----------------------------------------
 
 .. automodule:: models.u_net
    :members:
    :undoc-members:
    :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
