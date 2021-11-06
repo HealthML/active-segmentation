@@ -326,6 +326,26 @@ class TestDiceLoss(unittest.TestCase):
         self._test_dice_loss(probabilistic_slice, probabilistic_slice, smoothing=1, reduction="sum",
                              expected_loss=torch.tensor(2 * expected_loss))
 
+    def test_multi_class_prediction(self):
+        prediction_1, target_1, tp_1, fp_1, _, fn_1 = standard_slice_1()
+        prediction_2, target_2, tp_2, fp_2, _, fn_2 = standard_slice_2()
+
+        dice_loss = DiceLoss(smoothing=0, reduction="mean")
+
+        loss_1 = -2 * tp_1 / (2 * tp_1 + fp_1 + fn_1)
+        loss_2 = -2 * tp_2 / (2 * tp_2 + fp_2 + fn_2)
+
+        multi_class_prediction_1 = torch.cat([prediction_1, prediction_2])
+        multi_class_prediction_2 = torch.cat([prediction_1, prediction_1])
+
+        multi_class_target_1 = torch.cat([target_1, target_2])
+        multi_class_target_2 = torch.cat([target_1, target_1])
+
+        loss = dice_loss(torch.stack([multi_class_prediction_1, multi_class_prediction_2]),
+                         torch.stack([multi_class_target_1, multi_class_target_2]))
+
+        torch.testing.assert_allclose(loss, torch.tensor(((loss_1 + loss_2) / 2 + loss_1) / 2), msg="Correctly computes loss value.")
+
 
 class TestFalsePositiveLoss(unittest.TestCase):
 

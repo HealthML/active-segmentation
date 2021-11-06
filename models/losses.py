@@ -37,16 +37,13 @@ class SegmentationLoss(torch.nn.Module):
 
         assert loss.dim() == 1 or loss.dim() == 2
 
-        # compute mean of channel losses
-        if self.reduction == 'mean':
-            dice_loss = loss.mean(-1)
-
         # aggregate loss values for all channels and the entire batch
         if self.reduction == 'mean':
             return loss.mean()
         elif self.reduction == "sum":
             return loss.sum()
         return loss
+
 
 class DiceLoss(SegmentationLoss):
     """
