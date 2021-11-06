@@ -29,8 +29,9 @@ class DiceLoss(torch.nn.Module):
         r"""
 
         Args:
-            prediction (Tensor): Predicted segmentation mask
-            target (Tensor): Target segmentation mask
+            prediction (Tensor): Predicted segmentation mask with each channel being either a sharp segmentation mask or
+                the output of a sigmoid layer.
+            target (Tensor): Target segmentation mask with the same number of channels as the prediction.
         Returns:
             Tensor: Dice loss.
 
@@ -39,16 +40,13 @@ class DiceLoss(torch.nn.Module):
              `(N, height, width)` for binary segmentation tasks.
             - Target: :math:`(N, C, height, width)`, where each value is in
               :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
-            - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N)`. Otherwise, scalar.
+            - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
-
-        class_predictions = (prediction > 0.5).float()
-        class_predictions.requires_grad = True
 
         assert prediction.shape == target.shape
 
         flattened_target = target.view(*target.shape[:-2], -1).float()
-        flattened_prediction = class_predictions.view(*class_predictions.shape[:-2], -1).float()
+        flattened_prediction = prediction.view(*prediction.shape[:-2], -1).float()
 
         intersection = (flattened_prediction * flattened_target).sum(dim=-1)
 
@@ -59,9 +57,10 @@ class DiceLoss(torch.nn.Module):
                 + self.smoothing)
 
         # compute mean of channel losses
-        dice_loss = dice_loss.mean(-1)
+        if self.reduction == 'mean':
+            dice_loss = dice_loss.mean(-1)
 
-        # aggregate loss values for the entire batch
+        # aggregate loss values for all channels and the entire batch
         if self.reduction == 'mean':
             return dice_loss.mean()
         elif self.reduction == "sum":

@@ -26,8 +26,8 @@ class PytorchUNet(PytorchModel):
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
         x, y = batch
 
-        logits = self(x)
-        loss = self.loss(logits, y)
+        probabilities = self(x)
+        loss = self.loss(probabilities, y)
         return loss
 
     def validation_step(self, batch, batch_idx):

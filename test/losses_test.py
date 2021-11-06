@@ -8,9 +8,9 @@ from models import DiceLoss
 def standard_slice_1():
     prediction_slice = torch.tensor(
         [[
-            [0.1, 0.1, 0.],
-            [0.9, 0.9, 0.4],
-            [0.7, 0.8, 0.2]
+            [0, 0, 0.],
+            [1, 1, 0],
+            [1, 1, 0]
         ]])
 
     target_slice = torch.tensor(
@@ -31,9 +31,9 @@ def standard_slice_1():
 def standard_slice_2():
     prediction_slice = torch.tensor(
         [[
-            [0.1, 0.8, 0.2],
-            [0.9, 0.9, 0.3],
-            [0.7, 0.8, 0.3]
+            [0, 1, 0],
+            [1, 1, 0],
+            [1, 1, 0]
         ]])
 
     target_slice = torch.tensor(
@@ -52,13 +52,6 @@ def standard_slice_2():
 
 
 def slice_all_true():
-    prediction_slice = torch.tensor(
-        [[
-            [0.9, 0.1, 0.1],
-            [0.1, 0.9, 0.1],
-            [0.1, 0.1, 0.9]
-        ]])
-
     target_slice = torch.tensor(
         [[
             [1, 0, 0],
@@ -71,15 +64,15 @@ def slice_all_true():
     tn = 6
     fn = 0
 
-    return prediction_slice, target_slice, tp, fp, tn, fn
+    return target_slice, target_slice, tp, fp, tn, fn
 
 
 def slice_all_false():
     prediction_slice = torch.tensor(
         [[
-            [0.1, 0.9, 0.9],
-            [0.9, 0.1, 0.9],
-            [0.9, 0.9, 0.1]
+            [0, 1, 1],
+            [1, 0, 1],
+            [1, 1, 0]
         ]])
 
     target_slice = torch.tensor(
@@ -100,9 +93,9 @@ def slice_all_false():
 def slice_no_true_positives():
     prediction_slice = torch.tensor(
         [[
-            [0.1, 0.9, 0.9],
-            [0.1, 0.1, 0.9],
-            [0.1, 0.1, 0.1]
+            [0, 1, 1],
+            [0, 0, 1],
+            [0, 0, 0]
         ]])
 
     target_slice = torch.tensor(
@@ -123,9 +116,9 @@ def slice_no_true_positives():
 def slice_no_true_negatives():
     prediction_slice = torch.tensor(
         [[
-            [0.9, 0.9, 0.9],
-            [0.9, 0.9, 0.9],
-            [0.9, 0.9, 0.1]
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 0]
         ]])
 
     target_slice = torch.tensor(
@@ -144,13 +137,6 @@ def slice_no_true_negatives():
 
 
 def slice_all_true_negatives():
-    prediction_slice = torch.tensor(
-        [[
-            [0.1, 0.1, 0.1],
-            [0.1, 0.1, 0.1],
-            [0.1, 0.1, 0.1]
-        ]])
-
     target_slice = torch.tensor(
         [[
             [0, 0, 0],
@@ -162,6 +148,29 @@ def slice_all_true_negatives():
     fp = 0
     tn = 9
     fn = 9
+
+    return target_slice, target_slice, tp, fp, tn, fn
+
+
+def probabilistic_slice():
+    prediction_slice = torch.tensor(
+        [[
+            [0.1, 0.1, 0.],
+            [0.9, 0.9, 0.4],
+            [0.7, 0.8, 0.2]
+        ]])
+
+    target_slice = torch.tensor(
+        [[
+            [0, 0, 0],
+            [1, 1, 1],
+            [1, 1, 0]
+        ]])
+
+    tp = 4
+    fp = 0
+    tn = 4
+    fn = 1
 
     return prediction_slice, target_slice, tp, fp, tn, fn
 
@@ -189,14 +198,18 @@ class TestDiceLoss(unittest.TestCase):
             elif reduction == "sum":
                 expected_loss = torch.tensor(loss_first_slice + loss_second_slice)
             else:
-                expected_loss = torch.tensor([loss_first_slice, loss_second_slice])
+                expected_loss = torch.tensor([[loss_first_slice], [loss_second_slice]])
 
         dice_loss = DiceLoss(reduction=reduction, smoothing=smoothing)
         loss = dice_loss(prediction, target)
 
+        print("loss", loss)
+        print("expected loss", expected_loss)
+
         self.assertTrue(loss.shape == expected_loss.shape, "Returns loss tensor with correct shape.")
-        self.assertTrue(loss.requires_grad, "Loss tensor requires gradient.")
-        self.assertTrue(torch.equal(loss, expected_loss), "Correctly computes loss value.")
+        # self.assertTrue(loss.requires_grad, "Loss tensor requires gradient.")
+        torch.testing.assert_allclose(loss, expected_loss, msg="Correctly computes loss value.")
+        # self.assertTrue(torch.equal(loss, expected_loss), "Correctly computes loss value.")
 
     def test_standard_case(self):
         self._test_dice_loss(standard_slice_1, standard_slice_2, smoothing=0)
@@ -208,13 +221,13 @@ class TestDiceLoss(unittest.TestCase):
         self._test_dice_loss(standard_slice_1, standard_slice_2, smoothing=1, reduction="sum")
 
     def test_all_true(self):
-        self._test_dice_loss(slice_all_true, slice_all_true, smoothing=0, expected_loss=torch.tensor([-1., -1.]))
+        self._test_dice_loss(slice_all_true, slice_all_true, smoothing=0, expected_loss=torch.tensor([[-1.], [-1.]]))
         self._test_dice_loss(slice_all_true, slice_all_true, smoothing=0, reduction="mean",
                              expected_loss=torch.tensor(-1.))
         self._test_dice_loss(slice_all_true, slice_all_true, smoothing=0, reduction="sum",
                              expected_loss=torch.tensor(-2.))
 
-        self._test_dice_loss(slice_all_true, slice_all_true, smoothing=1, expected_loss=torch.tensor([-1., -1.]))
+        self._test_dice_loss(slice_all_true, slice_all_true, smoothing=1, expected_loss=torch.tensor([[-1.], [-1.]]))
         self._test_dice_loss(slice_all_true, slice_all_true, smoothing=1, reduction="mean",
                              expected_loss=torch.tensor(-1.))
         self._test_dice_loss(slice_all_true, slice_all_true, smoothing=1, reduction="sum",
@@ -222,7 +235,7 @@ class TestDiceLoss(unittest.TestCase):
 
     def test_all_false(self):
         self._test_dice_loss(slice_all_false, slice_all_false, smoothing=0,
-                             expected_loss=torch.tensor([0., 0.]))
+                             expected_loss=torch.tensor([[0.], [0.]]))
         self._test_dice_loss(slice_all_false, slice_all_false, smoothing=0, reduction="mean",
                              expected_loss=torch.tensor(0.))
         self._test_dice_loss(slice_all_false, slice_all_false, smoothing=0, reduction="sum",
@@ -231,7 +244,7 @@ class TestDiceLoss(unittest.TestCase):
         _, _, _, fp, _, fn = slice_all_false()
 
         self._test_dice_loss(slice_all_false, slice_all_false, smoothing=1,
-                             expected_loss=torch.tensor([-1. / (1.+fp+fn), - 1. / (1.+fp+fn)]))
+                             expected_loss=torch.tensor([[-1. / (1.+fp+fn)], [-1. / (1.+fp+fn)]]))
         self._test_dice_loss(slice_all_false, slice_all_false, smoothing=1, reduction="mean",
                              expected_loss=torch.tensor(-1. / (1.+fp+fn)))
         self._test_dice_loss(slice_all_false, slice_all_false, smoothing=1, reduction="sum",
@@ -239,7 +252,7 @@ class TestDiceLoss(unittest.TestCase):
 
     def test_no_true_positives(self):
         self._test_dice_loss(slice_no_true_positives, slice_no_true_positives, smoothing=0,
-                             expected_loss=torch.tensor([0., 0.]))
+                             expected_loss=torch.tensor([[0.], [0.]]))
         self._test_dice_loss(slice_no_true_positives, slice_no_true_positives, smoothing=0, reduction="mean",
                              expected_loss=torch.tensor(0.))
         self._test_dice_loss(slice_no_true_positives, slice_no_true_positives, smoothing=0, reduction="sum",
@@ -248,7 +261,7 @@ class TestDiceLoss(unittest.TestCase):
         _, _, _, fp, _, fn = slice_no_true_positives()
 
         self._test_dice_loss(slice_no_true_positives, slice_no_true_positives, smoothing=1,
-                             expected_loss=torch.tensor([-1. / (1.+fp+fn), -1. / (1.+fp+fn)]))
+                             expected_loss=torch.tensor([[-1. / (1.+fp+fn)], [-1. / (1.+fp+fn)]]))
         self._test_dice_loss(slice_no_true_positives, slice_no_true_positives, smoothing=1, reduction="mean",
                              expected_loss=torch.tensor(-1. / (1.+fp+fn)))
         self._test_dice_loss(slice_no_true_positives, slice_no_true_positives, smoothing=1, reduction="sum",
@@ -258,15 +271,15 @@ class TestDiceLoss(unittest.TestCase):
         _, _, tp, fp, _, fn = slice_no_true_negatives()
 
         self._test_dice_loss(slice_no_true_negatives, slice_no_true_negatives, smoothing=0,
-                             expected_loss=torch.tensor([-2.*tp / (2.*tp+fp+fn), -2.*tp / (2.*tp+fp+fn)]))
+                             expected_loss=torch.tensor([[-2.*tp / (2.*tp+fp+fn)], [-2.*tp / (2.*tp+fp+fn)]]))
         self._test_dice_loss(slice_no_true_negatives, slice_no_true_negatives, smoothing=0, reduction="mean",
                              expected_loss=torch.tensor(-2.*tp / (2.*tp+fp+fn)))
         self._test_dice_loss(slice_no_true_negatives, slice_no_true_negatives, smoothing=0, reduction="sum",
                              expected_loss=torch.tensor(-4.*tp / (2.*tp+fp+fn)))
 
         self._test_dice_loss(slice_no_true_negatives, slice_no_true_negatives, smoothing=1,
-                             expected_loss=torch.tensor([-1. * (2.*tp+1.) / (2*tp+fp+fn+1.), -1. * (2.*tp+1.) /
-                                                         (2*tp+fp+fn+1.)]))
+                             expected_loss=torch.tensor([[-1. * (2.*tp+1.) / (2*tp+fp+fn+1.)], [-1. * (2.*tp+1.) /
+                                                         (2*tp+fp+fn+1.)]]))
         self._test_dice_loss(slice_no_true_negatives, slice_no_true_negatives, smoothing=1, reduction="mean",
                              expected_loss=torch.tensor(-1. * (2.*tp+1.) / (2.*tp+fp+fn+1.)))
         self._test_dice_loss(slice_no_true_negatives, slice_no_true_negatives, smoothing=1, reduction="sum",
@@ -292,11 +305,33 @@ class TestDiceLoss(unittest.TestCase):
         self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
 
         self._test_dice_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1,
-                             expected_loss=torch.tensor([-1., -1.]))
+                             expected_loss=torch.tensor([[-1.], [-1.]]))
         self._test_dice_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1, reduction="mean",
                              expected_loss=torch.tensor(-1.))
         self._test_dice_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1, reduction="sum",
                              expected_loss=torch.tensor(-2.))
+
+    def test_probabilistic_predictions(self):
+        expected_intersection = 3.7
+        expected_denominator = 2.97 + 5
+        expected_loss = -2 * expected_intersection / expected_denominator
+
+        self._test_dice_loss(probabilistic_slice, probabilistic_slice, smoothing=0,
+                             expected_loss=torch.tensor([[expected_loss], [expected_loss]]))
+        self._test_dice_loss(probabilistic_slice, probabilistic_slice, smoothing=0, reduction="mean",
+                             expected_loss=torch.tensor(expected_loss))
+        self._test_dice_loss(probabilistic_slice, probabilistic_slice, smoothing=0, reduction="sum",
+                             expected_loss=torch.tensor(2 * expected_loss))
+
+        expected_loss = -1 * (2 * expected_intersection + 1) / (expected_denominator + 1)
+        self._test_dice_loss(probabilistic_slice, probabilistic_slice, smoothing=1,
+                             expected_loss=torch.tensor([[expected_loss], [expected_loss]]))
+        self._test_dice_loss(probabilistic_slice, probabilistic_slice, smoothing=1, reduction="mean",
+                             expected_loss=torch.tensor(expected_loss))
+        self._test_dice_loss(probabilistic_slice, probabilistic_slice, smoothing=1, reduction="sum",
+                             expected_loss=torch.tensor(2 * expected_loss))
+
+
 
 
 if __name__ == '__main__':
