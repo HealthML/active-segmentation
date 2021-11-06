@@ -1,3 +1,4 @@
+""" Base classes to implement models with pytorch """
 import abc
 import numpy
 import torch
@@ -8,6 +9,7 @@ from .metrics import BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDice
 
 
 class PytorchModel(LightningModule):
+    """ TBD """
     def __init__(self, learning_rate=0.0001, optimizer="adam", loss="dice", **kwargs):
         super().__init__(**kwargs)
 
@@ -45,28 +47,35 @@ class PytorchModel(LightningModule):
         return None
 
     def configure_optimizers(self):
-        # this method is called by the PyTorch lightning framework before starting model training
+        """
+        this method is called by the PyTorch lightning framework before starting model training
+        :return:
+        """
 
         if self.optimizer == "adam":
             return Adam(self.parameters(), lr=self.learning_rate)
-        elif self.optimizer == "sgd":
+        if self.optimizer == "sgd":
             return SGD(self.parameters(), lr=self.learning_rate)
-        else:
-            raise ValueError("Invalid optimizer name.")
+        raise ValueError("Invalid optimizer name.")
 
-    def configure_loss(self, loss: str):
+    @staticmethod
+    def configure_loss(loss: str):
+        """
+        Configures the loss
+        :param loss: name of the loss
+        :return:
+        """
         if loss == "bce":
             return torch.nn.CrossEntropyLoss()
         if loss == "bce_dice":
             return BCEDiceLoss()
-        elif loss == "dice":
+        if loss == "dice":
             return DiceLoss()
-        elif loss == "fp":
+        if loss == "fp":
             return FalsePositiveLoss()
-        elif loss == "fp_dice":
+        if loss == "fp_dice":
             return FalsePositiveDiceLoss()
-        else:
-            raise ValueError("Invalid loss name.")
+        raise ValueError("Invalid loss name.")
 
     def predict(self, batch: torch.Tensor) -> numpy.ndarray:
         """
