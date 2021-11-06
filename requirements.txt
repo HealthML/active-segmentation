@@ -5,6 +5,7 @@ Pillow==8.4.0
 pydata-sphinx-theme==0.7.1
 pytorch-lightning==1.4.9
 Sphinx==4.2.0
+sphinxcontrib-napoleon==0.7
 torch==1.10.0
 torchvision==0.11.1
 -e git+https://github.com/pytorch/pytorch_sphinx_theme.git#egg=pytorch_sphinx_theme
