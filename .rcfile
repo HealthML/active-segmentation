@@ -1,0 +1,20 @@
+[MASTER]
+ignore=venv
+
+[BASIC]
+good-names=i,j,k
+
+[FORMAT]
+max-line-length=120
+
+[SIMILARITIES]
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=no
+
+[MESSAGES CONTROL]
+disable=
+    fixme,
+
+[REPORTS]
+reports=yes
