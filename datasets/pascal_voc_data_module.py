@@ -1,14 +1,17 @@
-import numpy as np
+""" Module to load pascal voc data """
 import os
+from typing import Any, List, Optional, Union
+import numpy as np
 from torch.utils.data import Dataset, random_split
 from torchvision import datasets, transforms
 import torch
-from typing import Any, List, Optional, Union
 
 from .data_module import ActiveLearningDataModule
 
 
 class PILMaskToTensor:
+    """ TBD """
+    # pylint: disable=too-few-public-methods
     def __call__(self, target):
         target = np.array(target)
         target = np.where(target == 255, 0, target)
@@ -16,6 +19,7 @@ class PILMaskToTensor:
 
 
 class PascalVOCDataModule(ActiveLearningDataModule):
+    """ Pascal voc data loader """
     def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.

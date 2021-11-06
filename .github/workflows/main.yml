@@ -24,4 +24,4 @@ jobs:
           black . --check --verbose --diff --color
       - name: Analysing the code with pylint
         run: |
-          pylint * --rcfile=.rcfile
+          pylint */*.py --rcfile=.rcfile

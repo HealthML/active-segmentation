@@ -1,8 +1,11 @@
 [MASTER]
 ignore=venv
 
+[TYPECHECK]
+ignored-modules=torch.utils.data
+
 [BASIC]
-good-names=i,j,k
+good-names=x,y
 
 [FORMAT]
 max-line-length=120
@@ -12,9 +15,16 @@ ignore-comments=yes
 ignore-docstrings=yes
 ignore-imports=no
 
+[DESIGN]
+max-attributes=10
+max-args=6
+
 [MESSAGES CONTROL]
 disable=
     fixme,
+    bad-continuation,
+    bad-whitespace,
+    useless-super-delegation
 
 [REPORTS]
 reports=yes

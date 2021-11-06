@@ -1,14 +1,23 @@
+""" Module containing the data module for brats data """
 import os
-from torch.utils.data import Dataset
 from typing import Any, List, Optional, Union
+from torch.utils.data import Dataset
 
 from .data_module import ActiveLearningDataModule
 from .brats_dataset import BraTSDataset
 
 
 class BraTSDataModule(ActiveLearningDataModule):
+    """Brats data module"""
+
     @staticmethod
     def discover_paths(dir_path: str, modality="flair"):
+        """
+        Discover the .nii.gz file paths with a given modality
+        :param dir_path: directory to discover paths in
+        :param modality: modality of scan
+        :return: list of files as tuple of image paths, annotation paths
+        """
         cases = sorted(os.listdir(dir_path))
         cases = [case for case in cases if not case.startswith(".")]
 
