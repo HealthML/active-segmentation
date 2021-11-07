@@ -11,7 +11,7 @@ class SegmentationLoss(torch.nn.Module):
             one batch, must be either "mean", "sum" or "none".
     """
 
-    def __init__(self, smoothing: int = 1, reduction: str = "mean"):
+    def __init__(self, smoothing: float = 1, reduction: str = "mean"):
 
         super(SegmentationLoss, self).__init__()
         self.smoothing = smoothing
@@ -30,7 +30,7 @@ class SegmentationLoss(torch.nn.Module):
             Aggregated loss value.
 
         Shape:
-            - Loss: :math:`(N, C)`, where `N = batch size`, and `C = number of classes`, or
+            - Loss: :math:`(N, C)`, where `N = batch size`, and `C = number of classes (excluding the background)`, or
              `(N)` for binary segmentation tasks.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
@@ -61,7 +61,7 @@ class DiceLoss(SegmentationLoss):
             one batch, must be either "mean", "sum" or "none".
     """
 
-    def __init__(self, smoothing: int = 1, reduction: str = "mean"):
+    def __init__(self, smoothing: float = 1, reduction: str = "mean"):
         super(DiceLoss, self).__init__(smoothing, reduction)
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -75,8 +75,8 @@ class DiceLoss(SegmentationLoss):
             Tensor: Dice loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes`, or
-             `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
+            the background)`, or `(N, height, width)` for binary segmentation tasks.
             - Target: :math:`(N, C, height, width)`, where each value is in
               :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
@@ -108,7 +108,7 @@ class FalsePositiveLoss(SegmentationLoss):
             one batch, must be either "mean", "sum" or "none".
     """
 
-    def __init__(self, smoothing: int = 1, reduction: str = "mean"):
+    def __init__(self, smoothing: float = 1, reduction: str = "mean"):
         super(FalsePositiveLoss, self).__init__(smoothing, reduction)
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -122,8 +122,8 @@ class FalsePositiveLoss(SegmentationLoss):
             Tensor: False positive loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes`, or
-             `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`, or `(N, height, width)` for binary segmentation tasks.
             - Target: :math:`(N, C, height, width)`, where each value is in
               :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
@@ -154,10 +154,10 @@ class FalsePositiveDiceLoss(SegmentationLoss):
             one batch, must be either "mean", "sum" or "none".
     """
 
-    def __init__(self, smoothing: int = 1, reduction: str = "mean"):
+    def __init__(self, smoothing: float = 1, reduction: str = "mean"):
         super(FalsePositiveDiceLoss, self).__init__(smoothing, reduction)
-        self.fp_loss = FalsePositiveLoss(smoothing)
-        self.dice_loss = DiceLoss(smoothing)
+        self.fp_loss = FalsePositiveLoss(smoothing=smoothing, reduction=reduction)
+        self.dice_loss = DiceLoss(smoothing=smoothing, reduction=reduction)
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         r"""
@@ -170,11 +170,83 @@ class FalsePositiveDiceLoss(SegmentationLoss):
             Tensor: Combined loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes`, or
-             `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`, or `(N, height, width)` for binary segmentation tasks.
             - Target: :math:`(N, C, height, width)`, where each value is in
               :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
         return self.fp_loss(prediction, target) + self.dice_loss(prediction, target)
+
+
+class BCELoss(SegmentationLoss):
+    """
+    Wrapper for the PyTorch implementation of BCE loss to ensure uniform reduction behaviour for all losses.
+
+    Args:
+        reduction (str, optional): Reduction function that is to be used to aggregate the loss values of the images of
+            one batch, must be either "mean", "sum" or "none".
+    """
+
+    def __init__(self, reduction: str = "mean"):
+        super(BCELoss, self).__init__(reduction=reduction)
+        self.bce_loss = torch.nn.BCELoss(reduction="none")
+
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        r"""
+
+        Args:
+            prediction (Tensor): Predicted segmentation mask with each channel being either a sharp segmentation mask or
+                the output of a sigmoid layer.
+            target (Tensor): Target segmentation mask with the same number of channels as the prediction.
+        Returns:
+            Tensor: Binary cross-entropy loss.
+
+        Shape:
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`, or `(N, height, width)` for binary segmentation tasks.
+            - Target: :math:`(N, C, height, width)`, where each value is in
+              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
+        """
+
+        loss = self.bce_loss(prediction.float(), target.float()).sum(dim=(-2, -1))
+        return self._reduce_loss(loss)
+
+
+class BCEDiceLoss(SegmentationLoss):
+    """
+    Implements a loss function that combines the Dice loss with the binary cross-entropy (negative log-likelihood) loss.
+
+    Args:
+        smoothing (int, optional): Laplacian smoothing factor.
+        reduction (str, optional): Reduction function that is to be used to aggregate the loss values of the images of
+            one batch, must be either "mean", "sum" or "none".
+    """
+
+    def __init__(self, smoothing: float = 1, reduction: str = "mean"):
+        super(BCEDiceLoss, self).__init__(smoothing, reduction)
+        self.bce_loss = BCELoss(reduction=reduction)
+        self.dice_loss = DiceLoss(smoothing=smoothing, reduction=reduction)
+
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        r"""
+
+        Args:
+            prediction (Tensor): Predicted segmentation mask with each channel being either a sharp segmentation mask or
+                the output of a sigmoid layer.
+            target (Tensor): Target segmentation mask with the same number of channels as the prediction.
+        Returns:
+            Tensor: Combined loss.
+
+        Shape:
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`, or `(N, height, width)` for binary segmentation tasks.
+            - Target: :math:`(N, C, height, width)`, where each value is in
+              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
+        """
+
+        loss = self.bce_loss(prediction, target) + self.dice_loss(prediction, target)
+        return loss

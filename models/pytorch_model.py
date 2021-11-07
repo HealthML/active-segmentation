@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
 
-from .metrics import BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDiceLoss
+from .losses import BCELoss, BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDiceLoss
 
 
 class PytorchModel(LightningModule):
@@ -56,7 +56,7 @@ class PytorchModel(LightningModule):
 
     def configure_loss(self, loss: str):
         if loss == "bce":
-            return torch.nn.CrossEntropyLoss()
+            return BCELoss()
         if loss == "bce_dice":
             return BCEDiceLoss()
         elif loss == "dice":

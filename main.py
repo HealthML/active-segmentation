@@ -12,7 +12,7 @@ def run_active_learning_pipeline(
         data_dir: str = "./data",
         batch_size: int = 16,
         epochs: int = 50,
-        loss = "dice",
+        loss: str = "dice",
         optimizer: str = "adam",
 ):
 

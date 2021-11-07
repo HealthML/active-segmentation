@@ -2,7 +2,7 @@ import torch
 from typing import Callable, Optional, Tuple
 import unittest
 
-from models import DiceLoss, FalsePositiveLoss
+from models import BCELoss, DiceLoss, FalsePositiveLoss
 
 
 def standard_slice_1():
@@ -344,16 +344,17 @@ class TestDiceLoss(unittest.TestCase):
         loss = dice_loss(torch.stack([multi_class_prediction_1, multi_class_prediction_2]),
                          torch.stack([multi_class_target_1, multi_class_target_2]))
 
-        torch.testing.assert_allclose(loss, torch.tensor(((loss_1 + loss_2) / 2 + loss_1) / 2), msg="Correctly computes loss value.")
+        torch.testing.assert_allclose(loss, torch.tensor(((loss_1 + loss_2) / 2 + loss_1) / 2),
+                                      msg="Correctly computes loss value.")
 
 
 class TestFalsePositiveLoss(unittest.TestCase):
 
     def _test_fp_loss(self, get_first_slice: Callable[[], Tuple[torch.Tensor, torch.Tensor, int, int, int, int]],
-                        get_second_slice: Callable[[], Tuple[torch.Tensor, torch.Tensor, int, int, int, int]],
-                        reduction: Optional[str] = "none",
-                        smoothing: float = 1,
-                        expected_loss: Optional[torch.Tensor] = None):
+                      get_second_slice: Callable[[], Tuple[torch.Tensor, torch.Tensor, int, int, int, int]],
+                      reduction: Optional[str] = "none",
+                      smoothing: float = 1,
+                      expected_loss: Optional[torch.Tensor] = None):
 
         predictions_first_slice, target_first_slice, tp_first, fp_first, _, fn_first = get_first_slice()
         predictions_second_slice, target_second_slice, tp_second, fp_second, _, fn_second = get_second_slice()
@@ -443,11 +444,32 @@ class TestFalsePositiveLoss(unittest.TestCase):
         self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
 
         self._test_fp_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1,
-                             expected_loss=torch.tensor([[0.], [0.]]))
+                           expected_loss=torch.tensor([[0.], [0.]]))
         self._test_fp_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1, reduction="mean",
-                             expected_loss=torch.tensor(0.))
+                           expected_loss=torch.tensor(0.))
         self._test_fp_loss(slice_all_true_negatives, slice_all_true_negatives, smoothing=1, reduction="sum",
-                             expected_loss=torch.tensor(0.))
+                           expected_loss=torch.tensor(0.))
+
+
+class TestBCELoss(unittest.TestCase):
+    def test_standard_case(self):
+        prediction, target, _, _, _, _, = probabilistic_slice()
+
+        bce_loss = BCELoss(reduction="none")
+        loss = bce_loss(torch.stack([prediction, prediction]), torch.stack([target, target]))
+        expected_loss = torch.tensor([[2.1407], [2.1407]])
+        torch.testing.assert_allclose(loss, expected_loss, msg="Computes unreduced loss correctly.")
+
+        bce_loss = BCELoss(reduction="mean")
+        loss = bce_loss(torch.stack([prediction, prediction]), torch.stack([target, target]))
+        expected_loss = torch.tensor(2.1407)
+        torch.testing.assert_allclose(loss, expected_loss, msg="Averages loss correctly.")
+
+        bce_loss = BCELoss(reduction="sum")
+        loss = bce_loss(torch.stack([prediction, prediction]), torch.stack([target, target]))
+        expected_loss = torch.tensor(2 * 2.1407)
+        torch.testing.assert_allclose(loss, expected_loss, msg="Sums loss correctly.")
+
 
 if __name__ == '__main__':
     unittest.main()
