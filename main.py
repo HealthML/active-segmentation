@@ -12,6 +12,7 @@ def run_active_learning_pipeline(
         data_dir: str = "./data",
         batch_size: int = 16,
         epochs: int = 50,
+        gpus: int = 1,
         loss: str = "dice",
         optimizer: str = "adam",
 ):
@@ -35,7 +36,7 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid data_module name.")
 
-    pipeline = ActiveLearningPipeline(data_module, model, strategy, epochs)
+    pipeline = ActiveLearningPipeline(data_module, model, strategy, epochs, gpus)
     pipeline.run()
 
 

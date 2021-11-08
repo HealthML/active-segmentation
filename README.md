@@ -44,5 +44,20 @@ python3 main.py \
     --batch_size 16 \
     --epochs 1 \
     --optimizer "adam" \
-    --loss "bce"
+    --loss "bce" \
+    --gpus 1
+```
+
+Example command to train a U-net with the BraTS dataset on a GPU on the DHC Server:
+```
+srun -p gpupro --gpus=1 python main.py \
+    --architecture "u_net" \
+    --dataset "brats" \
+    --strategy "base" \
+    --batch_size 16 \
+    --epochs 1 \
+    --optimizer "adam" \
+    --loss "dice" \
+    --data_dir "/dhc/groups/mpws2021cl1/Data"
+    --gpus 1
 ```

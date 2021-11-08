@@ -10,12 +10,14 @@ class ActiveLearningPipeline:
                  data_module: ActiveLearningDataModule,
                  model: PytorchModel,
                  strategy: QueryStrategy,
-                 epochs: int) -> None:
+                 epochs: int,
+                 gpus: int) -> None:
         self.data_module = data_module
         self.model = model
-        self.model_trainer = Trainer(deterministic=True, max_epochs=epochs)
+        self.model_trainer = Trainer(deterministic=True, max_epochs=epochs, gpus=gpus)
         self.strategy = strategy
         self.epochs = epochs
+        self.gpus = gpus
 
     def run(self) -> None:
         self.data_module.setup()
