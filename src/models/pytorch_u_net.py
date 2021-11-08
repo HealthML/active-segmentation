@@ -73,7 +73,7 @@ class PytorchUNet(PytorchModel):
             Loss on the training batch.
         """
 
-        x, y = batch
+        x, y, case_IDs = batch
 
         probabilities = self(x)
         loss = self.loss(probabilities, y)
@@ -89,7 +89,7 @@ class PytorchUNet(PytorchModel):
         """
 
         # pylint: disable-msg=unused-variable
-        x, y = batch
+        x, y, case_IDs = batch
 
         # pylint: disable-msg=unused-variable
         logits = self(x)
