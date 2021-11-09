@@ -7,7 +7,8 @@ from models import PytorchModel
 
 
 class ActiveLearningPipeline:
-    """ the pipeline for active learning """
+    """the pipeline for active learning"""
+
     # pylint: disable=too-few-public-methods
     def __init__(
         self,
@@ -23,7 +24,7 @@ class ActiveLearningPipeline:
         self.epochs = epochs
 
     def run(self) -> None:
-        """ Run the pipeline """
+        """Run the pipeline"""
         self.data_module.setup()
 
         items_to_label = self.strategy.select_items_to_label(

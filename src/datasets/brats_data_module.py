@@ -22,9 +22,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         cases = [case for case in cases if not case.startswith(".")]
 
         image_paths = [
-            os.path.join(
-                dir_path, case, f"{os.path.basename(case)}_{modality}.nii.gz"
-            )
+            os.path.join(dir_path, case, f"{os.path.basename(case)}_{modality}.nii.gz")
             for case in cases
         ]
         annotation_paths = [

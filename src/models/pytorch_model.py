@@ -5,11 +5,17 @@ import torch
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
 
-from models.metrics import BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDiceLoss
+from models.metrics import (
+    BCEDiceLoss,
+    DiceLoss,
+    FalsePositiveLoss,
+    FalsePositiveDiceLoss,
+)
 
 
 class PytorchModel(LightningModule):
     """TBD"""
+
     # pylint: disable=too-many-ancestors,arguments-differ
 
     def __init__(self, learning_rate=0.0001, optimizer="adam", loss="dice", **kwargs):
