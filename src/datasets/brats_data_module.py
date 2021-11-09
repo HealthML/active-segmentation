@@ -3,8 +3,8 @@ import os
 from typing import Any, List, Optional, Union
 from torch.utils.data import Dataset
 
-from .data_module import ActiveLearningDataModule
-from .brats_dataset import BraTSDataset
+from datasets.data_module import ActiveLearningDataModule
+from datasets.brats_dataset import BraTSDataset
 
 
 class BraTSDataModule(ActiveLearningDataModule):
@@ -23,12 +23,12 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         image_paths = [
             os.path.join(
-                dir_path, case, "{}_{}.nii.gz".format(os.path.basename(case), modality)
+                dir_path, case, f"{os.path.basename(case)}_{modality}.nii.gz"
             )
             for case in cases
         ]
         annotation_paths = [
-            os.path.join(dir_path, case, "{}_seg.nii.gz".format(os.path.basename(case)))
+            os.path.join(dir_path, case, f"{os.path.basename(case)}_seg.nii.gz")
             for case in cases
         ]
 

@@ -2,7 +2,7 @@
 from torch.utils.data import DataLoader
 from typing import List, Union
 
-from models import PytorchModel
+from models.pytorch_model import PytorchModel
 
 
 class QueryStrategy:

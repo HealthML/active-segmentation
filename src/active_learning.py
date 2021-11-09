@@ -1,3 +1,4 @@
+""" Module containing the active learning pipeline """
 from pytorch_lightning import Trainer
 
 from query_strategies import QueryStrategy
@@ -6,6 +7,8 @@ from models import PytorchModel
 
 
 class ActiveLearningPipeline:
+    """ the pipeline for active learning """
+    # pylint: disable=too-few-public-methods
     def __init__(
         self,
         data_module: ActiveLearningDataModule,
@@ -20,6 +23,7 @@ class ActiveLearningPipeline:
         self.epochs = epochs
 
     def run(self) -> None:
+        """ Run the pipeline """
         self.data_module.setup()
 
         items_to_label = self.strategy.select_items_to_label(

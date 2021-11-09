@@ -2,13 +2,12 @@
 import torch
 from torchvision import models
 
-from .pytorch_model import PytorchModel
+from models.pytorch_model import PytorchModel
 
 
 class PytorchFCNResnet50(PytorchModel):
     """Resnet 50 model class"""
-
-    # pylint: disable=unused-argument,unused-variable
+    # pylint: disable=unused-argument,unused-variable,too-many-ancestors,arguments-differ
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

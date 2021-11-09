@@ -6,7 +6,7 @@ from torch.utils.data import Dataset, random_split
 from torchvision import datasets, transforms
 import torch
 
-from .data_module import ActiveLearningDataModule
+from datasets.data_module import ActiveLearningDataModule
 
 
 class PILMaskToTensor:
