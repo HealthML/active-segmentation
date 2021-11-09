@@ -16,5 +16,8 @@ env
 # Pycharm
 .idea
 
+# VSCode
+.vscode
+
 # Pytorch Lightning Logs
 lightning_logs
