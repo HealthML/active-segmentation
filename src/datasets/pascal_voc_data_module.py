@@ -22,6 +22,7 @@ class PILMaskToTensor:
 class PascalVOCDataModule(ActiveLearningDataModule):
     """Pascal voc data loader"""
 
+    # pylint: disable=unused-argument,no-self-use,too-few-public-methods
     def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.
@@ -44,6 +45,7 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         self.__validation_set_size = 4
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+        """TBD"""
         # ToDo: implement labeling logic
         return None
 

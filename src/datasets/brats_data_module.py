@@ -10,6 +10,7 @@ from datasets.brats_dataset import BraTSDataset
 class BraTSDataModule(ActiveLearningDataModule):
     """Brats data module"""
 
+    # pylint: disable=unused-argument,no-self-use
     @staticmethod
     def discover_paths(dir_path: str, modality="flair"):
         """
@@ -42,6 +43,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         super().__init__(data_dir, batch_size, shuffle, **kwargs)
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+        """TBD"""
         # ToDo: implement labeling logic
         return None
 
