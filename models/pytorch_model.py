@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
 
-from .losses import BCELoss, BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDiceLoss
+from functional import BCELoss, BCEDiceLoss, DiceLoss, FalsePositiveLoss, FalsePositiveDiceLoss
 
 
 class PytorchModel(LightningModule):

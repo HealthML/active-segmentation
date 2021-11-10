@@ -5,8 +5,19 @@ import torch.nn as nn
 
 
 class UNet(nn.Module):
+    """
+    This U-Net implementation was taken from
+    https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py
 
-    def __init__(self, in_channels=3, out_channels=1, init_features=32):
+    Args:
+        in_channels: Number of input channels.
+        out_channels: Number of output channels (should be equal to the number of classes excluding the background)
+        init_features: Number of feature channels of the first U-Net block, in each down-sampling block, the number of
+            feature channels is doubled.
+    """
+
+    def __init__(self, in_channels: int = 3, out_channels: int = 1, init_features: int = 32):
+
         super(UNet, self).__init__()
 
         features = init_features
