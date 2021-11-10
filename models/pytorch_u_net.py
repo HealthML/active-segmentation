@@ -28,6 +28,7 @@ class PytorchUNet(PytorchModel):
 
         probabilities = self(x)
         loss = self.loss(probabilities, y)
+        self.log("train/loss", loss) # log loss via weights&biases
         return loss
 
     def validation_step(self, batch, batch_idx):
