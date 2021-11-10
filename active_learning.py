@@ -1,9 +1,11 @@
+from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning import Trainer
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
 from models import PytorchModel
 
+wandb_logger = WandbLogger(project="active-segmentation")
 
 class ActiveLearningPipeline:
     def __init__(self,
@@ -14,7 +16,7 @@ class ActiveLearningPipeline:
                  gpus: int) -> None:
         self.data_module = data_module
         self.model = model
-        self.model_trainer = Trainer(deterministic=True, max_epochs=epochs, gpus=gpus)
+        self.model_trainer = Trainer(deterministic=True, max_epochs=epochs, logger=wandb_logger, gpus=gpus)
         self.strategy = strategy
         self.epochs = epochs
         self.gpus = gpus

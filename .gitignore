@@ -18,3 +18,6 @@ env
 
 # Pytorch Lightning Logs
 lightning_logs
+
+# Weight&Biases Logs
+wandb/
