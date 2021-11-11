@@ -10,7 +10,7 @@ class BraTSDataModule(ActiveLearningDataModule):
     @staticmethod
     def discover_paths(dir_path: str, modality='flair'):
         cases = sorted(os.listdir(dir_path))
-        cases = [case for case in cases if not case.startswith('.')]
+        cases = [case for case in cases if not case.startswith('.') and os.path.isdir(os.path.join(dir_path, case))]
 
         image_paths = [os.path.join(dir_path, case, "{}_{}.nii.gz".format(
             os.path.basename(case), modality)) for case in cases]
