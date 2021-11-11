@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 
 
 class BraTSDataset(Dataset):
-    """CLass to load brats dataset"""
+    """Class to load brats dataset"""
 
     IMAGE_DIMENSIONS = (155, 240, 240)
 
