@@ -1,5 +1,5 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, Union
 import math
 import os
 
@@ -9,6 +9,7 @@ import torch
 from torch.utils.data import Dataset
 
 
+# pylint: disable=too-many-instance-attributes
 class BraTSDataset(Dataset):
     """Class to load brats dataset"""
 
@@ -46,7 +47,7 @@ class BraTSDataset(Dataset):
         if norm:
             img = BraTSDataset.normalize(img)
         return np.moveaxis(img, 2, 0)
-    
+
     @staticmethod
     def __get_case_id(filepath: str) -> str:
         """
@@ -85,10 +86,11 @@ class BraTSDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
-    def __getitem__(self, index: int) -> Union[Tuple[torch.Tensor, str], Tuple[torch.Tensor, torch.Tensor, str]]:
+    def __getitem__(
+        self, index: int
+    ) -> Union[Tuple[torch.Tensor, str], Tuple[torch.Tensor, torch.Tensor, str]]:
         image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
         slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
-        case_id = self.__get_case_id(filepath=self.image_paths[self._current_image_index])
         if image_index != self._current_image_index:
             self._current_image_index = image_index
             self._current_image = self.__read_image_as_array(
@@ -99,6 +101,9 @@ class BraTSDataset(Dataset):
                 norm=False,
                 clip=self.clip_mask,
             )
+        case_id = self.__get_case_id(
+            filepath=self.image_paths[self._current_image_index]
+        )
 
         x = torch.from_numpy(self._current_image[slice_index, :, :])
         y = torch.from_numpy(self._current_mask[slice_index, :, :])
