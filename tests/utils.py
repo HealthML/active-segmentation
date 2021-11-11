@@ -1,6 +1,7 @@
 from typing import Tuple
 import torch
 
+
 def standard_slice_1() -> Tuple[torch.Tensor, torch.Tensor, float, float, float, float]:
     """
     Creates a faked segmentation slice that contains both true and false predictions.
@@ -25,10 +26,7 @@ def standard_slice_1() -> Tuple[torch.Tensor, torch.Tensor, float, float, float,
         ]])
     # fmt: on
 
-    tp = 4
-    fp = 0
-    tn = 4
-    fn = 1
+    tp, fp, tn, fn = (4, 0, 4, 1)
 
     return prediction_slice, target_slice, tp, fp, tn, fn
 
@@ -57,10 +55,7 @@ def standard_slice_2() -> Tuple[torch.Tensor, torch.Tensor, float, float, float,
         ]])
     # fmt: on
 
-    tp = 4
-    fp = 1
-    tn = 3
-    fn = 1
+    tp, fp, tn, fn = (4, 1, 3, 1)
 
     return prediction_slice, target_slice, tp, fp, tn, fn
 
@@ -82,10 +77,7 @@ def slice_all_true() -> Tuple[torch.Tensor, torch.Tensor, float, float, float, f
         ]])
     # fmt: on
 
-    tp = 3
-    fp = 0
-    tn = 6
-    fn = 0
+    tp, fp, tn, fn = (3, 0, 6, 0)
 
     return target_slice, target_slice, tp, fp, tn, fn
 
@@ -114,10 +106,7 @@ def slice_all_false() -> Tuple[torch.Tensor, torch.Tensor, float, float, float, 
         ]])
     # fmt: on
 
-    tp = 0
-    fp = 6
-    tn = 0
-    fn = 3
+    tp, fp, tn, fn = (0, 6, 0, 3)
 
     return prediction_slice, target_slice, tp, fp, tn, fn
 
@@ -148,10 +137,7 @@ def slice_no_true_positives() -> Tuple[
         ]])
     # fmt: on
 
-    tp = 0
-    fp = 3
-    tn = 3
-    fn = 3
+    tp, fp, tn, fn = (0, 3, 3, 3)
 
     return prediction_slice, target_slice, tp, fp, tn, fn
 
@@ -182,10 +168,7 @@ def slice_no_true_negatives() -> Tuple[
         ]])
     # fmt: on
 
-    tp = 2
-    fp = 6
-    tn = 0
-    fn = 1
+    tp, fp, tn, fn = (2, 6, 0, 1)
 
     return prediction_slice, target_slice, tp, fp, tn, fn
 
@@ -202,10 +185,7 @@ def slice_all_true_negatives() -> Tuple[
 
     target_slice = torch.Tensor([[[0, 0, 0], [0, 0, 0], [0, 0, 0]]])
 
-    tp = 0
-    fp = 0
-    tn = 9
-    fn = 9
+    tp, fp, tn, fn = (0, 0, 9, 9)
 
     return target_slice, target_slice, tp, fp, tn, fn
 
@@ -236,10 +216,6 @@ def probabilistic_slice() -> Tuple[
         ]])
     # fmt: on
 
-    tp = 4
-    fp = 0
-    tn = 4
-    fn = 1
+    tp, fp, tn, fn = (4, 0, 4, 1)
 
     return prediction_slice, target_slice, tp, fp, tn, fn
-
