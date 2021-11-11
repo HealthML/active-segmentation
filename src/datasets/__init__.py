@@ -1,0 +1,4 @@
+""" modules to import when initializing module """
+from datasets.data_module import ActiveLearningDataModule
+from datasets.brats_data_module import BraTSDataModule
+from datasets.pascal_voc_data_module import PascalVOCDataModule

@@ -26,6 +26,16 @@ To install the dependencies, run:
 python3 -m pip install -r requirements.txt
 ```
 
+To execute the code, you have to add the `src`directory to your `PYTHONPATH`:
+On Unix or MacOS, run:
+```
+export PYTHONPATH=$PWD:$PWD/src/
+```
+On Windows, run:
+```
+set PYTHONPATH=%cd%/src
+```
+
 To be able to import the modules from the repository, run:
 
 ```
@@ -37,7 +47,7 @@ python3 -m pip install -e .
 To execute the active learning pipeline, run:
 
 ```
-python3 main.py \
+python3 src/main.py \
     --architecture "fcn_resnet50" \
     --dataset "pascal-voc" \
     --strategy "base" \

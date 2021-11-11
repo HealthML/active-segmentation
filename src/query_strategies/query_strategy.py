@@ -1,15 +1,18 @@
+# pylint: disable=all
 from torch.utils.data import DataLoader
 from typing import List, Union
 
-from models import PytorchModel
+from models.pytorch_model import PytorchModel
 
 
 class QueryStrategy:
-    def select_items_to_label(self,
-                              models: Union[PytorchModel, List[PytorchModel]],
-                              dataloader: DataLoader,
-                              number_of_items: int,
-                              **kwargs) -> List[str]:
+    def select_items_to_label(
+        self,
+        models: Union[PytorchModel, List[PytorchModel]],
+        dataloader: DataLoader,
+        number_of_items: int,
+        **kwargs
+    ) -> List[str]:
         """
         Selects subset of the unlabeled data that should be labeled next.
 

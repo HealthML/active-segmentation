@@ -1,0 +1,31 @@
+[MASTER]
+ignore=venv
+
+[TYPECHECK]
+ignored-modules=torch.utils.data
+generated-members=torch.*
+
+[BASIC]
+good-names=x,y
+
+[FORMAT]
+max-line-length=120
+
+[SIMILARITIES]
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=no
+
+[DESIGN]
+max-attributes=10
+max-args=8
+
+[MESSAGES CONTROL]
+disable=
+    fixme,
+    bad-continuation,
+    bad-whitespace,
+    useless-super-delegation
+
+[REPORTS]
+reports=yes
