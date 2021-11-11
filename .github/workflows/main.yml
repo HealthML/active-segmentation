@@ -1,0 +1,28 @@
+name: code-quality
+
+on: [pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint==2.11.1 black==21.9b0
+          pip install -r requirements.txt
+      - name: Analysing the code with black
+        run: |
+          black src --check --verbose --diff --color
+      - name: Analysing the code with pylint
+        run: |
+          export PYTHONPATH=$PWD:$PWD/src/
+          pylint src --rcfile=.rcfile

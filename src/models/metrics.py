@@ -1,4 +1,6 @@
+# pylint: disable=all
 import torch
+
 
 def dsc(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     """
@@ -13,10 +15,14 @@ def dsc(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     flattened_target = torch.flatten(target).float()
     flattened_input = torch.flatten(input).float()
     intersection = (flattened_target * flattened_input).sum()
-    score = (2. * intersection + smoothing) / ((flattened_target * flattened_target).sum()
-                                               + (flattened_input * flattened_input).sum() + smoothing)
+    score = (2.0 * intersection + smoothing) / (
+        (flattened_target * flattened_target).sum()
+        + (flattened_input * flattened_input).sum()
+        + smoothing
+    )
 
     return score
+
 
 def recall(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     """
@@ -35,6 +41,7 @@ def recall(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tens
     intersection = (flattened_target * flattened_input).sum()
     return (intersection + smoothing) / (true_positives + smoothing)
 
+
 class DiceLoss(torch.nn.Module):
     def __init__(self, smoothing=1):
         super(DiceLoss, self).__init__()
@@ -52,6 +59,7 @@ class DiceLoss(torch.nn.Module):
         loss = 1 - dsc(target, input)
         return loss
 
+
 class BCEDiceLoss(torch.nn.Module):
     def __init__(self, smoothing=1):
         super(BCEDiceLoss, self).__init__()
@@ -68,8 +76,11 @@ class BCEDiceLoss(torch.nn.Module):
         :return: Loss value as 1-element tensor.
         """
 
-        loss = self.binary_crossentropy_loss(input, target) + self.dice_loss(input, target)
+        loss = self.binary_crossentropy_loss(input, target) + self.dice_loss(
+            input, target
+        )
         return loss
+
 
 class FalsePositiveLoss(torch.nn.Module):
     def __init__(self, smoothing=1):
@@ -92,6 +103,7 @@ class FalsePositiveLoss(torch.nn.Module):
         positives = flattened_input.sum()
 
         return (smooth + false_positives) / (smooth + positives)
+
 
 class FalsePositiveDiceLoss(torch.nn.Module):
     def __init__(self, smoothing=1):
