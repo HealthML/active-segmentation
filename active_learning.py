@@ -16,7 +16,8 @@ class ActiveLearningPipeline:
                  gpus: int) -> None:
         self.data_module = data_module
         self.model = model
-        self.model_trainer = Trainer(deterministic=True, max_epochs=epochs, logger=wandb_logger, gpus=gpus)
+        self.model_trainer = Trainer(num_sanity_val_steps=-1, max_epochs=epochs, logger=wandb_logger, gpus=gpus)
+        #self.model_trainer = Trainer(profiler="simple", max_epochs=epochs, logger=wandb_logger, gpus=gpus)
         self.strategy = strategy
         self.epochs = epochs
         self.gpus = gpus
