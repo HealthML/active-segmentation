@@ -5,13 +5,7 @@ import torch
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
 
-from functional import (
-    BCELoss,
-    BCEDiceLoss,
-    DiceLoss,
-    FalsePositiveLoss,
-    FalsePositiveDiceLoss,
-)
+import functional
 
 
 class PytorchModel(LightningModule):
@@ -75,15 +69,15 @@ class PytorchModel(LightningModule):
         :return:
         """
         if loss == "bce":
-            return BCELoss()
+            return functional.BCELoss()
         if loss == "bce_dice":
-            return BCEDiceLoss()
+            return functional.BCEDiceLoss()
         if loss == "dice":
-            return DiceLoss()
+            return functional.DiceLoss()
         if loss == "fp":
-            return FalsePositiveLoss()
+            return functional.FalsePositiveLoss()
         if loss == "fp_dice":
-            return FalsePositiveDiceLoss()
+            return functional.FalsePositiveDiceLoss()
         raise ValueError("Invalid loss name.")
 
     def predict(self, batch: torch.Tensor) -> numpy.ndarray:

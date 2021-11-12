@@ -1,4 +1,4 @@
 """ modules to import when initializing module """
-from models.pytorch_model import PytorchModel
-from models.pytorch_fcn_resnet50 import PytorchFCNResnet50
-from models.pytorch_u_net import PytorchUNet
+from .pytorch_model import PytorchModel
+from .pytorch_fcn_resnet50 import PytorchFCNResnet50
+from .pytorch_u_net import PytorchUNet

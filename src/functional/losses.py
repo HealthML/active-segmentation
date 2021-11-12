@@ -1,7 +1,10 @@
+""" Module containing segmentation losses """
+import abc
+
 import torch
 
 
-class SegmentationLoss(torch.nn.Module):
+class SegmentationLoss(torch.nn.Module, abc.ABC):
     """
     Base class for implementation of segmentation losses.
 
@@ -13,7 +16,7 @@ class SegmentationLoss(torch.nn.Module):
 
     def __init__(self, smoothing: float = 1, reduction: str = "mean"):
 
-        super(SegmentationLoss, self).__init__()
+        super().__init__()
         self.smoothing = smoothing
         if reduction and reduction not in ["mean", "sum", "none"]:
             raise ValueError("Invalid reduction method.")
@@ -40,7 +43,7 @@ class SegmentationLoss(torch.nn.Module):
         # aggregate loss values for all channels and the entire batch
         if self.reduction == "mean":
             return loss.mean()
-        elif self.reduction == "sum":
+        if self.reduction == "sum":
             return loss.sum()
         return loss
 
@@ -62,7 +65,7 @@ class DiceLoss(SegmentationLoss):
     """
 
     def __init__(self, smoothing: float = 1, reduction: str = "mean"):
-        super(DiceLoss, self).__init__(smoothing, reduction)
+        super().__init__(smoothing, reduction)
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         r"""
@@ -117,7 +120,7 @@ class FalsePositiveLoss(SegmentationLoss):
     """
 
     def __init__(self, smoothing: float = 1, reduction: str = "mean"):
-        super(FalsePositiveLoss, self).__init__(smoothing, reduction)
+        super().__init__(smoothing, reduction)
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         r"""
@@ -163,7 +166,7 @@ class FalsePositiveDiceLoss(SegmentationLoss):
     """
 
     def __init__(self, smoothing: float = 1, reduction: str = "mean"):
-        super(FalsePositiveDiceLoss, self).__init__(smoothing, reduction)
+        super().__init__(smoothing, reduction)
         self.fp_loss = FalsePositiveLoss(smoothing=smoothing, reduction=reduction)
         self.dice_loss = DiceLoss(smoothing=smoothing, reduction=reduction)
 
@@ -198,7 +201,7 @@ class BCELoss(SegmentationLoss):
     """
 
     def __init__(self, reduction: str = "mean"):
-        super(BCELoss, self).__init__(reduction=reduction)
+        super().__init__(reduction=reduction)
         self.bce_loss = torch.nn.BCELoss(reduction="none")
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -234,7 +237,7 @@ class BCEDiceLoss(SegmentationLoss):
     """
 
     def __init__(self, smoothing: float = 1, reduction: str = "mean"):
-        super(BCEDiceLoss, self).__init__(smoothing, reduction)
+        super().__init__(smoothing, reduction)
         self.bce_loss = BCELoss(reduction=reduction)
         self.dice_loss = DiceLoss(smoothing=smoothing, reduction=reduction)
 

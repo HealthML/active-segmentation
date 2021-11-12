@@ -2,7 +2,7 @@
 import torch
 from torchvision import models
 
-from models.pytorch_model import PytorchModel
+from .pytorch_model import PytorchModel
 
 
 class PytorchFCNResnet50(PytorchModel):
