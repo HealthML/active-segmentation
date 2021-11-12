@@ -88,7 +88,7 @@ class BraTSDataset(Dataset):
         if self.target_transform:
             y = self.target_transform(y)
 
-        return torch.unsqueeze(x, 0), y
+        return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0)
 
     def __len__(self) -> int:
         return self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]

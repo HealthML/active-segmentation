@@ -21,3 +21,6 @@ env
 
 # Pytorch Lightning Logs
 lightning_logs
+
+# editable package installs
+*.egg-info
