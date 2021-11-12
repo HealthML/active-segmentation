@@ -41,6 +41,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         """
 
         super().__init__(data_dir, batch_size, shuffle, **kwargs)
+        self.data_folder = os.path.join(self.data_dir, "BraTS18")
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
@@ -49,7 +50,7 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def _create_training_set(self) -> Union[Dataset, None]:
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
-            os.path.join(self.data_dir, "train")
+            os.path.join(self.data_folder, "train")
         )
         return BraTSDataset(
             image_paths=train_image_paths, annotation_paths=train_annotation_paths
@@ -57,7 +58,7 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def _create_validation_set(self) -> Union[Dataset, None]:
         val_image_paths, val_annotation_paths = BraTSDataModule.discover_paths(
-            os.path.join(self.data_dir, "val")
+            os.path.join(self.data_folder, "val")
         )
         return BraTSDataset(
             image_paths=val_image_paths, annotation_paths=val_annotation_paths

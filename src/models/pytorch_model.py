@@ -6,6 +6,7 @@ from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
 
 from functional import (
+    BCELoss,
     BCEDiceLoss,
     DiceLoss,
     FalsePositiveLoss,

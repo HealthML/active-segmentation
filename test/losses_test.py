@@ -2,10 +2,11 @@ import torch
 from typing import Callable, Optional, Tuple
 import unittest
 
-from models import BCELoss, DiceLoss, FalsePositiveLoss
+from functional import BCELoss, DiceLoss, FalsePositiveLoss
 
 
 def standard_slice_1():
+    # fmt: off
     prediction_slice = torch.tensor(
         [[
             [0, 0, 0.],
@@ -19,6 +20,7 @@ def standard_slice_1():
             [1, 1, 1],
             [1, 1, 0]
         ]])
+    # fmt: on
 
     tp = 4
     fp = 0
@@ -29,6 +31,7 @@ def standard_slice_1():
 
 
 def standard_slice_2():
+    # fmt: off
     prediction_slice = torch.tensor(
         [[
             [0, 1, 0],
@@ -42,6 +45,7 @@ def standard_slice_2():
             [1, 1, 1],
             [0, 1, 0]
         ]])
+    # fmt: on
 
     tp = 4
     fp = 1
@@ -52,12 +56,14 @@ def standard_slice_2():
 
 
 def slice_all_true():
+    # fmt: off
     target_slice = torch.tensor(
         [[
             [1, 0, 0],
             [0, 1, 0],
             [0, 0, 1]
         ]])
+    # fmt: on
 
     tp = 3
     fp = 0
@@ -68,6 +74,7 @@ def slice_all_true():
 
 
 def slice_all_false():
+    # fmt: off
     prediction_slice = torch.tensor(
         [[
             [0, 1, 1],
@@ -81,6 +88,7 @@ def slice_all_false():
             [0, 1, 0],
             [0, 0, 1]
         ]])
+    # fmt: on
 
     tp = 0
     fp = 6
@@ -91,6 +99,7 @@ def slice_all_false():
 
 
 def slice_no_true_positives():
+    # fmt: off
     prediction_slice = torch.tensor(
         [[
             [0, 1, 1],
@@ -104,6 +113,7 @@ def slice_no_true_positives():
             [0, 1, 0],
             [0, 0, 1]
         ]])
+    # fmt: on
 
     tp = 0
     fp = 3
@@ -114,6 +124,7 @@ def slice_no_true_positives():
 
 
 def slice_no_true_negatives():
+    # fmt: off
     prediction_slice = torch.tensor(
         [[
             [1, 1, 1],
@@ -127,6 +138,7 @@ def slice_no_true_negatives():
             [0, 1, 0],
             [0, 0, 1]
         ]])
+    # fmt: on
 
     tp = 2
     fp = 6
@@ -137,12 +149,7 @@ def slice_no_true_negatives():
 
 
 def slice_all_true_negatives():
-    target_slice = torch.tensor(
-        [[
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
-        ]])
+    target_slice = torch.tensor([[[0, 0, 0], [0, 0, 0], [0, 0, 0]]])
 
     tp = 0
     fp = 0
@@ -153,6 +160,7 @@ def slice_all_true_negatives():
 
 
 def probabilistic_slice():
+    # fmt: off
     prediction_slice = torch.tensor(
         [[
             [0.1, 0.1, 0.],
@@ -166,6 +174,7 @@ def probabilistic_slice():
             [1, 1, 1],
             [1, 1, 0]
         ]])
+    # fmt: on
 
     tp = 4
     fp = 0
