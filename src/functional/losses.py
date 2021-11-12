@@ -38,7 +38,7 @@ class SegmentationLoss(torch.nn.Module):
         assert loss.dim() == 1 or loss.dim() == 2
 
         # aggregate loss values for all channels and the entire batch
-        if self.reduction == 'mean':
+        if self.reduction == "mean":
             return loss.mean()
         elif self.reduction == "sum":
             return loss.sum()
@@ -91,9 +91,17 @@ class DiceLoss(SegmentationLoss):
 
         # compute loss for each channel
         # since the loss is to be minimized, the loss value is negated
-        dice_loss = -1. * (2. * intersection + self.smoothing) / (
-                (flattened_target * flattened_target + flattened_prediction * flattened_prediction).sum(dim=-1)
-                + self.smoothing)
+        dice_loss = (
+            -1.0
+            * (2.0 * intersection + self.smoothing)
+            / (
+                (
+                    flattened_target * flattened_target
+                    + flattened_prediction * flattened_prediction
+                ).sum(dim=-1)
+                + self.smoothing
+            )
+        )
 
         return self._reduce_loss(dice_loss)
 

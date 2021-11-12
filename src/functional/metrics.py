@@ -14,10 +14,14 @@ def dsc(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     flattened_target = torch.flatten(target).float()
     flattened_input = torch.flatten(input).float()
     intersection = (flattened_target * flattened_input).sum()
-    score = (2. * intersection + smoothing) / ((flattened_target * flattened_target).sum()
-                                               + (flattened_input * flattened_input).sum() + smoothing)
+    score = (2.0 * intersection + smoothing) / (
+        (flattened_target * flattened_target).sum()
+        + (flattened_input * flattened_input).sum()
+        + smoothing
+    )
 
     return score
+
 
 def recall(input: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     """

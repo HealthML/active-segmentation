@@ -16,7 +16,9 @@ class UNet(nn.Module):
             feature channels is doubled.
     """
 
-    def __init__(self, in_channels: int = 3, out_channels: int = 1, init_features: int = 32):
+    def __init__(
+        self, in_channels: int = 3, out_channels: int = 1, init_features: int = 32
+    ):
 
         super(UNet, self).__init__()
 
