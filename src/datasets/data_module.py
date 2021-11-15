@@ -166,5 +166,4 @@ class ActiveLearningDataModule(LightningDataModule):
         if self._unlabeled_set:
             return len(self._unlabeled_set)
         return 0
-
             

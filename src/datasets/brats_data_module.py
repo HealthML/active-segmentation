@@ -77,5 +77,3 @@ class BraTSDataModule(ActiveLearningDataModule):
         # faked unlabeled set
         # ToDo: implement unlabeled set
         return self._create_training_set()
-
-        
