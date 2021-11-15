@@ -20,16 +20,18 @@ class ActiveLearningDataModule(LightningDataModule):
     _test_set = None
     _unlabeled_set = None
 
-    def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
+    def __init__(self, data_dir: str, batch_size, num_workers, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.
         :param batch_size: Batch size.
+        :param num_workers: Number of workers for DataLoader.
         :param kwargs: Further, dataset specific parameters.
         """
 
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
+        self.num_workers = num_workers
         self.shuffle = shuffle
 
     def setup(self, stage: Optional[str] = None) -> None:
@@ -96,7 +98,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 self._training_set,
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
-                num_workers=8,
+                num_workers=self.num_workers,
             )
         return None
 
@@ -107,7 +109,9 @@ class ActiveLearningDataModule(LightningDataModule):
 
         if self._validation_set:
             return DataLoader(
-                self._validation_set, batch_size=self.batch_size, num_workers=8
+                self._validation_set,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
             )
         return None
 
@@ -117,7 +121,11 @@ class ActiveLearningDataModule(LightningDataModule):
         """
 
         if self._test_set:
-            return DataLoader(self._test_set, batch_size=self.batch_size, num_workers=8)
+            return DataLoader(
+                self._test_set,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+            )
         return None
 
     def unlabeled_dataloader(self) -> Optional[DataLoader]:
@@ -127,7 +135,9 @@ class ActiveLearningDataModule(LightningDataModule):
 
         if self._unlabeled_set:
             return DataLoader(
-                self._unlabeled_set, batch_size=self.batch_size, num_workers=8
+                self._unlabeled_set,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
             )
         return None
 
@@ -166,4 +176,3 @@ class ActiveLearningDataModule(LightningDataModule):
         if self._unlabeled_set:
             return len(self._unlabeled_set)
         return 0
-            

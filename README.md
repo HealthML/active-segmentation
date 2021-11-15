@@ -53,6 +53,7 @@ python3 src/main.py \
     --strategy "base" \
     --batch_size 16 \
     --epochs 1 \
+    --num_workers 2 \
     --optimizer "adam" \
     --loss "bce" \
     --gpus 1
@@ -67,6 +68,7 @@ srun -p gpupro --gpus=1 -c 18 --mem 150000 python -m memory_profiler main.py \
     --strategy "base" \
     --batch_size 16 \
     --epochs 3 \
+    --num_workers 8 \
     --optimizer "adam" \
     --loss "dice" \
     --data_dir "/dhc/groups/mpws2021cl1/Data" \
