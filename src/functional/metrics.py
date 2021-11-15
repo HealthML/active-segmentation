@@ -52,13 +52,13 @@ def dice_score(
     return score
 
 
-def recall(
+def sensitivity(
     prediction: torch.Tensor, target: torch.Tensor, smoothing: float = 0
 ) -> torch.Tensor:
     r"""
-    Computes the recall from a predicted segmentation mask and the target mask:
+    Computes the sensitivity from a predicted segmentation mask and the target mask:
 
-        :math:`Recall = \frac{TP}{TP + FN}`
+        :math:`Sensitivity = \frac{TP}{TP + FN}`
 
     Using the `smoothing` parameter, Laplacian smoothing can be applied:
 
@@ -74,7 +74,7 @@ def recall(
         smoothing (float, optional): Laplacian smoothing factor.
 
     Returns:
-        Tensor: Recall.
+        Tensor: Sensitivity.
 
     Shape:
         - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,
@@ -133,9 +133,9 @@ class DiceScore(torchmetrics.Metric):
         )
 
 
-class Recall(torchmetrics.Metric):
+class Sensitivity(torchmetrics.Metric):
     """
-    Computes the Recall. Can be used for 3D images whose slices are scattered over multiple batches.
+    Computes the sensitivity. Can be used for 3D images whose slices are scattered over multiple batches.
 
     Args:
         smoothing (int, optional): Laplacian smoothing factor.
@@ -161,10 +161,10 @@ class Recall(torchmetrics.Metric):
 
     def compute(self) -> torch.Tensor:
         """
-        Computes the recall  over all slices that were registered using the `update` method.
+        Computes the sensitivity  over all slices that were registered using the `update` method.
 
         Returns:
-            Tensor: Recall.
+            Tensor: Sensitivity.
         """
 
         return (self.true_positives + self.smoothing) / (

@@ -3,7 +3,7 @@
 import unittest
 import torch
 
-from functional import DiceScore, dice_score, recall, Recall
+from functional import DiceScore, dice_score, sensitivity, Sensitivity
 import tests.utils
 
 
@@ -174,165 +174,172 @@ class TestDiceScore(unittest.TestCase):
         )
 
 
-class TestRecall(unittest.TestCase):
+class TestSensitivity(unittest.TestCase):
     """
-    Test cases for recall.
+    Test cases for sensitivity.
     """
 
     def test_standard_case(self):
         """
-        Tests that the recall is computed correctly when there are both true and false predictions.
+        Tests that the sensitivity is computed correctly when there are both true and false predictions.
         """
 
         prediction, target, tp, _, _, fn = tests.utils.standard_slice_1()
 
-        recall_from_function = recall(prediction, target)
+        sensitivity_from_function = sensitivity(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_function, torch.tensor(tp / (tp + fn))),
-            "Functional implementation correctly computes recall when there are TP, FP and FN.",
+            torch.equal(sensitivity_from_function, torch.tensor(tp / (tp + fn))),
+            "Functional implementation correctly computes sensitivity when there are TP, FP and FN.",
         )
 
-        smoothed_recall_from_function = recall(prediction, target, smoothing=1)
+        smoothed_sensitivity_from_function = sensitivity(
+            prediction, target, smoothing=1
+        )
         self.assertTrue(
             torch.equal(
-                smoothed_recall_from_function, torch.tensor((tp + 1) / (tp + fn + 1))
+                smoothed_sensitivity_from_function,
+                torch.tensor((tp + 1) / (tp + fn + 1)),
             ),
-            "Functional implementation correctly computes smoothed recall when there are TP, FP and FN.",
+            "Functional implementation correctly computes smoothed sensitivity when there are TP, FP and FN.",
         )
 
-        recall_module = Recall()
-        recall_from_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity()
+        sensitivity_from_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_module, torch.tensor(tp / (tp + fn))),
-            "Module-based implementation correctly computes recall when there are TP, FP and FN.",
+            torch.equal(sensitivity_from_module, torch.tensor(tp / (tp + fn))),
+            "Module-based implementation correctly computes sensitivity when there are TP, FP and FN.",
         )
 
-        recall_module.update(prediction, target)
-        recall_from_module_compute = recall_module.compute()
+        sensitivity_module.update(prediction, target)
+        sensitivity_from_module_compute = sensitivity_module.compute()
         self.assertTrue(
             torch.equal(
-                recall_from_module_compute,
+                sensitivity_from_module_compute,
                 torch.tensor(tp / (tp + fn)),
             ),
-            "Compute method of module-based implementation returns correct recall.",
+            "Compute method of module-based implementation returns correct sensitivity.",
         )
 
-        recall_module = Recall(smoothing=1)
-        smoothed_recall_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity(smoothing=1)
+        smoothed_sensitivity_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.equal(smoothed_recall_module, torch.tensor((tp + 1) / (tp + fn + 1))),
-            "Module-based implementation correctly computes smoothed recall when there are TP, FP and FN.",
+            torch.equal(
+                smoothed_sensitivity_module, torch.tensor((tp + 1) / (tp + fn + 1))
+            ),
+            "Module-based implementation correctly computes smoothed sensitivity when there are TP, FP and FN.",
         )
 
     def test_all_true(self):
         """
-        Tests that the recall is computed correctly when all predictions are correct.
+        Tests that the sensitivity is computed correctly when all predictions are correct.
         """
 
         prediction, target, _, _, _, _ = tests.utils.slice_all_true()
 
-        recall_from_function = recall(prediction, target)
+        sensitivity_from_function = sensitivity(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_function, torch.tensor(1.0)),
-            "Functional implementation correctly computes recall when there are no prediction errors.",
+            torch.equal(sensitivity_from_function, torch.tensor(1.0)),
+            "Functional implementation correctly computes sensitivity when there are no prediction errors.",
         )
 
-        recall_module = Recall()
-        recall_from_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity()
+        sensitivity_from_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_module, torch.tensor(1.0)),
-            "Module-based implementation correctly computes recall when there are no prediction errors.",
+            torch.equal(sensitivity_from_module, torch.tensor(1.0)),
+            "Module-based implementation correctly computes sensitivity when there are no prediction errors.",
         )
 
     def test_all_false(self):
         """
-        Tests that the recall is computed correctly when all predictions are wrong.
+        Tests that the sensitivity is computed correctly when all predictions are wrong.
         """
 
         prediction, target, _, _, _, _ = tests.utils.slice_all_false()
 
-        recall_from_function = recall(prediction, target)
+        sensitivity_from_function = sensitivity(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_function, torch.tensor(0.0)),
-            "Functional implementation correctly computes recall when all predictions are wrong.",
+            torch.equal(sensitivity_from_function, torch.tensor(0.0)),
+            "Functional implementation correctly computes sensitivity when all predictions are wrong.",
         )
 
-        recall_module = Recall()
-        recall_from_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity()
+        sensitivity_from_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_module, torch.tensor(0.0)),
-            "Module-based implementation correctly computes recall when all predictions are wrong.",
+            torch.equal(sensitivity_from_module, torch.tensor(0.0)),
+            "Module-based implementation correctly computes sensitivity when all predictions are wrong.",
         )
 
     def test_no_true_positives(self):
         """
-        Tests that the recall is computed correctly when there are no true positives.
+        Tests that the sensitivity is computed correctly when there are no true positives.
         """
 
         prediction, target, _, _, _, _ = tests.utils.slice_no_true_positives()
 
-        recall_from_function = recall(prediction, target)
+        sensitivity_from_function = sensitivity(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_function, torch.tensor(0.0)),
-            "Functional implementation correctly computes recall when there are no TP.",
+            torch.equal(sensitivity_from_function, torch.tensor(0.0)),
+            "Functional implementation correctly computes sensitivity when there are no TP.",
         )
 
-        recall_module = Recall()
-        recall_from_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity()
+        sensitivity_from_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_module, torch.tensor(0.0)),
-            "Module-based implementation correctly computes recall when there are no TP.",
+            torch.equal(sensitivity_from_module, torch.tensor(0.0)),
+            "Module-based implementation correctly computes sensitivity when there are no TP.",
         )
 
     def test_no_true_negatives(self):
         """
-        Tests that the recall is computed correctly when there are no true negatives.
+        Tests that the sensitivity is computed correctly when there are no true negatives.
         """
 
         prediction, target, tp, _, _, fn = tests.utils.slice_no_true_negatives()
 
-        recall_from_function = recall(prediction, target)
+        sensitivity_from_function = sensitivity(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_function, torch.tensor(tp / (tp + fn))),
-            "Functional implementation correctly computes recall when there are no TN.",
+            torch.equal(sensitivity_from_function, torch.tensor(tp / (tp + fn))),
+            "Functional implementation correctly computes sensitivity when there are no TN.",
         )
 
-        recall_module = Recall()
-        recall_from_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity()
+        sensitivity_from_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.equal(recall_from_module, torch.tensor(tp / (tp + fn))),
-            "Module-based implementation correctly computes recall when there are no TN.",
+            torch.equal(sensitivity_from_module, torch.tensor(tp / (tp + fn))),
+            "Module-based implementation correctly computes sensitivity when there are no TN.",
         )
 
     def test_all_true_negatives(self):
         """
-        Tests that the recall is computed correctly when there are only true negatives.
+        Tests that the sensitivity is computed correctly when there are only true negatives.
         """
 
         prediction, target, _, _, _, _ = tests.utils.slice_all_true_negatives()
 
-        recall_from_function = recall(prediction, target)
+        sensitivity_from_function = sensitivity(prediction, target)
         self.assertTrue(
-            torch.isnan(recall_from_function),
-            "Functional implementation correctly computes recall when there are only TN.",
+            torch.isnan(sensitivity_from_function),
+            "Functional implementation correctly computes sensitivity when there are only TN.",
         )
 
-        smoothed_recall_from_function = recall(prediction, target, smoothing=1)
+        smoothed_sensitivity_from_function = sensitivity(
+            prediction, target, smoothing=1
+        )
         self.assertTrue(
-            torch.equal(smoothed_recall_from_function, torch.tensor(1.0)),
-            "Functional implementation correctly computes smoothed recall when there are only TN.",
+            torch.equal(smoothed_sensitivity_from_function, torch.tensor(1.0)),
+            "Functional implementation correctly computes smoothed sensitivity when there are only TN.",
         )
 
-        recall_module = Recall()
-        recall_from_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity()
+        sensitivity_from_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.isnan(recall_from_module),
-            "Module-based implementation correctly computes recall when there are only TN.",
+            torch.isnan(sensitivity_from_module),
+            "Module-based implementation correctly computes sensitivity when there are only TN.",
         )
 
-        recall_module = Recall(smoothing=1)
-        smoothed_recall_from_module = recall_module(prediction, target)
+        sensitivity_module = Sensitivity(smoothing=1)
+        smoothed_sensitivity_from_module = sensitivity_module(prediction, target)
         self.assertTrue(
-            torch.equal(smoothed_recall_from_module, torch.tensor(1.0)),
-            "Module-based implementation correctly computes smoothed recall when there are only TN.",
+            torch.equal(smoothed_sensitivity_from_module, torch.tensor(1.0)),
+            "Module-based implementation correctly computes smoothed sensitivity when there are only TN.",
         )
