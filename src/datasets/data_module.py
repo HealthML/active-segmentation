@@ -3,8 +3,12 @@ from torch.utils.data import DataLoader, Dataset
 from typing import Optional
 from typing import Any, List, Union
 import warnings
+
 warnings.filterwarnings("ignore", ".*does not have many workers.*")
-warnings.filterwarnings("ignore", ".*DataModule.setup has already been called, so it will not be called again.*")
+warnings.filterwarnings(
+    "ignore",
+    ".*DataModule.setup has already been called, so it will not be called again.*",
+)
 
 
 class ActiveLearningDataModule(LightningDataModule):
@@ -85,7 +89,12 @@ class ActiveLearningDataModule(LightningDataModule):
         """
 
         if self._training_set:
-            return DataLoader(self._training_set, batch_size=self.batch_size, shuffle=self.shuffle, num_workers=8)
+            return DataLoader(
+                self._training_set,
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                num_workers=8,
+            )
         return None
 
     def val_dataloader(self) -> Optional[DataLoader]:
@@ -94,7 +103,9 @@ class ActiveLearningDataModule(LightningDataModule):
         """
 
         if self._validation_set:
-            return DataLoader(self._validation_set, batch_size=self.batch_size, num_workers=8)
+            return DataLoader(
+                self._validation_set, batch_size=self.batch_size, num_workers=8
+            )
         return None
 
     def test_dataloader(self) -> Optional[DataLoader]:
@@ -112,7 +123,9 @@ class ActiveLearningDataModule(LightningDataModule):
         """
 
         if self._unlabeled_set:
-            return DataLoader(self._unlabeled_set, batch_size=self.batch_size, num_workers=8)
+            return DataLoader(
+                self._unlabeled_set, batch_size=self.batch_size, num_workers=8
+            )
         return None
 
     def training_set_size(self) -> int:
