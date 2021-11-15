@@ -1,8 +1,8 @@
+""" Module containing abstract classes for the data modules"""
+import warnings
+from typing import Any, List, Optional
 from pytorch_lightning.core.datamodule import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
-from typing import Optional
-from typing import Any, List, Union
-import warnings
 
 warnings.filterwarnings("ignore", ".*does not have many workers.*")
 warnings.filterwarnings(
@@ -12,6 +12,9 @@ warnings.filterwarnings(
 
 
 class ActiveLearningDataModule(LightningDataModule):
+    """TBD"""
+
+    # pylint: disable=assignment-from-none,no-self-use,unused-argument
     _training_set = None
     _validation_set = None
     _test_set = None
@@ -163,3 +166,5 @@ class ActiveLearningDataModule(LightningDataModule):
         if self._unlabeled_set:
             return len(self._unlabeled_set)
         return 0
+
+            

@@ -16,8 +16,14 @@ env
 # Pycharm
 .idea
 
+# VSCode
+.vscode
+
 # Pytorch Lightning Logs
 lightning_logs
+
+# editable package installs
+*.egg-info
 
 # Weight&Biases Logs
 wandb/

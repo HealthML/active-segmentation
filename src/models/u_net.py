@@ -1,7 +1,9 @@
+"""U-Net architecture."""
+
 from collections import OrderedDict
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class UNet(nn.Module):
@@ -16,9 +18,13 @@ class UNet(nn.Module):
             feature channels is doubled.
     """
 
-    def __init__(self, in_channels: int = 3, out_channels: int = 1, init_features: int = 32):
+    # pylint: disable-msg=too-many-instance-attributes
 
-        super(UNet, self).__init__()
+    def __init__(
+        self, in_channels: int = 3, out_channels: int = 1, init_features: int = 32
+    ):
+
+        super().__init__()
 
         features = init_features
         self.encoder1 = UNet._block(in_channels, features, name="enc1")
@@ -54,6 +60,15 @@ class UNet(nn.Module):
         )
 
     def forward(self, x):
+        """
+
+        Args:
+            x (Tensor): Batch of input images.
+
+        Returns:
+            Tensor: Segmentation masks.
+        """
+
         x = x.float()
         enc1 = self.encoder1(x)
         enc2 = self.encoder2(self.pool1(enc1))

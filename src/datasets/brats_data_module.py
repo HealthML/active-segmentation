@@ -1,14 +1,24 @@
+""" Module containing the data module for brats data """
 import os
-from torch.utils.data import Dataset
 from typing import Any, List, Optional, Union
+from torch.utils.data import Dataset
 
-from .data_module import ActiveLearningDataModule
-from .brats_dataset import BraTSDataset
+from datasets.data_module import ActiveLearningDataModule
+from datasets.brats_dataset import BraTSDataset
 
 
 class BraTSDataModule(ActiveLearningDataModule):
+    """Brats data module"""
+
+    # pylint: disable=unused-argument,no-self-use
     @staticmethod
     def discover_paths(dir_path: str, modality="flair"):
+        """
+        Discover the .nii.gz file paths with a given modality
+        :param dir_path: directory to discover paths in
+        :param modality: modality of scan
+        :return: list of files as tuple of image paths, annotation paths
+        """
         cases = sorted(os.listdir(dir_path))
         cases = [
             case
@@ -17,13 +27,11 @@ class BraTSDataModule(ActiveLearningDataModule):
         ]
 
         image_paths = [
-            os.path.join(
-                dir_path, case, "{}_{}.nii.gz".format(os.path.basename(case), modality)
-            )
+            os.path.join(dir_path, case, f"{os.path.basename(case)}_{modality}.nii.gz")
             for case in cases
         ]
         annotation_paths = [
-            os.path.join(dir_path, case, "{}_seg.nii.gz".format(os.path.basename(case)))
+            os.path.join(dir_path, case, f"{os.path.basename(case)}_seg.nii.gz")
             for case in cases
         ]
 
@@ -37,14 +45,16 @@ class BraTSDataModule(ActiveLearningDataModule):
         """
 
         super().__init__(data_dir, batch_size, shuffle, **kwargs)
+        self.data_folder = os.path.join(self.data_dir, "BraTS18")
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+        """TBD"""
         # ToDo: implement labeling logic
         return None
 
     def _create_training_set(self) -> Union[Dataset, None]:
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
-            os.path.join(self.data_dir, "train")
+            os.path.join(self.data_folder, "train")
         )
         return BraTSDataset(
             image_paths=train_image_paths, annotation_paths=train_annotation_paths
@@ -52,7 +62,7 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def _create_validation_set(self) -> Union[Dataset, None]:
         val_image_paths, val_annotation_paths = BraTSDataModule.discover_paths(
-            os.path.join(self.data_dir, "val")
+            os.path.join(self.data_folder, "val")
         )
         return BraTSDataset(
             image_paths=val_image_paths, annotation_paths=val_annotation_paths
@@ -67,3 +77,5 @@ class BraTSDataModule(ActiveLearningDataModule):
         # faked unlabeled set
         # ToDo: implement unlabeled set
         return self._create_training_set()
+
+        

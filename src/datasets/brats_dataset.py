@@ -1,16 +1,20 @@
+""" Module to load and batch brats dataset """
+from typing import Any, Callable, List, Optional, Tuple
 import math
 import nibabel as nib
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from typing import Any, Callable, List, Optional, Tuple
 
 
 class BraTSDataset(Dataset):
+    """Class to load brats dataset"""
+
     IMAGE_DIMENSIONS = (155, 240, 240)
 
     @staticmethod
     def normalize(img):
+        """Normalizes an image"""
         tmp = img / np.max(img)
         # ignore zero values for mean calculation because background dominates
         tmp = tmp - np.mean(tmp[tmp > 0])
@@ -19,7 +23,9 @@ class BraTSDataset(Dataset):
 
     @staticmethod
     def __read_image_as_array(
-        filepath: str, norm: bool, clip: bool = False
+        filepath: str,
+        norm: bool,
+        clip: bool = False,
     ) -> np.ndarray:
         """
         Reads image or annotation as numpy array.

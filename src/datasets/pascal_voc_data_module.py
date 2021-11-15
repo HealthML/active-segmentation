@@ -1,14 +1,18 @@
-import numpy as np
+""" Module to load pascal voc data """
 import os
+from typing import Any, List, Optional, Union
+import numpy as np
 from torch.utils.data import Dataset, random_split
 from torchvision import datasets, transforms
 import torch
-from typing import Any, List, Optional, Union
 
-from .data_module import ActiveLearningDataModule
+from datasets.data_module import ActiveLearningDataModule
 
 
 class PILMaskToTensor:
+    """TBD"""
+
+    # pylint: disable=too-few-public-methods
     def __call__(self, target):
         target = np.array(target)
         target = np.where(target == 255, 0, target)
@@ -16,6 +20,9 @@ class PILMaskToTensor:
 
 
 class PascalVOCDataModule(ActiveLearningDataModule):
+    """Pascal voc data loader"""
+
+    # pylint: disable=unused-argument,no-self-use,too-few-public-methods
     def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.
@@ -28,32 +35,50 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         self.data_folder = os.path.join(data_dir, "voc-segmentation")
         self.__download_dataset = not os.path.exists(self.data_folder)
 
-        self.__image_transformation = transforms.Compose([transforms.Resize((255, 255)), transforms.ToTensor()])
-        self.__annotation_transformation = transforms.Compose([transforms.Resize((255, 255)), PILMaskToTensor()])
+        self.__image_transformation = transforms.Compose(
+            [transforms.Resize((255, 255)), transforms.ToTensor()]
+        )
+        self.__annotation_transformation = transforms.Compose(
+            [transforms.Resize((255, 255)), PILMaskToTensor()]
+        )
         self.__training_set_size = 4
         self.__validation_set_size = 4
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+        """TBD"""
         # ToDo: implement labeling logic
         return None
 
     def _create_training_set(self) -> Union[Dataset, None]:
-        training_set = datasets.VOCSegmentation(self.data_folder,
-                                                year="2012",
-                                                image_set="train",
-                                                download=self.__download_dataset,
-                                                transform=self.__image_transformation,
-                                                target_transform=self.__annotation_transformation)
-        return random_split(training_set, [self.__training_set_size, len(training_set) - self.__training_set_size])[0]
+        training_set = datasets.VOCSegmentation(
+            self.data_folder,
+            year="2012",
+            image_set="train",
+            download=self.__download_dataset,
+            transform=self.__image_transformation,
+            target_transform=self.__annotation_transformation,
+        )
+        return random_split(
+            training_set,
+            [self.__training_set_size, len(training_set) - self.__training_set_size],
+        )[0]
 
     def _create_validation_set(self) -> Union[Dataset, None]:
-        validation_set = datasets.VOCSegmentation(self.data_folder,
-                                                  year="2012",
-                                                  image_set="val",
-                                                  download=self.__download_dataset,
-                                                  transform=self.__image_transformation,
-                                                  target_transform=self.__annotation_transformation)
-        return random_split(validation_set, [self.__validation_set_size, len(validation_set) - self.__validation_set_size])[0]
+        validation_set = datasets.VOCSegmentation(
+            self.data_folder,
+            year="2012",
+            image_set="val",
+            download=self.__download_dataset,
+            transform=self.__image_transformation,
+            target_transform=self.__annotation_transformation,
+        )
+        return random_split(
+            validation_set,
+            [
+                self.__validation_set_size,
+                len(validation_set) - self.__validation_set_size,
+            ],
+        )[0]
 
     def _create_test_set(self) -> Union[Dataset, None]:
         # faked test set

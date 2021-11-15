@@ -1,3 +1,4 @@
+""" Main module to execute active learning pipeline from CLI """
 import fire
 from active_learning import ActiveLearningPipeline
 from models import PytorchFCNResnet50, PytorchUNet
@@ -16,7 +17,18 @@ def run_active_learning_pipeline(
     loss: str = "dice",
     optimizer: str = "adam",
 ):
-
+    """
+    # TODO (mfr): Add docstring
+    :param architecture:
+    :param dataset:
+    :param strategy:
+    :param data_dir:
+    :param batch_size:
+    :param epochs:
+    :param loss:
+    :param optimizer:
+    :return:
+    """
     if architecture == "fcn_resnet50":
         model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
     elif architecture == "u_net":
