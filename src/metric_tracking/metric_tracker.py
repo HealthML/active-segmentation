@@ -3,7 +3,7 @@
 from typing import Dict, Iterable
 import torch
 
-from functional import DiceScore, Sensitivity
+from functional import DiceScore, Sensitivity, Specificity
 
 
 class MetricTracker:
@@ -12,10 +12,11 @@ class MetricTracker:
     Provides utilities to collect the predictions and targets of samples that are scattered over multiple batches.
 
     Args:
-        metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", and "sensitivity".
+        metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity", and
+            "specificity".
     """
 
-    supported_metrics = ["dice", "sensitivity"]
+    supported_metrics = ["dice", "sensitivity", "specificity"]
 
     def __init__(self, metrics: Iterable[str]):
         self._metrics = {}
@@ -27,6 +28,8 @@ class MetricTracker:
                 self._metrics[metric] = DiceScore(smoothing=0)
             if metric == "sensitivity":
                 self._metrics[metric] = Sensitivity(smoothing=0)
+            if metric == "specificity":
+                self._metrics[metric] = Specificity(smoothing=0)
 
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
         """

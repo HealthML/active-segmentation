@@ -173,6 +173,23 @@ def slice_no_true_negatives() -> Tuple[
     return prediction_slice, target_slice, tp, fp, tn, fn
 
 
+def slice_all_true_positives() -> Tuple[
+    torch.Tensor, torch.Tensor, float, float, float, float
+]:
+    """
+    Creates a faked segmentation slice that only contains true negatives.
+
+    Returns:
+        Tuple: Predicted slice, target slice, true positives, false positives, true negatives, false negatives.
+    """
+
+    target_slice = torch.Tensor([[[1, 1, 1], [1, 1, 1], [1, 1, 1]]])
+
+    tp, fp, tn, fn = (9, 0, 0, 0)
+
+    return target_slice, target_slice, tp, fp, tn, fn
+
+
 def slice_all_true_negatives() -> Tuple[
     torch.Tensor, torch.Tensor, float, float, float, float
 ]:
@@ -185,7 +202,7 @@ def slice_all_true_negatives() -> Tuple[
 
     target_slice = torch.Tensor([[[0, 0, 0], [0, 0, 0], [0, 0, 0]]])
 
-    tp, fp, tn, fn = (0, 0, 9, 9)
+    tp, fp, tn, fn = (0, 0, 9, 0)
 
     return target_slice, target_slice, tp, fp, tn, fn
 

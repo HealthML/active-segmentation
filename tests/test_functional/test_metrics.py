@@ -3,7 +3,7 @@
 import unittest
 import torch
 
-from functional import DiceScore, dice_score, sensitivity, Sensitivity
+from functional import DiceScore, dice_score, sensitivity, specificity, Sensitivity, Specificity
 import tests.utils
 
 
@@ -342,4 +342,175 @@ class TestSensitivity(unittest.TestCase):
         self.assertTrue(
             torch.equal(smoothed_sensitivity_from_module, torch.tensor(1.0)),
             "Module-based implementation correctly computes smoothed sensitivity when there are only TN.",
+        )
+
+
+class TestSpecificity(unittest.TestCase):
+    """
+    Test cases for specificity.
+    """
+
+    def test_standard_case(self):
+        """
+        Tests that the specificity is computed correctly when there are both true and false predictions.
+        """
+
+        prediction, target, _, fp, tn, _ = tests.utils.standard_slice_1()
+
+        specificity_from_function = specificity(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_function, torch.tensor(tn / (tn + fp))),
+            "Functional implementation correctly computes specificity when there are TP, FP and FN.",
+        )
+
+        smoothed_specificity_from_function = specificity(
+            prediction, target, smoothing=1
+        )
+        self.assertTrue(
+            torch.equal(
+                smoothed_specificity_from_function,
+                torch.tensor((tn + 1) / (tn + fp + 1)),
+            ),
+            "Functional implementation correctly computes smoothed specificity when there are TP, FP and FN.",
+        )
+
+        specificity_module = Specificity()
+        specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_module, torch.tensor(tn / (tn + fp))),
+            "Module-based implementation correctly computes specificity when there are TP, FP and FN.",
+        )
+
+        specificity_module.update(prediction, target)
+        specificity_from_module_compute = specificity_module.compute()
+        self.assertTrue(
+            torch.equal(
+                specificity_from_module_compute,
+                torch.tensor(tn / (tn + fp)),
+            ),
+            "Compute method of module-based implementation returns correct specificity.",
+        )
+
+        specificity_module = Specificity(smoothing=1)
+        smoothed_specificity_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(
+                smoothed_specificity_module, torch.tensor((tn + 1) / (tn + fp + 1))
+            ),
+            "Module-based implementation correctly computes smoothed specificity when there are TP, FP and FN.",
+        )
+
+    def test_all_true(self):
+        """
+        Tests that the specificity is computed correctly when all predictions are correct.
+        """
+
+        prediction, target, _, _, _, _ = tests.utils.slice_all_true()
+
+        specificity_from_function = specificity(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_function, torch.tensor(1.0)),
+            "Functional implementation correctly computes specificity when there are no prediction errors.",
+        )
+
+        specificity_module = Specificity()
+        specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_module, torch.tensor(1.0)),
+            "Module-based implementation correctly computes specificity when there are no prediction errors.",
+        )
+
+    def test_all_false(self):
+        """
+        Tests that the specificity is computed correctly when all predictions are wrong.
+        """
+
+        prediction, target, _, _, _, _ = tests.utils.slice_all_false()
+
+        specificity_from_function = specificity(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_function, torch.tensor(0.0)),
+            "Functional implementation correctly computes specificity when all predictions are wrong.",
+        )
+
+        specificity_module = Specificity()
+        specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_module, torch.tensor(0.0)),
+            "Module-based implementation correctly computes specificity when all predictions are wrong.",
+        )
+
+    def test_no_true_positives(self):
+        """
+        Tests that the specificity is computed correctly when there are no true positives.
+        """
+
+        prediction, target, _, fp, tn, _ = tests.utils.slice_no_true_positives()
+
+        specificity_from_function = specificity(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_function, torch.tensor(tn / (tn + fp))),
+            "Functional implementation correctly computes specificity when there are no TP.",
+        )
+
+        specificity_module = Specificity()
+        specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_module, torch.tensor(tn / (tn + fp))),
+            "Module-based implementation correctly computes specificity when there are no TP.",
+        )
+
+    def test_no_true_negatives(self):
+        """
+        Tests that the specificity is computed correctly when there are no true negatives.
+        """
+
+        prediction, target, _, _, _, _ = tests.utils.slice_no_true_negatives()
+
+        specificity_from_function = specificity(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_function, torch.tensor(0.0)),
+            "Functional implementation correctly computes specificity when there are no TN.",
+        )
+
+        specificity_module = Specificity()
+        specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_module, torch.tensor(0.0)),
+            "Module-based implementation correctly computes specificity when there are no TN.",
+        )
+
+    def test_all_true_positives(self):
+        """
+        Tests that the specificity is computed correctly when there are only true positives.
+        """
+
+        prediction, target, _, _, _, _ = tests.utils.slice_all_true_positives()
+
+        specificity_from_function = specificity(prediction, target)
+        self.assertTrue(
+            torch.isnan(specificity_from_function),
+            "Functional implementation correctly computes specificity when there are only TN.",
+        )
+
+        smoothed_specificity_from_function = specificity(
+            prediction, target, smoothing=1
+        )
+        self.assertTrue(
+            torch.equal(smoothed_specificity_from_function, torch.tensor(1.0)),
+            "Functional implementation correctly computes smoothed specificity when there are only TN.",
+        )
+
+        specificity_module = Specificity()
+        specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.isnan(specificity_from_module),
+            "Module-based implementation correctly computes specificity when there are only TN.",
+        )
+
+        specificity_module = Specificity(smoothing=1)
+        smoothed_specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(smoothed_specificity_from_module, torch.tensor(1.0)),
+            "Module-based implementation correctly computes smoothed specificity when there are only TN.",
         )
