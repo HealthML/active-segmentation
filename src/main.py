@@ -6,6 +6,7 @@ from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
 
 
+# pylint: disable=too-many-arguments
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
