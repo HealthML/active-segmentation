@@ -4,8 +4,30 @@ Module containing model evaluation metrics.
 The metric implementations are based on the TorchMetrics framework. For instructions on how to implement custom metrics
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
+
+import numpy as np
 import torch
 import torchmetrics
+from scipy.ndimage.morphology import (
+    distance_transform_edt,
+    binary_erosion,
+    generate_binary_structure,
+)
+
+
+def _is_binary(tensor_to_check: torch.Tensor) -> bool:
+    """
+    Checks whether the input contains only zeros and ones.
+
+    Args:
+        input (Tensor): tensor to check.
+    Returns:
+        bool: True if contains only zeros and ones, False otherwise.
+    """
+
+    return torch.equal(
+        tensor_to_check, tensor_to_check.bool().to(dtype=tensor_to_check.dtype)
+    )
 
 
 def dice_score(
@@ -136,6 +158,94 @@ def specificity(
     return (true_negatives + smoothing) / (true_negatives_false_positives + smoothing)
 
 
+def _distances_to_surface(prediction: np.ndarray, target: np.ndarray) -> np.ndarray:
+    r"""
+    For each border point of a predicted shape, computes the distance to the nearest point of the target shape.
+
+    Args:
+        prediction: The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.
+        target: The target segmentation mask, where each value is in :math:`\{0, 1\}`.
+
+    Returns:
+        Array of distance values with one entry per border point of the predicted shape.
+    """
+
+    # code adapted from
+    # https://github.com/loli/medpy/blob/39131b94f0ab5328ab14a874229320efc2f74d98/medpy/metric/binary.py#L1195
+
+    assert (
+        prediction.shape == target.shape
+    ), "Prediction and target must have the same dimensions."
+    assert prediction.ndim in [
+        2,
+        3,
+    ], "Prediction and target must have either two or three dimensions."
+
+    erosion_structure = generate_binary_structure(prediction.ndim, connectivity=1)
+
+    # extract 1-pixel border line of predicted shapes using XOR
+    prediction_border = prediction ^ binary_erosion(
+        prediction, structure=erosion_structure, iterations=1
+    )
+
+    # scipys distance transform is calculated only inside the borders of the foreground objects, therefore the target
+    # has to be reversed
+    distances_to_target = distance_transform_edt(~target, sampling=None)
+
+    return distances_to_target[prediction_border]
+
+
+def hausdorff_distance(
+    prediction: torch.Tensor, target: torch.Tensor, percentile: float = 0.95
+) -> torch.Tensor:
+    r"""
+    Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
+
+    Note:
+        In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
+        given class and thus the distances are calculated over all channels and dimensions.
+
+    Args:
+        prediction (Tensor): The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.
+        target (Tensor): The target segmentation mask, where each value is in :math:`\{0, 1\}`.
+        percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
+            :math:`\[0, 1\]`.
+
+    Returns:
+        Tensor: Hausdorff distance.
+
+    Shape:
+        - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,
+          or `(height, width)` for single image segmentation tasks.
+        - Target: Must have the same dimensions as the prediction.
+        - Output: Scalar.
+    """
+
+    # adapted code from
+    # https://github.com/PiechaczekMyller/brats/blob/eb9f7eade1066dd12c90f6cef101b74c5e974bfa/brats/functional.py#L135
+
+    assert (
+        prediction.shape == target.shape
+    ), "Prediction and target must have the same dimensions."
+    assert (
+        prediction.dim() == 2 or prediction.dim() == 3
+    ), "Prediction and target must have either two or three dimensions."
+    assert _is_binary(prediction), "Predictions must be binary."
+    assert _is_binary(target), "Target must be binary."
+
+    prediction = prediction.cpu().detach().numpy().astype(np.bool)
+    target = target.cpu().detach().numpy().astype(np.bool)
+
+    if np.count_nonzero(prediction) == 0 or np.count_nonzero(target) == 0:
+        return torch.as_tensor(float("nan"))
+
+    distances_to_target = _distances_to_surface(prediction, target)
+
+    return torch.quantile(
+        torch.from_numpy(distances_to_target), q=percentile, keepdim=False
+    ).float()
+
+
 class DiceScore(torchmetrics.Metric):
     """
     Computes the Dice similarity coefficient (DSC). Can be used for 3D images whose slices are scattered over multiple
@@ -256,3 +366,38 @@ class Specificity(torchmetrics.Metric):
         return (self.true_negatives + self.smoothing) / (
             self.true_negatives_false_positives + self.smoothing
         )
+
+
+class HausdorffDistance(torchmetrics.Metric):
+    r"""
+    Computes the Hausdorff distance. Can be used for 3D images whose slices are scattered over multiple batches.
+
+    Args:
+        percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
+            :math:`\[0, 1\]`.
+    """
+
+    def __init__(self, percentile: float = 0.95):
+        super().__init__()
+        self.percentile = percentile
+        self.distances = []
+        self.add_state("distances", [])
+
+    # pylint: disable=arguments-differ
+    def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        self.distances.append(
+            hausdorff_distance(prediction, target, percentile=self.percentile)
+        )
+
+    def compute(self) -> torch.Tensor:
+        """
+        Computes the Hausdorf distance over all slices that were registered using the `update` method as the maximum per
+         slice-distance.
+
+        Returns:
+            Tensor: Hausdorff distance.
+        """
+
+        # ToDo: compute 3D Hausdorff distance when the slices of one scan are scattered across multiple batches.
+
+        return torch.max(torch.Tensor(self.distances))

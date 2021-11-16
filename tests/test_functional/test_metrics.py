@@ -3,7 +3,16 @@
 import unittest
 import torch
 
-from functional import DiceScore, dice_score, sensitivity, specificity, Sensitivity, Specificity
+from functional import (
+    DiceScore,
+    dice_score,
+    sensitivity,
+    specificity,
+    Sensitivity,
+    Specificity,
+    hausdorff_distance,
+    HausdorffDistance,
+)
 import tests.utils
 
 
@@ -513,4 +522,225 @@ class TestSpecificity(unittest.TestCase):
         self.assertTrue(
             torch.equal(smoothed_specificity_from_module, torch.tensor(1.0)),
             "Module-based implementation correctly computes smoothed specificity when there are only TN.",
+        )
+
+
+class TestHausdorffDistance(unittest.TestCase):
+    """
+    Test cases for Hausdorff distance.
+    """
+
+    def _test_hausdorff_distance(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        expected_distance_prediction_target: float,
+        expected_distance_target_prediction: float,
+        message: str = "",
+        percentile: float = 0.95,
+    ) -> None:
+        """
+        Helper function that calculates the Hausdorff distances for the given predictions and compares it with the
+        expected values.
+
+        Args:
+            prediction (Tensor): Predicted segmentation mask.
+            target (Tensor): Target segmentation mask.
+            expected_distance_prediction_target (float): Expected Hausdorff distance between prediction and target.
+            expected_distance_target_prediction (float): Expected Hausdorff distance between target and prediction.
+            message (string, optional): Description of the test case.
+            percentile (float): Percentile for which the Hausdorff distance is to be tested.
+        """
+
+        hausdorff_dist_prediction_target_from_function = hausdorff_distance(
+            prediction, target, percentile=percentile
+        )
+
+        self.assertTrue(
+            torch.equal(
+                hausdorff_dist_prediction_target_from_function,
+                torch.tensor(expected_distance_prediction_target).float(),
+            ),
+            f"Functional implementation correctly computes hausdorff distance between prediction and target when "
+            f"{message}.",
+        )
+
+        # pylint: disable=arguments-out-of-order
+        hausdorff_dist_target_prediction_from_function = hausdorff_distance(
+            target, prediction, percentile=percentile
+        )
+        self.assertTrue(
+            torch.equal(
+                hausdorff_dist_target_prediction_from_function,
+                torch.tensor(expected_distance_target_prediction).float(),
+            ),
+            f"Functional implementation correctly computes hausdorff distance between target and prediction when "
+            f"{message}.",
+        )
+
+        hausdorff_distance_module = HausdorffDistance(percentile=percentile)
+        hausdorff_dist_prediction_target_from_module = hausdorff_distance_module(
+            prediction, target
+        )
+        self.assertTrue(
+            torch.equal(
+                hausdorff_dist_prediction_target_from_module,
+                torch.tensor(expected_distance_prediction_target).float(),
+            ),
+            f"Module-based implementation correctly computes hausdorff distance between prediction and target when "
+            f"{message}.",
+        )
+        hausdorff_dist_target_prediction_from_module = hausdorff_distance_module(
+            target, prediction
+        )
+        self.assertTrue(
+            torch.equal(
+                hausdorff_dist_target_prediction_from_module,
+                torch.tensor(expected_distance_target_prediction).float(),
+            ),
+            f"Module-based implementation correctly computes hausdorff distance between target and prediction when "
+            f"{message}.",
+        )
+
+    def test_standard_case(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when there are both true and false predictions.
+        """
+
+        (
+            prediction,
+            target,
+            hausdorff_dist_prediction_target_50,
+            hausdorff_dist_target_prediction_50,
+        ) = tests.utils.standard_distance_slice(percentile=0.5)
+
+        self._test_hausdorff_distance(
+            prediction,
+            target,
+            hausdorff_dist_prediction_target_50,
+            hausdorff_dist_target_prediction_50,
+            "there are TP, FP and FN",
+            percentile=0.5,
+        )
+
+        (
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+        ) = tests.utils.standard_distance_slice()
+
+        self._test_hausdorff_distance(
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+            "there are TP, FP and FN",
+            percentile=0.95,
+        )
+
+        (
+            prediction,
+            target,
+            hausdorff_dist_prediction_target_100,
+            hausdorff_dist_target_prediction_100,
+        ) = tests.utils.standard_distance_slice(percentile=1.0)
+
+        self._test_hausdorff_distance(
+            prediction,
+            target,
+            hausdorff_dist_prediction_target_100,
+            hausdorff_dist_target_prediction_100,
+            "there are TP, FP and FN",
+            percentile=1.0,
+        )
+
+    def test_all_true(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when all predictions are correct.
+        """
+
+        prediction, target, _, _, _, _ = tests.utils.slice_all_true()
+
+        self._test_hausdorff_distance(
+            prediction, target, 0, 0, "there are no prediction errors"
+        )
+
+    def test_all_false(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when all predictions are wrong.
+        """
+
+        (
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+        ) = tests.utils.distance_slice_all_false()
+
+        self._test_hausdorff_distance(
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+            "all predictions are wrong",
+        )
+
+    def test_subset(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when all the predicted mask is a subset of the target
+        mask.
+        """
+        (
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+        ) = tests.utils.distance_slice_subset()
+
+        self._test_hausdorff_distance(
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+            "the prediction is a subset of the target",
+        )
+
+    def test_no_positives(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when there are no positives.
+        """
+
+        prediction, target, _, _, _, _ = tests.utils.slice_all_true_negatives()
+
+        hausdorff_dist_from_function = hausdorff_distance(prediction, target)
+        self.assertTrue(
+            torch.isnan(hausdorff_dist_from_function),
+            "Functional implementation correctly computes Hausdorff distance when there are only TN.",
+        )
+
+        hausdorff_distance_module = HausdorffDistance()
+        hausdorff_dist_from_module = hausdorff_distance_module(prediction, target)
+        self.assertTrue(
+            torch.isnan(hausdorff_dist_from_module),
+            "Functional implementation correctly computes Hausdorff distance when there are only TN.",
+        )
+
+    def test_3d(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when the predictions are 3-dimensional scans.
+        """
+        (
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+        ) = tests.utils.distance_slices_3d()
+
+        self._test_hausdorff_distance(
+            prediction,
+            target,
+            hausdorff_dist_prediction_target,
+            hausdorff_dist_target_prediction,
+            "the input is 3-dimensional",
         )

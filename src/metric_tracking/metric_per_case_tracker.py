@@ -13,8 +13,8 @@ class MetricPerCaseTracker:
     Provides utilities to collect the predictions and targets of scans whose slices are scattered over multiple batches.
 
     Args:
-        metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity", and
-            "specificity".
+        metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity",
+            "specificity", and "hausdorff95".
         reduce (string):  Reduction function that is to be used to aggregate the metric values of all cases, must be
             either "mean", "sum" or "none".
     """
