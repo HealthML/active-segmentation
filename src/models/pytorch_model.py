@@ -9,11 +9,25 @@ import functional
 
 
 class PytorchModel(LightningModule):
-    """TBD"""
+    """
+    Base class to implement Pytorch models.
+    Args:
+        learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
+        optimizer: Algorithm used to calculate the loss and update the weights. E.g. 'adam' or 'sgd'.
+        loss: The measure of performance. E.g. 'dice', 'bce', 'fp'
+        **kwargs:
+    """
 
     # pylint: disable=too-many-ancestors,arguments-differ
 
-    def __init__(self, learning_rate=0.0001, optimizer="adam", loss="dice", **kwargs):
+    def __init__(
+        self,
+        learning_rate: float = 0.0001,
+        optimizer: str = "adam",
+        loss: str = "dice",
+        **kwargs
+    ):
+
         super().__init__(**kwargs)
 
         self.learning_rate = learning_rate
@@ -26,10 +40,12 @@ class PytorchModel(LightningModule):
         Trains the model on a given batch of model inputs.
         # this method should match the requirements of the pytorch lightning framework.
         # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html
+        Args:
+            batch: A batch of model inputs.
+            batch_idx: Index of the current batch.
 
-        :param batch: A batch of model inputs.
-        :param batch_idx: Index of the current batch.
-        :return: Training loss.
+        Returns:
+            Training loss.
         """
 
         return 0
@@ -40,9 +56,12 @@ class PytorchModel(LightningModule):
         Validates the model on a given batch of model inputs.
         # this method should match the requirements of the pytorch lightning framework.
         # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html
+        Args:
+            batch: A batch of model inputs.
+            batch_idx: Index of the current batch.
 
-        :param batch: A batch of model inputs.
-        :param batch_idx: Index of the current batch.
+        Returns:
+
         """
 
         # ToDo: this method should return the required performance metrics
@@ -52,7 +71,8 @@ class PytorchModel(LightningModule):
     def configure_optimizers(self):
         """
         This method is called by the PyTorch lightning framework before starting model training.
-        :return:
+
+        Returns:
         """
 
         if self.optimizer == "adam":
@@ -64,10 +84,14 @@ class PytorchModel(LightningModule):
     @staticmethod
     def configure_loss(loss: str):
         """
-        Configures the loss
-        :param loss: name of the loss
-        :return:
+        Configures the loss.
+        Args:
+            loss: name of the loss
+
+        Returns:
+
         """
+
         if loss == "bce":
             return functional.BCELoss()
         if loss == "bce_dice":
@@ -83,9 +107,11 @@ class PytorchModel(LightningModule):
     def predict(self, batch: torch.Tensor) -> numpy.ndarray:
         """
         Computes predictions for a given batch of model inputs.
+        Args:
+            batch: A batch of model inputs.
 
-        :param batch: A batch of model inputs.
-        :return: Predictions for the given inputs.
+        Returns:
+            Predictions for the given inputs.
         """
 
         self.eval()

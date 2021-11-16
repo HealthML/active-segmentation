@@ -12,7 +12,15 @@ warnings.filterwarnings(
 
 
 class ActiveLearningDataModule(LightningDataModule):
-    """TBD"""
+    """
+    Abstract base class to structure the dataset creation for active learning
+    Args:
+        data_dir: Path of the directory that contains the data.
+        batch_size: Batch size.
+        num_workers: Number of workers for DataLoader.
+        shuffle: Flag if the data should be shuffled.
+        **kwargs: Further, dataset specific parameters.
+    """
 
     # pylint: disable=assignment-from-none,no-self-use,unused-argument
     _training_set = None
@@ -20,13 +28,7 @@ class ActiveLearningDataModule(LightningDataModule):
     _test_set = None
     _unlabeled_set = None
 
-    def __init__(self, data_dir: str, batch_size, num_workers, shuffle=True, **kwargs):
-        """
-        :param data_dir: Path of the directory that contains the data.
-        :param batch_size: Batch size.
-        :param num_workers: Number of workers for DataLoader.
-        :param kwargs: Further, dataset specific parameters.
-        """
+    def __init__(self, data_dir: str, batch_size: int, num_workers: int, shuffle: bool = True, **kwargs):
 
         super().__init__()
         self.data_dir = data_dir
@@ -37,8 +39,11 @@ class ActiveLearningDataModule(LightningDataModule):
     def setup(self, stage: Optional[str] = None) -> None:
         """
         Creates the datasets managed by this data module.
+        Args:
+            stage: Current training stage.
 
-        :param stage: Current training stage.
+        Returns:
+            No return.
         """
 
         self._training_set = self._create_training_set()
@@ -48,7 +53,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def _create_training_set(self) -> Optional[Dataset]:
         """
-        :return: Pytorch data_module or Keras sequence representing the training set.
+        Returns:
+            Pytorch data_module or Keras sequence representing the training set.
         """
 
         # this method should be overwritten in derived classes to create the training set
@@ -56,7 +62,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def _create_validation_set(self) -> Optional[Dataset]:
         """
-        :return: Pytorch data_module or Keras sequence representing the validation set.
+        Returns:
+            Pytorch data_module or Keras sequence representing the validation set.
         """
 
         # this method should be overwritten in derived classes to create the validation set
@@ -64,7 +71,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def _create_test_set(self) -> Optional[Dataset]:
         """
-        :return: Pytorch data_module or Keras sequence representing the test set.
+        Returns:
+            Pytorch data_module or Keras sequence representing the test set.
         """
 
         # this method should be overwritten in derived classes to create the test set
@@ -72,7 +80,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def _create_unlabeled_set(self) -> Optional[Dataset]:
         """
-        :return: Pytorch data_module or Keras sequence representing the unlabeled set.
+        Returns:
+            Pytorch data_module or Keras sequence representing the unlabeled set.
         """
 
         # this method should be overwritten in derived classes to create the unlabeled set
@@ -81,16 +90,21 @@ class ActiveLearningDataModule(LightningDataModule):
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """
         Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
+        Args:
+            ids: IDs of the items to be labeled.
+            labels: Labels for the selected data items.
 
-        :param ids: IDs of the items to be labeled.
-        :param labels: Labels for the selected data items.
+        Returns:
+            No return.
         """
+
         # this method should be overwritten in derived classes to implement the labeling logic
         return None
 
     def train_dataloader(self) -> Optional[DataLoader]:
         """
-        :return: Pytorch dataloader or Keras sequence representing the training set.
+        Returns:
+            Pytorch dataloader or Keras sequence representing the training set.
         """
 
         if self._training_set:
@@ -104,7 +118,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def val_dataloader(self) -> Optional[DataLoader]:
         """
-        :return: Pytorch dataloader or Keras sequence representing the validation set.
+        Returns:
+            Pytorch dataloader or Keras sequence representing the validation set.
         """
 
         if self._validation_set:
@@ -117,7 +132,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def test_dataloader(self) -> Optional[DataLoader]:
         """
-        :return: Pytorch dataloader or Keras sequence representing the test set.
+        Returns:
+            Pytorch dataloader or Keras sequence representing the test set.
         """
 
         if self._test_set:
@@ -130,7 +146,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def unlabeled_dataloader(self) -> Optional[DataLoader]:
         """
-        :return: Pytorch dataloader or Keras sequence representing the unlabeled set.
+        Returns:
+            Pytorch dataloader or Keras sequence representing the unlabeled set.
         """
 
         if self._unlabeled_set:
@@ -143,7 +160,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def training_set_size(self) -> int:
         """
-        :return: Size of training set.
+        Returns:
+            Size of training set.
         """
 
         if self._training_set:
@@ -152,7 +170,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def validation_set_size(self) -> int:
         """
-        :return: Size of validation set.
+        Returns:
+            Size of validation set.
         """
 
         if self._validation_set:
@@ -161,7 +180,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def test_set_size(self) -> int:
         """
-        :return: Size of test set.
+        Returns:
+            Size of test set.
         """
 
         if self._test_set:
@@ -170,7 +190,8 @@ class ActiveLearningDataModule(LightningDataModule):
 
     def unlabeled_set_size(self) -> int:
         """
-        :return: Number of unlabeled items.
+        Returns:
+            Number of unlabeled items.
         """
 
         if self._unlabeled_set:

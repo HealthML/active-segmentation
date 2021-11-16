@@ -20,16 +20,22 @@ class PILMaskToTensor:
 
 
 class PascalVOCDataModule(ActiveLearningDataModule):
-    """Pascal voc data loader"""
+    """
+    The PASCAL Visual Object Classes (VOC) 2012 dataset contains 20 object categories including vehicles, household,
+    animals, and other: aeroplane, bicycle, boat, bus, car, motorbike, train, bottle, chair, dining table, potted plant,
+    sofa, TV/monitor, bird, cat, cow, dog, horse, sheep, and person. Each image in this dataset has pixel-level
+    segmentation annotations, bounding box annotations, and object class annotations.
+    Further information: http://host.robots.ox.ac.uk/pascal/VOC/
+    Args:
+        data_dir: Path of the directory that contains the data.
+        batch_size: Batch size.
+        um_workers: Number of workers for DataLoader.
+        shuffle: Flag if the data should be shuffled.
+        **kwargs: Further, dataset specific parameters.
+    """
 
     # pylint: disable=unused-argument,no-self-use,too-few-public-methods
-    def __init__(self, data_dir: str, batch_size, num_workers, shuffle=True, **kwargs):
-        """
-        :param data_dir: Path of the directory that contains the data.
-        :param batch_size: Batch size.
-        :param num_workers: Number of workers for DataLoader.
-        :param kwargs: Further, dataset specific parameters.
-        """
+    def __init__(self, data_dir: str, batch_size: int, num_workers: int, shuffle: bool = True, **kwargs):
 
         super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
 
@@ -51,6 +57,7 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         return None
 
     def _create_training_set(self) -> Union[Dataset, None]:
+        """Creates a training dataset."""
         training_set = datasets.VOCSegmentation(
             self.data_folder,
             year="2012",
@@ -65,6 +72,7 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         )[0]
 
     def _create_validation_set(self) -> Union[Dataset, None]:
+        """Creates a validation dataset."""
         validation_set = datasets.VOCSegmentation(
             self.data_folder,
             year="2012",
