@@ -1,8 +1,15 @@
 fire==0.4.0
+git+https://github.com/ain-soph/trojanzoo_sphinx_theme.git
 nibabel==3.2.1
 numpy==1.19.5
 Pillow==8.4.0
+pydata-sphinx-theme==0.7.1
 pytorch-lightning==1.4.9
+Sphinx==4.2.0
+sphinx-copybutton==0.4.0
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-katex==0.8.6
+sphinxcontrib-napoleon==0.7
 torch==1.10.0
 torchvision==0.11.1
 wandb==0.12.6

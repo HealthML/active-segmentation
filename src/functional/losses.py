@@ -78,8 +78,8 @@ class DiceLoss(SegmentationLoss):
             Tensor: Dice loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
-            the background)`, or `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding`
+              `the background)`, or `(N, height, width)` for binary segmentation tasks.
             - Target: :math:`(N, C, height, width)`, where each value is in
               :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.

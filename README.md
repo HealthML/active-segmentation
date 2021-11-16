@@ -5,19 +5,19 @@
 The recommended way of installing the project's dependencies is to use a virtual environment. To create a virtual environment, run the venv module inside the repository:
 
 ```
-python3 -m venv env
+python3 -m venv venv
 ```
 
 Once you have created a virtual environment, you may activate it. On Windows, run:
 
 ```
-env\Scripts\activate.bat
+venv\Scripts\activate.bat
 ```
 
 On Unix or MacOS, run:
 
 ```
-source ./env/bin/activate
+source ./venv/bin/activate
 ```
 
 To install the dependencies, run:
@@ -74,3 +74,22 @@ srun -p gpupro --gpus=1 -c 18 --mem 150000 python -m memory_profiler main.py \
     --data_dir "/dhc/groups/mpws2021cl1/Data" \
     --gpus 1
 ```
+
+## Building the Documentation
+
+The documentation is based on [Sphinx](https://www.sphinx-doc.org/en/master/). For detailed instructions on how to setup Sphinx documentations in general, see this [Read the Docs tutorial](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/install.html).
+
+To generate the documentation files using the docstrings in the code, run:
+
+```
+sphinx-apidoc -o ./docs/source ./src
+```
+
+
+To build the HTML documentation, run the following command inside the `./docs` directory:
+
+```
+make clean && make html
+```
+
+To view the documentation, open the `./docs/build/html/index.html` file in your browser.
