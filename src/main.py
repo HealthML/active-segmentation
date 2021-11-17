@@ -1,5 +1,7 @@
 """ Main module to execute active learning pipeline from CLI """
 import fire
+import json
+import os.path
 from active_learning import ActiveLearningPipeline
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
@@ -55,5 +57,24 @@ def run_active_learning_pipeline(
     pipeline.run()
 
 
+def run_active_learning_pipeline_from_config(config_file_name: str) -> None:
+    """
+    Runs the active learning pipeline based on a config file.
+    Args:
+        config_file_name: Name of or path to the config file.
+    Returns:
+        No return.
+    """
+    if not os.path.isfile(config_file_name):
+        print("Config file could not be found.")
+        return
+
+    with open(config_file_name) as config_file:
+        config = json.load(config_file)
+        run_active_learning_pipeline(
+            **config,
+        )
+
+
 if __name__ == "__main__":
-    fire.Fire(run_active_learning_pipeline)
+    fire.Fire(run_active_learning_pipeline_from_config)
