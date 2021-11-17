@@ -7,6 +7,7 @@ import torch
 from torch.utils.data import Dataset
 
 
+# pylint: disable=too-many-instance-attributes
 class BraTSDataset(Dataset):
     """Class to load brats dataset"""
 
@@ -45,7 +46,6 @@ class BraTSDataset(Dataset):
             img = BraTSDataset.normalize(img)
         return np.moveaxis(img, 2, 0)
 
-    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         image_paths: List[str],
