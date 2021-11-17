@@ -23,14 +23,15 @@ class PascalVOCDataModule(ActiveLearningDataModule):
     """Pascal voc data loader"""
 
     # pylint: disable=unused-argument,no-self-use,too-few-public-methods
-    def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
+    def __init__(self, data_dir: str, batch_size, num_workers, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.
         :param batch_size: Batch size.
+        :param num_workers: Number of workers for DataLoader.
         :param kwargs: Further, dataset specific parameters.
         """
 
-        super().__init__(data_dir, batch_size, shuffle, **kwargs)
+        super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
 
         self.data_folder = os.path.join(data_dir, "voc-segmentation")
         self.__download_dataset = not os.path.exists(self.data_folder)

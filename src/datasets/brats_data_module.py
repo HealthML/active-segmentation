@@ -20,7 +20,11 @@ class BraTSDataModule(ActiveLearningDataModule):
         :return: list of files as tuple of image paths, annotation paths
         """
         cases = sorted(os.listdir(dir_path))
-        cases = [case for case in cases if not case.startswith(".")]
+        cases = [
+            case
+            for case in cases
+            if not case.startswith(".") and os.path.isdir(os.path.join(dir_path, case))
+        ]
 
         image_paths = [
             os.path.join(dir_path, case, f"{os.path.basename(case)}_{modality}.nii.gz")
@@ -33,14 +37,15 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         return image_paths, annotation_paths
 
-    def __init__(self, data_dir: str, batch_size, shuffle=True, **kwargs):
+    def __init__(self, data_dir: str, batch_size, num_workers, shuffle=True, **kwargs):
         """
         :param data_dir: Path of the directory that contains the data.
         :param batch_size: Batch size.
+        :param num_workers: Number of workers for DataLoader.
         :param kwargs: Further, dataset specific parameters.
         """
 
-        super().__init__(data_dir, batch_size, shuffle, **kwargs)
+        super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
         self.data_folder = os.path.join(self.data_dir, "BraTS18")
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:

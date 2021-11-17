@@ -1,9 +1,12 @@
 """ Module containing the active learning pipeline """
 from pytorch_lightning import Trainer
+from pytorch_lightning.loggers import WandbLogger
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
 from models import PytorchModel
+
+wandb_logger = WandbLogger(project="active-segmentation", entity="active-segmentation")
 
 
 class ActiveLearningPipeline:
@@ -16,12 +19,20 @@ class ActiveLearningPipeline:
         model: PytorchModel,
         strategy: QueryStrategy,
         epochs: int,
+        gpus: int,
     ) -> None:
         self.data_module = data_module
         self.model = model
-        self.model_trainer = Trainer(deterministic=True, max_epochs=epochs)
+        self.model_trainer = Trainer(
+            deterministic=True,
+            profiler="simple",
+            max_epochs=epochs,
+            logger=wandb_logger,
+            gpus=gpus,
+        )
         self.strategy = strategy
         self.epochs = epochs
+        self.gpus = gpus
 
     def run(self) -> None:
         """Run the pipeline"""

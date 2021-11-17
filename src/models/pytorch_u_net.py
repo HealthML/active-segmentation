@@ -77,6 +77,7 @@ class PytorchUNet(PytorchModel):
 
         probabilities = self(x)
         loss = self.loss(probabilities, y)
+        self.log("train/loss", loss)  # log train loss via weights&biases
         return loss
 
     def validation_step(self, batch, batch_idx) -> None:
@@ -91,7 +92,8 @@ class PytorchUNet(PytorchModel):
         # pylint: disable-msg=unused-variable
         x, y = batch
 
-        # pylint: disable-msg=unused-variable
-        logits = self(x)
+        probabilities = self(x)
+        loss = self.loss(probabilities, y)
+        self.log("validation/loss", loss)  # log validation loss via weights&biases
 
         # ToDo: this method should return the required performance metrics

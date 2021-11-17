@@ -7,6 +7,7 @@ import torch
 from torch.utils.data import Dataset
 
 
+# pylint: disable=too-many-instance-attributes
 class BraTSDataset(Dataset):
     """Class to load brats dataset"""
 
@@ -54,11 +55,21 @@ class BraTSDataset(Dataset):
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
     ):
         self.image_paths = image_paths
+        self.images = [
+            self.__read_image_as_array(filepath=image_path, norm=True)
+            for image_path in self.image_paths
+        ]
         self.annotation_paths = annotation_paths
+        self.clip_mask = clip_mask
+        self.masks = [
+            self.__read_image_as_array(
+                filepath=annotation_path, norm=False, clip=self.clip_mask
+            )
+            for annotation_path in self.annotation_paths
+        ]
         self.num_images = len(image_paths)
         self.num_annotations = len(annotation_paths)
         assert self.num_images == self.num_annotations
-        self.clip_mask = clip_mask
         self._current_image = None
         self._current_image_index = None
         self._current_mask = None
@@ -71,14 +82,8 @@ class BraTSDataset(Dataset):
         slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
         if image_index != self._current_image_index:
             self._current_image_index = image_index
-            self._current_image = self.__read_image_as_array(
-                filepath=self.image_paths[self._current_image_index], norm=True
-            )
-            self._current_mask = self.__read_image_as_array(
-                filepath=self.annotation_paths[self._current_image_index],
-                norm=False,
-                clip=self.clip_mask,
-            )
+            self._current_image = self.images[self._current_image_index]
+            self._current_mask = self.masks[self._current_image_index]
 
         x = torch.from_numpy(self._current_image[slice_index, :, :])
         y = torch.from_numpy(self._current_mask[slice_index, :, :])
