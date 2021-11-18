@@ -71,7 +71,7 @@ def run_active_learning_pipeline_from_config(config_file_name: str) -> None:
     """
     if not os.path.isfile(config_file_name):
         print("Config file could not be found.")
-        return
+        raise FileNotFoundError(f"{config_file_name} is not a valid filename.")
 
     with open(config_file_name, encoding="utf-8") as config_file:
         config = json.load(config_file)
