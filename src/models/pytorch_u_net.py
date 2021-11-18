@@ -7,8 +7,6 @@ import torch
 from metric_tracking import MetricPerCaseTracker
 from .pytorch_model import PytorchModel
 from .u_net import UNet
-from metric_tracking import MetricPerCaseTracker
-
 
 # pylint: disable-msg=too-many-ancestors, abstract-method
 class PytorchUNet(PytorchModel):
