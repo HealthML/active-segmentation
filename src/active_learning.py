@@ -10,7 +10,14 @@ wandb_logger = WandbLogger(project="active-segmentation", entity="active-segment
 
 
 class ActiveLearningPipeline:
-    """the pipeline for active learning"""
+    """
+    The pipeline or simulation environment to run active learning experiments.
+    Args:
+        data_module: A data module object providing data.
+        model: A model object with architecture able to be fitted with the data.
+        strategy: An active learning strategy to query for new labels.
+        epochs: The number of epochs the model should be trained.
+    """
 
     # pylint: disable=too-few-public-methods
     def __init__(
@@ -21,6 +28,7 @@ class ActiveLearningPipeline:
         epochs: int,
         gpus: int,
     ) -> None:
+
         self.data_module = data_module
         self.model = model
         self.model_trainer = Trainer(
