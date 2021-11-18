@@ -51,7 +51,14 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         return image_paths, annotation_paths
 
-    def __init__(self, data_dir: str, batch_size: int, num_workers: int, shuffle: bool = True, **kwargs):
+    def __init__(
+        self,
+        data_dir: str,
+        batch_size: int,
+        num_workers: int,
+        shuffle: bool = True,
+        **kwargs,
+    ):
 
         super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
         self.data_folder = os.path.join(self.data_dir, "BraTS18")

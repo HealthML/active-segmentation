@@ -28,7 +28,14 @@ class ActiveLearningDataModule(LightningDataModule):
     _test_set = None
     _unlabeled_set = None
 
-    def __init__(self, data_dir: str, batch_size: int, num_workers: int, shuffle: bool = True, **kwargs):
+    def __init__(
+        self,
+        data_dir: str,
+        batch_size: int,
+        num_workers: int,
+        shuffle: bool = True,
+        **kwargs
+    ):
 
         super().__init__()
         self.data_dir = data_dir
