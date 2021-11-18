@@ -26,8 +26,10 @@ jobs:
       - name: Analysing the code with black
         run: |
           black src --check --verbose --diff --color
+          black tests --check --verbose --diff --color
+
       - name: Analysing the code with pylint
         run: |
           export PYTHONPATH=$PWD:$PWD/src/
           pylint src --rcfile=.rcfile
-          pylint tests --rcfile=.rcfile
+          pylint tests --rcfile=.rcfile --disable duplicate-code
