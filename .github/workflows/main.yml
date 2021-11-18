@@ -1,13 +1,13 @@
 name: code-quality
 
-on: [pull_request]
+on: [ push, pull_request ]
 
 jobs:
-  lint:
+  setup:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: [ "3.8" ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -19,10 +19,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint==2.11.1 black==21.9b0
           pip install -r requirements.txt
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.8" ]
+          - name: Analysing the code with black
+            run: |
+              black src --check --verbose --diff --color
+          - name: Analysing the code with pylint
+            run: |
+              export PYTHONPATH=$PWD:$PWD/src/
+              pylint src --rcfile=.rcfile
+  format:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.8" ]
+    steps:
       - name: Analysing the code with black
         run: |
           black src --check --verbose --diff --color
-      - name: Analysing the code with pylint
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Executing test with unittest framework
         run: |
           export PYTHONPATH=$PWD:$PWD/src/
-          pylint src --rcfile=.rcfile
+          python -m unittest discover
