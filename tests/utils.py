@@ -1,6 +1,7 @@
 from typing import Tuple
 import torch
 
+
 def standard_slice_1() -> Tuple[torch.Tensor, torch.Tensor, float, float, float, float]:
     """
     Creates a faked segmentation slice that contains both true and false predictions.
@@ -242,4 +243,3 @@ def probabilistic_slice() -> Tuple[
     fn = 1
 
     return prediction_slice, target_slice, tp, fp, tn, fn
-
