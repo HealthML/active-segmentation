@@ -14,9 +14,13 @@ from metric_tracking import MetricPerCaseTracker
 class PytorchUNet(PytorchModel):
     """
     U-Net architecture wrapped as PytorchModel.
+    Details about the architecture: https://arxiv.org/pdf/1505.04597.pdf
+    Args:
+        **kwargs: Further, dataset specific parameters.
     """
 
     def __init__(self, **kwargs):
+
         super().__init__(**kwargs)
 
         self.model = UNet(in_channels=1, out_channels=1, init_features=32)
@@ -100,6 +104,7 @@ class PytorchUNet(PytorchModel):
 
         # ToDo: compute metrics on epoch end and log them to WandB
 
+        self.log("train/loss", loss)  # log train loss via weights&biases
         return loss
 
     def validation_step(self, batch, batch_idx) -> None:
@@ -120,5 +125,7 @@ class PytorchUNet(PytorchModel):
 
         self.val_average_metrics.update(predicted_mask, y, case_ids)
         self.val_metrics_per_case.update(predicted_mask, y, case_ids)
+        loss = self.loss(probabilities, y)
+        self.log("validation/loss", loss)  # log validation loss via weights&biases
 
         # ToDo: this method should return the required performance metrics

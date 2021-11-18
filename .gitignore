@@ -151,5 +151,5 @@ lightning_logs
 # editable package installs
 *.egg-info
 
-# Weights and Biases logs
-wandb
+# Weight&Biases Logs
+wandb/

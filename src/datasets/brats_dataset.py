@@ -11,13 +11,34 @@ from torch.utils.data import Dataset
 
 # pylint: disable=too-many-instance-attributes
 class BraTSDataset(Dataset):
-    """Class to load brats dataset"""
+    """
+    The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
+    held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
+    glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
+    Further information: https://www.med.upenn.edu/cbica/brats2020/data.html
+    Args:
+        image_paths: List with the paths to the images.
+        annotation_paths: List with the paths to the annotations.
+        clip_mask: Flag to clip the annotation labels, if True only label 1 is kept.
+        transform: Function to transform the images.
+        target_transform: Function to transform the annotations.
+    """
 
     IMAGE_DIMENSIONS = (155, 240, 240)
 
     @staticmethod
-    def normalize(img):
-        """Normalizes an image"""
+    def normalize(img: np.ndarray) -> np.ndarray:
+        """
+        Normalizes an image by
+            1. Dividing by the maximum value
+            2. Subtracting the mean, zeros will be ignored while calculating the mean
+            3. Dividing by the negative minimum value
+        Args:
+            img: The input image that should be normalized.
+
+        Returns:
+            Normalized image with background values normalized to -1
+        """
         tmp = img / np.max(img)
         # ignore zero values for mean calculation because background dominates
         tmp = tmp - np.mean(tmp[tmp > 0])
@@ -32,13 +53,14 @@ class BraTSDataset(Dataset):
     ) -> np.ndarray:
         """
         Reads image or annotation as numpy array.
+        Args:
+            filepath: Path of the image file.
+            norm: Whether the image should be normalized.
+            clip: Whether the image should be clipped.
 
-        :param filepath: Path of the image file.
-        :param norm: Whether the image should be normalized.
-        :param clip: Whether the image should be clipped.
-        :return:
+        Returns:
+            The array representation of an image.
         """
-
         img = nib.load(filepath).get_fdata()
 
         if clip:
@@ -72,12 +94,23 @@ class BraTSDataset(Dataset):
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
     ):
+
         self.image_paths = image_paths
+        self.images = [
+            self.__read_image_as_array(filepath=image_path, norm=True)
+            for image_path in self.image_paths
+        ]
         self.annotation_paths = annotation_paths
+        self.clip_mask = clip_mask
+        self.masks = [
+            self.__read_image_as_array(
+                filepath=annotation_path, norm=False, clip=self.clip_mask
+            )
+            for annotation_path in self.annotation_paths
+        ]
         self.num_images = len(image_paths)
         self.num_annotations = len(annotation_paths)
         assert self.num_images == self.num_annotations
-        self.clip_mask = clip_mask
         self.is_unlabeled = is_unlabeled
         self._current_image = None
         self._current_image_index = None
@@ -93,14 +126,8 @@ class BraTSDataset(Dataset):
         slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
         if image_index != self._current_image_index:
             self._current_image_index = image_index
-            self._current_image = self.__read_image_as_array(
-                filepath=self.image_paths[self._current_image_index], norm=True
-            )
-            self._current_mask = self.__read_image_as_array(
-                filepath=self.annotation_paths[self._current_image_index],
-                norm=False,
-                clip=self.clip_mask,
-            )
+            self._current_image = self.images[self._current_image_index]
+            self._current_mask = self.masks[self._current_image_index]
         case_id = self.__get_case_id(
             filepath=self.image_paths[self._current_image_index]
         )
@@ -124,9 +151,12 @@ class BraTSDataset(Dataset):
     def add_image(self, image_path: str, annotation_path: str) -> None:
         """
         Adds an image to this dataset.
+        Args:
+            image_path: Path of the image to be added.
+            annotation_path: Path of the annotation of the image to be added.
 
-        :param image_path: Path of the image to be added.
-        :param annotation_path: Path of the annotation of the image to be added.
+        Returns:
+            None. Raises ValueError if image already exists.
         """
 
         if (image_path not in self.image_paths) and (
@@ -141,9 +171,12 @@ class BraTSDataset(Dataset):
     def remove_image(self, image_path: str, annotation_path: str) -> None:
         """
         Removes an image from this dataset.
+        Args:
+            image_path: Path of the image to be removed.
+            annotation_path: Path of the annotation of the image to be removed.
 
-        :param image_path: Path of the image to be removed.
-        :param annotation_path: Path of the annotation of the image to be removed.
+        Returns:
+            None. Raises ValueError if image already exists.
         """
 
         if image_path in self.image_paths and annotation_path in self.annotation_paths:

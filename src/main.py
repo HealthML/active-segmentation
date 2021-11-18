@@ -6,28 +6,36 @@ from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
 
 
+# pylint: disable=too-many-arguments
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
     strategy: str,
     data_dir: str = "./data",
     batch_size: int = 16,
+    num_workers: int = 4,
     epochs: int = 50,
+    gpus: int = 1,
     loss: str = "dice",
     optimizer: str = "adam",
-):
+) -> None:
     """
-    # TODO (mfr): Add docstring
-    :param architecture:
-    :param dataset:
-    :param strategy:
-    :param data_dir:
-    :param batch_size:
-    :param epochs:
-    :param loss:
-    :param optimizer:
-    :return:
+    Main function to execute an active learning pipeline run, or start an active learning simulation.
+    Args:
+        architecture: Name of the desired model architecture. E.g. 'u_net'.
+        dataset: Name of the dataset. E.g. 'brats'
+        strategy: Name of the query strategy. E.g. 'base'
+        data_dir: Main directory with the dataset. E.g. './data'
+        batch_size: Size of training examples passed in one training step.
+        num_workers: Number of workers.
+        epochs: Number of iterations with the full dataset.
+        loss: Name of the performance measure to optimize. E.g. 'dice'.
+        optimizer: Name of the optimization algorithm. E.g. 'adam'.
+
+    Returns:
+        None.
     """
+
     if architecture == "fcn_resnet50":
         model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
     elif architecture == "u_net":
@@ -41,13 +49,13 @@ def run_active_learning_pipeline(
         raise ValueError("Invalid query strategy.")
 
     if dataset == "pascal-voc":
-        data_module = PascalVOCDataModule(data_dir, batch_size)
+        data_module = PascalVOCDataModule(data_dir, batch_size, num_workers)
     elif dataset == "brats":
-        data_module = BraTSDataModule(data_dir, batch_size)
+        data_module = BraTSDataModule(data_dir, batch_size, num_workers)
     else:
         raise ValueError("Invalid data_module name.")
 
-    pipeline = ActiveLearningPipeline(data_module, model, strategy, epochs)
+    pipeline = ActiveLearningPipeline(data_module, model, strategy, epochs, gpus)
     pipeline.run()
 
 
