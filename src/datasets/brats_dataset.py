@@ -129,7 +129,7 @@ class BraTSDataset(Dataset):
             annotation_path: Path of the annotation of the image to be added.
 
         Returns:
-            No return. Raises ValueError if image already exists.
+            None. Raises ValueError if image already exists.
         """
 
         if (image_path not in self.image_paths) and (
@@ -149,7 +149,7 @@ class BraTSDataset(Dataset):
             annotation_path: Path of the annotation of the image to be removed.
 
         Returns:
-            No return. Raises ValueError if image already exists.
+            None. Raises ValueError if image already exists.
         """
 
         if image_path in self.image_paths and annotation_path in self.annotation_paths:

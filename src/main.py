@@ -18,7 +18,7 @@ def run_active_learning_pipeline(
     gpus: int = 1,
     loss: str = "dice",
     optimizer: str = "adam",
-):
+) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning simulation.
     Args:
@@ -33,7 +33,7 @@ def run_active_learning_pipeline(
         optimizer: Name of the optimization algorithm. E.g. 'adam'.
 
     Returns:
-
+        None.
     """
 
     if architecture == "fcn_resnet50":

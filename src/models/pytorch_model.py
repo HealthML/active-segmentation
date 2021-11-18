@@ -1,5 +1,6 @@
 """ Base classes to implement models with pytorch """
 import abc
+from typing import Union
 import numpy
 import torch
 from pytorch_lightning.core.lightning import LightningModule
@@ -61,18 +62,19 @@ class PytorchModel(LightningModule):
             batch_idx: Index of the current batch.
 
         Returns:
-
+            None.
         """
 
         # ToDo: this method should return the required performance metrics
 
         return None
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Union[Adam, SGD]:
         """
         This method is called by the PyTorch lightning framework before starting model training.
 
         Returns:
+            The optimizer object.
         """
 
         if self.optimizer == "adam":
@@ -82,14 +84,14 @@ class PytorchModel(LightningModule):
         raise ValueError("Invalid optimizer name.")
 
     @staticmethod
-    def configure_loss(loss: str):
+    def configure_loss(loss: str) -> functional.losses.SegmentationLoss:
         """
         Configures the loss.
         Args:
             loss: name of the loss
 
         Returns:
-
+            The loss object.
         """
 
         if loss == "bce":

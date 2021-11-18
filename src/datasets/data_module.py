@@ -43,7 +43,7 @@ class ActiveLearningDataModule(LightningDataModule):
             stage: Current training stage.
 
         Returns:
-            No return.
+            None.
         """
 
         self._training_set = self._create_training_set()
@@ -95,7 +95,7 @@ class ActiveLearningDataModule(LightningDataModule):
             labels: Labels for the selected data items.
 
         Returns:
-            No return.
+            None.
         """
 
         # this method should be overwritten in derived classes to implement the labeling logic
