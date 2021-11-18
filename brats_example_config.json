@@ -1,0 +1,12 @@
+{
+  "architecture": "u_net",
+  "dataset": "brats",
+  "strategy": "base",
+  "batch_size": 16,
+  "epochs": 3,
+  "num_workers": 8,
+  "optimizer": "adam",
+  "loss": "dice",
+  "data_dir": "/dhc/groups/mpws2021cl1/Data",
+  "gpus": 1
+}

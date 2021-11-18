@@ -59,32 +59,37 @@ wandb login
 To execute the active learning pipeline, run:
 
 ```
-python3 src/main.py \
-    --architecture "fcn_resnet50" \
-    --dataset "pascal-voc" \
-    --strategy "base" \
-    --batch_size 16 \
-    --epochs 1 \
-    --num_workers 2 \
-    --optimizer "adam" \
-    --loss "bce" \
-    --gpus 1
+python3 src/main.py pascal_voc_example_config.json
 ```
 
 Example command to train a U-net with the BraTS dataset on a GPU on the DHC Server:
 
 ```
-srun -p gpupro --gpus=1 -c 18 --mem 150000 python src/main.py \
-    --architecture "u_net" \
-    --dataset "brats" \
-    --strategy "base" \
-    --batch_size 16 \
-    --epochs 3 \
-    --num_workers 8 \
-    --optimizer "adam" \
-    --loss "dice" \
-    --data_dir "/dhc/groups/mpws2021cl1/Data" \
-    --gpus 1
+srun -p gpupro --gpus=1 -c 18 --mem 150000 python3 src/main.py brats_example_config.json
+```
+
+The config file should be in JSON format and has to contain the following arguments:
+
+```
+{
+    "architecture": "u_net",
+    "dataset": "brats",
+    "strategy": "base"
+}
+```
+
+Additionally, the following optional arguments can be supplied in the same config file, (the list contains their default values):
+
+```
+{
+    "data_dir": "./data",
+    "batch_size": 16,
+    "num_workers": 4,
+    "epochs": 50,
+    "gpus": 1,
+    "loss": "dice",
+    "optimizer": "adam"
+}
 ```
 
 ## Building the Documentation
