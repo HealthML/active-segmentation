@@ -3,7 +3,7 @@ name: code-quality
 on: [ pull_request ]
 
 jobs:
-  setup:
+  lint:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,4 +28,5 @@ jobs:
           black src --check --verbose --diff --color
       - name: Analysing the code with pylint
         run: |
+          export PYTHONPATH=$PWD:$PWD/src/
           pylint src --rcfile=.rcfile
