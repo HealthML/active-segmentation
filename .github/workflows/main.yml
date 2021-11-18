@@ -25,13 +25,14 @@ jobs:
     strategy:
       matrix:
         python-version: [ "3.8" ]
-          - name: Analysing the code with black
-            run: |
-              black src --check --verbose --diff --color
-          - name: Analysing the code with pylint
-            run: |
-              export PYTHONPATH=$PWD:$PWD/src/
-              pylint src --rcfile=.rcfile
+    steps:
+      - name: Analysing the code with black
+        run: |
+          black src --check --verbose --diff --color
+      - name: Analysing the code with pylint
+        run: |
+          export PYTHONPATH=$PWD:$PWD/src/
+          pylint src --rcfile=.rcfile
   format:
     needs: setup
     runs-on: ubuntu-latest
