@@ -15,14 +15,15 @@ class QueryStrategy:
     ) -> List[str]:
         """
         Selects subset of the unlabeled data that should be labeled next.
+        Args:
+            models: Current models that should be improved by selecting additional data for labeling.
+            dataloader: Pytorch dataloader representing the unlabeled dataset.
+            number_of_items: Number of items that should be selected for labeling.
+            **kwargs: Additional, strategy-specific parameters.
 
-        :param models: Current models that should be improved by selecting additional data for labeling.
-        :param dataloader: Pytorch dataloader representing the unlabeled dataset.
-        :param number_of_items: Number of items that should be selected for labeling.
-        :param kwargs: Additional, strategy-specific parameters.
-        :return: IDs of the data items to be labeled.
+        Returns:
+            IDs of the data items to be labeled.
         """
-
         # default strategy: select first n data items
         # this method should be overwritten in derived classes to implement other strategies
 

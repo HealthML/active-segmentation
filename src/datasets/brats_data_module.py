@@ -1,6 +1,6 @@
 """ Module containing the data module for brats data """
 import os
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Union, Tuple
 from torch.utils.data import Dataset
 
 from datasets.data_module import ActiveLearningDataModule
@@ -8,16 +8,30 @@ from datasets.brats_dataset import BraTSDataset
 
 
 class BraTSDataModule(ActiveLearningDataModule):
-    """Brats data module"""
+    """
+    Initializes the BraTS data module.
+    Args:
+        data_dir: Path of the directory that contains the data.
+        batch_size: Batch size.
+        num_workers: Number of workers for DataLoader.
+        shuffle: Flag if the data should be shuffled.
+        **kwargs: Further, dataset specific parameters.
+    """
 
     # pylint: disable=unused-argument,no-self-use
     @staticmethod
-    def discover_paths(dir_path: str, modality="flair"):
+    def discover_paths(
+        dir_path: str, modality: str = "flair"
+    ) -> Tuple[List[str], List[str]]:
         """
         Discover the .nii.gz file paths with a given modality
-        :param dir_path: directory to discover paths in
-        :param modality: modality of scan
-        :return: list of files as tuple of image paths, annotation paths
+
+        Args:
+            dir_path: directory to discover paths in
+            modality: modality of scan
+
+        Returns:
+            list of files as tuple of image paths, annotation paths
         """
         cases = sorted(os.listdir(dir_path))
         cases = [
@@ -37,16 +51,17 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         return image_paths, annotation_paths
 
-    def __init__(self, data_dir: str, batch_size, num_workers, shuffle=True, **kwargs):
-        """
-        :param data_dir: Path of the directory that contains the data.
-        :param batch_size: Batch size.
-        :param num_workers: Number of workers for DataLoader.
-        :param kwargs: Further, dataset specific parameters.
-        """
+    def __init__(
+        self,
+        data_dir: str,
+        batch_size: int,
+        num_workers: int,
+        shuffle: bool = True,
+        **kwargs,
+    ):
 
         super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
-        self.data_folder = os.path.join(self.data_dir, "BraTS18")
+        self.data_folder = self.data_dir
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
@@ -54,6 +69,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         return None
 
     def _create_training_set(self) -> Union[Dataset, None]:
+        """Creates a training dataset."""
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )
@@ -62,6 +78,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         )
 
     def _create_validation_set(self) -> Union[Dataset, None]:
+        """Creates a validation dataset."""
         val_image_paths, val_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "val")
         )

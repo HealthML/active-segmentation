@@ -45,6 +45,15 @@ To be able to import the modules from the repository, run:
 python3 -m pip install -e .
 ```
 
+## Additional Setup Steps
+
+Install and log into Weights and Biases:
+
+```
+pip install wandb
+wandb login
+```
+
 ## Running the Active Learning Pipeline
 
 To execute the active learning pipeline, run:
@@ -56,7 +65,7 @@ python3 src/main.py pascal_voc_example_config.json
 Example command to train a U-net with the BraTS dataset on a GPU on the DHC Server:
 
 ```
-srun -p gpupro --gpus=1 -c 18 --mem 150000 python3 -m memory_profiler src/main.py brats_example_config.json
+srun -p gpupro --gpus=1 -c 18 --mem 150000 python3 src/main.py brats_example_config.json
 ```
 
 The config file should be in JSON format and has to contain the following arguments:

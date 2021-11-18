@@ -6,11 +6,13 @@ import torch
 def dsc(prediction: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     """
     Computes Dice similarity coefficient (DSC) for two binary segmentation masks.
+    Args:
+        prediction: First binary segmentation mask.
+        target: Second binary segmentation mask.
+        smoothing: Smoothing factor.
 
-    :param prediction: First binary segmentation mask.
-    :param target: Second binary segmentation mask.
-    :param smoothing: Smoothing factor.
-    :return: Dice similarity coefficient as 1-element tensor.
+    Returns:
+        Dice similarity coefficient as 1-element tensor.
     """
 
     flattened_target = torch.flatten(target).float()
@@ -28,11 +30,13 @@ def dsc(prediction: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Te
 def recall(prediction: torch.Tensor, target: torch.Tensor, smoothing=1) -> torch.Tensor:
     """
     Computes number of false positive pixels for a predicted binary segmentation mask.
+    Args:
+        prediction: Predicted binary segmentation mask.
+        target: Target binary segmentation mask.
+        smoothing: Smoothing factor.
 
-    :param prediction: Predicted binary segmentation mask.
-    :param target: Target binary segmentation mask.
-    :param smoothing: Smoothing factor.
-    :return: Number of false positives as 1-element tensor.
+    Returns:
+        Number of false positives as 1-element tensor.
     """
 
     flattened_target = torch.flatten(target).float()

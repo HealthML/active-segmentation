@@ -12,9 +12,13 @@ from .u_net import UNet
 class PytorchUNet(PytorchModel):
     """
     U-Net architecture wrapped as PytorchModel.
+    Details about the architecture: https://arxiv.org/pdf/1505.04597.pdf
+    Args:
+        **kwargs: Further, dataset specific parameters.
     """
 
     def __init__(self, **kwargs):
+
         super().__init__(**kwargs)
 
         self.model = UNet(in_channels=1, out_channels=1, init_features=32)

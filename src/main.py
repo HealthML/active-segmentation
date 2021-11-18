@@ -20,20 +20,24 @@ def run_active_learning_pipeline(
     gpus: int = 1,
     loss: str = "dice",
     optimizer: str = "adam",
-):
+) -> None:
     """
-    # TODO (mfr): Add docstring
-    :param architecture:
-    :param dataset:
-    :param strategy:
-    :param data_dir:
-    :param batch_size:
-    :param num_workers:
-    :param epochs:
-    :param loss:
-    :param optimizer:
-    :return:
+    Main function to execute an active learning pipeline run, or start an active learning simulation.
+    Args:
+        architecture: Name of the desired model architecture. E.g. 'u_net'.
+        dataset: Name of the dataset. E.g. 'brats'
+        strategy: Name of the query strategy. E.g. 'base'
+        data_dir: Main directory with the dataset. E.g. './data'
+        batch_size: Size of training examples passed in one training step.
+        num_workers: Number of workers.
+        epochs: Number of iterations with the full dataset.
+        loss: Name of the performance measure to optimize. E.g. 'dice'.
+        optimizer: Name of the optimization algorithm. E.g. 'adam'.
+
+    Returns:
+        None.
     """
+
     if architecture == "fcn_resnet50":
         model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
     elif architecture == "u_net":
