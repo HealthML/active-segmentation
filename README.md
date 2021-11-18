@@ -28,10 +28,13 @@ python3 -m pip install -r requirements.txt
 
 To execute the code, you have to add the `src`directory to your `PYTHONPATH`:
 On Unix or MacOS, run:
+
 ```
 export PYTHONPATH=$PWD:$PWD/src/
 ```
+
 On Windows, run:
+
 ```
 set PYTHONPATH=%cd%/src
 ```
@@ -40,6 +43,15 @@ To be able to import the modules from the repository, run:
 
 ```
 python3 -m pip install -e .
+```
+
+## Additional Setup Steps
+
+Install and log into Weights and Biases:
+
+```
+pip install wandb
+wandb login
 ```
 
 ## Running the Active Learning Pipeline
@@ -62,7 +74,7 @@ python3 src/main.py \
 Example command to train a U-net with the BraTS dataset on a GPU on the DHC Server:
 
 ```
-srun -p gpupro --gpus=1 -c 18 --mem 150000 python -m memory_profiler main.py \
+srun -p gpupro --gpus=1 -c 18 --mem 150000 python src/main.py \
     --architecture "u_net" \
     --dataset "brats" \
     --strategy "base" \
@@ -84,7 +96,6 @@ To generate the documentation files using the docstrings in the code, run:
 ```
 sphinx-apidoc -o ./docs/source ./src
 ```
-
 
 To build the HTML documentation, run the following command inside the `./docs` directory:
 

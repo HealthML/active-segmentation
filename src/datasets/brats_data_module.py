@@ -61,7 +61,7 @@ class BraTSDataModule(ActiveLearningDataModule):
     ):
 
         super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
-        self.data_folder = os.path.join(self.data_dir, "BraTS18")
+        self.data_folder = self.data_dir
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
