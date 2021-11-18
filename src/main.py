@@ -66,8 +66,6 @@ def run_active_learning_pipeline_from_config(config_file_name: str) -> None:
     Runs the active learning pipeline based on a config file.
     Args:
         config_file_name: Name of or path to the config file.
-    Returns:
-        No return.
     """
     if not os.path.isfile(config_file_name):
         print("Config file could not be found.")
