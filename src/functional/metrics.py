@@ -204,6 +204,8 @@ def hausdorff_distance(
     Note:
         In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
         given class and thus the distances are calculated over all channels and dimensions.
+        As this method is implemented using the scipy package, the returned value is not differentiable in PyTorch and
+        can therefore not be used in loss functions.
 
     Args:
         prediction (Tensor): The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.
