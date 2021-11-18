@@ -534,8 +534,7 @@ class TestHausdorffDistance(unittest.TestCase):
         self,
         prediction: torch.Tensor,
         target: torch.Tensor,
-        expected_distance_prediction_target: float,
-        expected_distance_target_prediction: float,
+        expected_distance: float,
         message: str = "",
         percentile: float = 0.95,
     ) -> None:
@@ -546,60 +545,31 @@ class TestHausdorffDistance(unittest.TestCase):
         Args:
             prediction (Tensor): Predicted segmentation mask.
             target (Tensor): Target segmentation mask.
-            expected_distance_prediction_target (float): Expected Hausdorff distance between prediction and target.
-            expected_distance_target_prediction (float): Expected Hausdorff distance between target and prediction.
+            expected_distance (float): Expected Hausdorff distance.
             message (string, optional): Description of the test case.
             percentile (float): Percentile for which the Hausdorff distance is to be tested.
         """
 
-        hausdorff_dist_prediction_target_from_function = hausdorff_distance(
+        hausdorff_distance_from_function = hausdorff_distance(
             prediction, target, percentile=percentile
         )
 
         self.assertTrue(
             torch.equal(
-                hausdorff_dist_prediction_target_from_function,
-                torch.tensor(expected_distance_prediction_target).float(),
+                hausdorff_distance_from_function,
+                torch.tensor(expected_distance).float(),
             ),
-            f"Functional implementation correctly computes hausdorff distance between prediction and target when "
-            f"{message}.",
-        )
-
-        # pylint: disable=arguments-out-of-order
-        hausdorff_dist_target_prediction_from_function = hausdorff_distance(
-            target, prediction, percentile=percentile
-        )
-        self.assertTrue(
-            torch.equal(
-                hausdorff_dist_target_prediction_from_function,
-                torch.tensor(expected_distance_target_prediction).float(),
-            ),
-            f"Functional implementation correctly computes hausdorff distance between target and prediction when "
-            f"{message}.",
+            f"Functional implementation correctly computes hausdorff distance when {message}.",
         )
 
         hausdorff_distance_module = HausdorffDistance(percentile=percentile)
-        hausdorff_dist_prediction_target_from_module = hausdorff_distance_module(
-            prediction, target
-        )
+        hausdorff_distance_from_module = hausdorff_distance_module(prediction, target)
         self.assertTrue(
             torch.equal(
-                hausdorff_dist_prediction_target_from_module,
-                torch.tensor(expected_distance_prediction_target).float(),
+                hausdorff_distance_from_module,
+                torch.tensor(expected_distance).float(),
             ),
-            f"Module-based implementation correctly computes hausdorff distance between prediction and target when "
-            f"{message}.",
-        )
-        hausdorff_dist_target_prediction_from_module = hausdorff_distance_module(
-            target, prediction
-        )
-        self.assertTrue(
-            torch.equal(
-                hausdorff_dist_target_prediction_from_module,
-                torch.tensor(expected_distance_target_prediction).float(),
-            ),
-            f"Module-based implementation correctly computes hausdorff distance between target and prediction when "
-            f"{message}.",
+            f"Module-based implementation correctly computes hausdorff distance when {message}.",
         )
 
     def test_standard_case(self):
@@ -610,15 +580,15 @@ class TestHausdorffDistance(unittest.TestCase):
         (
             prediction,
             target,
-            hausdorff_dist_prediction_target_50,
-            hausdorff_dist_target_prediction_50,
+            expected_hausdorff_dist_50,
+            _,
+            _,
         ) = tests.utils.standard_distance_slice(percentile=0.5)
 
         self._test_hausdorff_distance(
             prediction,
             target,
-            hausdorff_dist_prediction_target_50,
-            hausdorff_dist_target_prediction_50,
+            expected_hausdorff_dist_50,
             "there are TP, FP and FN",
             percentile=0.5,
         )
@@ -626,15 +596,15 @@ class TestHausdorffDistance(unittest.TestCase):
         (
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist_95,
+            _,
+            _,
         ) = tests.utils.standard_distance_slice()
 
         self._test_hausdorff_distance(
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist_95,
             "there are TP, FP and FN",
             percentile=0.95,
         )
@@ -642,15 +612,15 @@ class TestHausdorffDistance(unittest.TestCase):
         (
             prediction,
             target,
-            hausdorff_dist_prediction_target_100,
-            hausdorff_dist_target_prediction_100,
+            expected_hausdorff_dist_100,
+            _,
+            _,
         ) = tests.utils.standard_distance_slice(percentile=1.0)
 
         self._test_hausdorff_distance(
             prediction,
             target,
-            hausdorff_dist_prediction_target_100,
-            hausdorff_dist_target_prediction_100,
+            expected_hausdorff_dist_100,
             "there are TP, FP and FN",
             percentile=1.0,
         )
@@ -663,7 +633,7 @@ class TestHausdorffDistance(unittest.TestCase):
         prediction, target, _, _, _, _ = tests.utils.slice_all_true()
 
         self._test_hausdorff_distance(
-            prediction, target, 0, 0, "there are no prediction errors"
+            prediction, target, 0, "there are no prediction errors"
         )
 
     def test_all_false(self):
@@ -674,15 +644,15 @@ class TestHausdorffDistance(unittest.TestCase):
         (
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist,
+            _,
+            _,
         ) = tests.utils.distance_slice_all_false()
 
         self._test_hausdorff_distance(
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist,
             "all predictions are wrong",
         )
 
@@ -694,15 +664,15 @@ class TestHausdorffDistance(unittest.TestCase):
         (
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist,
+            _,
+            _,
         ) = tests.utils.distance_slice_subset()
 
         self._test_hausdorff_distance(
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist,
             "the prediction is a subset of the target",
         )
 
@@ -733,14 +703,14 @@ class TestHausdorffDistance(unittest.TestCase):
         (
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist,
+            _,
+            _,
         ) = tests.utils.distance_slices_3d()
 
         self._test_hausdorff_distance(
             prediction,
             target,
-            hausdorff_dist_prediction_target,
-            hausdorff_dist_target_prediction,
+            expected_hausdorff_dist,
             "the input is 3-dimensional",
         )

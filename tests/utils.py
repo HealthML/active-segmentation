@@ -244,7 +244,7 @@ def probabilistic_slice() -> Tuple[
 
 def standard_distance_slice(
     percentile: float = 0.95,
-) -> Tuple[torch.Tensor, torch.Tensor, float, float]:
+) -> Tuple[torch.Tensor, torch.Tensor, float, float, float]:
     """
     Creates a faked segmentation slice that contains both true and false predictions.
 
@@ -274,28 +274,40 @@ def standard_distance_slice(
         ]])
     # fmt: on
 
+    dists_prediction_target = [0, 0, 0, 0, 0, 0, 1, np.sqrt(2)]
+    dist_target_prediction = [0, 0, 0, 1, 0, 0, np.sqrt(2), 0]
+
+    hausdorff_dist = np.percentile(
+        np.hstack((dists_prediction_target, dist_target_prediction)), q=percentile * 100
+    )
     hausdorff_dist_prediction_target = np.percentile(
-        [0, 0, 0, 0, 0, 0, 1, np.sqrt(2)], q=percentile * 100
+        dists_prediction_target, q=percentile * 100
     )
     hausdorff_dist_target_prediction = np.percentile(
-        [0, 0, 0, 1, 0, 0, np.sqrt(2), 0], q=percentile * 100
+        dist_target_prediction, q=percentile * 100
     )
 
     return (
         prediction_slice,
         target_slice,
+        hausdorff_dist,
         hausdorff_dist_prediction_target,
         hausdorff_dist_target_prediction,
     )
 
 
-def distance_slice_all_false() -> Tuple[torch.Tensor, torch.Tensor, float, float]:
+def distance_slice_all_false(
+    percentile: float = 0.95,
+) -> Tuple[torch.Tensor, torch.Tensor, float, float, float]:
     """
     Creates a faked segmentation slice that contains contains only wrong predictions.
 
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
     Returns:
-        Tuple: Predicted slice, target slice, Hausdorff distance between prediction and target, Hausdorff distance
-            between target and prediction.
+        Tuple: Predicted slice, target slice, symmetric Hausdorff distance, Hausdorff distance between prediction and
+            target, Hausdorff distance between target and prediction.
     """
 
     # fmt: off
@@ -316,26 +328,47 @@ def distance_slice_all_false() -> Tuple[torch.Tensor, torch.Tensor, float, float
         ]])
     # fmt: on
 
-    hausdorff_dist_prediction_target = np.percentile(
-        [np.sqrt(5), np.sqrt(2), np.sqrt(8), 2, np.sqrt(10), np.sqrt(5)], 95
+    dists_prediction_target = [
+        np.sqrt(5),
+        np.sqrt(2),
+        np.sqrt(8),
+        2,
+        np.sqrt(10),
+        np.sqrt(5),
+    ]
+    dist_target_prediction = [np.sqrt(2), 2, 2]
+
+    hausdorff_dist = np.percentile(
+        np.hstack((dists_prediction_target, dist_target_prediction)), q=percentile * 100
     )
-    hausdorff_dist_target_prediction = np.percentile([np.sqrt(2), 2, 2], 95)
+    hausdorff_dist_prediction_target = np.percentile(
+        dists_prediction_target, q=percentile * 100
+    )
+    hausdorff_dist_target_prediction = np.percentile(
+        dist_target_prediction, q=percentile * 100
+    )
 
     return (
         prediction_slice,
         target_slice,
+        hausdorff_dist,
         hausdorff_dist_prediction_target,
         hausdorff_dist_target_prediction,
     )
 
 
-def distance_slice_subset() -> Tuple[torch.Tensor, torch.Tensor, float, float]:
+def distance_slice_subset(
+    percentile: float = 0.95,
+) -> Tuple[torch.Tensor, torch.Tensor, float, float, float]:
     """
     Creates a faked segmentation slice where the prediction is a subset of the target.
 
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
     Returns:
-        Tuple: Predicted slice, target slice, Hausdorff distance between prediction and target, Hausdorff distance
-            between target and prediction.
+        Tuple: Predicted slice, target slice,symmetric Hausdorff distance,  Hausdorff distance between prediction and
+            target, Hausdorff distance between target and prediction.
     """
 
     # fmt: off
@@ -356,24 +389,40 @@ def distance_slice_subset() -> Tuple[torch.Tensor, torch.Tensor, float, float]:
         ]])
     # fmt: on
 
-    hausdorff_dist_prediction_target = np.percentile([0, 0, 0, 0], 95)
-    hausdorff_dist_target_prediction = np.percentile([0, 0, 0, 0, 1, 1], 95)
+    dists_prediction_target = [0, 0, 0, 0]
+    dist_target_prediction = [0, 0, 0, 0, 1, 1]
+
+    hausdorff_dist = np.percentile(
+        np.hstack((dists_prediction_target, dist_target_prediction)), q=percentile * 100
+    )
+    hausdorff_dist_prediction_target = np.percentile(
+        dists_prediction_target, q=percentile * 100
+    )
+    hausdorff_dist_target_prediction = np.percentile(
+        dist_target_prediction, q=percentile * 100
+    )
 
     return (
         prediction_slice,
         target_slice,
+        hausdorff_dist,
         hausdorff_dist_prediction_target,
         hausdorff_dist_target_prediction,
     )
 
 
-def distance_slices_3d() -> Tuple[torch.Tensor, torch.Tensor, float, float]:
+def distance_slices_3d(
+    percentile: float = 0.95,
+) -> Tuple[torch.Tensor, torch.Tensor, float, float, float]:
     """
     Creates a faked segmentation slice that contains both true and false predictions.
 
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
     Returns:
-        Tuple: Predicted slice, target slice, Hausdorff distance between prediction and target, Hausdorff distance
-            between target and prediction.
+        Tuple: Predicted slice, target slice, symmetric Hausdorff distance, Hausdorff distance between prediction and
+            target, Hausdorff distance between target and prediction.
     """
 
     # fmt: off
@@ -423,16 +472,41 @@ def distance_slices_3d() -> Tuple[torch.Tensor, torch.Tensor, float, float]:
         ])
     # fmt: on
 
+    dists_prediction_target = [np.sqrt(2), 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0]
+    dist_target_prediction = [
+        1,
+        np.sqrt(2),
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        np.sqrt(2),
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+    ]
+
+    hausdorff_dist = np.percentile(
+        np.hstack((dists_prediction_target, dist_target_prediction)), q=percentile * 100
+    )
     hausdorff_dist_prediction_target = np.percentile(
-        [np.sqrt(2), 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0], 95
+        dists_prediction_target, q=percentile * 100
     )
     hausdorff_dist_target_prediction = np.percentile(
-        [1, np.sqrt(2), 1, 0, 0, 0, 0, 1, 0, 0, np.sqrt(2), 0, 1, 0, 0, 0, 1], 95
+        dist_target_prediction, q=percentile * 100
     )
 
     return (
         prediction_slice,
         target_slice,
+        hausdorff_dist,
         hausdorff_dist_prediction_target,
         hausdorff_dist_target_prediction,
     )

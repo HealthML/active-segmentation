@@ -240,9 +240,13 @@ def hausdorff_distance(
         return torch.as_tensor(float("nan"))
 
     distances_to_target = _distances_to_surface(prediction, target)
+    # pylint: disable=arguments-out-of-order
+    distances_to_prediction = _distances_to_surface(target, prediction)
+
+    distances = np.hstack((distances_to_target, distances_to_prediction))
 
     return torch.quantile(
-        torch.from_numpy(distances_to_target), q=percentile, keepdim=False
+        torch.from_numpy(distances), q=percentile, keepdim=False
     ).float()
 
 
