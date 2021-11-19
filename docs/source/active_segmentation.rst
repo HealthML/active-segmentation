@@ -11,4 +11,3 @@ Subpackages
    functional
    models
    query_strategies
-

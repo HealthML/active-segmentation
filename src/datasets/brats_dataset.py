@@ -45,9 +45,7 @@ class BraTSDataset(Dataset):
 
     @staticmethod
     def __read_image_as_array(
-        filepath: str,
-        norm: bool,
-        clip: bool = False,
+        filepath: str, norm: bool, clip: bool = False
     ) -> np.ndarray:
         """
         Reads image or annotation as numpy array.

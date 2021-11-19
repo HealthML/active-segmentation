@@ -19,14 +19,7 @@ class TestBCELoss(unittest.TestCase):
 
         # pylint: disable-msg=no-self-use
 
-        (
-            prediction,
-            target,
-            _,
-            _,
-            _,
-            _,
-        ) = tests.utils.probabilistic_slice()
+        (prediction, target, _, _, _, _) = tests.utils.probabilistic_slice()
 
         bce_loss = BCELoss(reduction="none")
         loss = bce_loss(

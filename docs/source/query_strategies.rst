@@ -8,4 +8,3 @@ QueryStrategy
    :members:
    :undoc-members:
    :show-inheritance:
-
