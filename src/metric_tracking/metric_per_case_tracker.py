@@ -55,8 +55,10 @@ class MetricPerCaseTracker:
         """
 
         if self.reduce == "none":
+            # if reduce == "none", a dictionary mapping case IDs to metric values is returned
             aggregated_metrics = {metric: {} for metric in self.metrics}
         else:
+            # otherwise, a list of all metric values is created to compute the aggregated metric value
             aggregated_metrics = {metric: [] for metric in self.metrics}
 
         for case_id, case_metric_tracker in self._metrics_per_case.items():
