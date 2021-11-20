@@ -17,9 +17,11 @@ class MetricPerCaseTracker:
             "specificity", and "hausdorff95".
         reduce (string):  Reduction function that is to be used to aggregate the metric values of all cases, must be
             either "mean", "sum" or "none".
+        device: The target device as defined in PyTorch.
     """
 
-    def __init__(self, metrics: Iterable[str], reduce: str = "mean"):
+    def __init__(self, metrics: Iterable[str], reduce: str = "mean", device: torch.device = torch.device("cpu")):
+        self.device = device
         self.metrics = metrics
         self._metrics_per_case = {}
 
@@ -27,6 +29,18 @@ class MetricPerCaseTracker:
             raise ValueError("Invalid reduction method.")
 
         self.reduce = reduce
+
+    def to(self, device: torch.device):
+        """
+        Moves metric tracker to the given device.
+        
+        Args:
+            device: The target device as defined in PyTorch.
+        """
+
+        self.device = device
+        for metric_tracker in self._metrics_per_case.values():
+            metric_tracker.to(device)
 
     def update(
         self, prediction: torch.Tensor, target: torch.Tensor, case_ids: Iterable[str]
@@ -42,7 +56,7 @@ class MetricPerCaseTracker:
 
         for idx, case_id in enumerate(case_ids):
             if case_id not in self._metrics_per_case:
-                self._metrics_per_case[case_id] = MetricTracker(self.metrics)
+                self._metrics_per_case[case_id] = MetricTracker(self.metrics, self.device)
 
             self._metrics_per_case[case_id].update(prediction[idx], target[idx])
 
@@ -55,10 +69,8 @@ class MetricPerCaseTracker:
         """
 
         if self.reduce == "none":
-            # if reduce == "none", a dictionary mapping case IDs to metric values is returned
             aggregated_metrics = {metric: {} for metric in self.metrics}
         else:
-            # otherwise, a list of all metric values is created to compute the aggregated metric value
             aggregated_metrics = {metric: [] for metric in self.metrics}
 
         for case_id, case_metric_tracker in self._metrics_per_case.items():
@@ -73,12 +85,14 @@ class MetricPerCaseTracker:
         if self.reduce == "mean":
             for metric in self.metrics:
                 aggregated_metrics[metric] = torch.tensor(
-                    aggregated_metrics[metric]
+                    aggregated_metrics[metric],
+                    device = self.device
                 ).mean()
         if self.reduce == "sum":
             for metric in self.metrics:
                 aggregated_metrics[metric] = torch.tensor(
-                    aggregated_metrics[metric]
+                    aggregated_metrics[metric],
+                    device = self.device
                 ).sum()
 
         return aggregated_metrics

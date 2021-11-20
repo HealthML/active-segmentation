@@ -61,6 +61,7 @@ def dice_score(
         - Output: Scalar.
     """
 
+    assert prediction.device == target.device
     assert prediction.shape == target.shape
 
     flattened_prediction = prediction.view(-1).float()
@@ -105,6 +106,7 @@ def sensitivity(
         - Output: Scalar.
     """
 
+    assert prediction.device == target.device
     assert prediction.shape == target.shape
 
     flattened_prediction = prediction.view(-1).float()
@@ -146,6 +148,7 @@ def specificity(
         - Output: Scalar.
     """
 
+    assert prediction.device == target.device
     assert prediction.shape == target.shape
 
     flattened_prediction = prediction.view(-1).float()
@@ -226,6 +229,7 @@ def hausdorff_distance(
     # adapted code from
     # https://github.com/PiechaczekMyller/brats/blob/eb9f7eade1066dd12c90f6cef101b74c5e974bfa/brats/functional.py#L135
 
+    assert prediction.device == target.device
     assert (
         prediction.shape == target.shape
     ), "Prediction and target must have the same dimensions."
@@ -234,6 +238,8 @@ def hausdorff_distance(
     ), "Prediction and target must have either two or three dimensions."
     assert _is_binary(prediction), "Predictions must be binary."
     assert _is_binary(target), "Target must be binary."
+
+    device = prediction.device
 
     prediction = prediction.cpu().detach().numpy().astype(np.bool)
     target = target.cpu().detach().numpy().astype(np.bool)
@@ -249,7 +255,7 @@ def hausdorff_distance(
 
     return torch.quantile(
         torch.from_numpy(distances), q=percentile, keepdim=False
-    ).float()
+    ).float().to(device)
 
 
 class DiceScore(torchmetrics.Metric):
@@ -259,25 +265,29 @@ class DiceScore(torchmetrics.Metric):
 
     Args:
         smoothing (int, optional): Laplacian smoothing factor.
+        device: The target device as defined in PyTorch.
     """
 
-    def __init__(self, smoothing: float = 0):
+    def __init__(self, smoothing: float = 0, device: torch.device = torch.device("cpu")):
         super().__init__()
         self.smoothing = smoothing
-        self.numerator = torch.tensor(0.0)
-        self.denominator = torch.tensor(0.0)
-        self.add_state("numerator", torch.tensor(0.0))
-        self.add_state("denominator", torch.tensor(0.0))
+        self.to(device)
+        
+        self.numerator = torch.tensor(0.0, device=device)
+        self.denominator = torch.tensor(0.0, device=device)
+        self.add_state("numerator", torch.tensor(0.0, device=device))
+        self.add_state("denominator", torch.tensor(0.0, device=device))
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        assert prediction.device == target.device
         assert prediction.shape == target.shape
-
+        
         flattened_prediction = prediction.view(-1).float()
         flattened_target = target.view(-1).float()
 
-        self.numerator += (flattened_prediction * flattened_target).sum()
-        self.denominator += flattened_prediction.sum() + flattened_target.sum()
+        self.numerator += (flattened_prediction * flattened_target).sum().to(self.device)
+        self.denominator += (flattened_prediction.sum() + flattened_target.sum()).to(self.device)
 
     def compute(self) -> torch.Tensor:
         """
@@ -298,25 +308,28 @@ class Sensitivity(torchmetrics.Metric):
 
     Args:
         smoothing (int, optional): Laplacian smoothing factor.
+        device: The target device as defined in PyTorch.
     """
 
-    def __init__(self, smoothing: float = 0):
+    def __init__(self, smoothing: float = 0, device: torch.device = torch.device("cpu")):
         super().__init__()
+        self.to(device)
         self.smoothing = smoothing
-        self.true_positives = torch.tensor(0.0)
-        self.true_positives_false_negatives = torch.tensor(0.0)
-        self.add_state("true_positives", torch.tensor(0.0))
-        self.add_state("true_positives_false_negatives", torch.tensor(0.0))
+        self.true_positives = torch.tensor(0.0, device=device)
+        self.true_positives_false_negatives = torch.tensor(0.0, device=device)
+        self.add_state("true_positives", torch.tensor(0.0, device=device))
+        self.add_state("true_positives_false_negatives", torch.tensor(0.0, device=device))
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        assert prediction.device == target.device
         assert prediction.shape == target.shape
 
         flattened_prediction = prediction.view(-1).float()
         flattened_target = target.view(-1).float()
 
-        self.true_positives += (flattened_prediction * flattened_target).sum()
-        self.true_positives_false_negatives += flattened_target.sum()
+        self.true_positives += (flattened_prediction * flattened_target).sum().to(self.device)
+        self.true_positives_false_negatives += flattened_target.sum().to(self.device)
 
     def compute(self) -> torch.Tensor:
         """
@@ -337,29 +350,32 @@ class Specificity(torchmetrics.Metric):
 
     Args:
         smoothing (int, optional): Laplacian smoothing factor.
+        device: The target device as defined in PyTorch.
     """
 
-    def __init__(self, smoothing: float = 0):
+    def __init__(self, smoothing: float = 0, device: torch.device = torch.device("cpu")):
         super().__init__()
+        self.to(device)
         self.smoothing = smoothing
-        self.true_negatives = torch.tensor(0.0)
-        self.true_negatives_false_positives = torch.tensor(0.0)
-        self.add_state("true_negatives", torch.tensor(0.0))
-        self.add_state("true_negatives_false_positives", torch.tensor(0.0))
+        self.true_negatives = torch.tensor(0.0, device=device)
+        self.true_negatives_false_positives = torch.tensor(0.0, device=device)
+        self.add_state("true_negatives", torch.tensor(0.0, device=device))
+        self.add_state("true_negatives_false_positives", torch.tensor(0.0, device=device))
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        assert prediction.device == target.device
         assert prediction.shape == target.shape
 
         flattened_prediction = prediction.view(-1).float()
         flattened_target = target.view(-1).float()
 
-        ones = torch.ones(flattened_prediction.shape)
+        ones = torch.ones(flattened_prediction.shape, device=prediction.device)
 
         self.true_negatives += (
             (ones - flattened_prediction) * (ones - flattened_target)
-        ).sum()
-        self.true_negatives_false_positives += (ones - flattened_target).sum()
+        ).sum().to(self.device)
+        self.true_negatives_false_positives += (ones - flattened_target).sum().to(self.device)
 
     def compute(self) -> torch.Tensor:
         """
@@ -381,10 +397,12 @@ class HausdorffDistance(torchmetrics.Metric):
     Args:
         percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
             :math:`\[0, 1\]`.
+        device: The target device as defined in PyTorch.
     """
 
-    def __init__(self, percentile: float = 0.95):
+    def __init__(self, percentile: float = 0.95, device: torch.device = torch.device("cpu")):
         super().__init__()
+        self.to(device)
         self.percentile = percentile
         self.distances = []
         self.add_state("distances", [])
@@ -392,7 +410,7 @@ class HausdorffDistance(torchmetrics.Metric):
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
         self.distances.append(
-            hausdorff_distance(prediction, target, percentile=self.percentile)
+            hausdorff_distance(prediction, target, percentile=self.percentile).to(self.device)
         )
 
     def compute(self) -> torch.Tensor:

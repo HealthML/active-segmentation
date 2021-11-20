@@ -14,24 +14,37 @@ class MetricTracker:
     Args:
         metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity",
             "specificity", and "hausdorff95".
+        device: The target device as defined in PyTorch.
     """
 
-    supported_metrics = ["dice", "sensitivity", "specificity"]
+    supported_metrics = ["dice", "sensitivity", "specificity", "hausdorff95"]
 
-    def __init__(self, metrics: Iterable[str]):
+    def __init__(self, metrics: Iterable[str], device: torch.device = torch.device("cpu")):
         self._metrics = {}
 
         for metric in set(metrics):
             if metric not in MetricTracker.supported_metrics:
                 raise ValueError(f"Invalid metric name: {metric}")
             if metric == "dice":
-                self._metrics[metric] = DiceScore(smoothing=0)
+                self._metrics[metric] = DiceScore(smoothing=0, device=device)
             if metric == "sensitivity":
-                self._metrics[metric] = Sensitivity(smoothing=0)
+                self._metrics[metric] = Sensitivity(smoothing=0, device=device)
             if metric == "specificity":
-                self._metrics[metric] = Specificity(smoothing=0)
+                self._metrics[metric] = Specificity(smoothing=0, device=device)
             if metric == "hausdorff95":
-                self._metrics[metric] = HausdorffDistance(percentile=0.95)
+                self._metrics[metric] = HausdorffDistance(percentile=0.95, device=device)
+
+    def to(self, device: torch.device):
+        """
+        Moves metric tracker to the given device.
+        
+        Args:
+            device: The target device as defined in PyTorch.
+        """
+
+        self.device = device
+        for metric in self._metrics.values():
+            metric.to(device)
 
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
         """

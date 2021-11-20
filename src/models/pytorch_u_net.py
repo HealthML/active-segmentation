@@ -23,14 +23,14 @@ class PytorchUNet(PytorchModel):
 
         self.model = UNet(in_channels=1, out_channels=1, init_features=32)
         self.train_average_metrics = MetricPerCaseTracker(
-            metrics=["dice"], reduce="mean"
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="mean", device=self.device
         )
         self.train_metric_per_case = MetricPerCaseTracker(
-            metrics=["dice"], reduce="none"
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="none", device=self.device
         )
-        self.val_average_metrics = MetricPerCaseTracker(metrics=["dice"], reduce="mean")
+        self.val_average_metrics = MetricPerCaseTracker(metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="mean", device=self.device)
         self.val_metrics_per_case = MetricPerCaseTracker(
-            metrics=["dice"], reduce="none"
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="none", device=self.device
         )
 
     # wrap model interface
@@ -87,6 +87,9 @@ class PytorchUNet(PytorchModel):
             Loss on the training batch.
         """
 
+        self.train_average_metrics.to(self.device)
+        self.train_metric_per_case.to(self.device)
+
         # pylint: disable-msg=unused-variable
         x, y, case_ids = batch
 
@@ -113,6 +116,9 @@ class PytorchUNet(PytorchModel):
             batch (Tensor): Batch of validation images.
             batch_idx: Index of the validation batch.
         """
+
+        self.val_average_metrics.to(self.device)
+        self.val_metrics_per_case.to(self.device)
 
         # pylint: disable-msg=unused-variable
         x, y, case_ids = batch
