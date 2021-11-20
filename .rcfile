@@ -6,7 +6,7 @@ ignored-modules=torch.utils.data
 generated-members=torch.*
 
 [BASIC]
-good-names=x,y,tp,fp,tn,fn
+good-names=x,y,tp,fp,tn,fn,to
 
 [FORMAT]
 max-line-length=120
