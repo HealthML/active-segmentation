@@ -145,9 +145,7 @@ class ActiveLearningDataModule(LightningDataModule):
 
         if self._test_set:
             return DataLoader(
-                self._test_set,
-                batch_size=self.batch_size,
-                num_workers=self.num_workers,
+                self._test_set, batch_size=self.batch_size, num_workers=self.num_workers
             )
         return None
 
