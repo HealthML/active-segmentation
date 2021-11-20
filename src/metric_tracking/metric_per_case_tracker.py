@@ -20,7 +20,12 @@ class MetricPerCaseTracker:
         device: The target device as defined in PyTorch.
     """
 
-    def __init__(self, metrics: Iterable[str], reduce: str = "mean", device: torch.device = torch.device("cpu")):
+    def __init__(
+        self,
+        metrics: Iterable[str],
+        reduce: str = "mean",
+        device: torch.device = torch.device("cpu"),
+    ):
         self.device = device
         self.metrics = metrics
         self._metrics_per_case = {}
@@ -33,7 +38,7 @@ class MetricPerCaseTracker:
     def to(self, device: torch.device):
         """
         Moves metric tracker to the given device.
-        
+
         Args:
             device: The target device as defined in PyTorch.
         """
@@ -56,7 +61,9 @@ class MetricPerCaseTracker:
 
         for idx, case_id in enumerate(case_ids):
             if case_id not in self._metrics_per_case:
-                self._metrics_per_case[case_id] = MetricTracker(self.metrics, self.device)
+                self._metrics_per_case[case_id] = MetricTracker(
+                    self.metrics, self.device
+                )
 
             self._metrics_per_case[case_id].update(prediction[idx], target[idx])
 
@@ -85,14 +92,12 @@ class MetricPerCaseTracker:
         if self.reduce == "mean":
             for metric in self.metrics:
                 aggregated_metrics[metric] = torch.tensor(
-                    aggregated_metrics[metric],
-                    device = self.device
+                    aggregated_metrics[metric], device=self.device
                 ).mean()
         if self.reduce == "sum":
             for metric in self.metrics:
                 aggregated_metrics[metric] = torch.tensor(
-                    aggregated_metrics[metric],
-                    device = self.device
+                    aggregated_metrics[metric], device=self.device
                 ).sum()
 
         return aggregated_metrics

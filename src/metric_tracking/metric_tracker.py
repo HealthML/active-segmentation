@@ -19,7 +19,9 @@ class MetricTracker:
 
     supported_metrics = ["dice", "sensitivity", "specificity", "hausdorff95"]
 
-    def __init__(self, metrics: Iterable[str], device: torch.device = torch.device("cpu")):
+    def __init__(
+        self, metrics: Iterable[str], device: torch.device = torch.device("cpu")
+    ):
         self._metrics = {}
 
         for metric in set(metrics):
@@ -32,17 +34,18 @@ class MetricTracker:
             if metric == "specificity":
                 self._metrics[metric] = Specificity(smoothing=0, device=device)
             if metric == "hausdorff95":
-                self._metrics[metric] = HausdorffDistance(percentile=0.95, device=device)
+                self._metrics[metric] = HausdorffDistance(
+                    percentile=0.95, device=device
+                )
 
     def to(self, device: torch.device):
         """
         Moves metric tracker to the given device.
-        
+
         Args:
             device: The target device as defined in PyTorch.
         """
 
-        self.device = device
         for metric in self._metrics.values():
             metric.to(device)
 
