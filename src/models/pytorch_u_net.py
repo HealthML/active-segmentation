@@ -23,14 +23,24 @@ class PytorchUNet(PytorchModel):
 
         self.model = UNet(in_channels=1, out_channels=1, init_features=32)
         self.train_average_metrics = MetricPerCaseTracker(
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="mean", device=self.device
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            reduce="mean",
+            device=self.device,
         )
         self.train_metric_per_case = MetricPerCaseTracker(
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="none", device=self.device
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            reduce="none",
+            device=self.device,
         )
-        self.val_average_metrics = MetricPerCaseTracker(metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="mean", device=self.device)
+        self.val_average_metrics = MetricPerCaseTracker(
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            reduce="mean",
+            device=self.device,
+        )
         self.val_metrics_per_case = MetricPerCaseTracker(
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"], reduce="none", device=self.device
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            reduce="none",
+            device=self.device,
         )
 
     # wrap model interface
