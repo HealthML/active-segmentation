@@ -1,6 +1,6 @@
 """ Module containing a helper class for tracking and aggregating several metrics related to one 3D MRT scan. """
 
-from typing import Dict, Iterable
+from typing import Dict, Iterable, Optional
 
 import torch
 
@@ -17,6 +17,7 @@ class MetricPerCaseTracker:
             "specificity", and "hausdorff95".
         reduce (string):  Reduction function that is to be used to aggregate the metric values of all cases, must be
             either "mean", "sum" or "none".
+        groups (Iterable[str], optional): A list of group names for which the metrics are to be tracked separately.
         device: The target device as defined in PyTorch.
     """
 
@@ -24,8 +25,10 @@ class MetricPerCaseTracker:
         self,
         metrics: Iterable[str],
         reduce: str = "mean",
+        groups: Optional[Iterable[str]] = None,
         device: torch.device = torch.device("cpu"),
     ):
+        self.groups = groups
         self.device = device
         self.metrics = metrics
         self._metrics_per_case = {}
@@ -48,7 +51,11 @@ class MetricPerCaseTracker:
             metric_tracker.to(device)
 
     def update(
-        self, prediction: torch.Tensor, target: torch.Tensor, case_ids: Iterable[str]
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        case_ids: Iterable[str],
+        group_name: str = "default",
     ) -> None:
         """
         Takes the prediction and target of a given batch and updates the metrics accordingly.
@@ -57,19 +64,25 @@ class MetricPerCaseTracker:
             prediction (Tensor): A batch of predictions.
             target (Tensor): A batch of targets.
             case_ids (Iterable[string]): Case IDs of each slice in the prediction and target batches.
+            group_name (str, optional): Name of the group to update.
         """
 
         for idx, case_id in enumerate(case_ids):
             if case_id not in self._metrics_per_case:
                 self._metrics_per_case[case_id] = MetricTracker(
-                    self.metrics, self.device
+                    self.metrics, self.groups, self.device
                 )
 
-            self._metrics_per_case[case_id].update(prediction[idx], target[idx])
+            self._metrics_per_case[case_id].update(
+                prediction[idx], target[idx], group_name=group_name
+            )
 
-    def compute(self) -> Dict[str, torch.Tensor]:
+    def compute(self, group_name: str = "default") -> Dict[str, torch.Tensor]:
         """
         Computes per-scan metrics and aggregates them if `self.reduce` is not `None`.
+
+        Args:
+            group_name (str, optional): Name of the group for which the metrics are to be computed.
 
         Returns:
             Dict[string, Tensor]: Mapping of metric names to metric values.
@@ -81,7 +94,7 @@ class MetricPerCaseTracker:
             aggregated_metrics = {metric: [] for metric in self.metrics}
 
         for case_id, case_metric_tracker in self._metrics_per_case.items():
-            case_metrics = case_metric_tracker.compute()
+            case_metrics = case_metric_tracker.compute(group_name=group_name)
 
             for metric in self.metrics:
                 if self.reduce == "none":

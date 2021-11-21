@@ -1,6 +1,6 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable
+from typing import Any, Iterable
 
 import torch
 
@@ -22,24 +22,37 @@ class PytorchUNet(PytorchModel):
         super().__init__(**kwargs)
 
         self.model = UNet(in_channels=1, out_channels=1, init_features=32)
+
+        self.confidence_levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        self.confidence_level_names = [
+            str(confidence_level) for confidence_level in self.confidence_levels
+        ]
+
         self.train_average_metrics = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
             reduce="mean",
+            groups=self.confidence_level_names,
             device=self.device,
         )
-        self.train_metric_per_case = MetricPerCaseTracker(
+
+        self.train_metrics_per_case = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
             reduce="none",
+            groups=self.confidence_level_names,
             device=self.device,
         )
+
         self.val_average_metrics = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
             reduce="mean",
+            groups=self.confidence_level_names,
             device=self.device,
         )
+
         self.val_metrics_per_case = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
             reduce="none",
+            groups=self.confidence_level_names,
             device=self.device,
         )
 
@@ -98,7 +111,7 @@ class PytorchUNet(PytorchModel):
         """
 
         self.train_average_metrics.to(self.device)
-        self.train_metric_per_case.to(self.device)
+        self.train_metrics_per_case.to(self.device)
 
         # pylint: disable-msg=unused-variable
         x, y, case_ids = batch
@@ -108,15 +121,47 @@ class PytorchUNet(PytorchModel):
 
         # ToDo: log metrics for different confidence levels
 
-        predicted_mask = (probabilities > 0.5).int()
+        for confidence_level in self.confidence_levels:
 
-        self.train_average_metrics.update(predicted_mask, y, case_ids)
-        self.train_metric_per_case.update(predicted_mask, y, case_ids)
+            predicted_mask = (probabilities > confidence_level).int()
+
+            self.train_average_metrics.update(
+                predicted_mask, y, case_ids, group_name=str(confidence_level)
+            )
+            self.train_metrics_per_case.update(
+                predicted_mask, y, case_ids, group_name=str(confidence_level)
+            )
 
         # ToDo: compute metrics on epoch end and log them to WandB
 
         self.log("train/loss", loss)  # log train loss via weights&biases
         return loss
+
+    def training_epoch_end(self, training_step_outputs: Any):
+        """
+        This method is called by the Pytorch Lightning framework at the end of each training epoch.
+
+        Args:
+            training_step_outputs: List of return values of all training steps of the current training epoch. 
+        """
+
+        for confidence_level in self.confidence_levels:
+            average_metrics = self.train_average_metrics.compute(
+                group_name=str(confidence_level)
+            )
+            metrics_per_case = self.train_metrics_per_case.compute(
+                group_name=str(confidence_level)
+            )
+
+            for metric_name, metric_value in average_metrics.items():
+                self.log(f"train/mean_{metric_name}_{confidence_level}", metric_value)
+
+            for metric, metric in metrics_per_case.items():
+                for case_id, metric_value in metric.items():
+                    self.log(
+                        f"train/case_{case_id}_{metric_name}_{confidence_level}",
+                        metric_value,
+                    )
 
     def validation_step(self, batch, batch_idx) -> None:
         """
@@ -130,16 +175,46 @@ class PytorchUNet(PytorchModel):
         self.val_average_metrics.to(self.device)
         self.val_metrics_per_case.to(self.device)
 
-        # pylint: disable-msg=unused-variable
         x, y, case_ids = batch
 
-        # pylint: disable-msg=unused-variable
         probabilities = self(x)
-        predicted_mask = (probabilities > 0.5).int()
 
-        self.val_average_metrics.update(predicted_mask, y, case_ids)
-        self.val_metrics_per_case.update(predicted_mask, y, case_ids)
         loss = self.loss(probabilities, y)
         self.log("validation/loss", loss)  # log validation loss via weights&biases
 
-        # ToDo: this method should return the required performance metrics
+        for confidence_level in self.confidence_levels:
+
+            predicted_mask = (probabilities > confidence_level).int()
+
+            self.val_average_metrics.update(
+                predicted_mask, y, case_ids, group_name=str(confidence_level)
+            )
+            self.val_metrics_per_case.update(
+                predicted_mask, y, case_ids, group_name=str(confidence_level)
+            )
+
+    def validation_epoch_end(self, validation_step_outputs: Any):
+        """
+        This method is called by the Pytorch Lightning framework at the end of each validation epoch.
+
+        Args:
+            validation_step_outputs: List of return values of all validation steps of the current validation epoch. 
+        """
+
+        for confidence_level in self.confidence_levels:
+            average_metrics = self.val_average_metrics.compute(
+                group_name=str(confidence_level)
+            )
+            metrics_per_case = self.val_metrics_per_case.compute(
+                group_name=str(confidence_level)
+            )
+
+            for metric_name, metric_value in average_metrics.items():
+                self.log(f"val/mean_{metric_name}_{confidence_level}", metric_value)
+
+            for metric_name, metric in metrics_per_case.items():
+                for case_id, metric_value in metric.items():
+                    self.log(
+                        f"val/case_{case_id}_{metric_name}_{confidence_level}",
+                        metric_value,
+                    )
