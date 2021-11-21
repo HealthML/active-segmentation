@@ -25,7 +25,15 @@ class PytorchUNet(PytorchModel):
 
         self.confidence_levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         self.confidence_level_names = [
-            str(confidence_level) for confidence_level in self.confidence_levels
+            "0.1",
+            "0.2",
+            "0.3",
+            "0.4",
+            "0.5",
+            "0.6",
+            "0.7",
+            "0.8",
+            "0.9",
         ]
 
         self.train_average_metrics = MetricPerCaseTracker(
@@ -121,15 +129,15 @@ class PytorchUNet(PytorchModel):
 
         # ToDo: log metrics for different confidence levels
 
-        for confidence_level in self.confidence_levels:
+        for idx, confidence_level in enumerate(self.confidence_levels):
 
             predicted_mask = (probabilities > confidence_level).int()
 
             self.train_average_metrics.update(
-                predicted_mask, y, case_ids, group_name=str(confidence_level)
+                predicted_mask, y, case_ids, group_name=self.confidence_level_names[idx]
             )
             self.train_metrics_per_case.update(
-                predicted_mask, y, case_ids, group_name=str(confidence_level)
+                predicted_mask, y, case_ids, group_name=self.confidence_level_names[idx]
             )
 
         # ToDo: compute metrics on epoch end and log them to WandB
@@ -145,12 +153,12 @@ class PytorchUNet(PytorchModel):
             training_step_outputs: List of return values of all training steps of the current training epoch. 
         """
 
-        for confidence_level in self.confidence_levels:
+        for idx, confidence_level in enumerate(self.confidence_levels):
             average_metrics = self.train_average_metrics.compute(
-                group_name=str(confidence_level)
+                group_name=self.confidence_level_names[idx]
             )
             metrics_per_case = self.train_metrics_per_case.compute(
-                group_name=str(confidence_level)
+                group_name=self.confidence_level_names[idx]
             )
 
             for metric_name, metric_value in average_metrics.items():
@@ -182,15 +190,15 @@ class PytorchUNet(PytorchModel):
         loss = self.loss(probabilities, y)
         self.log("validation/loss", loss)  # log validation loss via weights&biases
 
-        for confidence_level in self.confidence_levels:
+        for idx, confidence_level in enumerate(self.confidence_levels):
 
             predicted_mask = (probabilities > confidence_level).int()
 
             self.val_average_metrics.update(
-                predicted_mask, y, case_ids, group_name=str(confidence_level)
+                predicted_mask, y, case_ids, group_name=self.confidence_level_names[idx]
             )
             self.val_metrics_per_case.update(
-                predicted_mask, y, case_ids, group_name=str(confidence_level)
+                predicted_mask, y, case_ids, group_name=self.confidence_level_names[idx]
             )
 
     def validation_epoch_end(self, validation_step_outputs: Any):
@@ -201,12 +209,12 @@ class PytorchUNet(PytorchModel):
             validation_step_outputs: List of return values of all validation steps of the current validation epoch. 
         """
 
-        for confidence_level in self.confidence_levels:
+        for idx, confidence_level in enumerate(self.confidence_levels):
             average_metrics = self.val_average_metrics.compute(
-                group_name=str(confidence_level)
+                group_name=self.confidence_level_names[idx]
             )
             metrics_per_case = self.val_metrics_per_case.compute(
-                group_name=str(confidence_level)
+                group_name=self.confidence_level_names[idx]
             )
 
             for metric_name, metric_value in average_metrics.items():
