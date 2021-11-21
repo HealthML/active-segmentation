@@ -94,4 +94,6 @@ class BraTSDataModule(ActiveLearningDataModule):
     def _create_unlabeled_set(self) -> Union[Dataset, None]:
         # faked unlabeled set
         # ToDo: implement unlabeled set
-        return self._create_training_set()
+        unlabeled_set = self._create_training_set()
+        unlabeled_set.is_unlabeled = True
+        return unlabeled_set

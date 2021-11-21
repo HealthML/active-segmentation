@@ -1,6 +1,8 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, Union
 import math
+import os
+
 import nibabel as nib
 import numpy as np
 import torch
@@ -66,11 +68,27 @@ class BraTSDataset(Dataset):
             img = BraTSDataset.normalize(img)
         return np.moveaxis(img, 2, 0)
 
+    @staticmethod
+    def __get_case_id(filepath: str) -> str:
+        """
+        Retrieves case ID from the file path of an image.
+
+        Args:
+            filepath (str): Path of the image file whose case ID is to be retrieved.
+
+        Returns:
+            str: Case ID.
+        """
+
+        # retrieve folder name from path
+        return os.path.split(os.path.split(filepath)[0])[1]
+
     def __init__(
         self,
         image_paths: List[str],
         annotation_paths: List[str],
         clip_mask: bool = True,
+        is_unlabeled: bool = False,
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
     ):
@@ -91,6 +109,7 @@ class BraTSDataset(Dataset):
         self.num_images = len(image_paths)
         self.num_annotations = len(annotation_paths)
         assert self.num_images == self.num_annotations
+        self.is_unlabeled = is_unlabeled
         self._current_image = None
         self._current_image_index = None
         self._current_mask = None
@@ -98,13 +117,18 @@ class BraTSDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
-    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(
+        self, index: int
+    ) -> Union[Tuple[torch.Tensor, str], Tuple[torch.Tensor, torch.Tensor, str]]:
         image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
         slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
         if image_index != self._current_image_index:
             self._current_image_index = image_index
             self._current_image = self.images[self._current_image_index]
             self._current_mask = self.masks[self._current_image_index]
+        case_id = self.__get_case_id(
+            filepath=self.image_paths[self._current_image_index]
+        )
 
         x = torch.from_numpy(self._current_image[slice_index, :, :])
         y = torch.from_numpy(self._current_mask[slice_index, :, :])
@@ -114,7 +138,10 @@ class BraTSDataset(Dataset):
         if self.target_transform:
             y = self.target_transform(y)
 
-        return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0)
+        if self.is_unlabeled:
+            return torch.unsqueeze(x, 0), f"{case_id}-{slice_index}"
+
+        return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
 
     def __len__(self) -> int:
         return self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
