@@ -3,7 +3,6 @@
 from typing import Iterable
 
 import torch
-import wandb
 
 from .pytorch_model import PytorchModel
 from .u_net import UNet

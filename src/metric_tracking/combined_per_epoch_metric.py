@@ -1,4 +1,7 @@
-""" Module containing a metrics class for tracking and aggregating several metrics related to multiple 3D MRT scans whose slices may be scattered across different batches. """
+"""
+Module containing a metrics class for tracking and aggregating several metrics related to multiple 3D MRT scans
+whose slices may be scattered across different batches.
+"""
 
 from typing import Dict, Iterable, Optional
 
@@ -10,26 +13,28 @@ from .combined_per_scan_metric import CombinedPerScanMetric
 
 class CombinedPerEpochMetric(torchmetrics.Metric):
     """
-    A metrics class that tracks the metrics of multiple 3D MRT scans (cases) whose slices may be scattered across different batches.
-    Different metrics can be tracked per scan, e.g. dice score and Hausdorff distance, and the metrics can also be tracked
-    for different confidence levels. If `reduction` is not `"none"`, the per-scan metrics are  aggregated into global 
-    per-epoch metric values.
+    A metrics class that tracks the metrics of multiple 3D MRT scans (cases) whose slices may be scattered across
+    different batches. Different metrics can be tracked per scan, e.g. dice score and Hausdorff distance, and the
+    metrics can also be tracked for different confidence levels. If `reduction` is not `"none"`, the per-scan metrics
+    are  aggregated into global per-epoch metric values.
 
     Args:
         phase (string): Descriptive name of the current pipeline phase, e.g. "train", "val" or "test".
         metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity",
             "specificity", and "hausdorff95".
-        confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked separately.
-        metrics_to_aggregate (Iterable[str], optional): A list of metric names from which to calculate an aggregated 
+        confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
+            separately.
+        metrics_to_aggregate (Iterable[str], optional): A list of metric names from which to calculate an aggregated
             metric. Must be a subset of the metric names passed to the `metrics` parameter. If, for example,
-            `metrics_to_aggregate=["dice", "hausdorff95"]` and `reduction="mean"`, the mean of the dice score and the 
-            Hausdorff distance is calculated and returned as the `aggregated` metric. If `reduction` is `"none"`, this parameter
-            will be ignored.
-        reduction (string, optional):  Reduction function that is to be used to aggregate the metric values of all scans / cases, must be
-            either "mean", "sum" or "none". Default: `"mean"`.
+            `metrics_to_aggregate=["dice", "hausdorff95"]` and `reduction="mean"`, the mean of the dice score and the
+            Hausdorff distance is calculated and returned as the `aggregated` metric. If `reduction` is `"none"`, this
+                parameter will be ignored.
+        reduction (string, optional):  Reduction function that is to be used to aggregate the metric values of all scans
+            / cases, must be either "mean", "sum" or "none". Default: `"mean"`.
 
     Note:
-        In this method, the `prediction` tensor is expected to be the output of the final sigmoid layer of a single-class segmentation task.
+        In this method, the `prediction` tensor is expected to be the output of the final sigmoid layer of a
+            single-class segmentation task.
 
     Shape:
         - Prediction: :math:`(N, height, width)`, where `N = batch size`.
@@ -73,9 +78,13 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         for metric in self._metrics_per_case.values():
             metric.reset()
         super().reset()
-
+    
+    # pylint: disable=arguments-differ
     def update(
-        self, prediction: torch.Tensor, target: torch.Tensor, case_ids: Iterable[str],
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        case_ids: Iterable[str],
     ) -> None:
         """
         Takes the prediction and target of a given batch and updates the metrics accordingly.
@@ -94,6 +103,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
             self._metrics_per_case[case_id].update(prediction[idx], target[idx])
 
+    # pylint: disable=too-many-branches
     def compute(self) -> Dict[str, torch.Tensor]:
         """
         Computes the metrics for each scan and aggregates them if `reduction` is not `"none"`.
@@ -102,8 +112,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             Dict[string, Tensor]: Mapping of metric names to metric values.
                 If `reduction` is `"none"`, the keys have the form `<phase>/<metric name>_<confidence_level>_<case ID>`.
                 Otherwise the keys have the form `<phase>/<reduction>_<metric name>_<confidence_level>`
-                If `"metrics_to_aggregate"` is provided and `reduction` is not `"none"`, the dictionary additionally contains 
-                the keys `<phase>/<reduction>_aggregated_<confidence_level>`.
+                If `"metrics_to_aggregate"` is provided and `reduction` is not `"none"`, the dictionary additionally
+                contains the keys `<phase>/<reduction>_aggregated_<confidence_level>`.
         """
         per_case_metrics = {}
 

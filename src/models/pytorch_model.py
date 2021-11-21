@@ -176,25 +176,24 @@ class PytorchModel(LightningModule, ABC):
 
         return self.val_metrics
 
-    def training_epoch_end(self, training_step_outputs: Any):
+    def training_epoch_end(self, outputs: Any):
         """
         This method is called by the Pytorch Lightning framework at the end of each training epoch.
 
         Args:
-            training_step_outputs: List of return values of all training steps of the current training epoch. 
+            outputs: List of return values of all training steps of the current training epoch.
         """
 
         for train_metric in self.train_metrics:
             train_metrics = train_metric.compute()
             self.logger.log_metrics(train_metrics)
-            train_metric.reset()
 
-    def validation_epoch_end(self, validation_step_outputs: Any):
+    def validation_epoch_end(self, outputs: Any):
         """
         This method is called by the Pytorch Lightning framework at the end of each validation epoch.
 
         Args:
-            validation_step_outputs: List of return values of all validation steps of the current validation epoch. 
+            outputs: List of return values of all validation steps of the current validation epoch.
         """
 
         for val_metric in self.val_metrics:

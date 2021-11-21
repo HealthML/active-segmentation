@@ -1,6 +1,6 @@
 """ Module containing a metrics class for tracking several metrics related to one 3D MRT scan """
 
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable
 import torch
 import torchmetrics
 
@@ -9,17 +9,19 @@ from functional import DiceScore, Sensitivity, Specificity, HausdorffDistance
 
 class CombinedPerScanMetric(torchmetrics.Metric):
     """
-    A metrics class that tracks several metrics related to one 3D MRT scan whose slices may be scattered across different batches.
-    The metrics can be tracked for different confidence levels.
+    A metrics class that tracks several metrics related to one 3D MRT scan whose slices may be scattered across
+    different batches. The metrics can be tracked for different confidence levels.
 
     Args:
         phase (string): Descriptive name of the current pipeline phase, e.g. "train", "val" or "test".
         metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity",
             "specificity", and "hausdorff95".
-        confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked separately.
+        confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
+            separately.
 
     Note:
-        In this method, the `prediction` tensor is expected to be one output slice of the final sigmoid layer of a single-class segmentation task.
+        In this method, the `prediction` tensor is expected to be one output slice of the final sigmoid layer of a
+            single-class segmentation task.
 
     Shape:
         - Prediction: :math:`(height, width)`.
@@ -34,10 +36,17 @@ class CombinedPerScanMetric(torchmetrics.Metric):
     ):
         super().__init__()
         self.phase = phase
-        # PyTorch does not allow "." in module names, therefore we first replace them by "," and later replace them again by "."
-        self.confidence_levels = [(confidence_level, f"{confidence_level:.1f}".replace(".", ",")) for confidence_level in confidence_levels]
+        # PyTorch does not allow "." in module names, therefore we first replace them by "," and later replace them
+        # again by "."
+        self.confidence_levels = [
+            (confidence_level, f"{confidence_level:.1f}".replace(".", ","))
+            for confidence_level in confidence_levels
+        ]
 
-        self._metrics = {confidence_level_name: {} for _, confidence_level_name in self.confidence_levels}
+        self._metrics = {
+            confidence_level_name: {}
+            for _, confidence_level_name in self.confidence_levels
+        }
 
         # ToDo: clear metrics after epoch end
 
@@ -63,7 +72,9 @@ class CombinedPerScanMetric(torchmetrics.Metric):
                     raise ValueError(f"Invalid metric name: {metric}")
 
             # the ModuleDict is required by PyTorch Lightning in order to place the metrics on the correct device
-            self._metrics[confidence_level_name] = torch.nn.ModuleDict(self._metrics[confidence_level_name])
+            self._metrics[confidence_level_name] = torch.nn.ModuleDict(
+                self._metrics[confidence_level_name]
+            )
 
     def reset(self) -> None:
         """
@@ -76,6 +87,8 @@ class CombinedPerScanMetric(torchmetrics.Metric):
 
         super().reset()
 
+    
+    # pylint: disable=arguments-differ
     def update(
         self,
         prediction: torch.Tensor,
@@ -104,8 +117,10 @@ class CombinedPerScanMetric(torchmetrics.Metric):
                 The keys have the form `<phase>/<metric name>_<confidence_level>`.
         """
         metric_results = {}
-        for confidence_level, confidence_level_name in self.confidence_levels:
+        for _, confidence_level_name in self.confidence_levels:
             for metric_name, metric in self._metrics[confidence_level_name].items():
-                metric_results[f"{self.phase}/{metric_name}_{confidence_level_name.replace(',','.')}"] = metric.compute()
+                metric_results[
+                    f"{self.phase}/{metric_name}_{confidence_level_name.replace(',','.')}"
+                ] = metric.compute()
 
         return metric_results
