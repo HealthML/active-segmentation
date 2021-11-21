@@ -38,6 +38,7 @@ class PytorchUNet(PytorchModel):
 
         self.train_average_metrics = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics_to_aggregate=["dice", "hausdorff95"],
             reduce="mean",
             groups=self.confidence_level_names,
             device=self.device,
@@ -45,6 +46,7 @@ class PytorchUNet(PytorchModel):
 
         self.train_metrics_per_case = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics_to_aggregate=["dice", "hausdorff95"],
             reduce="none",
             groups=self.confidence_level_names,
             device=self.device,
@@ -52,6 +54,7 @@ class PytorchUNet(PytorchModel):
 
         self.val_average_metrics = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics_to_aggregate=["dice", "hausdorff95"],
             reduce="mean",
             groups=self.confidence_level_names,
             device=self.device,
@@ -59,6 +62,7 @@ class PytorchUNet(PytorchModel):
 
         self.val_metrics_per_case = MetricPerCaseTracker(
             metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics_to_aggregate=["dice", "hausdorff95"],
             reduce="none",
             groups=self.confidence_level_names,
             device=self.device,

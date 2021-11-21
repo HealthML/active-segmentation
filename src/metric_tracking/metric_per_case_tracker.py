@@ -18,6 +18,10 @@ class MetricPerCaseTracker:
         reduce (string):  Reduction function that is to be used to aggregate the metric values of all cases, must be
             either "mean", "sum" or "none".
         groups (Iterable[str], optional): A list of group names for which the metrics are to be tracked separately.
+        metrics_to_aggregate (Iterable[str], optional): A list of metric names from which to calculate an aggregated 
+            metric. Must be a subset of the metric names passed to the `metrics` parameter. If, for example,
+            `metrics_to_aggregate=["dice", "hausdorff95"]` and `reduce="mean"`, the mean of the dice score and the 
+            Hausdorff distance is calculated.
         device: The target device as defined in PyTorch.
     """
 
@@ -26,11 +30,21 @@ class MetricPerCaseTracker:
         metrics: Iterable[str],
         reduce: str = "mean",
         groups: Optional[Iterable[str]] = None,
+        metrics_to_aggregate: Optional[Iterable[str]] = None,
         device: torch.device = torch.device("cpu"),
     ):
         self.groups = groups
         self.device = device
         self.metrics = metrics
+
+        if metrics_to_aggregate is not None and not set(metrics_to_aggregate).issubset(
+            set(metrics)
+        ):
+            raise ValueError(
+                "'metrics_to_aggregate must be a subset' of the metric names passed to the 'metrics' parameter."
+            )
+
+        self.metrics_to_aggregate = metrics_to_aggregate
         self._metrics_per_case = {}
 
         if reduce not in ["mean", "sum", "none"]:
@@ -112,5 +126,17 @@ class MetricPerCaseTracker:
                 aggregated_metrics[metric] = torch.tensor(
                     aggregated_metrics[metric], device=self.device
                 ).sum()
+
+        if self.metrics_to_aggregate and self.reduce:
+            all_metrics = [
+                metric_value
+                for metric_name, metric_value in aggregated_metrics.items()
+                if metric_name in self.metrics_to_aggregate
+            ]
+
+            if self.reduce == "mean":
+                aggregated_metrics["aggregated"] = torch.mean(torch.tensor(all_metrics))
+            elif self.reduce == "sum":
+                aggregated_metrics["aggregated"] = torch.sum(torch.tensor(all_metrics))
 
         return aggregated_metrics
