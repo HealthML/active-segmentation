@@ -3,6 +3,7 @@
 from typing import Any, Iterable
 
 import torch
+import wandb
 
 from metric_tracking import MetricPerCaseTracker
 from .pytorch_model import PytorchModel
@@ -166,6 +167,7 @@ class PytorchUNet(PytorchModel):
             )
 
             for metric_name, metric_value in average_metrics.items():
+                wandb.define_metric(f"train/mean_{metric_name}_{confidence_level}", summary="max", step_metric="epoch")
                 self.log(f"train/mean_{metric_name}_{confidence_level}", metric_value)
 
             for metric, metric in metrics_per_case.items():
@@ -222,6 +224,7 @@ class PytorchUNet(PytorchModel):
             )
 
             for metric_name, metric_value in average_metrics.items():
+                wandb.define_metric(f"val/mean_{metric_name}_{confidence_level}", summary="max", step_metric="epoch")
                 self.log(f"val/mean_{metric_name}_{confidence_level}", metric_value)
 
             for metric_name, metric in metrics_per_case.items():
