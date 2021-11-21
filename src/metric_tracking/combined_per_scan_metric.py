@@ -80,14 +80,13 @@ class CombinedPerScanMetric(torchmetrics.Metric):
         """
         Resets internal state such that metric ready for new data.
         """
-        
+
         for _, confidence_level_name in self.confidence_levels:
             for metric in self._metrics[confidence_level_name].values():
                 metric.reset()
 
         super().reset()
 
-    
     # pylint: disable=arguments-differ
     def update(
         self,

@@ -74,11 +74,11 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         """
         Resets internal state such that metric ready for new data.
         """
-        
+
         for metric in self._metrics_per_case.values():
             metric.reset()
         super().reset()
-    
+
     # pylint: disable=arguments-differ
     def update(
         self,
