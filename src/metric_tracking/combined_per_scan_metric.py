@@ -65,6 +65,17 @@ class CombinedPerScanMetric(torchmetrics.Metric):
             # the ModuleDict is required by PyTorch Lightning in order to place the metrics on the correct device
             self._metrics[confidence_level_name] = torch.nn.ModuleDict(self._metrics[confidence_level_name])
 
+    def reset(self) -> None:
+        """
+        Resets internal state such that metric ready for new data.
+        """
+        
+        for _, confidence_level_name in self.confidence_levels:
+            for metric in self._metrics[confidence_level_name].values():
+                metric.reset()
+
+        super().reset()
+
     def update(
         self,
         prediction: torch.Tensor,

@@ -187,6 +187,7 @@ class PytorchModel(LightningModule, ABC):
         for train_metric in self.train_metrics:
             train_metrics = train_metric.compute()
             self.logger.log_metrics(train_metrics)
+            train_metric.reset()
 
     def validation_epoch_end(self, validation_step_outputs: Any):
         """
@@ -199,3 +200,4 @@ class PytorchModel(LightningModule, ABC):
         for val_metric in self.val_metrics:
             val_metrics = val_metric.compute()
             self.logger.log_metrics(val_metrics)
+            val_metric.reset()

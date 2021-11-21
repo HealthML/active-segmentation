@@ -65,6 +65,15 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
         self.reduction = reduction
 
+    def reset(self) -> None:
+        """
+        Resets internal state such that metric ready for new data.
+        """
+        
+        for metric in self._metrics_per_case.values():
+            metric.reset()
+        super().reset()
+
     def update(
         self, prediction: torch.Tensor, target: torch.Tensor, case_ids: Iterable[str],
     ) -> None:
