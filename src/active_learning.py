@@ -1,6 +1,8 @@
 """ Module containing the active learning pipeline """
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.callbacks import EarlyStopping, ModelSummary, LearningRateMonitor
+from torchsummary import summary
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
@@ -31,12 +33,20 @@ class ActiveLearningPipeline:
 
         self.data_module = data_module
         self.model = model
+        callbacks = [
+            ModelSummary(max_depth=1),
+            EarlyStopping("validation/loss"),
+            LearningRateMonitor(logging_interval="step"),
+        ]
         self.model_trainer = Trainer(
             deterministic=True,
             profiler="simple",
             max_epochs=epochs,
             logger=wandb_logger,
             gpus=gpus,
+            auto_lr_find=True,
+            benchmark=True,
+            callbacks=callbacks,
         )
         self.strategy = strategy
         self.epochs = epochs

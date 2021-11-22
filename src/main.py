@@ -20,6 +20,7 @@ def run_active_learning_pipeline(
     gpus: int = 1,
     loss: str = "dice",
     optimizer: str = "adam",
+    lr_scheduler: str = None,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning simulation.
@@ -33,15 +34,18 @@ def run_active_learning_pipeline(
         epochs: Number of iterations with the full dataset.
         loss: Name of the performance measure to optimize. E.g. 'dice'.
         optimizer: Name of the optimization algorithm. E.g. 'adam'.
+        lr_scheduler: Name of the learning rate scheduler algorithm. E.g. 'reduceLROnPlateau'.
 
     Returns:
         None.
     """
 
     if architecture == "fcn_resnet50":
-        model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
+        model = PytorchFCNResnet50(
+            optimizer=optimizer, loss=loss, lr_scheduler=lr_scheduler
+        )
     elif architecture == "u_net":
-        model = PytorchUNet(optimizer=optimizer, loss=loss)
+        model = PytorchUNet(optimizer=optimizer, loss=loss, lr_scheduler=lr_scheduler)
     else:
         raise ValueError("Invalid model architecture.")
 

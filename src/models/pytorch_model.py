@@ -15,6 +15,7 @@ class PytorchModel(LightningModule, ABC):
     Args:
         learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
         optimizer: Algorithm used to calculate the loss and update the weights. E.g. 'adam' or 'sgd'.
+        lr_scheduler: Algorithm used for dynamically updating the learning rate during training. E.g. 'reduceLROnPlateau'
         loss: The measure of performance. E.g. 'dice', 'bce', 'fp'
         **kwargs:
     """
@@ -25,6 +26,7 @@ class PytorchModel(LightningModule, ABC):
         self,
         learning_rate: float = 0.0001,
         optimizer: str = "adam",
+        lr_scheduler: str = None,
         loss: str = "dice",
         **kwargs
     ):
@@ -33,6 +35,7 @@ class PytorchModel(LightningModule, ABC):
 
         self.learning_rate = learning_rate
         self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
         self.loss = self.configure_loss(loss)
 
     @abstractmethod
@@ -74,14 +77,26 @@ class PytorchModel(LightningModule, ABC):
         This method is called by the PyTorch lightning framework before starting model training.
 
         Returns:
-            The optimizer object.
+            The optimizer object and optionally a learning rate scheduler object.
         """
-
         if self.optimizer == "adam":
-            return Adam(self.parameters(), lr=self.learning_rate)
-        if self.optimizer == "sgd":
-            return SGD(self.parameters(), lr=self.learning_rate)
-        raise ValueError("Invalid optimizer name.")
+            opt = Adam(self.parameters(), lr=self.learning_rate)
+        elif self.optimizer == "sgd":
+            opt = SGD(self.parameters(), lr=self.learning_rate)
+        else:
+            raise ValueError("Invalid optimizer name.")
+
+        scheduler = None
+        if self.lr_scheduler == "reduceLROnPlateau":
+            scheduler = {
+                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(opt),
+                "monitor": "validation/loss",
+            }
+
+        if scheduler is not None:
+            return [opt], [scheduler]
+        else:
+            return opt
 
     @staticmethod
     def configure_loss(loss: str) -> functional.losses.SegmentationLoss:
