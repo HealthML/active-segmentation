@@ -10,7 +10,7 @@ from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-locals
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,

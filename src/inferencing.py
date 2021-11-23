@@ -19,6 +19,7 @@ class Inferencer:
         prediction_count: The amount of predictions to be generated.
     """
 
+    # pylint: disable=too-few-public-methods
     def __init__(
         self,
         model: PytorchModel,
