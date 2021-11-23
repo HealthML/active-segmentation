@@ -1,5 +1,5 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Literal, Optional, Tuple
 import math
 import nibabel as nib
 import numpy as np
@@ -73,6 +73,7 @@ class BraTSDataset(Dataset):
         clip_mask: bool = True,
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
+        dimensionality: Literal["2d", "3d"] = "2d",
     ):
 
         self.image_paths = image_paths
@@ -98,16 +99,22 @@ class BraTSDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
-    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
-        slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
-        if image_index != self._current_image_index:
-            self._current_image_index = image_index
-            self._current_image = self.images[self._current_image_index]
-            self._current_mask = self.masks[self._current_image_index]
+        self.dimensionality = dimensionality
 
-        x = torch.from_numpy(self._current_image[slice_index, :, :])
-        y = torch.from_numpy(self._current_mask[slice_index, :, :])
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        if self.dimensionality == "2d":
+            image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
+            slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
+            if image_index != self._current_image_index:
+                self._current_image_index = image_index
+                self._current_image = self.images[self._current_image_index]
+                self._current_mask = self.masks[self._current_image_index]
+
+            x = torch.from_numpy(self._current_image[slice_index, :, :])
+            y = torch.from_numpy(self._current_mask[slice_index, :, :])
+        else:
+            x = torch.from_numpy(self.images[index])
+            y = torch.from_numpy(self.masks[index])
 
         if self.transform:
             x = self.transform(x)

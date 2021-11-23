@@ -1,5 +1,6 @@
 """ Module containing the data module for brats data """
 import os
+import random
 from typing import Any, List, Optional, Union, Tuple
 from torch.utils.data import Dataset
 
@@ -21,7 +22,9 @@ class BraTSDataModule(ActiveLearningDataModule):
     # pylint: disable=unused-argument,no-self-use
     @staticmethod
     def discover_paths(
-        dir_path: str, modality: str = "flair"
+        dir_path: str,
+        modality: str = "flair",
+        random_samples: Union[int, None] = None,
     ) -> Tuple[List[str], List[str]]:
         """
         Discover the .nii.gz file paths with a given modality
@@ -39,6 +42,9 @@ class BraTSDataModule(ActiveLearningDataModule):
             for case in cases
             if not case.startswith(".") and os.path.isdir(os.path.join(dir_path, case))
         ]
+
+        if random_samples is not None and random_samples < len(cases):
+            cases = random.sample(cases, random_samples)
 
         image_paths = [
             os.path.join(dir_path, case, f"{os.path.basename(case)}_{modality}.nii.gz")

@@ -1,8 +1,10 @@
 """ Main module to execute active learning pipeline from CLI """
 import json
 import os.path
+from typing import Union
 import fire
 from active_learning import ActiveLearningPipeline
+from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
@@ -20,6 +22,8 @@ def run_active_learning_pipeline(
     gpus: int = 1,
     loss: str = "dice",
     optimizer: str = "adam",
+    prediction_count: Union[int, None] = None,
+    prediction_dir: str = "./predictions",
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning simulation.
@@ -59,6 +63,14 @@ def run_active_learning_pipeline(
 
     pipeline = ActiveLearningPipeline(data_module, model, strategy, epochs, gpus)
     pipeline.run()
+
+    if prediction_count is None:
+        return
+
+    inferencer = Inferencer(
+        model, dataset, os.path.join(data_dir, "val"), prediction_dir, prediction_count
+    )
+    inferencer.inference()
 
 
 def run_active_learning_pipeline_from_config(config_file_name: str) -> None:
