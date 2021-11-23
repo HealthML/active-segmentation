@@ -1,5 +1,5 @@
 """ Base classes to implement models with pytorch """
-import abc
+from abc import ABC, abstractmethod
 from typing import Union
 import numpy
 import torch
@@ -9,7 +9,7 @@ from torch.optim import Adam, SGD
 import functional
 
 
-class PytorchModel(LightningModule):
+class PytorchModel(LightningModule, ABC):
     """
     Base class to implement Pytorch models.
     Args:
@@ -35,7 +35,7 @@ class PytorchModel(LightningModule):
         self.optimizer = optimizer
         self.loss = self.configure_loss(loss)
 
-    @abc.abstractmethod
+    @abstractmethod
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
         """
         Trains the model on a given batch of model inputs.
@@ -51,7 +51,7 @@ class PytorchModel(LightningModule):
 
         return 0
 
-    @abc.abstractmethod
+    @abstractmethod
     def validation_step(self, batch, batch_idx) -> None:
         """
         Validates the model on a given batch of model inputs.

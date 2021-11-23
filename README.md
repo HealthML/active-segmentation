@@ -111,3 +111,22 @@ make clean && make html
 ```
 
 To view the documentation, open the `./docs/build/html/index.html` file in your browser.
+## Running the Tests
+
+To execute all unit tests, run:
+
+```
+python3 -m unittest discover
+```
+
+To execute only a specific test module run:
+
+```
+python3 -m unittest test.<name of test module>
+```
+
+To execute only a specific test case, run:
+
+```
+python3 -m unittest test.<name of test module>.<name of test case>
+```
