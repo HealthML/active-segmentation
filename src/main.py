@@ -21,6 +21,7 @@ def run_active_learning_pipeline(
     gpus: int = 1,
     loss: str = "dice",
     optimizer: str = "adam",
+    learning_rate: float = 0.0001,
     lr_scheduler: str = None,
 ) -> None:
     """
@@ -35,6 +36,7 @@ def run_active_learning_pipeline(
         epochs: Number of iterations with the full dataset.
         loss: Name of the performance measure to optimize. E.g. 'dice'.
         optimizer: Name of the optimization algorithm. E.g. 'adam'.
+        learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
         lr_scheduler: Name of the learning rate scheduler algorithm. E.g. 'reduceLROnPlateau'.
 
     Returns:
@@ -43,10 +45,18 @@ def run_active_learning_pipeline(
 
     if architecture == "fcn_resnet50":
         model = PytorchFCNResnet50(
-            optimizer=optimizer, loss=loss, lr_scheduler=lr_scheduler
+            optimizer=optimizer,
+            loss=loss,
+            learning_rate=learning_rate,
+            lr_scheduler=lr_scheduler,
         )
     elif architecture == "u_net":
-        model = PytorchUNet(optimizer=optimizer, loss=loss, lr_scheduler=lr_scheduler)
+        model = PytorchUNet(
+            optimizer=optimizer,
+            learning_rate=learning_rate,
+            loss=loss,
+            lr_scheduler=lr_scheduler,
+        )
     else:
         raise ValueError("Invalid model architecture.")
 

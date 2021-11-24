@@ -6,6 +6,7 @@
   "epochs": 3,
   "num_workers": 8,
   "optimizer": "adam",
+  "learning_rate": 0.0001,
   "loss": "dice",
   "data_dir": "/dhc/groups/mpws2021cl1/Data",
   "gpus": 1

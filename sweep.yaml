@@ -15,15 +15,15 @@ parameters:
   batch_size:
     distribution: categorical
     values:
-    - 16
-    - 32
-    - 64
+      - 16
+      - 32
+      - 64
   optimizer:
     distribution: categorical
     values:
-    - adam
-    - sgd
-  # learning_rate:
-  #   distribution: log_uniform
-  #   min: -10
-  #   max: -3
+      - adam
+      - sgd
+  learning_rate:
+    distribution: uniform
+    min: 0.0001
+    max: 0.01
