@@ -9,14 +9,15 @@ command:
   - ${args}
 method: bayes
 metric:
-  name: val_loss
+  name: validation/loss
   goal: minimize
 parameters:
   batch_size:
-    distribution: q_uniform
-    min: 16
-    max: 64
-    q: 1
+    distribution: categorical
+    values:
+    - 16
+    - 32
+    - 64
   optimizer:
     distribution: categorical
     values:
