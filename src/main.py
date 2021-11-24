@@ -6,6 +6,7 @@ from active_learning import ActiveLearningPipeline
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
+import wandb
 
 
 # pylint: disable=too-many-arguments
@@ -65,18 +66,30 @@ def run_active_learning_pipeline(
     pipeline.run()
 
 
-def run_active_learning_pipeline_from_config(config_file_name: str) -> None:
+def run_active_learning_pipeline_from_config(
+    config_file_name: str, hp_optimisation: bool = False
+) -> None:
     """
     Runs the active learning pipeline based on a config file.
     Args:
         config_file_name: Name of or path to the config file.
+        hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based on the configured sweep file
     """
     if not os.path.isfile(config_file_name):
         print("Config file could not be found.")
         raise FileNotFoundError(f"{config_file_name} is not a valid filename.")
 
     with open(config_file_name, encoding="utf-8") as config_file:
-        config = json.load(config_file)
+        hyperparameter_defaults = json.load(config_file)
+        config = hyperparameter_defaults
+        if hp_optimisation:
+            print("Start Hyperparameter Optimisation using sweep.yaml file")
+            wandb.init(config=hyperparameter_defaults)
+            # Config parameters are automatically set by W&B sweep agent
+            config = wandb.config
+        else:
+            print("Hyperparemter optimisation parameter is not set")
+
         run_active_learning_pipeline(
             **config,
         )

@@ -1,0 +1,28 @@
+program: src/main.py
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "--config_file_name"
+  - "brats_example_config.json"
+  - "--hp-optimisation"
+  - ${args}
+method: bayes
+metric:
+  name: val_loss
+  goal: minimize
+parameters:
+  batch_size:
+    distribution: q_uniform
+    min: 16
+    max: 64
+    q: 1
+  optimizer:
+    distribution: categorical
+    values:
+    - adam
+    - sgd
+  # learning_rate:
+  #   distribution: log_uniform
+  #   min: -10
+  #   max: -3

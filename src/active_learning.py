@@ -2,7 +2,6 @@
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelSummary, LearningRateMonitor
-from torchsummary import summary
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
@@ -33,6 +32,9 @@ class ActiveLearningPipeline:
 
         self.data_module = data_module
         self.model = model
+        # log log gradients, parameter histogram and model topology
+        wandb_logger.watch(self.model, log="all")
+
         callbacks = [
             ModelSummary(max_depth=1),
             EarlyStopping("validation/loss"),
