@@ -84,7 +84,7 @@ class UNet(nn.Module):
         for i in range(self.layers):
             encs[i] = self.encoders[i](x if i == 0 else self.pools[i - 1](encs[i - 1]))
 
-        bottleneck = self.bottleneck(self.pool4(encs[-1]))
+        bottleneck = self.bottleneck(self.pools[-1](encs[-1]))
 
         dec = bottleneck
         for i in reversed(range(self.layers)):
