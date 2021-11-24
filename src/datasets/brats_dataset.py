@@ -146,7 +146,10 @@ class BraTSDataset(Dataset):
             y = self.target_transform(y)
 
         if self.is_unlabeled:
-            return torch.unsqueeze(x, 0), f"{case_id}-{slice_index}"
+            return (
+                torch.unsqueeze(x, 0),
+                f"{case_id}-{slice_index}" if self.dimensionality == "2d" else case_id,
+            )
 
         return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
 

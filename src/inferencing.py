@@ -55,7 +55,7 @@ class Inferencer:
         )
 
         for i in range(self.prediction_count):
-            x, _ = data.__getitem__(i)
+            x = data.__getitem__(i)[0]
 
             x = torch.swapaxes(x, 0, 1)
             pred = self.model(x)
