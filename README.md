@@ -92,6 +92,22 @@ Additionally, the following optional arguments can be supplied in the same confi
 }
 ```
 
+## Running Weights & Biases Sweeps
+
+To execute the hyperparameter optimisation using W&B sweeps, run:
+
+```
+wandb sweep sweep.yaml
+```
+
+This will output a new `Sweep_ID` that you can use to run the agent:
+
+```
+srun -p gpupro --gpus=1 -c 18 --mem 150000 wandb agent <sweep_ID>
+```
+
+Configuring which hyperparameters should be optimized is done in the `sweep.yaml` file.
+
 ## Building the Documentation
 
 The documentation is based on [Sphinx](https://www.sphinx-doc.org/en/master/). For detailed instructions on how to setup Sphinx documentations in general, see this [Read the Docs tutorial](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/install.html).
@@ -109,6 +125,7 @@ make clean && make html
 ```
 
 To view the documentation, open the `./docs/build/html/index.html` file in your browser.
+
 ## Running the Tests
 
 To execute all unit tests, run:
