@@ -4,7 +4,7 @@
 
 #SBATCH --mail-type=END,FAIL
 
-#SBATCH --mail-user=johannes.hagemann@student.hpi.de
+#SBATCH --mail-user=<USER_EMAIL>
 
 #SBATCH --partition=gpua100
 

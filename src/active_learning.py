@@ -32,7 +32,7 @@ class ActiveLearningPipeline:
 
         self.data_module = data_module
         self.model = model
-        # log log gradients, parameter histogram and model topology
+        # log gradients, parameter histogram and model topology
         wandb_logger.watch(self.model, log="all")
 
         callbacks = [

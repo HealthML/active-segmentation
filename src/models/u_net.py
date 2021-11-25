@@ -104,10 +104,10 @@ class UNet(nn.Module):
         bottleneck = self.bottleneck(self.pools[-1](encs[-1]))
 
         dec = bottleneck
-        for i in reversed(range(self.num_levels)):
-            dec = self.upconvs[i](dec)
-            dec = torch.cat((dec, encs[i]), dim=1)
-            dec = self.decoders[i](dec)
+        for level in reversed(range(self.num_levels)):
+            dec = self.upconvs[level](dec)
+            dec = torch.cat((dec, encs[level]), dim=1)
+            dec = self.decoders[level](dec)
 
         return torch.sigmoid(self.conv(dec))
 
