@@ -2,6 +2,8 @@
   "architecture": "u_net",
   "dataset": "brats",
   "strategy": "base",
+  "experiment_name": "test-experiment",
+  "experiment_tags": [],
   "batch_size": 16,
   "epochs": 3,
   "num_workers": 8,

@@ -1,4 +1,4 @@
 """ Modules to import when initializing module """
 
-from .metric_tracker import MetricTracker
-from .metric_per_case_tracker import MetricPerCaseTracker
+from .combined_per_scan_metric import CombinedPerScanMetric
+from .combined_per_epoch_metric import CombinedPerEpochMetric
