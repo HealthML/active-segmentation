@@ -6,7 +6,7 @@
 
 #SBATCH --mail-user=<USER_EMAIL>
 
-#SBATCH --partition=gpua100
+#SBATCH --partition=gpupro
 
 #SBATCH --mem=200000
 

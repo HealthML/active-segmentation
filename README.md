@@ -104,7 +104,7 @@ wandb sweep sweep.yaml
 This will output a new `Sweep_ID` that you can use to run the agent via the provided shell script:
 
 ```
-sbatch batch_sweeps.sh <sweep_ID>
+sbatch batch_sweeps.slurm <sweep_ID>
 ```
 
 Configuring which hyperparameters should be optimized is done in the `sweep.yaml` file.
