@@ -1,7 +1,7 @@
 """ Module containing the data module for brats data """
 import os
 import random
-from typing import Any, List, Optional, Union, Tuple
+from typing import Any, List, Optional, Tuple
 from torch.utils.data import Dataset
 
 from datasets.data_module import ActiveLearningDataModule
@@ -24,7 +24,7 @@ class BraTSDataModule(ActiveLearningDataModule):
     def discover_paths(
         dir_path: str,
         modality: str = "flair",
-        random_samples: Union[int, None] = None,
+        random_samples: Optional[int] = None,
     ) -> Tuple[List[str], List[str]]:
         """
         Discover the .nii.gz file paths with a given modality
@@ -76,7 +76,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         # ToDo: implement labeling logic
         return None
 
-    def _create_training_set(self) -> Union[Dataset, None]:
+    def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
@@ -85,7 +85,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             image_paths=train_image_paths, annotation_paths=train_annotation_paths
         )
 
-    def _create_validation_set(self) -> Union[Dataset, None]:
+    def _create_validation_set(self) -> Optional[Dataset]:
         """Creates a validation dataset."""
         val_image_paths, val_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "val")
@@ -94,12 +94,12 @@ class BraTSDataModule(ActiveLearningDataModule):
             image_paths=val_image_paths, annotation_paths=val_annotation_paths
         )
 
-    def _create_test_set(self) -> Union[Dataset, None]:
+    def _create_test_set(self) -> Optional[Dataset]:
         # faked test set
         # ToDo: implement test set
         return self._create_validation_set()
 
-    def _create_unlabeled_set(self) -> Union[Dataset, None]:
+    def _create_unlabeled_set(self) -> Optional[Dataset]:
         # faked unlabeled set
         # ToDo: implement unlabeled set
         unlabeled_set = self._create_training_set()

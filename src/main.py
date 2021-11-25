@@ -1,7 +1,7 @@
 """ Main module to execute active learning pipeline from CLI """
 import json
 import os.path
-from typing import Union
+from typing import Optional
 import fire
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
@@ -22,7 +22,7 @@ def run_active_learning_pipeline(
     gpus: int = 1,
     loss: str = "dice",
     optimizer: str = "adam",
-    prediction_count: Union[int, None] = None,
+    prediction_count: Optional[int] = None,
     prediction_dir: str = "./predictions",
 ) -> None:
     """
