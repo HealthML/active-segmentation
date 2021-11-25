@@ -145,13 +145,16 @@ class PytorchUNet(PytorchModel):
 
         # ToDo: this method should return the required performance metrics
 
-    def predict_step(self, batch: torch.Tensor, batch_idx: int) -> np.ndarray:
+    def predict_step(
+        self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
+    ) -> np.ndarray:
         """
         Uses the model to predict a given batch of input images.
 
         Args:
             batch (Tensor): Batch of prediction images.
             batch_idx: Index of the prediction batch.
+            dataloader_idx: Index of the dataloader.
         """
 
         return self.predict(batch)
