@@ -7,6 +7,7 @@ import fire
 from pytorch_lightning.loggers import WandbLogger
 
 from active_learning import ActiveLearningPipeline
+from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
@@ -26,6 +27,8 @@ def run_active_learning_pipeline(
     loss: str = "dice",
     num_workers: int = 4,
     optimizer: str = "adam",
+    prediction_count: Optional[int] = None,
+    prediction_dir: str = "./predictions",
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning simulation.
@@ -78,6 +81,18 @@ def run_active_learning_pipeline(
         data_module, model, strategy, epochs, gpus, wandb_logger
     )
     pipeline.run()
+
+    if prediction_count is None:
+        return
+
+    inferencer = Inferencer(
+        model,
+        dataset,
+        os.path.join(data_dir, "val"),
+        prediction_dir,
+        prediction_count,
+    )
+    inferencer.inference()
 
 
 def run_active_learning_pipeline_from_config(config_file_name: str) -> None:

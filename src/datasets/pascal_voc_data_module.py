@@ -1,6 +1,6 @@
 """ Module to load pascal voc data """
 import os
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 import numpy as np
 from torch.utils.data import Dataset, random_split
 from torchvision import datasets, transforms
@@ -63,7 +63,7 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         # ToDo: implement labeling logic
         return None
 
-    def _create_training_set(self) -> Union[Dataset, None]:
+    def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
         training_set = datasets.VOCSegmentation(
             self.data_folder,
@@ -78,7 +78,7 @@ class PascalVOCDataModule(ActiveLearningDataModule):
             [self.__training_set_size, len(training_set) - self.__training_set_size],
         )[0]
 
-    def _create_validation_set(self) -> Union[Dataset, None]:
+    def _create_validation_set(self) -> Optional[Dataset]:
         """Creates a validation dataset."""
         validation_set = datasets.VOCSegmentation(
             self.data_folder,
@@ -96,12 +96,12 @@ class PascalVOCDataModule(ActiveLearningDataModule):
             ],
         )[0]
 
-    def _create_test_set(self) -> Union[Dataset, None]:
+    def _create_test_set(self) -> Optional[Dataset]:
         # faked test set
         # ToDo: implement test set
         return self._create_validation_set()
 
-    def _create_unlabeled_set(self) -> Union[Dataset, None]:
+    def _create_unlabeled_set(self) -> Optional[Dataset]:
         # faked unlabeled set
         # ToDo: implement unlabeled set
         return self._create_training_set()

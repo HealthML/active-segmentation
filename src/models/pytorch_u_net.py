@@ -3,6 +3,7 @@
 from typing import Iterable
 
 import torch
+import numpy as np
 
 from .pytorch_model import PytorchModel
 from .u_net import UNet
@@ -111,3 +112,17 @@ class PytorchUNet(PytorchModel):
 
         for val_metric in self.get_val_metrics():
             val_metric.update(probabilities, y, case_ids)
+
+    def predict_step(
+        self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
+    ) -> np.ndarray:
+        """
+        Uses the model to predict a given batch of input images.
+
+        Args:
+            batch (Tensor): Batch of prediction images.
+            batch_idx: Index of the prediction batch.
+            dataloader_idx: Index of the dataloader.
+        """
+
+        return self.predict(batch)

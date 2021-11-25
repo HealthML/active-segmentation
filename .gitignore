@@ -153,3 +153,6 @@ lightning_logs
 
 # Weight&Biases Logs
 wandb/
+
+# Checkpoints
+checkpoints
