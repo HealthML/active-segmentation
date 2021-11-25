@@ -9,7 +9,7 @@ command:
   - ${args}
 method: bayes
 metric:
-  name: validation/losse
+  name: validation/loss
   goal: minimize
 parameters:
   batch_size:

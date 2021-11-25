@@ -13,9 +13,10 @@ class PytorchModel(LightningModule, ABC):
     """
     Base class to implement Pytorch models.
     Args:
-        learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
+        learning_rate: The step size at each iteration while moving towards a minimum of the loss.
         optimizer: Algorithm used to calculate the loss and update the weights. E.g. 'adam' or 'sgd'.
-        lr_scheduler: Algorithm used for dynamically updating the learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        lr_scheduler: Algorithm used for dynamically updating the learning rate during training.
+            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         loss: The measure of performance. E.g. 'dice', 'bce', 'fp'
         **kwargs:
     """
@@ -100,8 +101,8 @@ class PytorchModel(LightningModule, ABC):
 
         if scheduler is not None:
             return [opt], [scheduler]
-        else:
-            return opt
+
+        return opt
 
     @staticmethod
     def configure_loss(loss: str) -> functional.losses.SegmentationLoss:

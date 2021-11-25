@@ -1,7 +1,7 @@
 """ Module containing the active learning pipeline """
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.callbacks import EarlyStopping, ModelSummary, LearningRateMonitor
+from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
@@ -36,7 +36,6 @@ class ActiveLearningPipeline:
         wandb_logger.watch(self.model, log="all")
 
         callbacks = [
-            ModelSummary(max_depth=1),
             EarlyStopping("validation/loss"),
             LearningRateMonitor(logging_interval="step"),
         ]

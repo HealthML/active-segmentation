@@ -2,14 +2,15 @@
 import json
 import os.path
 import fire
+import wandb
 from active_learning import ActiveLearningPipeline
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
-import wandb
 
 
 # pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
@@ -26,7 +27,8 @@ def run_active_learning_pipeline(
     num_u_net_levels: int = 4,
 ) -> None:
     """
-    Main function to execute an active learning pipeline run, or start an active learning simulation.
+    Main function to execute an active learning pipeline run, or start an active learning
+        simulation.
     Args:
         architecture: Name of the desired model architecture. E.g. 'u_net'.
         dataset: Name of the dataset. E.g. 'brats'
@@ -37,7 +39,7 @@ def run_active_learning_pipeline(
         epochs: Number of iterations with the full dataset.
         loss: Name of the performance measure to optimize. E.g. 'dice'.
         optimizer: Name of the optimization algorithm. E.g. 'adam'.
-        learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
+        learning_rate: The step size at each iteration while moving towards a minimum of the loss.
         lr_scheduler: Name of the learning rate scheduler algorithm. E.g. 'reduceLROnPlateau'.
         num_u_net_levels: Number levels (encoder and decoder blocks) in the U-Net.
     Returns:
@@ -85,7 +87,8 @@ def run_active_learning_pipeline_from_config(
     Runs the active learning pipeline based on a config file.
     Args:
         config_file_name: Name of or path to the config file.
-        hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based on the configured sweep file
+        hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based
+            on the configured sweep file
     """
     if not os.path.isfile(config_file_name):
         print("Config file could not be found.")
