@@ -1,13 +1,17 @@
 """ Base classes to implement models with pytorch """
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import List, Union
 import numpy
 import torch
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR
 
 import functional
 
+Optimizer = Union[Adam, SGD]
+LRScheduler = Union[ReduceLROnPlateau, CosineAnnealingLR]
+LRSchedulerDict = dict[str, Union[str, LRScheduler]]
 
 class PytorchModel(LightningModule, ABC):
     """
@@ -73,12 +77,12 @@ class PytorchModel(LightningModule, ABC):
 
         return None
 
-    def configure_optimizers(self) -> Union[Adam, SGD]:
+    def configure_optimizers(self) -> Union[List[Optimizer], tuple[List[Optimizer], List[LRSchedulerDict]]]:
         """
         This method is called by the PyTorch lightning framework before starting model training.
 
         Returns:
-            The optimizer object and optionally a learning rate scheduler object.
+            The optimizer object as a list and optionally a learning rate scheduler object as a list.
         """
         if self.optimizer == "adam":
             opt = Adam(self.parameters(), lr=self.learning_rate)
@@ -90,19 +94,19 @@ class PytorchModel(LightningModule, ABC):
         scheduler = None
         if self.lr_scheduler == "reduceLROnPlateau":
             scheduler = {
-                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(opt),
+                "scheduler": ReduceLROnPlateau(opt),
                 "monitor": "validation/loss",
             }
         elif self.lr_scheduler == "cosineAnnealingLR":
             scheduler = {
-                "scheduler": torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=50),
+                "scheduler": CosineAnnealingLR(opt, T_max=50),
                 "monitor": "validation/loss",
             }
 
         if scheduler is not None:
             return [opt], [scheduler]
 
-        return opt
+        return [opt]
 
     @staticmethod
     def configure_loss(loss: str) -> functional.losses.SegmentationLoss:

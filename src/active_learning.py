@@ -45,7 +45,6 @@ class ActiveLearningPipeline:
             max_epochs=epochs,
             logger=wandb_logger,
             gpus=gpus,
-            auto_lr_find=True,
             benchmark=True,
             callbacks=callbacks,
         )
