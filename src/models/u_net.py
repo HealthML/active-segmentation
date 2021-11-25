@@ -8,15 +8,16 @@ from torch import nn
 
 class UNet(nn.Module):
     """
-    This U-Net implementation was taken from
+    This U-Net implementation was originally taken from
     https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py
+    and adapted to a flexible number of levels.
 
     Args:
         in_channels: Number of input channels.
         out_channels: Number of output channels (should be equal to the number of classes excluding the background)
         init_features: Number of feature channels of the first U-Net block, in each down-sampling block, the number of
             feature channels is doubled.
-        layers: Number of layers (encoder and decoder blocks) in the U-Net.
+        num_levels: Number levels (encoder and decoder blocks) in the U-Net.
     """
 
     # pylint: disable-msg=too-many-instance-attributes
@@ -26,44 +27,56 @@ class UNet(nn.Module):
         in_channels: int = 3,
         out_channels: int = 1,
         init_features: int = 32,
-        layers: int = 4,
+        num_levels: int = 4,
     ):
 
         super().__init__()
 
-        self.layers = layers
+        self.num_levels = num_levels
 
         features = init_features
 
-        self.encoders = [
-            UNet._block(
-                in_channels if i == 0 else features * (2 ** (i - 1)),
-                features * (2 ** i),
-                name=f"enc{i + 1}",
-            )
-            for i in range(layers)
-        ]
-        self.pools = [nn.MaxPool2d(kernel_size=2, stride=2) for _ in range(layers)]
-
-        self.bottleneck = UNet._block(
-            features * (2 ** (layers - 1)), features * (2 ** layers), name="bottleneck"
+        self.encoders = nn.ModuleList(
+            [
+                UNet._block(
+                    in_channels if i == 0 else features * (2 ** (i - 1)),
+                    features * (2 ** i),
+                    name=f"enc{i + 1}",
+                )
+                for i in range(num_levels)
+            ]
+        )
+        self.pools = nn.ModuleList(
+            [nn.MaxPool2d(kernel_size=2, stride=2) for _ in range(num_levels)]
         )
 
-        self.upconvs = [
-            nn.ConvTranspose2d(
-                features * 2 * (2 ** (i + 1)),
-                features * (2 ** i),
-                kernel_size=2,
-                stride=2,
-            )
-            for i in range(layers)
-        ]
-        self.decoders = [
-            UNet._block(
-                features * 2 * (2 ** (i + 1)), features * (2 ** i), name=f"dec{i + 1}"
-            )
-            for i in range(layers)
-        ]
+        self.bottleneck = UNet._block(
+            features * (2 ** (num_levels - 1)),
+            features * (2 ** num_levels),
+            name="bottleneck",
+        )
+
+        self.upconvs = nn.ModuleList(
+            [
+                nn.ConvTranspose2d(
+                    features * (2 ** (i + 1)),
+                    features * (2 ** i),
+                    kernel_size=2,
+                    stride=2,
+                )
+                for i in range(num_levels)
+            ]
+        )
+        self.decoders = nn.ModuleList(
+            [
+                UNet._block(
+                    features * (2 ** (i + 1)),
+                    features * (2 ** i),
+                    name=f"dec{i + 1}",
+                )
+                for i in range(num_levels)
+            ]
+        )
 
         self.conv = nn.Conv2d(
             in_channels=features, out_channels=out_channels, kernel_size=1
@@ -81,13 +94,15 @@ class UNet(nn.Module):
 
         x = x.float()
         encs = []  # individually store encoding results for skip connections
-        for i in range(self.layers):
-            encs[i] = self.encoders[i](x if i == 0 else self.pools[i - 1](encs[i - 1]))
+        for i in range(self.num_levels):
+            encs.append(
+                self.encoders[i](x if i == 0 else self.pools[i - 1](encs[i - 1]))
+            )
 
         bottleneck = self.bottleneck(self.pools[-1](encs[-1]))
 
         dec = bottleneck
-        for i in reversed(range(self.layers)):
+        for i in reversed(range(self.num_levels)):
             dec = self.upconvs[i](dec)
             dec = torch.cat((dec, encs[i]), dim=1)
             dec = self.decoders[i](dec)
