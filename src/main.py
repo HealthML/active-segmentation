@@ -99,7 +99,7 @@ def run_active_learning_pipeline_from_config(
         config = hyperparameter_defaults
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")
-            wandb.init(config=hyperparameter_defaults)
+            wandb.init(config=hyperparameter_defaults, project="active-segmentation", entity="active-segmentation")
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 

@@ -1,4 +1,6 @@
 program: src/main.py
+project: active-segmentation
+entity: active-segmentation
 command:
   - ${env}
   - ${interpreter}
