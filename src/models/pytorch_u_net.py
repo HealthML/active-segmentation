@@ -109,7 +109,7 @@ class PytorchUNet(PytorchModel):
 
         loss = self.loss(probabilities, y)
         self.log("validation/loss", loss)  # log validation loss via weights&biases
-        
+
         for val_metric in self.get_val_metrics():
             val_metric.update(probabilities, y, case_ids)
 
