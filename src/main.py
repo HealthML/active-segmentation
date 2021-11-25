@@ -23,6 +23,7 @@ def run_active_learning_pipeline(
     optimizer: str = "adam",
     learning_rate: float = 0.0001,
     lr_scheduler: str = None,
+    num_u_net_levels: int = 4,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning simulation.
@@ -38,7 +39,7 @@ def run_active_learning_pipeline(
         optimizer: Name of the optimization algorithm. E.g. 'adam'.
         learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
         lr_scheduler: Name of the learning rate scheduler algorithm. E.g. 'reduceLROnPlateau'.
-
+        num_u_net_levels: Number levels (encoder and decoder blocks) in the U-Net.
     Returns:
         None.
     """
@@ -52,6 +53,7 @@ def run_active_learning_pipeline(
         )
     elif architecture == "u_net":
         model = PytorchUNet(
+            num_levels=num_u_net_levels,
             optimizer=optimizer,
             learning_rate=learning_rate,
             loss=loss,
