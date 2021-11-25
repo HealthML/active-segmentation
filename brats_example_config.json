@@ -8,5 +8,6 @@
   "optimizer": "adam",
   "loss": "dice",
   "data_dir": "/dhc/groups/mpws2021cl1/Data",
-  "gpus": 1
+  "gpus": 1,
+  "num_u_net_levels": 4
 }
