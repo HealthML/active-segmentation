@@ -29,9 +29,9 @@ parameters:
       - None
       - reduceLROnPlateau
       - cosineAnnealingLR
-  num_levels:
+  num_u_net_levels:
     distribution: categorical
     values:
+      - 2
       - 3
       - 4
-      - 5

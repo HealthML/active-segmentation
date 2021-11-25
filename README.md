@@ -101,10 +101,10 @@ To execute the hyperparameter optimisation using W&B sweeps, run:
 wandb sweep sweep.yaml
 ```
 
-This will output a new `Sweep_ID` that you can use to run the agent:
+This will output a new `Sweep_ID` that you can use to run the agent via the provided shell script:
 
 ```
-srun -p gpupro --gpus=1 -c 18 --mem 150000 wandb agent <sweep_ID>
+sbatch batch_sweeps.sh <sweep_ID>
 ```
 
 Configuring which hyperparameters should be optimized is done in the `sweep.yaml` file.
