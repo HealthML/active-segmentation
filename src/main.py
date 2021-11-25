@@ -1,6 +1,6 @@
 """ Main module to execute active learning pipeline from CLI """
 import json
-import os.
+import os.path
 from typing import Iterable, Optional
 
 import fire
@@ -86,7 +86,11 @@ def run_active_learning_pipeline(
         return
 
     inferencer = Inferencer(
-        model, dataset, os.path.join(data_dir, "val"), prediction_dir, prediction_count
+        model,
+        dataset,
+        os.pathpath.join(data_dir, "val"),
+        prediction_dir,
+        prediction_count,
     )
     inferencer.inference()
 
@@ -97,7 +101,7 @@ def run_active_learning_pipeline_from_config(config_file_name: str) -> None:
     Args:
         config_file_name: Name of or path to the config file.
     """
-    if not os.path.isfile(config_file_name):
+    if not os.pathpath.isfile(config_file_name):
         print("Config file could not be found.")
         raise FileNotFoundError(f"{config_file_name} is not a valid filename.")
 
