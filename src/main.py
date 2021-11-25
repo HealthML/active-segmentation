@@ -9,8 +9,7 @@ from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
 
 
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments,too-many-locals
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
@@ -99,7 +98,11 @@ def run_active_learning_pipeline_from_config(
         config = hyperparameter_defaults
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")
-            wandb.init(config=hyperparameter_defaults, project="active-segmentation", entity="active-segmentation")
+            wandb.init(
+                config=hyperparameter_defaults,
+                project="active-segmentation",
+                entity="active-segmentation",
+            )
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
