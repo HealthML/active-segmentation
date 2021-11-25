@@ -1,8 +1,9 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable
+from typing import Iterable, Optional
 
 import torch
+import numpy as np
 
 from metric_tracking import MetricPerCaseTracker
 from .pytorch_model import PytorchModel
@@ -143,3 +144,14 @@ class PytorchUNet(PytorchModel):
         self.log("validation/loss", loss)  # log validation loss via weights&biases
 
         # ToDo: this method should return the required performance metrics
+
+    def predict_step(self, batch: torch.Tensor, batch_idx: int) -> np.ndarray:
+        """
+        Uses the model to predict a given batch of input images.
+
+        Args:
+            batch (Tensor): Batch of prediction images.
+            batch_idx: Index of the prediction batch.
+        """
+
+        return self.predict(batch)

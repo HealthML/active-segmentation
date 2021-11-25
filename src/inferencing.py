@@ -54,11 +54,10 @@ class Inferencer:
             dimensionality="3d",
         )
 
-        for i in range(self.prediction_count):
-            x = data.__getitem__(i)[0]
-
+        for i, (x, _, _) in enumerate(data):
             # Switching axes to predict for single slices.
-            # Swap from (1, 155, x, y) to (155, 1, x, y) and after predicting swap back.
+            # Swap from (1, z, x, y) to (z, 1, x, y) and after predicting swap back.
+            # Basically represents the 3d images as a batch of z 2d slices.
             x = torch.swapaxes(x, 0, 1)
             pred = self.model.predict(x)
             seg = np.squeeze(np.swapaxes(pred, 0, 1))

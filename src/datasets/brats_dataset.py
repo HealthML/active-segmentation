@@ -22,6 +22,7 @@ class BraTSDataset(Dataset):
         clip_mask: Flag to clip the annotation labels, if True only label 1 is kept.
         transform: Function to transform the images.
         target_transform: Function to transform the annotations.
+        dimensionality: "2d" or "3d" literal to define if the datset should return 2d slices of whole 3d images.
     """
 
     IMAGE_DIMENSIONS = (155, 240, 240)

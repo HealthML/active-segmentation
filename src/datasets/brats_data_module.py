@@ -32,6 +32,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         Args:
             dir_path: directory to discover paths in
             modality: modality of scan
+            random_samples: the amount of random samples from the data sets
 
         Returns:
             list of files as tuple of image paths, annotation paths
@@ -44,6 +45,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         ]
 
         if random_samples is not None and random_samples < len(cases):
+            random.seed(42)
             cases = random.sample(cases, random_samples)
 
         image_paths = [
