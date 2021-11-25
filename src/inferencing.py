@@ -57,11 +57,12 @@ class Inferencer:
         for i in range(self.prediction_count):
             x = data.__getitem__(i)[0]
 
+            # Switching axes to predict for single slices.
+            # Swap from (1, 155, x, y) to (155, 1, x, y) and after predicting swap back.
             x = torch.swapaxes(x, 0, 1)
-            pred = self.model(x)
-            pred = torch.swapaxes(pred, 0, 1)
+            pred = self.model.predict(x)
+            seg = np.squeeze(np.swapaxes(pred, 0, 1))
 
-            seg = pred.detach().cpu().numpy()[0]
             seg = (seg >= 0.5) * 255
             seg = np.moveaxis(seg, 0, 2)
             seg = np.rot90(seg, 2, (0, 1))

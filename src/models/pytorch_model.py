@@ -117,5 +117,5 @@ class PytorchModel(LightningModule, ABC):
         """
 
         self.eval()
-        with torch.no_grad:
+        with torch.no_grad():
             return self(batch).cpu().numpy()
