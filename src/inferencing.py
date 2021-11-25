@@ -45,7 +45,7 @@ class Inferencer:
         os.mkdir(output_dir)
 
         image_paths, annotation_paths = BraTSDataModule.discover_paths(
-            self.data_dir,
+            dir_path=self.data_dir,
             random_samples=self.prediction_count,
         )
         data = BraTSDataset(
@@ -72,4 +72,4 @@ class Inferencer:
             file_name = os.path.basename(annotation_paths[i]).replace("seg", "pred")
             path = os.path.join(output_dir, file_name)
             nib.save(img, path)
-            print(path)
+            print(f"Predictions stored in path {path}")
