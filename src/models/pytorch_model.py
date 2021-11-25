@@ -15,7 +15,7 @@ class PytorchModel(LightningModule, ABC):
     Args:
         learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
         optimizer: Algorithm used to calculate the loss and update the weights. E.g. 'adam' or 'sgd'.
-        lr_scheduler: Algorithm used for dynamically updating the learning rate during training. E.g. 'reduceLROnPlateau'
+        lr_scheduler: Algorithm used for dynamically updating the learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         loss: The measure of performance. E.g. 'dice', 'bce', 'fp'
         **kwargs:
     """
@@ -90,6 +90,11 @@ class PytorchModel(LightningModule, ABC):
         if self.lr_scheduler == "reduceLROnPlateau":
             scheduler = {
                 "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(opt),
+                "monitor": "validation/loss",
+            }
+        elif self.lr_scheduler == "cosineAnnealingLR":
+            scheduler = {
+                "scheduler": torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=50),
                 "monitor": "validation/loss",
             }
 

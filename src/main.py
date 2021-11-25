@@ -97,8 +97,6 @@ def run_active_learning_pipeline_from_config(
             wandb.init(config=hyperparameter_defaults)
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
-        else:
-            print("Hyperparemter optimisation parameter is not set")
 
         run_active_learning_pipeline(
             **config,
