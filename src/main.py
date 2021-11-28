@@ -1,7 +1,7 @@
 """ Main module to execute active learning pipeline from CLI """
 import json
 import os.path
-from typing import Iterable, Optional
+from typing import Iterable, List, Literal, Optional
 
 import fire
 from pytorch_lightning.loggers import WandbLogger
@@ -28,6 +28,8 @@ def run_active_learning_pipeline(
     num_workers: int = 4,
     optimizer: str = "adam",
     num_u_net_levels: int = 4,
+    u_net_dim: Literal["2d", "3d"] = "2d",
+    u_net_input_shape: Optional[List[int]] = None,
     prediction_count: Optional[int] = None,
     prediction_dir: str = "./predictions",
 ) -> None:
@@ -47,10 +49,16 @@ def run_active_learning_pipeline(
         num_workers (int, optional): Number of workers.
         optimizer (str, optional): Name of the optimization algorithm. E.g. 'adam'.
         num_u_net_levels: Number levels (encoder and decoder blocks) in the U-Net.
+        u_net_dim: Dimension of the U-Net. Either "2d" or "3d".
+        u_net_input_shape: Shape of the U-Net input.
 
     Returns:
         None.
     """
+
+    # Safely assign list default value.
+    if u_net_input_shape is None:
+        u_net_input_shape = [240, 240]
 
     wandb_logger = WandbLogger(
         project="active-segmentation",
@@ -63,7 +71,13 @@ def run_active_learning_pipeline(
     if architecture == "fcn_resnet50":
         model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
     elif architecture == "u_net":
-        model = PytorchUNet(num_levels=num_u_net_levels, optimizer=optimizer, loss=loss)
+        model = PytorchUNet(
+            num_levels=num_u_net_levels,
+            optimizer=optimizer,
+            loss=loss,
+            dim=u_net_dim,
+            input_shape=tuple(u_net_input_shape),
+        )
     else:
         raise ValueError("Invalid model architecture.")
 
@@ -75,7 +89,7 @@ def run_active_learning_pipeline(
     if dataset == "pascal-voc":
         data_module = PascalVOCDataModule(data_dir, batch_size, num_workers)
     elif dataset == "brats":
-        data_module = BraTSDataModule(data_dir, batch_size, num_workers)
+        data_module = BraTSDataModule(data_dir, batch_size, num_workers, dim=u_net_dim)
     else:
         raise ValueError("Invalid data_module name.")
 
@@ -93,6 +107,7 @@ def run_active_learning_pipeline(
         os.path.join(data_dir, "val"),
         prediction_dir,
         prediction_count,
+        u_net_dim,
     )
     inferencer.inference()
 

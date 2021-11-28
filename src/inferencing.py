@@ -1,5 +1,6 @@
 """ Module containing inferencing logic """
 import os
+from typing import Literal
 import uuid
 import torch
 import numpy as np
@@ -17,6 +18,7 @@ class Inferencer:
         data_dir: Main directory with the dataset. E.g. './data'
         prediction_dir: Main directory with the predictions. E.g. './predictions'
         prediction_count: The amount of predictions to be generated.
+        model_dim: The dimensionality of the model. Either "2d" or "3d".
     """
 
     # pylint: disable=too-few-public-methods
@@ -27,12 +29,14 @@ class Inferencer:
         data_dir: str,
         prediction_dir: str,
         prediction_count: int,
+        model_dim: Literal["2d", "3d"],
     ) -> None:
         self.model = model
         self.dataset = dataset
         self.data_dir = data_dir
         self.prediction_dir = prediction_dir
         self.prediction_count = prediction_count
+        self.model_dim = model_dim
 
     def inference(self) -> None:
         """Run the inferencing."""
@@ -55,12 +59,21 @@ class Inferencer:
         )
 
         for i, (x, _, _) in enumerate(data):
+            # For 2d case:
             # Switching axes to predict for single slices.
             # Swap from (1, z, x, y) to (z, 1, x, y) and after predicting swap back.
             # Basically represents the 3d images as a batch of z 2d slices.
-            x = torch.swapaxes(x, 0, 1)
+            # For 3d case:
+            # Adding one more dimension to represent the image as a batch of one single image.
+            x = (
+                torch.swapaxes(x, 0, 1)
+                if self.model_dim == "2d"
+                else torch.unsqueeze(x, 0)
+            )
             pred = self.model.predict(x)
-            seg = np.squeeze(np.swapaxes(pred, 0, 1))
+            seg = np.squeeze(
+                np.swapaxes(pred, 0, 1) if self.model_dim == "2d" else pred
+            )
 
             seg = (seg >= 0.5) * 255
             seg = np.moveaxis(seg, 0, 2)

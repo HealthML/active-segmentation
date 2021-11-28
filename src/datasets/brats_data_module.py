@@ -1,7 +1,7 @@
 """ Module containing the data module for brats data """
 import os
 import random
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Literal, Optional, Tuple
 from torch.utils.data import Dataset
 
 from datasets.data_module import ActiveLearningDataModule
@@ -65,11 +65,13 @@ class BraTSDataModule(ActiveLearningDataModule):
         batch_size: int,
         num_workers: int,
         shuffle: bool = True,
+        dim: Literal["2d", "3d"] = "2d",
         **kwargs,
     ):
 
         super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
         self.data_folder = self.data_dir
+        self.dim = dim
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
@@ -82,7 +84,9 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "train")
         )
         return BraTSDataset(
-            image_paths=train_image_paths, annotation_paths=train_annotation_paths
+            image_paths=train_image_paths,
+            annotation_paths=train_annotation_paths,
+            dimensionality=self.dim,
         )
 
     def _create_validation_set(self) -> Optional[Dataset]:
@@ -91,7 +95,9 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "val")
         )
         return BraTSDataset(
-            image_paths=val_image_paths, annotation_paths=val_annotation_paths
+            image_paths=val_image_paths,
+            annotation_paths=val_annotation_paths,
+            dimensionality=self.dim,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:

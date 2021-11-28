@@ -1,6 +1,6 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable
+from typing import Iterable, Literal, Tuple
 
 import torch
 import numpy as np
@@ -18,12 +18,23 @@ class PytorchUNet(PytorchModel):
         **kwargs: Further, dataset specific parameters.
     """
 
-    def __init__(self, num_levels: int = 4, **kwargs):
+    def __init__(
+        self,
+        num_levels: int = 4,
+        dim: Literal["2d", "3d"] = "2d",
+        input_shape: Tuple[int] = (240, 240),
+        **kwargs
+    ):
 
         super().__init__(**kwargs)
 
         self.model = UNet(
-            in_channels=1, out_channels=1, init_features=32, num_levels=num_levels
+            in_channels=1,
+            out_channels=1,
+            init_features=32,
+            num_levels=num_levels,
+            dim=dim,
+            input_shape=input_shape,
         )
 
     # wrap model interface

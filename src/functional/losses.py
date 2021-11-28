@@ -38,7 +38,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
-        assert loss.dim() == 1 or loss.dim() == 2
+        assert loss.dim() == 1 or loss.dim() == 2 or loss.dim() == 3
 
         # aggregate loss values for all channels and the entire batch
         if self.reduction == "mean":

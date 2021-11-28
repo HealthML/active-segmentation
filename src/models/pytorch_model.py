@@ -41,16 +41,16 @@ class PytorchModel(LightningModule, ABC):
 
         self.train_average_metrics = CombinedPerEpochMetric(
             phase="train",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics=[],
             confidence_levels=self.confidence_levels,
             reduction="mean",
-            metrics_to_aggregate=["dice", "hausdorff95"],
+            metrics_to_aggregate=[],
         )
 
         self.train_metrics_per_case = CombinedPerEpochMetric(
             phase="train",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            metrics_to_aggregate=["dice", "hausdorff95"],
+            metrics=[],
+            metrics_to_aggregate=[],
             confidence_levels=self.confidence_levels,
             reduction="none",
         )
@@ -59,16 +59,16 @@ class PytorchModel(LightningModule, ABC):
 
         self.val_average_metrics = CombinedPerEpochMetric(
             phase="val",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics=[],
             confidence_levels=self.confidence_levels,
             reduction="mean",
-            metrics_to_aggregate=["dice", "hausdorff95"],
+            metrics_to_aggregate=[],
         )
 
         self.val_metrics_per_case = CombinedPerEpochMetric(
             phase="val",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            metrics_to_aggregate=["dice", "hausdorff95"],
+            metrics=[],
+            metrics_to_aggregate=[],
             confidence_levels=self.confidence_levels,
             reduction="none",
         )

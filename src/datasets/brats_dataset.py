@@ -155,7 +155,11 @@ class BraTSDataset(Dataset):
         return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
 
     def __len__(self) -> int:
-        return self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
+        return (
+            self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
+            if self.dimensionality == "2d"
+            else self.num_images
+        )
 
     def add_image(self, image_path: str, annotation_path: str) -> None:
         """

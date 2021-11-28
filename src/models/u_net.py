@@ -1,16 +1,18 @@
 """U-Net architecture."""
 
 from collections import OrderedDict
+from typing import Literal, Tuple
 
 import torch
 from torch import nn
+import numpy as np
 
 
 class UNet(nn.Module):
     """
     This U-Net implementation was originally taken from
     https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py
-    and adapted to a flexible number of levels.
+    and adapted to a flexible number of levels and for optinal 3d mode.
 
     Args:
         in_channels: Number of input channels.
@@ -18,6 +20,7 @@ class UNet(nn.Module):
         init_features: Number of feature channels of the first U-Net block, in each down-sampling block, the number of
             feature channels is doubled.
         num_levels: Number levels (encoder and decoder blocks) in the U-Net.
+        dim: The dimension of the input. Either "2d" or "3d".
     """
 
     # pylint: disable-msg=too-many-instance-attributes
@@ -28,11 +31,17 @@ class UNet(nn.Module):
         out_channels: int = 1,
         init_features: int = 32,
         num_levels: int = 4,
+        dim: Literal["2d", "3d"] = "2d",
+        input_shape: Tuple[int] = (240, 240),
     ):
 
         super().__init__()
 
         self.num_levels = num_levels
+
+        MaxPool = nn.MaxPool2d if dim == "2d" else nn.MaxPool3d
+        ConvTranspose = nn.ConvTranspose2d if dim == "2d" else nn.ConvTranspose3d
+        Conv = nn.Conv2d if dim == "2d" else nn.Conv3d
 
         features = init_features
 
@@ -42,27 +51,30 @@ class UNet(nn.Module):
                     in_channels if i == 0 else features * (2 ** (i - 1)),
                     features * (2 ** i),
                     name=f"enc{i + 1}",
+                    dim=dim,
                 )
                 for i in range(num_levels)
             ]
         )
         self.pools = nn.ModuleList(
-            [nn.MaxPool2d(kernel_size=2, stride=2) for _ in range(num_levels)]
+            [MaxPool(kernel_size=2, stride=2) for _ in range(num_levels)]
         )
 
         self.bottleneck = UNet._block(
             features * (2 ** (num_levels - 1)),
             features * (2 ** num_levels),
             name="bottleneck",
+            dim=dim,
         )
 
         self.upconvs = nn.ModuleList(
             [
-                nn.ConvTranspose2d(
+                ConvTranspose(
                     features * (2 ** (i + 1)),
                     features * (2 ** i),
                     kernel_size=2,
                     stride=2,
+                    output_padding=UNet.upconv_output_padding(i, input_shape),
                 )
                 for i in range(num_levels)
             ]
@@ -73,14 +85,13 @@ class UNet(nn.Module):
                     features * (2 ** (i + 1)),
                     features * (2 ** i),
                     name=f"dec{i + 1}",
+                    dim=dim,
                 )
                 for i in range(num_levels)
             ]
         )
 
-        self.conv = nn.Conv2d(
-            in_channels=features, out_channels=out_channels, kernel_size=1
-        )
+        self.conv = Conv(in_channels=features, out_channels=out_channels, kernel_size=1)
 
     def forward(self, x):
         """
@@ -110,13 +121,17 @@ class UNet(nn.Module):
         return torch.sigmoid(self.conv(dec))
 
     @staticmethod
-    def _block(in_channels, features, name):
+    def _block(in_channels: int, features: int, name: str, dim: Literal["2d", "3d"]):
+
+        Conv = nn.Conv2d if dim == "2d" else nn.Conv3d
+        BatchNorm = nn.BatchNorm2d if dim == "2d" else nn.BatchNorm3d
+
         return nn.Sequential(
             OrderedDict(
                 [
                     (
                         name + "conv1",
-                        nn.Conv2d(
+                        Conv(
                             in_channels=in_channels,
                             out_channels=features,
                             kernel_size=3,
@@ -124,11 +139,11 @@ class UNet(nn.Module):
                             bias=False,
                         ),
                     ),
-                    (name + "norm1", nn.BatchNorm2d(num_features=features)),
+                    (name + "norm1", BatchNorm(num_features=features)),
                     (name + "relu1", nn.ReLU(inplace=True)),
                     (
                         name + "conv2",
-                        nn.Conv2d(
+                        Conv(
                             in_channels=features,
                             out_channels=features,
                             kernel_size=3,
@@ -136,8 +151,27 @@ class UNet(nn.Module):
                             bias=False,
                         ),
                     ),
-                    (name + "norm2", nn.BatchNorm2d(num_features=features)),
+                    (name + "norm2", BatchNorm(num_features=features)),
                     (name + "relu2", nn.ReLU(inplace=True)),
                 ]
             )
         )
+
+    @staticmethod
+    def upconv_output_padding(level: int, input_shape: Tuple[int]) -> Tuple[int]:
+        """
+        Calculates the output padding for transpose convolutions to match the output size to the corresponding encoding
+        step for concatination.
+
+        Args:
+            level (int): The level in the UNet the transpose convolution is on.
+            input_shape (Tuple[int]): The input shape for the whole UNet.
+
+        Returns:
+            Tuple[int]: The output padding for the transpose convolution.
+        """
+        shape = np.asarray(input_shape)
+        for _ in range(level):
+            shape = np.floor_divide(shape, 2)
+        odd = shape % 2
+        return tuple(odd)
