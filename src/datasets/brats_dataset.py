@@ -6,11 +6,11 @@ import os
 import nibabel as nib
 import numpy as np
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import IterableDataset
 
 
 # pylint: disable=too-many-instance-attributes
-class BraTSDataset(Dataset):
+class BraTSDataset(IterableDataset):
     """
     The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
     held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
@@ -96,39 +96,57 @@ class BraTSDataset(Dataset):
     ):
 
         self.image_paths = image_paths
-        self.images = [
-            self.__read_image_as_array(filepath=image_path, norm=True)
-            for image_path in self.image_paths
-        ]
         self.annotation_paths = annotation_paths
         self.clip_mask = clip_mask
-        self.masks = [
-            self.__read_image_as_array(
-                filepath=annotation_path, norm=False, clip=self.clip_mask
-            )
-            for annotation_path in self.annotation_paths
-        ]
+
         self.num_images = len(image_paths)
         self.num_annotations = len(annotation_paths)
         assert self.num_images == self.num_annotations
+
         self.is_unlabeled = is_unlabeled
+
         self._current_image = None
-        self._current_image_index = None
         self._current_mask = None
+        self._current_image_index = None
 
         self.transform = transform
         self.target_transform = target_transform
 
         self.dimensionality = dimensionality
 
-    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        self.start_index = 0
+        self.end_index = self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
+        self.current_index = 0
+
+    def __iter__(self):
+        """
+        Returns:
+            Iterator: Iterator that yields the whole dataset if a single process is used for data loading
+                or a subset of the dataset if the dataloading is split across multiple worker processes.
+        """
+        
+        worker_info = torch.utils.data.get_worker_info()
+
+        # check whether data loading is split across multiple workers
+        if worker_info is not None:
+            # code adapted from https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset
+            per_worker = int(math.ceil((self.end_index - self.start_index) / float(worker_info.num_workers)))
+            worker_id = worker_info.id
+            self.start_index = self.start_index + worker_id * per_worker
+            self.current_index = self.start_index
+            self.end_index = min(self.start_index + per_worker, self.end_index)
+        return self
+
+    def __next__(self) -> Tuple[torch.Tensor, torch.Tensor]:
         if self.dimensionality == "2d":
-            image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
-            slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
+            image_index = math.floor(self.current_index / BraTSDataset.IMAGE_DIMENSIONS[0])
+            slice_index = self.current_index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
             if image_index != self._current_image_index:
                 self._current_image_index = image_index
-                self._current_image = self.images[self._current_image_index]
-                self._current_mask = self.masks[self._current_image_index]
+                self._current_image = self.__read_image_as_array(self.image_paths[self._current_image_index], norm=True)
+                self._current_mask = self.__read_image_as_array(
+                self.annotation_paths[self._current_image_index], norm=False, clip=self.clip_mask
+            )
             case_id = self.__get_case_id(
                 filepath=self.image_paths[self._current_image_index]
             )
@@ -151,6 +169,8 @@ class BraTSDataset(Dataset):
                 torch.unsqueeze(x, 0),
                 f"{case_id}-{slice_index}" if self.dimensionality == "2d" else case_id,
             )
+
+        self.current_index += 1
 
         return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
 

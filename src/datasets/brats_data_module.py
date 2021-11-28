@@ -2,7 +2,7 @@
 import os
 import random
 from typing import Any, List, Optional, Tuple
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 
 from datasets.data_module import ActiveLearningDataModule
 from datasets.brats_dataset import BraTSDataset
@@ -84,6 +84,22 @@ class BraTSDataModule(ActiveLearningDataModule):
         return BraTSDataset(
             image_paths=train_image_paths, annotation_paths=train_annotation_paths
         )
+
+    def train_dataloader(self) -> Optional[DataLoader]:
+        """
+        Returns:
+            Pytorch dataloader or Keras sequence representing the training set.
+        """
+
+        # disable shuffling in the dataloader since the BraTS dataset is a subclass of
+        # IterableDataset and implements it's own shuffling
+        if self._training_set:
+            return DataLoader(
+                self._training_set,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+            )
+        return None
 
     def _create_validation_set(self) -> Optional[Dataset]:
         """Creates a validation dataset."""
