@@ -1,43 +1,64 @@
 """ Main module to execute active learning pipeline from CLI """
 import json
 import os.path
+from typing import Iterable, Optional
+
 import fire
+from pytorch_lightning.loggers import WandbLogger
+
 from active_learning import ActiveLearningPipeline
+from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-locals
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
     strategy: str,
-    data_dir: str = "./data",
+    experiment_name: str,
     batch_size: int = 16,
-    num_workers: int = 4,
+    data_dir: str = "./data",
     epochs: int = 50,
+    experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
     loss: str = "dice",
+    num_workers: int = 4,
     optimizer: str = "adam",
     num_u_net_levels: int = 4,
+    prediction_count: Optional[int] = None,
+    prediction_dir: str = "./predictions",
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning simulation.
     Args:
-        architecture: Name of the desired model architecture. E.g. 'u_net'.
-        dataset: Name of the dataset. E.g. 'brats'
-        strategy: Name of the query strategy. E.g. 'base'
-        data_dir: Main directory with the dataset. E.g. './data'
-        batch_size: Size of training examples passed in one training step.
-        num_workers: Number of workers.
-        epochs: Number of iterations with the full dataset.
-        loss: Name of the performance measure to optimize. E.g. 'dice'.
-        optimizer: Name of the optimization algorithm. E.g. 'adam'.
+        architecture (string): Name of the desired model architecture. E.g. 'u_net'.
+        dataset (string): Name of the dataset. E.g. 'brats'
+        strategy (string): Name of the query strategy. E.g. 'base'
+        experiment_name (string): Name of the experiment.
+        batch_size (int, optional): Size of training examples passed in one training step.
+        data_dir (string, optional): Main directory with the dataset. E.g. './data'
+        epochs (int, optional): Number of iterations with the full dataset.
+        experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
+        gpus (int): Number of GPUS to use for model training.
+        loss (str, optional): Name of the performance measure to optimize. E.g. 'dice'.
+        num_workers (int, optional): Number of workers.
+        optimizer (str, optional): Name of the optimization algorithm. E.g. 'adam'.
         num_u_net_levels: Number levels (encoder and decoder blocks) in the U-Net.
+
     Returns:
         None.
     """
+
+    wandb_logger = WandbLogger(
+        project="active-segmentation",
+        entity="active-segmentation",
+        name=experiment_name,
+        tags=experiment_tags,
+        config=locals().copy(),
+    )
 
     if architecture == "fcn_resnet50":
         model = PytorchFCNResnet50(optimizer=optimizer, loss=loss)
@@ -58,8 +79,22 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid data_module name.")
 
-    pipeline = ActiveLearningPipeline(data_module, model, strategy, epochs, gpus)
+    pipeline = ActiveLearningPipeline(
+        data_module, model, strategy, epochs, gpus, wandb_logger
+    )
     pipeline.run()
+
+    if prediction_count is None:
+        return
+
+    inferencer = Inferencer(
+        model,
+        dataset,
+        os.path.join(data_dir, "val"),
+        prediction_dir,
+        prediction_count,
+    )
+    inferencer.inference()
 
 
 def run_active_learning_pipeline_from_config(config_file_name: str) -> None:

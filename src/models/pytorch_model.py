@@ -1,12 +1,14 @@
 """ Base classes to implement models with pytorch """
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Any, Iterable, Union
 import numpy
 import torch
+import torchmetrics
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
 
 import functional
+from metric_tracking import CombinedPerEpochMetric
 
 
 class PytorchModel(LightningModule, ABC):
@@ -34,6 +36,44 @@ class PytorchModel(LightningModule, ABC):
         self.learning_rate = learning_rate
         self.optimizer = optimizer
         self.loss = self.configure_loss(loss)
+
+        self.confidence_levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+        self.train_average_metrics = CombinedPerEpochMetric(
+            phase="train",
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            confidence_levels=self.confidence_levels,
+            reduction="mean",
+            metrics_to_aggregate=["dice", "hausdorff95"],
+        )
+
+        self.train_metrics_per_case = CombinedPerEpochMetric(
+            phase="train",
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics_to_aggregate=["dice", "hausdorff95"],
+            confidence_levels=self.confidence_levels,
+            reduction="none",
+        )
+
+        self.train_metrics = [self.train_average_metrics, self.train_metrics_per_case]
+
+        self.val_average_metrics = CombinedPerEpochMetric(
+            phase="val",
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            confidence_levels=self.confidence_levels,
+            reduction="mean",
+            metrics_to_aggregate=["dice", "hausdorff95"],
+        )
+
+        self.val_metrics_per_case = CombinedPerEpochMetric(
+            phase="val",
+            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+            metrics_to_aggregate=["dice", "hausdorff95"],
+            confidence_levels=self.confidence_levels,
+            reduction="none",
+        )
+
+        self.val_metrics = [self.val_average_metrics, self.val_metrics_per_case]
 
     @abstractmethod
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
@@ -117,5 +157,46 @@ class PytorchModel(LightningModule, ABC):
         """
 
         self.eval()
-        with torch.no_grad:
+        with torch.no_grad():
             return self(batch).cpu().numpy()
+
+    def get_train_metrics(self) -> Iterable[torchmetrics.Metric]:
+        """
+        Returns:
+            A list of metrics to be updated in each training step.
+        """
+
+        return self.train_metrics
+
+    def get_val_metrics(self) -> Iterable[torchmetrics.Metric]:
+        """
+        Returns:
+            A list of metrics to be updated in each validation step.
+        """
+
+        return self.val_metrics
+
+    def training_epoch_end(self, outputs: Any):
+        """
+        This method is called by the Pytorch Lightning framework at the end of each training epoch.
+
+        Args:
+            outputs: List of return values of all training steps of the current training epoch.
+        """
+
+        for train_metric in self.train_metrics:
+            train_metrics = train_metric.compute()
+            self.logger.log_metrics(train_metrics)
+
+    def validation_epoch_end(self, outputs: Any):
+        """
+        This method is called by the Pytorch Lightning framework at the end of each validation epoch.
+
+        Args:
+            outputs: List of return values of all validation steps of the current validation epoch.
+        """
+
+        for val_metric in self.val_metrics:
+            val_metrics = val_metric.compute()
+            self.logger.log_metrics(val_metrics)
+            val_metric.reset()

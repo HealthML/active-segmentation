@@ -89,7 +89,9 @@ Additionally, the following optional arguments can be supplied in the same confi
     "gpus": 1,
     "loss": "dice",
     "optimizer": "adam",
-    "num_u_net_levels": 4
+    "num_u_net_levels": 4,
+    "prediction_count": None,
+    "prediction_dir": "./predictions"
 }
 ```
 
