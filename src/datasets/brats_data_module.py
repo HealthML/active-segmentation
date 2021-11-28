@@ -82,7 +82,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "train")
         )
         return BraTSDataset(
-            image_paths=train_image_paths, annotation_paths=train_annotation_paths
+            image_paths=train_image_paths, annotation_paths=train_annotation_paths, shuffle=self.shuffle
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
