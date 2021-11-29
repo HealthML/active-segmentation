@@ -14,9 +14,10 @@ class UNet(nn.Module):
 
     Args:
         in_channels: Number of input channels.
-        out_channels: Number of output channels (should be equal to the number of classes excluding the background)
-        init_features: Number of feature channels of the first U-Net block, in each down-sampling block, the number of
-            feature channels is doubled.
+        out_channels: Number of output channels (should be equal to the number of classes
+            excluding the background)
+        init_features: Number of feature channels of the first U-Net block,
+            in each down-sampling block, the number of feature channels is doubled.
         num_levels: Number levels (encoder and decoder blocks) in the U-Net.
     """
 
