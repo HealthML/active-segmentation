@@ -16,6 +16,7 @@ LRScheduler = Union[ReduceLROnPlateau, CosineAnnealingLR]
 LRSchedulerDict = Dict[str, Union[str, LRScheduler]]
 
 
+# pylint: disable=too-many-instance-attributes
 class PytorchModel(LightningModule, ABC):
     """
     Base class to implement Pytorch models.

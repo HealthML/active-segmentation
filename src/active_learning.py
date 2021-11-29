@@ -3,7 +3,7 @@
 from typing import Iterable, Union
 
 from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import LightningLoggerBase, WandbLogger
+from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
 
 from query_strategies import QueryStrategy
@@ -37,7 +37,7 @@ class ActiveLearningPipeline:
         self.data_module = data_module
         self.model = model
         # log gradients, parameter histogram and model topology
-        wandb_logger.watch(self.model, log="all")
+        logger.watch(self.model, log="all")
 
         callbacks = [
             EarlyStopping("validation/loss"),
