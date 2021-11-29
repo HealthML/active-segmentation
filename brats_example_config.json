@@ -2,7 +2,8 @@
   "architecture": "u_net",
   "dataset": "brats",
   "dataset_config": {
-    "cache_size": 250
+    "cache_size": 250,
+    "pin_memory": true
   },
   "strategy": "base",
   "experiment_name": "test-experiment",

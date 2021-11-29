@@ -15,7 +15,8 @@ class BraTSDataModule(ActiveLearningDataModule):
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
         num_workers: Number of workers for DataLoader.
-        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading (defualt = 0).
+        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading (default = 0).
+        pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle: Flag if the data should be shuffled.
         **kwargs: Further, dataset specific parameters.
     """
@@ -66,11 +67,12 @@ class BraTSDataModule(ActiveLearningDataModule):
         batch_size: int,
         num_workers: int,
         cache_size: int = 0,
+        pin_memory: bool = True,
         shuffle: bool = True,
         **kwargs,
     ):
 
-        super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
+        super().__init__(data_dir, batch_size, num_workers, pin_memory=pin_memory, shuffle=shuffle, **kwargs)
         self.data_folder = self.data_dir
         self.cache_size = cache_size
 
@@ -101,6 +103,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 self._training_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
+                pin_memory=self.pin_memory
             )
         return None
 
