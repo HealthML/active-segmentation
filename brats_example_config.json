@@ -1,6 +1,9 @@
 {
   "architecture": "u_net",
   "dataset": "brats",
+  "dataset_config": {
+    "cache_size": 250
+  },
   "strategy": "base",
   "experiment_name": "test-experiment",
   "experiment_tags": [],

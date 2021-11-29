@@ -1,7 +1,7 @@
 """ Main module to execute active learning pipeline from CLI """
 import json
 import os.path
-from typing import Iterable, Optional
+from typing import Any, Dict, Iterable, Optional
 
 import fire
 from pytorch_lightning.loggers import WandbLogger
@@ -22,6 +22,7 @@ def run_active_learning_pipeline(
     experiment_name: str,
     batch_size: int = 16,
     data_dir: str = "./data",
+    dataset_config: Optional[Dict[str, Any]] = None,
     epochs: int = 50,
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
@@ -44,6 +45,7 @@ def run_active_learning_pipeline(
         experiment_name (string): Name of the experiment.
         batch_size (int, optional): Size of training examples passed in one training step.
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
+        dataset_config (Dict[str, Any], optional): Dictionary with dataset specific parameters.
         epochs (int, optional): Number of iterations with the full dataset.
         experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
         gpus (int): Number of GPUS to use for model training.
@@ -89,10 +91,13 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid query strategy.")
 
+    if dataset_config is None:
+        dataset_config = {}
+
     if dataset == "pascal-voc":
-        data_module = PascalVOCDataModule(data_dir, batch_size, num_workers)
+        data_module = PascalVOCDataModule(data_dir, batch_size, num_workers, **dataset_config)
     elif dataset == "brats":
-        data_module = BraTSDataModule(data_dir, batch_size, num_workers)
+        data_module = BraTSDataModule(data_dir, batch_size, num_workers, **dataset_config)
     else:
         raise ValueError("Invalid data_module name.")
 

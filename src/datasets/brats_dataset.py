@@ -1,6 +1,7 @@
 """ Module to load and batch brats dataset """
 from typing import Any, Callable, List, Literal, Optional, Tuple
 import math
+from multiprocessing import Manager
 import os
 
 import nibabel as nib
@@ -19,6 +20,7 @@ class BraTSDataset(IterableDataset):
     Args:
         image_paths: List with the paths to the images.
         annotation_paths: List with the paths to the annotations.
+        cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs. Defaults to zero.
         clip_mask: Flag to clip the annotation labels, if True only label 1 is kept.
         shuffle (bool, optional): Whether the data should be shuffled.
         transform: Function to transform the images.
@@ -124,6 +126,7 @@ class BraTSDataset(IterableDataset):
         self,
         image_paths: List[str],
         annotation_paths: List[str],
+        cache_size: int = 0,
         clip_mask: bool = True,
         is_unlabeled: bool = False,
         shuffle: bool = False,
@@ -145,6 +148,15 @@ class BraTSDataset(IterableDataset):
         self._current_image = None
         self._current_mask = None
         self._current_image_index = None
+        self.cache_size = cache_size
+
+        manager = Manager()
+
+        # since the PyTorch dataloader uses multiple processes for data loading (if num_workers > 0), 
+        # a shared dict is used to share the cache between all processes have to use 
+        # see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py for more information
+        self.image_cache = manager.dict()
+        self.mask_cache = manager.dict()
 
         self.transform = transform
         self.target_transform = target_transform
@@ -156,9 +168,9 @@ class BraTSDataset(IterableDataset):
         self.current_index = 0
 
         if shuffle:
-            self.indices = BraTSDataset.__shuffled_indices(self.__len__(), BraTSDataset.IMAGE_DIMENSIONS[0])
+            self.shuffled_indices = BraTSDataset.__shuffled_indices(self.__len__(), BraTSDataset.IMAGE_DIMENSIONS[0])
         else:
-            self.indices = np.arange(self.__len__())
+            self.shuffled_indices = np.arange(self.__len__())
 
     def __iter__(self):
         """
@@ -179,28 +191,54 @@ class BraTSDataset(IterableDataset):
             self.end_index = min(self.start_index + per_worker, self.end_index)
         return self
 
-    def __next__(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        if self.dimensionality == "2d":
-            index = self.indices[self.current_index]
-            image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
-            slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
-            if image_index != self._current_image_index:
-                self._current_image_index = image_index
-                self._current_image = self.__read_image_as_array(self.image_paths[self._current_image_index], norm=True)
-                self._current_mask = self.__read_image_as_array(
-                self.annotation_paths[self._current_image_index], norm=False, clip=self.clip_mask
-            )
-            case_id = self.__get_case_id(
-                filepath=self.image_paths[self._current_image_index]
-            )
+    def __load_image_and_mask(self, image_index: int) -> None:
+        """
+        Loads image with the given index either from cache or from disk.
 
+        Args:
+            image_index (int): Index of the image to load.
+        """
+
+        self._current_image_index = image_index
+
+        # check if image and mask are in cache
+        if image_index in self.image_cache and image_index in self.mask_cache:
+            self._current_image = self.image_cache[image_index]
+            self._current_mask = self.mask_cache[image_index]
+        # read image and mask from disk otherwise
+        else:
+            self._current_image = self.__read_image_as_array(self.image_paths[image_index], norm=True)
+            self._current_mask = self.__read_image_as_array(
+                self.annotation_paths[image_index], norm=False, clip=self.clip_mask
+            )
+        
+        # cache image and mask if there is still space in cache
+        if len(self.image_cache.keys()) < self.cache_size:
+            self.image_cache[image_index] = self._current_image
+            self.mask_cache[image_index] = self._current_mask
+
+
+    def __next__(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        if self.current_index >= self.end_index:
+            raise StopIteration
+
+        shuffled_index = self.shuffled_indices[self.current_index]
+        image_index = math.floor(shuffled_index / BraTSDataset.IMAGE_DIMENSIONS[0])
+        slice_index = shuffled_index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
+
+        if image_index != self._current_image_index:
+            self.__load_image_and_mask(image_index)
+
+        case_id = self.__get_case_id(
+            filepath=self.image_paths[self._current_image_index]
+        )
+
+        if self.dimensionality == "2d":
             x = torch.from_numpy(self._current_image[slice_index, :, :])
             y = torch.from_numpy(self._current_mask[slice_index, :, :])
         else:
-            case_id = self.__get_case_id(filepath=self.image_paths[index])
-
-            x = torch.from_numpy(self.images[index])
-            y = torch.from_numpy(self.masks[index])
+            x = torch.from_numpy(self._current_image)
+            y = torch.from_numpy(self._current_mask)
 
         if self.transform:
             x = self.transform(x)
