@@ -2,6 +2,8 @@
   "architecture": "u_net",
   "dataset": "brats",
   "strategy": "base",
+  "experiment_name": "test-experiment",
+  "experiment_tags": [],
   "batch_size": 16,
   "epochs": 3,
   "num_workers": 8,
@@ -11,4 +13,6 @@
   "data_dir": "/dhc/groups/mpws2021cl1/Data",
   "gpus": 1,
   "num_u_net_levels": 4
+  "prediction_count": 5,
+  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions"
 }

@@ -1,5 +1,5 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Literal, Optional, Tuple
 import math
 import os
 
@@ -22,6 +22,7 @@ class BraTSDataset(Dataset):
         clip_mask: Flag to clip the annotation labels, if True only label 1 is kept.
         transform: Function to transform the images.
         target_transform: Function to transform the annotations.
+        dimensionality: "2d" or "3d" literal to define if the datset should return 2d slices of whole 3d images.
     """
 
     IMAGE_DIMENSIONS = (155, 240, 240)
@@ -91,6 +92,7 @@ class BraTSDataset(Dataset):
         is_unlabeled: bool = False,
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
+        dimensionality: Literal["2d", "3d"] = "2d",
     ):
 
         self.image_paths = image_paths
@@ -117,21 +119,27 @@ class BraTSDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
-    def __getitem__(
-        self, index: int
-    ) -> Union[Tuple[torch.Tensor, str], Tuple[torch.Tensor, torch.Tensor, str]]:
-        image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
-        slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
-        if image_index != self._current_image_index:
-            self._current_image_index = image_index
-            self._current_image = self.images[self._current_image_index]
-            self._current_mask = self.masks[self._current_image_index]
-        case_id = self.__get_case_id(
-            filepath=self.image_paths[self._current_image_index]
-        )
+        self.dimensionality = dimensionality
 
-        x = torch.from_numpy(self._current_image[slice_index, :, :])
-        y = torch.from_numpy(self._current_mask[slice_index, :, :])
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        if self.dimensionality == "2d":
+            image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
+            slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
+            if image_index != self._current_image_index:
+                self._current_image_index = image_index
+                self._current_image = self.images[self._current_image_index]
+                self._current_mask = self.masks[self._current_image_index]
+            case_id = self.__get_case_id(
+                filepath=self.image_paths[self._current_image_index]
+            )
+
+            x = torch.from_numpy(self._current_image[slice_index, :, :])
+            y = torch.from_numpy(self._current_mask[slice_index, :, :])
+        else:
+            case_id = self.__get_case_id(filepath=self.image_paths[index])
+
+            x = torch.from_numpy(self.images[index])
+            y = torch.from_numpy(self.masks[index])
 
         if self.transform:
             x = self.transform(x)
@@ -139,7 +147,10 @@ class BraTSDataset(Dataset):
             y = self.target_transform(y)
 
         if self.is_unlabeled:
-            return torch.unsqueeze(x, 0), f"{case_id}-{slice_index}"
+            return (
+                torch.unsqueeze(x, 0),
+                f"{case_id}-{slice_index}" if self.dimensionality == "2d" else case_id,
+            )
 
         return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
 

@@ -2,6 +2,8 @@
   "architecture": "fcn_resnet50",
   "dataset": "pascal-voc",
   "strategy": "base",
+  "experiment_name": "test-experiment",
+  "experiment_tags": [],
   "batch_size": 16,
   "epochs": 1,
   "num_workers": 2,

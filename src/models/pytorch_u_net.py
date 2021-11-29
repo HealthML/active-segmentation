@@ -3,8 +3,8 @@
 from typing import Iterable
 
 import torch
+import numpy as np
 
-from metric_tracking import MetricPerCaseTracker
 from .pytorch_model import PytorchModel
 from .u_net import UNet
 
@@ -24,26 +24,6 @@ class PytorchUNet(PytorchModel):
 
         self.model = UNet(
             in_channels=1, out_channels=1, init_features=32, num_levels=num_levels
-        )
-        self.train_average_metrics = MetricPerCaseTracker(
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            reduce="mean",
-            device=self.device,
-        )
-        self.train_metric_per_case = MetricPerCaseTracker(
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            reduce="none",
-            device=self.device,
-        )
-        self.val_average_metrics = MetricPerCaseTracker(
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            reduce="mean",
-            device=self.device,
-        )
-        self.val_metrics_per_case = MetricPerCaseTracker(
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            reduce="none",
-            device=self.device,
         )
 
     # wrap model interface
@@ -101,22 +81,15 @@ class PytorchUNet(PytorchModel):
         """
 
         self.train_average_metrics.to(self.device)
-        self.train_metric_per_case.to(self.device)
+        self.train_metrics_per_case.to(self.device)
 
-        # pylint: disable-msg=unused-variable
         x, y, case_ids = batch
 
         probabilities = self(x)
         loss = self.loss(probabilities, y)
 
-        # ToDo: log metrics for different confidence levels
-
-        predicted_mask = (probabilities > 0.5).int()
-
-        self.train_average_metrics.update(predicted_mask, y, case_ids)
-        self.train_metric_per_case.update(predicted_mask, y, case_ids)
-
-        # ToDo: compute metrics on epoch end and log them to WandB
+        for train_metric in self.get_train_metrics():
+            train_metric.update(probabilities, y, case_ids)
 
         self.log("train/loss", loss)  # log train loss via weights&biases
         return loss
@@ -133,16 +106,26 @@ class PytorchUNet(PytorchModel):
         self.val_average_metrics.to(self.device)
         self.val_metrics_per_case.to(self.device)
 
-        # pylint: disable-msg=unused-variable
         x, y, case_ids = batch
 
-        # pylint: disable-msg=unused-variable
         probabilities = self(x)
-        predicted_mask = (probabilities > 0.5).int()
 
-        self.val_average_metrics.update(predicted_mask, y, case_ids)
-        self.val_metrics_per_case.update(predicted_mask, y, case_ids)
         loss = self.loss(probabilities, y)
         self.log("validation/loss", loss)  # log validation loss via weights&biases
 
-        # ToDo: this method should return the required performance metrics
+        for val_metric in self.get_val_metrics():
+            val_metric.update(probabilities, y, case_ids)
+
+    def predict_step(
+        self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
+    ) -> np.ndarray:
+        """
+        Uses the model to predict a given batch of input images.
+
+        Args:
+            batch (Tensor): Batch of prediction images.
+            batch_idx: Index of the prediction batch.
+            dataloader_idx: Index of the dataloader.
+        """
+
+        return self.predict(batch)

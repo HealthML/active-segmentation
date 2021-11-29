@@ -1,23 +1,26 @@
 """ Module containing the active learning pipeline """
+
+from typing import Iterable, Union
+
 from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.loggers import LightningLoggerBase, WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
 from models import PytorchModel
 
-wandb_logger = WandbLogger(project="active-segmentation", entity="active-segmentation")
-
 
 class ActiveLearningPipeline:
     """
     The pipeline or simulation environment to run active learning experiments.
     Args:
-        data_module: A data module object providing data.
-        model: A model object with architecture able to be fitted with the data.
-        strategy: An active learning strategy to query for new labels.
-        epochs: The number of epochs the model should be trained.
+        data_module (ActiveLearningDataModule): A data module object providing data.
+        model (PytorchModel): A model object with architecture able to be fitted with the data.
+        strategy (QueryStrategy): An active learning strategy to query for new labels.
+        epochs (int): The number of epochs the model should be trained.
+        gpus (int): Number of GPUS to use for model training.
+        logger: A logger object as defined by Pytorch Lightning.
     """
 
     # pylint: disable=too-few-public-methods
@@ -28,6 +31,7 @@ class ActiveLearningPipeline:
         strategy: QueryStrategy,
         epochs: int,
         gpus: int,
+        logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
     ) -> None:
 
         self.data_module = data_module
@@ -43,7 +47,7 @@ class ActiveLearningPipeline:
             deterministic=True,
             profiler="simple",
             max_epochs=epochs,
-            logger=wandb_logger,
+            logger=logger,
             gpus=gpus,
             benchmark=True,
             callbacks=callbacks,
