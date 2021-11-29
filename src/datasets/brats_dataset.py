@@ -88,7 +88,7 @@ class BraTSDataset(IterableDataset):
         return os.path.split(os.path.split(filepath)[0])[1]
 
     @staticmethod
-    def __shuffled_indices(dataset_size: int, slices_per_image: int, seed: int = 42) -> List[int]:
+    def __shuffled_indices(dataset_size: int, slices_per_image: int, seed: Optional[int] = None) -> List[int]:
         r"""
         Implements efficient shuffling for 2D image datasets like the BraTSDataset whose elements represent the slices of multiple 3D
         images. It is assumed that `dataset_size` is equal to :math:`N \cdot S` where :math:`N` is the number of 3D images and
@@ -105,7 +105,8 @@ class BraTSDataset(IterableDataset):
             List[int]: List of shuffled indices.
         """
 
-        np.random.seed(seed) 
+        if seed is not None:
+            np.random.seed(seed) 
 
         number_2d_slices = dataset_size
         number_3d_images = math.ceil(number_2d_slices) / slices_per_image
