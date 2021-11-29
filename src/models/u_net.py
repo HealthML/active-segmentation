@@ -1,7 +1,7 @@
 """U-Net architecture."""
 
 from collections import OrderedDict
-from typing import Literal, Tuple
+from typing import Tuple
 
 import torch
 from torch import nn
@@ -20,7 +20,7 @@ class UNet(nn.Module):
         init_features: Number of feature channels of the first U-Net block, in each down-sampling block, the number of
             feature channels is doubled.
         num_levels: Number levels (encoder and decoder blocks) in the U-Net.
-        dim: The dimension of the input. Either "2d" or "3d".
+        input_shape: The input shape of the U-Net.
     """
 
     # pylint: disable-msg=too-many-instance-attributes
@@ -31,7 +31,6 @@ class UNet(nn.Module):
         out_channels: int = 1,
         init_features: int = 32,
         num_levels: int = 4,
-        dim: Literal["2d", "3d"] = "2d",
         input_shape: Tuple[int] = (240, 240),
     ):
 
@@ -39,9 +38,11 @@ class UNet(nn.Module):
 
         self.num_levels = num_levels
 
-        MaxPool = nn.MaxPool2d if dim == "2d" else nn.MaxPool3d
-        ConvTranspose = nn.ConvTranspose2d if dim == "2d" else nn.ConvTranspose3d
-        Conv = nn.Conv2d if dim == "2d" else nn.Conv3d
+        dim = len(input_shape)
+
+        MaxPool = nn.MaxPool2d if dim == 2 else nn.MaxPool3d
+        ConvTranspose = nn.ConvTranspose2d if dim == 2 else nn.ConvTranspose3d
+        Conv = nn.Conv2d if dim == 2 else nn.Conv3d
 
         features = init_features
 
@@ -121,10 +122,10 @@ class UNet(nn.Module):
         return torch.sigmoid(self.conv(dec))
 
     @staticmethod
-    def _block(in_channels: int, features: int, name: str, dim: Literal["2d", "3d"]):
+    def _block(in_channels: int, features: int, name: str, dim: int):
 
-        Conv = nn.Conv2d if dim == "2d" else nn.Conv3d
-        BatchNorm = nn.BatchNorm2d if dim == "2d" else nn.BatchNorm3d
+        Conv = nn.Conv2d if dim == 2 else nn.Conv3d
+        BatchNorm = nn.BatchNorm2d if dim == 2 else nn.BatchNorm3d
 
         return nn.Sequential(
             OrderedDict(

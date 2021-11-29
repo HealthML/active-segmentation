@@ -12,7 +12,6 @@
   "data_dir": "/dhc/groups/mpws2021cl1/Data",
   "gpus": 1,
   "num_u_net_levels": 4,
-  "u_net_dim": "2d",
   "u_net_input_shape": [
     240,
     240

@@ -1,5 +1,5 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Literal, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 import math
 import os
 
@@ -22,7 +22,7 @@ class BraTSDataset(Dataset):
         clip_mask: Flag to clip the annotation labels, if True only label 1 is kept.
         transform: Function to transform the images.
         target_transform: Function to transform the annotations.
-        dimensionality: "2d" or "3d" literal to define if the datset should return 2d slices of whole 3d images.
+        dimensionality: 2 or 3 to define if the datset should return 2d slices of whole 3d images.
     """
 
     IMAGE_DIMENSIONS = (155, 240, 240)
@@ -92,7 +92,7 @@ class BraTSDataset(Dataset):
         is_unlabeled: bool = False,
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
-        dimensionality: Literal["2d", "3d"] = "2d",
+        dimensionality: int = 2,
     ):
 
         self.image_paths = image_paths
@@ -122,7 +122,7 @@ class BraTSDataset(Dataset):
         self.dimensionality = dimensionality
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        if self.dimensionality == "2d":
+        if self.dimensionality == 2:
             image_index = math.floor(index / BraTSDataset.IMAGE_DIMENSIONS[0])
             slice_index = index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
             if image_index != self._current_image_index:
@@ -149,7 +149,7 @@ class BraTSDataset(Dataset):
         if self.is_unlabeled:
             return (
                 torch.unsqueeze(x, 0),
-                f"{case_id}-{slice_index}" if self.dimensionality == "2d" else case_id,
+                f"{case_id}-{slice_index}" if self.dimensionality == 2 else case_id,
             )
 
         return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
@@ -157,7 +157,7 @@ class BraTSDataset(Dataset):
     def __len__(self) -> int:
         return (
             self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
-            if self.dimensionality == "2d"
+            if self.dimensionality == 2
             else self.num_images
         )
 

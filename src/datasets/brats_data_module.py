@@ -1,7 +1,7 @@
 """ Module containing the data module for brats data """
 import os
 import random
-from typing import Any, List, Literal, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from torch.utils.data import Dataset
 
 from datasets.data_module import ActiveLearningDataModule
@@ -16,6 +16,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         batch_size: Batch size.
         num_workers: Number of workers for DataLoader.
         shuffle: Flag if the data should be shuffled.
+        dim: 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -65,7 +66,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         batch_size: int,
         num_workers: int,
         shuffle: bool = True,
-        dim: Literal["2d", "3d"] = "2d",
+        dim: int = 2,
         **kwargs,
     ):
 

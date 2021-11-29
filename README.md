@@ -90,6 +90,7 @@ Additionally, the following optional arguments can be supplied in the same confi
     "loss": "dice",
     "optimizer": "adam",
     "num_u_net_levels": 4,
+    "u_net_input_shape": [240, 240], // can also be 3d
     "prediction_count": None,
     "prediction_dir": "./predictions"
 }

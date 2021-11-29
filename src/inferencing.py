@@ -1,6 +1,5 @@
 """ Module containing inferencing logic """
 import os
-from typing import Literal
 import uuid
 import torch
 import numpy as np
@@ -18,7 +17,7 @@ class Inferencer:
         data_dir: Main directory with the dataset. E.g. './data'
         prediction_dir: Main directory with the predictions. E.g. './predictions'
         prediction_count: The amount of predictions to be generated.
-        model_dim: The dimensionality of the model. Either "2d" or "3d".
+        model_dim: The dimensionality of the model. Either 2 or 3.
     """
 
     # pylint: disable=too-few-public-methods
@@ -29,7 +28,7 @@ class Inferencer:
         data_dir: str,
         prediction_dir: str,
         prediction_count: int,
-        model_dim: Literal["2d", "3d"],
+        model_dim: int,
     ) -> None:
         self.model = model
         self.dataset = dataset
@@ -55,7 +54,7 @@ class Inferencer:
         data = BraTSDataset(
             image_paths=image_paths,
             annotation_paths=annotation_paths,
-            dimensionality="3d",
+            dimensionality=3,
         )
 
         for i, (x, _, _) in enumerate(data):
@@ -67,13 +66,11 @@ class Inferencer:
             # Adding one more dimension to represent the image as a batch of one single image.
             x = (
                 torch.swapaxes(x, 0, 1)
-                if self.model_dim == "2d"
+                if self.model_dim == 2
                 else torch.unsqueeze(x, 0)
             )
             pred = self.model.predict(x)
-            seg = np.squeeze(
-                np.swapaxes(pred, 0, 1) if self.model_dim == "2d" else pred
-            )
+            seg = np.squeeze(np.swapaxes(pred, 0, 1) if self.model_dim == 2 else pred)
 
             seg = (seg >= 0.5) * 255
             seg = np.moveaxis(seg, 0, 2)
