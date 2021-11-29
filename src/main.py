@@ -95,9 +95,13 @@ def run_active_learning_pipeline(
         dataset_config = {}
 
     if dataset == "pascal-voc":
-        data_module = PascalVOCDataModule(data_dir, batch_size, num_workers, **dataset_config)
+        data_module = PascalVOCDataModule(
+            data_dir, batch_size, num_workers, **dataset_config
+        )
     elif dataset == "brats":
-        data_module = BraTSDataModule(data_dir, batch_size, num_workers, **dataset_config)
+        data_module = BraTSDataModule(
+            data_dir, batch_size, num_workers, **dataset_config
+        )
     else:
         raise ValueError("Invalid data_module name.")
 

@@ -15,7 +15,8 @@ class BraTSDataModule(ActiveLearningDataModule):
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
         num_workers: Number of workers for DataLoader.
-        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading (default = 0).
+        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
+            (default = 0).
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle: Flag if the data should be shuffled.
         **kwargs: Further, dataset specific parameters.
@@ -72,7 +73,14 @@ class BraTSDataModule(ActiveLearningDataModule):
         **kwargs,
     ):
 
-        super().__init__(data_dir, batch_size, num_workers, pin_memory=pin_memory, shuffle=shuffle, **kwargs)
+        super().__init__(
+            data_dir,
+            batch_size,
+            num_workers,
+            pin_memory=pin_memory,
+            shuffle=shuffle,
+            **kwargs,
+        )
         self.data_folder = self.data_dir
         self.cache_size = cache_size
 
@@ -87,7 +95,10 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "train")
         )
         return BraTSDataset(
-            image_paths=train_image_paths, annotation_paths=train_annotation_paths, cache_size=self.cache_size, shuffle=self.shuffle
+            image_paths=train_image_paths,
+            annotation_paths=train_annotation_paths,
+            cache_size=self.cache_size,
+            shuffle=self.shuffle,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -103,7 +114,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 self._training_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
-                pin_memory=self.pin_memory
+                pin_memory=self.pin_memory,
             )
         return None
 
@@ -113,7 +124,9 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "val")
         )
         return BraTSDataset(
-            image_paths=val_image_paths, annotation_paths=val_annotation_paths, cache_size=self.cache_size
+            image_paths=val_image_paths,
+            annotation_paths=val_annotation_paths,
+            cache_size=self.cache_size,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:

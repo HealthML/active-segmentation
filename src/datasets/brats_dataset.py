@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import IterableDataset
 
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes,abstract-method
 class BraTSDataset(IterableDataset):
     """
     The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
@@ -20,7 +20,8 @@ class BraTSDataset(IterableDataset):
     Args:
         image_paths: List with the paths to the images.
         annotation_paths: List with the paths to the annotations.
-        cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs. Defaults to zero.
+        cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.
+            Defaults to zero.
         clip_mask: Flag to clip the annotation labels, if True only label 1 is kept.
         shuffle (bool, optional): Whether the data should be shuffled.
         transform: Function to transform the images.
@@ -88,15 +89,17 @@ class BraTSDataset(IterableDataset):
         return os.path.split(os.path.split(filepath)[0])[1]
 
     @staticmethod
-    def __shuffled_indices(dataset_size: int, slices_per_image: int, seed: Optional[int] = None) -> List[int]:
+    def __shuffled_indices(
+        dataset_size: int, slices_per_image: int, seed: Optional[int] = None
+    ) -> List[int]:
         r"""
-        Implements efficient shuffling for 2D image datasets like the BraTSDataset whose elements represent the slices of multiple 3D
-        images. It is assumed that `dataset_size` is equal to :math:`N \cdot S` where :math:`N` is the number of 3D images and
-        :math:`S` the number of 2D slices per 3D image. It is further assumed that all 2D slices of one 3D image have have
-        contiguous indices in the dataset. To allow for efficient image pre-fetching, first the order
-        of all 3D images is shuffled and then the order of slices within each 3D image is shuffled. This way the 3D images can still be
-        loaded as a whole.
-        
+        Implements efficient shuffling for 2D image datasets like the BraTSDataset whose elements represent the slices
+        of multiple 3D images. It is assumed that `dataset_size` is equal to :math:`N \cdot S` where :math:`N` is the
+        number of 3D images and :math:`S` the number of 2D slices per 3D image. It is further assumed that all 2D slices
+        of one 3D image have have contiguous indices in the dataset. To allow for efficient image pre-fetching, first
+        the order of all 3D images is shuffled and then the order of slices within each 3D image is shuffled. This way
+        the 3D images can still be loaded as a whole.
+
         Args:
             dataset_size (int): Number of 2D images in the dataset.
             slices_per_image (int): Number of slices per 3D image.
@@ -106,7 +109,7 @@ class BraTSDataset(IterableDataset):
         """
 
         if seed is not None:
-            np.random.seed(seed) 
+            np.random.seed(seed)
 
         number_2d_slices = dataset_size
         number_3d_images = math.ceil(number_2d_slices) / slices_per_image
@@ -123,6 +126,7 @@ class BraTSDataset(IterableDataset):
 
         return list(indices.flatten())
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         image_paths: List[str],
@@ -153,10 +157,10 @@ class BraTSDataset(IterableDataset):
 
         manager = Manager()
 
-        # since the PyTorch dataloader uses multiple processes for data loading (if num_workers > 0), 
-        # a shared dict is used to share the cache between all processes have to use 
-        # see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py and 
-        # https://discuss.pytorch.org/t/reuse-of-dataloader-worker-process-and-caching-in-dataloader/30620/14 
+        # since the PyTorch dataloader uses multiple processes for data loading (if num_workers > 0),
+        # a shared dict is used to share the cache between all processes have to use
+        # see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py and
+        # https://discuss.pytorch.org/t/reuse-of-dataloader-worker-process-and-caching-in-dataloader/30620/14
         # for more information
         self.image_cache = manager.dict()
         self.mask_cache = manager.dict()
@@ -171,7 +175,9 @@ class BraTSDataset(IterableDataset):
         self.current_index = 0
 
         if shuffle:
-            self.shuffled_indices = BraTSDataset.__shuffled_indices(self.__len__(), BraTSDataset.IMAGE_DIMENSIONS[0])
+            self.shuffled_indices = BraTSDataset.__shuffled_indices(
+                self.__len__(), BraTSDataset.IMAGE_DIMENSIONS[0]
+            )
         else:
             self.shuffled_indices = np.arange(self.__len__())
 
@@ -181,13 +187,17 @@ class BraTSDataset(IterableDataset):
             Iterator: Iterator that yields the whole dataset if a single process is used for data loading
                 or a subset of the dataset if the dataloading is split across multiple worker processes.
         """
-        
+
         worker_info = torch.utils.data.get_worker_info()
 
         # check whether data loading is split across multiple workers
         if worker_info is not None:
             # code adapted from https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset
-            per_worker = int(math.ceil((self.end_index - self.start_index) / float(worker_info.num_workers)))
+            per_worker = int(
+                math.ceil(
+                    (self.end_index - self.start_index) / float(worker_info.num_workers)
+                )
+            )
             worker_id = worker_info.id
             self.start_index = self.start_index + worker_id * per_worker
             self.current_index = self.start_index
@@ -210,16 +220,17 @@ class BraTSDataset(IterableDataset):
             self._current_mask = self.mask_cache[image_index]
         # read image and mask from disk otherwise
         else:
-            self._current_image = self.__read_image_as_array(self.image_paths[image_index], norm=True)
+            self._current_image = self.__read_image_as_array(
+                self.image_paths[image_index], norm=True
+            )
             self._current_mask = self.__read_image_as_array(
                 self.annotation_paths[image_index], norm=False, clip=self.clip_mask
             )
-        
+
         # cache image and mask if there is still space in cache
         if len(self.image_cache.keys()) < self.cache_size:
             self.image_cache[image_index] = self._current_image
             self.mask_cache[image_index] = self._current_mask
-
 
     def __next__(self) -> Tuple[torch.Tensor, torch.Tensor]:
         if self.current_index >= self.end_index:

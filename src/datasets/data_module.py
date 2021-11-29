@@ -123,7 +123,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
                 num_workers=self.num_workers,
-                pin_memory=self.pin_memory
+                pin_memory=self.pin_memory,
             )
         return None
 
@@ -138,7 +138,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 self._validation_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
-                pin_memory=self.pin_memory
+                pin_memory=self.pin_memory,
             )
         return None
 
@@ -165,7 +165,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 self._unlabeled_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
-                pin_memory=self.pin_memory
+                pin_memory=self.pin_memory,
             )
         return None
 
