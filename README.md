@@ -89,10 +89,27 @@ Additionally, the following optional arguments can be supplied in the same confi
     "gpus": 1,
     "loss": "dice",
     "optimizer": "adam",
+    "num_u_net_levels": 4
     "prediction_count": None,
     "prediction_dir": "./predictions"
 }
 ```
+
+## Running Weights & Biases Sweeps
+
+To execute the hyperparameter optimisation using W&B sweeps, run:
+
+```
+wandb sweep sweep.yaml
+```
+
+This will output a new `Sweep_ID` that you can use to run the agent via the provided shell script:
+
+```
+sbatch batch_sweeps.slurm <sweep_ID>
+```
+
+Configuring which hyperparameters should be optimized is done in the `sweep.yaml` file.
 
 ## Building the Documentation
 
@@ -111,6 +128,7 @@ make clean && make html
 ```
 
 To view the documentation, open the `./docs/build/html/index.html` file in your browser.
+
 ## Running the Tests
 
 To execute all unit tests, run:
