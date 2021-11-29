@@ -1,6 +1,6 @@
 """ Base classes to implement models with pytorch """
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Tuple, Union
 import numpy
 import torch
 import torchmetrics
@@ -13,7 +13,8 @@ from metric_tracking import CombinedPerEpochMetric
 
 Optimizer = Union[Adam, SGD]
 LRScheduler = Union[ReduceLROnPlateau, CosineAnnealingLR]
-LRSchedulerDict = dict[str, Union[str, LRScheduler]]
+LRSchedulerDict = Dict[str, Union[str, LRScheduler]]
+
 
 class PytorchModel(LightningModule, ABC):
     """
@@ -117,7 +118,9 @@ class PytorchModel(LightningModule, ABC):
 
         return None
 
-    def configure_optimizers(self) -> Union[List[Optimizer], tuple[List[Optimizer], List[LRSchedulerDict]]]:
+    def configure_optimizers(
+        self,
+    ) -> Union[List[Optimizer], Tuple[List[Optimizer], List[LRSchedulerDict]]]:
         """
         This method is called by the PyTorch lightning framework before starting model training.
 
