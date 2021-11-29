@@ -12,7 +12,7 @@
   "loss": "dice",
   "data_dir": "/dhc/groups/mpws2021cl1/Data",
   "gpus": 1,
-  "num_u_net_levels": 4
+  "num_u_net_levels": 4,
   "prediction_count": 5,
   "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions"
 }

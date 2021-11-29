@@ -4,8 +4,8 @@ import os.path
 from typing import Iterable, Optional
 
 import fire
-import wandb
 from pytorch_lightning.loggers import WandbLogger
+import wandb
 
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
@@ -53,7 +53,7 @@ def run_active_learning_pipeline(
         learning_rate: The step size at each iteration while moving towards a minimum of the loss.
         lr_scheduler: Name of the learning rate scheduler algorithm. E.g. 'reduceLROnPlateau'.
         num_u_net_levels: Number levels (encoder and decoder blocks) in the U-Net.
-        
+
     Returns:
         None.
     """
