@@ -155,7 +155,9 @@ class BraTSDataset(IterableDataset):
 
         # since the PyTorch dataloader uses multiple processes for data loading (if num_workers > 0), 
         # a shared dict is used to share the cache between all processes have to use 
-        # see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py for more information
+        # see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py and 
+        # https://discuss.pytorch.org/t/reuse-of-dataloader-worker-process-and-caching-in-dataloader/30620/14 
+        # for more information
         self.image_cache = manager.dict()
         self.mask_cache = manager.dict()
 
