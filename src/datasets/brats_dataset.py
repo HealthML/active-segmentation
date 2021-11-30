@@ -96,7 +96,7 @@ class BraTSDataset(IterableDataset):
         Implements efficient shuffling for 2D image datasets like the BraTSDataset whose elements represent the slices
         of multiple 3D images. It is assumed that `dataset_size` is equal to :math:`N \cdot S` where :math:`N` is the
         number of 3D images and :math:`S` the number of 2D slices per 3D image. It is further assumed that all 2D slices
-        of one 3D image have have contiguous indices in the dataset. To allow for efficient image pre-fetching, first
+        of one 3D image have contiguous indices in the dataset. To allow for efficient image pre-fetching, first
         the order of all 3D images is shuffled and then the order of slices within each 3D image is shuffled. This way
         the 3D images can still be loaded as a whole.
 
