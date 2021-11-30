@@ -182,6 +182,7 @@ def _distances_to_surface(prediction: np.ndarray, target: np.ndarray) -> np.ndar
     assert prediction.ndim in [
         2,
         3,
+        4,  # ToDo: Only input one channel.
     ], "Prediction and target must have either two or three dimensions."
 
     erosion_structure = generate_binary_structure(prediction.ndim, connectivity=1)
@@ -234,7 +235,9 @@ def hausdorff_distance(
         prediction.shape == target.shape
     ), "Prediction and target must have the same dimensions."
     assert (
-        prediction.dim() == 2 or prediction.dim() == 3
+        prediction.dim() == 2
+        or prediction.dim() == 3
+        or prediction.dim() == 4  # ToDo: Only input one channel.
     ), "Prediction and target must have either two or three dimensions."
     assert _is_binary(prediction), "Predictions must be binary."
     assert _is_binary(target), "Target must be binary."
