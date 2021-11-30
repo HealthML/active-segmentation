@@ -17,7 +17,6 @@ class Inferencer:
         data_dir: Main directory with the dataset. E.g. './data'
         prediction_dir: Main directory with the predictions. E.g. './predictions'
         prediction_count: The amount of predictions to be generated.
-        model_dim: The dimensionality of the model. Either 2 or 3.
     """
 
     # pylint: disable=too-few-public-methods
@@ -28,14 +27,13 @@ class Inferencer:
         data_dir: str,
         prediction_dir: str,
         prediction_count: int,
-        model_dim: int,
     ) -> None:
         self.model = model
         self.dataset = dataset
         self.data_dir = data_dir
         self.prediction_dir = prediction_dir
         self.prediction_count = prediction_count
-        self.model_dim = model_dim
+        self.model_dim = model.input_dimensionality()
 
     def inference(self) -> None:
         """Run the inferencing."""
@@ -54,7 +52,7 @@ class Inferencer:
         data = BraTSDataset(
             image_paths=image_paths,
             annotation_paths=annotation_paths,
-            dimensionality=3,
+            dim=3,
         )
 
         for i, (x, _, _) in enumerate(data):

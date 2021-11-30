@@ -18,15 +18,16 @@ class BraTSDataset(IterableDataset):
     glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
     Further information: https://www.med.upenn.edu/cbica/brats2020/data.html
     Args:
-        image_paths: List with the paths to the images.
-        annotation_paths: List with the paths to the annotations.
+        image_paths (List[str]): List with the paths to the images.
+        annotation_paths (List[str]): List with the paths to the annotations.
         cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.
             Defaults to zero.
-        clip_mask: Flag to clip the annotation labels, if True only label 1 is kept.
+        clip_mask (bool, optinal): Flag to clip the annotation labels, if True only label 1 is kept. Defaults to true.
         shuffle (bool, optional): Whether the data should be shuffled.
-        transform: Function to transform the images.
-        target_transform: Function to transform the annotations.
-        dimensionality: 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+        transform (Callable[[Any], Tensor], optional): Function to transform the images.
+        target_transform (Callable[[Any], Tensor], optional): Function to transform the annotations.
+        dimensionality (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+            Defaults to 2.
     """
 
     IMAGE_DIMENSIONS = (155, 240, 240)
@@ -137,7 +138,7 @@ class BraTSDataset(IterableDataset):
         shuffle: bool = False,
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
-        dimensionality: int = 2,
+        dim: int = 2,
     ):
 
         self.image_paths = image_paths
@@ -168,7 +169,7 @@ class BraTSDataset(IterableDataset):
         self.transform = transform
         self.target_transform = target_transform
 
-        self.dimensionality = dimensionality
+        self.dim = dim
 
         self.start_index = 0
         self.end_index = self.__len__()
@@ -177,7 +178,7 @@ class BraTSDataset(IterableDataset):
         if shuffle:
             self.shuffled_indices = BraTSDataset.__shuffled_indices(
                 self.__len__(),
-                BraTSDataset.IMAGE_DIMENSIONS[0] if self.dimensionality == 2 else 1,
+                BraTSDataset.IMAGE_DIMENSIONS[0] if self.dim == 2 else 1,
             )
         else:
             self.shuffled_indices = np.arange(self.__len__())
@@ -240,7 +241,7 @@ class BraTSDataset(IterableDataset):
         shuffled_index = self.shuffled_indices[self.current_index]
         image_index = (
             math.floor(shuffled_index / BraTSDataset.IMAGE_DIMENSIONS[0])
-            if self.dimensionality == 2
+            if self.dim == 2
             else shuffled_index
         )
 
@@ -251,7 +252,7 @@ class BraTSDataset(IterableDataset):
             filepath=self.image_paths[self._current_image_index]
         )
 
-        if self.dimensionality == 2:
+        if self.dim == 2:
             slice_index = (
                 shuffled_index - image_index * BraTSDataset.IMAGE_DIMENSIONS[0]
             )
@@ -270,7 +271,7 @@ class BraTSDataset(IterableDataset):
         if self.is_unlabeled:
             return (
                 torch.unsqueeze(x, 0),
-                f"{case_id}-{slice_index}" if self.dimensionality == 2 else case_id,
+                f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
             )
 
         self.current_index += 1
@@ -280,7 +281,7 @@ class BraTSDataset(IterableDataset):
     def __len__(self) -> int:
         return (
             self.num_images * BraTSDataset.IMAGE_DIMENSIONS[0]
-            if self.dimensionality == 2
+            if self.dim == 2
             else self.num_images
         )
 

@@ -1,5 +1,15 @@
 {
-  "architecture": "u_net",
+  "model-config": {
+    "architecture": "u_net",
+    "optimizer": "adam",
+    "loss": "dice",
+    "learning_rate": 0.0001,
+    "num_levels": 4,
+    "input_shape": [
+      240,
+      240
+    ]
+  },
   "dataset_config": {
     "dataset": "brats",
     "data_dir": "/dhc/groups/mpws2021cl1/Data",
@@ -12,15 +22,7 @@
   "batch_size": 16,
   "epochs": 3,
   "num_workers": 8,
-  "optimizer": "adam",
-  "learning_rate": 0.0001,
-  "loss": "dice",
   "gpus": 1,
-  "num_u_net_levels": 4,
-  "u_net_input_shape": [
-    240,
-    240
-  ],
   "prediction_count": 5,
   "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions"
 }

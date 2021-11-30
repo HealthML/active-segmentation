@@ -14,8 +14,8 @@ class PytorchUNet(PytorchModel):
     U-Net architecture wrapped as PytorchModel.
     Details about the architecture: https://arxiv.org/pdf/1505.04597.pdf
     Args:
-        num_levels: Number levels (encoder and decoder blocks) in the U-Net.
-        input_shape: The input shape of the U-Net.
+        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
+        input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -25,6 +25,8 @@ class PytorchUNet(PytorchModel):
 
         super().__init__(**kwargs)
 
+        self.input_shape = input_shape
+
         self.model = UNet(
             in_channels=1,
             out_channels=1,
@@ -32,6 +34,9 @@ class PytorchUNet(PytorchModel):
             num_levels=num_levels,
             input_shape=input_shape,
         )
+
+    def input_dimensionality(self) -> int:
+        return len(self.input_shape)
 
     # wrap model interface
     def eval(self) -> None:

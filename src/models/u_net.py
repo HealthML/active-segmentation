@@ -15,13 +15,13 @@ class UNet(nn.Module):
     and adapted to a flexible number of levels and for optinal 3d mode.
 
     Args:
-        in_channels: Number of input channels.
-        out_channels: Number of output channels (should be equal to the number of classes
-            excluding the background)
-        init_features: Number of feature channels of the first U-Net block,
-            in each down-sampling block, the number of feature channels is doubled.
-        num_levels: Number levels (encoder and decoder blocks) in the U-Net.
-        input_shape: The input shape of the U-Net.
+        in_channels (int, optional): Number of input channels. Defaults to 3.
+        out_channels (int, optional): Number of output channels (should be equal to the number of classes
+            excluding the background). Defaults to 1.
+        init_features (int, optional): Number of feature channels of the first U-Net block,
+            in each down-sampling block, the number of feature channels is doubled. Defaults to 32.
+        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
+        input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).
     """
 
     # pylint: disable-msg=too-many-instance-attributes
@@ -165,7 +165,7 @@ class UNet(nn.Module):
     def upconv_output_padding(level: int, input_shape: Tuple[int]) -> Tuple[int]:
         """
         Calculates the output padding for transpose convolutions to match the output size to the corresponding encoding
-        step for concatination.
+        step for concatenation.
 
         Args:
             level (int): The level in the UNet the transpose convolution is on.

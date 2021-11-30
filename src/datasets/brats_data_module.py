@@ -100,7 +100,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         return BraTSDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,
-            dimensionality=self.dim,
+            dim=self.dim,
             cache_size=self.cache_size,
             shuffle=self.shuffle,
         )
@@ -130,7 +130,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         return BraTSDataset(
             image_paths=val_image_paths,
             annotation_paths=val_annotation_paths,
-            dimensionality=self.dim,
+            dim=self.dim,
             cache_size=self.cache_size,
         )
 
