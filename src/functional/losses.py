@@ -23,7 +23,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         self.reduction = reduction
 
     def _reduce_loss(self, loss: torch.Tensor) -> torch.Tensor:
-        """
+        r"""
         Aggregates the loss values of the different classes of an image as well as the different images of a batch.
 
         Args:
@@ -38,7 +38,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
-        assert loss.dim() == 1 or loss.dim() == 2 or loss.dim() == 3
+        assert loss.dim() == 1 or loss.dim() == 2
 
         # aggregate loss values for all channels and the entire batch
         if self.reduction == "mean":
@@ -46,6 +46,23 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         if self.reduction == "sum":
             return loss.sum()
         return loss
+
+    @staticmethod
+    def flatten_tensor(tensor: torch.Tensor):
+        r"""
+        Flattens a tensor except for its first two dimensions.
+
+        Args:
+            tensor (Tensor): The tensor to be flattened.
+        Returns:
+            Tensor: Flattened view of the input tensor.
+
+        Shape:
+            - Tensor: :math:`(N, C, X, Y, ...)`
+            - Output: :math:`(N, C, X*Y*...)`
+        """
+
+        return tensor.view(*tensor.shape[0:2], -1).float()
 
 
 class DiceLoss(SegmentationLoss):
@@ -78,17 +95,17 @@ class DiceLoss(SegmentationLoss):
             Tensor: Dice loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding`
-              `the background)`, or `(N, height, width)` for binary segmentation tasks.
-            - Target: :math:`(N, C, height, width)`, where each value is in
-              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, and `C = number of classes (excluding`
+              `the background)`.
+            - Target: :math:`(N, C, X, Y, ...)`, where each value is in
+              :math:`\{0, 1\}`.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
         assert prediction.shape == target.shape
 
-        flattened_target = target.view(*target.shape[:-2], -1).float()
-        flattened_prediction = prediction.view(*prediction.shape[:-2], -1).float()
+        flattened_target = self.flatten_tensor(target)
+        flattened_prediction = self.flatten_tensor(prediction)
 
         intersection = (flattened_prediction * flattened_target).sum(dim=-1)
 
@@ -133,17 +150,17 @@ class FalsePositiveLoss(SegmentationLoss):
             Tensor: False positive loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
-              the background)`, or `(N, height, width)` for binary segmentation tasks.
-            - Target: :math:`(N, C, height, width)`, where each value is in
-              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`.
+            - Target: :math:`(N, C, X, Y, ...)`, where each value is in
+              :math:`\{0, 1\}`.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
         assert prediction.shape == target.shape
 
-        flattened_target = target.view(*target.shape[:-2], -1).float()
-        flattened_prediction = prediction.view(*prediction.shape[:-2], -1).float()
+        flattened_target = self.flatten_tensor(target)
+        flattened_prediction = self.flatten_tensor(prediction)
 
         false_positives = ((1 - flattened_target) * flattened_prediction).sum(-1)
         positives = flattened_prediction.sum(-1)
@@ -181,10 +198,10 @@ class FalsePositiveDiceLoss(SegmentationLoss):
             Tensor: Combined loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
-              the background)`, or `(N, height, width)` for binary segmentation tasks.
-            - Target: :math:`(N, C, height, width)`, where each value is in
-              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`.
+            - Target: :math:`(N, C, X, Y, ...)`, where each value is in
+              :math:`\{0, 1\}`.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
@@ -215,10 +232,10 @@ class BCELoss(SegmentationLoss):
             Tensor: Binary cross-entropy loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
-              the background)`, or `(N, height, width)` for binary segmentation tasks.
-            - Target: :math:`(N, C, height, width)`, where each value is in
-              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`.
+            - Target: :math:`(N, C, X, Y, ...)`, where each value is in
+              :math:`\{0, 1\}`.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
@@ -252,10 +269,10 @@ class BCEDiceLoss(SegmentationLoss):
             Tensor: Combined loss.
 
         Shape:
-            - Prediction: :math:`(N, C, height, width)`, where `N = batch size`, and `C = number of classes (excluding
-              the background)`, or `(N, height, width)` for binary segmentation tasks.
-            - Target: :math:`(N, C, height, width)`, where each value is in
-              :math:`\{0, 1\}`, or `(N, height, width)` for binary segmentation tasks.
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, and `C = number of classes (excluding
+              the background)`.
+            - Target: :math:`(N, C, X, Y, ...)`, where each value is in
+              :math:`\{0, 1\}`.
             - Output: If :attr:`reduction` is ``'none'``, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
