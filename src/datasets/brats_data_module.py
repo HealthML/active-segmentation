@@ -2,7 +2,7 @@
 import os
 import random
 from typing import Any, List, Optional, Tuple
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 
 from datasets.data_module import ActiveLearningDataModule
 from datasets.brats_dataset import BraTSDataset
@@ -15,6 +15,9 @@ class BraTSDataModule(ActiveLearningDataModule):
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
         num_workers: Number of workers for DataLoader.
+        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
+            (default = 0).
+        pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle: Flag if the data should be shuffled.
         **kwargs: Further, dataset specific parameters.
     """
@@ -64,12 +67,22 @@ class BraTSDataModule(ActiveLearningDataModule):
         data_dir: str,
         batch_size: int,
         num_workers: int,
+        cache_size: int = 0,
+        pin_memory: bool = True,
         shuffle: bool = True,
         **kwargs,
     ):
 
-        super().__init__(data_dir, batch_size, num_workers, shuffle, **kwargs)
+        super().__init__(
+            data_dir,
+            batch_size,
+            num_workers,
+            pin_memory=pin_memory,
+            shuffle=shuffle,
+            **kwargs,
+        )
         self.data_folder = self.data_dir
+        self.cache_size = cache_size
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
@@ -82,8 +95,28 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "train")
         )
         return BraTSDataset(
-            image_paths=train_image_paths, annotation_paths=train_annotation_paths
+            image_paths=train_image_paths,
+            annotation_paths=train_annotation_paths,
+            cache_size=self.cache_size,
+            shuffle=self.shuffle,
         )
+
+    def train_dataloader(self) -> Optional[DataLoader]:
+        """
+        Returns:
+            Pytorch dataloader or Keras sequence representing the training set.
+        """
+
+        # disable shuffling in the dataloader since the BraTS dataset is a subclass of
+        # IterableDataset and implements it's own shuffling
+        if self._training_set:
+            return DataLoader(
+                self._training_set,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                pin_memory=self.pin_memory,
+            )
+        return None
 
     def _create_validation_set(self) -> Optional[Dataset]:
         """Creates a validation dataset."""
@@ -91,7 +124,9 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "val")
         )
         return BraTSDataset(
-            image_paths=val_image_paths, annotation_paths=val_annotation_paths
+            image_paths=val_image_paths,
+            annotation_paths=val_annotation_paths,
+            cache_size=self.cache_size,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
