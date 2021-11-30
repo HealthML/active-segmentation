@@ -4,6 +4,7 @@ from typing import Iterable, Union
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LightningLoggerBase
+from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
@@ -35,12 +36,21 @@ class ActiveLearningPipeline:
 
         self.data_module = data_module
         self.model = model
+        # log gradients, parameter histogram and model topology
+        logger.watch(self.model, log="all")
+
+        callbacks = [
+            EarlyStopping("validation/loss"),
+            LearningRateMonitor(logging_interval="step"),
+        ]
         self.model_trainer = Trainer(
             deterministic=True,
             profiler="simple",
             max_epochs=epochs,
             logger=logger,
             gpus=gpus,
+            benchmark=True,
+            callbacks=callbacks,
         )
         self.strategy = strategy
         self.epochs = epochs

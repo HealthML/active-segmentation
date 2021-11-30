@@ -16,9 +16,10 @@ class UNet(nn.Module):
 
     Args:
         in_channels: Number of input channels.
-        out_channels: Number of output channels (should be equal to the number of classes excluding the background)
-        init_features: Number of feature channels of the first U-Net block, in each down-sampling block, the number of
-            feature channels is doubled.
+        out_channels: Number of output channels (should be equal to the number of classes
+            excluding the background)
+        init_features: Number of feature channels of the first U-Net block,
+            in each down-sampling block, the number of feature channels is doubled.
         num_levels: Number levels (encoder and decoder blocks) in the U-Net.
         input_shape: The input shape of the U-Net.
     """
@@ -49,12 +50,12 @@ class UNet(nn.Module):
         self.encoders = nn.ModuleList(
             [
                 UNet._block(
-                    in_channels if i == 0 else features * (2 ** (i - 1)),
-                    features * (2 ** i),
-                    name=f"enc{i + 1}",
+                    in_channels if level == 0 else features * (2 ** (level - 1)),
+                    features * (2 ** level),
+                    name=f"enc{level + 1}",
                     dim=dim,
                 )
-                for i in range(num_levels)
+                for level in range(num_levels)
             ]
         )
         self.pools = nn.ModuleList(
@@ -71,24 +72,24 @@ class UNet(nn.Module):
         self.upconvs = nn.ModuleList(
             [
                 ConvTranspose(
-                    features * (2 ** (i + 1)),
-                    features * (2 ** i),
+                    features * (2 ** (level + 1)),
+                    features * (2 ** level),
                     kernel_size=2,
                     stride=2,
-                    output_padding=UNet.upconv_output_padding(i, input_shape),
+                    output_padding=UNet.upconv_output_padding(level, input_shape),
                 )
-                for i in range(num_levels)
+                for level in range(num_levels)
             ]
         )
         self.decoders = nn.ModuleList(
             [
                 UNet._block(
-                    features * (2 ** (i + 1)),
-                    features * (2 ** i),
-                    name=f"dec{i + 1}",
+                    features * (2 ** (level + 1)),
+                    features * (2 ** level),
+                    name=f"dec{level + 1}",
                     dim=dim,
                 )
-                for i in range(num_levels)
+                for level in range(num_levels)
             ]
         )
 
@@ -106,18 +107,20 @@ class UNet(nn.Module):
 
         x = x.float()
         encs = []  # individually store encoding results for skip connections
-        for i in range(self.num_levels):
+        for level in range(self.num_levels):
             encs.append(
-                self.encoders[i](x if i == 0 else self.pools[i - 1](encs[i - 1]))
+                self.encoders[level](
+                    x if level == 0 else self.pools[level - 1](encs[level - 1])
+                )
             )
 
         bottleneck = self.bottleneck(self.pools[-1](encs[-1]))
 
         dec = bottleneck
-        for i in reversed(range(self.num_levels)):
-            dec = self.upconvs[i](dec)
-            dec = torch.cat((dec, encs[i]), dim=1)
-            dec = self.decoders[i](dec)
+        for level in reversed(range(self.num_levels)):
+            dec = self.upconvs[level](dec)
+            dec = torch.cat((dec, encs[level]), dim=1)
+            dec = self.decoders[level](dec)
 
         return torch.sigmoid(self.conv(dec))
 

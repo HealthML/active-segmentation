@@ -18,6 +18,7 @@ class ActiveLearningDataModule(LightningDataModule):
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
         num_workers: Number of workers for DataLoader.
+        pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle: Flag if the data should be shuffled.
         **kwargs: Further, dataset specific parameters.
     """
@@ -33,6 +34,7 @@ class ActiveLearningDataModule(LightningDataModule):
         data_dir: str,
         batch_size: int,
         num_workers: int,
+        pin_memory: bool = True,
         shuffle: bool = True,
         **kwargs
     ):
@@ -41,6 +43,7 @@ class ActiveLearningDataModule(LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.pin_memory = pin_memory
         self.shuffle = shuffle
 
     def setup(self, stage: Optional[str] = None) -> None:
@@ -120,6 +123,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
                 num_workers=self.num_workers,
+                pin_memory=self.pin_memory,
             )
         return None
 
@@ -134,6 +138,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 self._validation_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
+                pin_memory=self.pin_memory,
             )
         return None
 
@@ -160,6 +165,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 self._unlabeled_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
+                pin_memory=self.pin_memory,
             )
         return None
 

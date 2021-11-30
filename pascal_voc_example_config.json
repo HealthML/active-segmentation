@@ -1,6 +1,8 @@
 {
   "architecture": "fcn_resnet50",
-  "dataset": "pascal-voc",
+  "dataset_config": {
+    "dataset": "pascal-voc"
+  } ,
   "strategy": "base",
   "experiment_name": "test-experiment",
   "experiment_tags": [],

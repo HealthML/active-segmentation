@@ -1,22 +1,30 @@
 """ Base classes to implement models with pytorch """
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, Union
+from typing import Any, Dict, Iterable, List, Tuple, Union
 import numpy
 import torch
 import torchmetrics
 from pytorch_lightning.core.lightning import LightningModule
 from torch.optim import Adam, SGD
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR
 
 import functional
 from metric_tracking import CombinedPerEpochMetric
 
+Optimizer = Union[Adam, SGD]
+LRScheduler = Union[ReduceLROnPlateau, CosineAnnealingLR]
+LRSchedulerDict = Dict[str, Union[str, LRScheduler]]
 
+
+# pylint: disable=too-many-instance-attributes
 class PytorchModel(LightningModule, ABC):
     """
     Base class to implement Pytorch models.
     Args:
-        learning_rate: The step size at each iteration while moving towards a minimum of the loss function.
+        learning_rate: The step size at each iteration while moving towards a minimum of the loss.
         optimizer: Algorithm used to calculate the loss and update the weights. E.g. 'adam' or 'sgd'.
+        lr_scheduler: Algorithm used for dynamically updating the learning rate during training.
+            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         loss: The measure of performance. E.g. 'dice', 'bce', 'fp'
         **kwargs:
     """
@@ -27,6 +35,7 @@ class PytorchModel(LightningModule, ABC):
         self,
         learning_rate: float = 0.0001,
         optimizer: str = "adam",
+        lr_scheduler: str = None,
         loss: str = "dice",
         **kwargs
     ):
@@ -35,6 +44,7 @@ class PytorchModel(LightningModule, ABC):
 
         self.learning_rate = learning_rate
         self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
         self.loss = self.configure_loss(loss)
 
         self.confidence_levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -109,19 +119,38 @@ class PytorchModel(LightningModule, ABC):
 
         return None
 
-    def configure_optimizers(self) -> Union[Adam, SGD]:
+    def configure_optimizers(
+        self,
+    ) -> Union[List[Optimizer], Tuple[List[Optimizer], List[LRSchedulerDict]]]:
         """
         This method is called by the PyTorch lightning framework before starting model training.
 
         Returns:
-            The optimizer object.
+            The optimizer object as a list and optionally a learning rate scheduler object as a list.
         """
-
         if self.optimizer == "adam":
-            return Adam(self.parameters(), lr=self.learning_rate)
-        if self.optimizer == "sgd":
-            return SGD(self.parameters(), lr=self.learning_rate)
-        raise ValueError("Invalid optimizer name.")
+            opt = Adam(self.parameters(), lr=self.learning_rate)
+        elif self.optimizer == "sgd":
+            opt = SGD(self.parameters(), lr=self.learning_rate)
+        else:
+            raise ValueError("Invalid optimizer name.")
+
+        scheduler = None
+        if self.lr_scheduler == "reduceLROnPlateau":
+            scheduler = {
+                "scheduler": ReduceLROnPlateau(opt),
+                "monitor": "validation/loss",
+            }
+        elif self.lr_scheduler == "cosineAnnealingLR":
+            scheduler = {
+                "scheduler": CosineAnnealingLR(opt, T_max=50),
+                "monitor": "validation/loss",
+            }
+
+        if scheduler is not None:
+            return [opt], [scheduler]
+
+        return [opt]
 
     @staticmethod
     def configure_loss(loss: str) -> functional.losses.SegmentationLoss:
