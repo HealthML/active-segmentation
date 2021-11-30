@@ -140,6 +140,14 @@ def run_active_learning_pipeline_from_config(
     with open(config_file_name, encoding="utf-8") as config_file:
         hyperparameter_defaults = json.load(config_file)
         config = hyperparameter_defaults
+
+        if "dataset_config" in config and "dataset" in config["dataset_config"]:
+            config["dataset"] = config["dataset_config"]["dataset"]
+            del config["dataset_config"]["dataset"]
+        if "dataset_config" in config and "data_dir" in config["dataset_config"]:
+            config["data_dir"] = config["dataset_config"]["data_dir"]
+            del config["dataset_config"]["data_dir"]
+
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")
             wandb.init(

@@ -1,7 +1,8 @@
 {
   "architecture": "u_net",
-  "dataset": "brats",
   "dataset_config": {
+    "dataset": "brats",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data",
     "cache_size": 250,
     "pin_memory": true
   },
@@ -14,7 +15,6 @@
   "optimizer": "adam",
   "learning_rate": 0.0001,
   "loss": "dice",
-  "data_dir": "/dhc/groups/mpws2021cl1/Data",
   "gpus": 1,
   "num_u_net_levels": 4,
   "prediction_count": 5,
