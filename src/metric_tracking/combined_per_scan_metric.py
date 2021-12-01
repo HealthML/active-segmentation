@@ -94,11 +94,11 @@ class CombinedPerScanMetric(torchmetrics.Metric):
         target: torch.Tensor,
     ) -> None:
         """
-        Takes a prediction and a target slice of the MRT scan and updates the metrics accordingly.
+        Takes a prediction and a target of the MRT scan and updates the metrics accordingly.
 
         Args:
-            prediction (Tensor): A prediction slice.
-            target (Tensor): A target slice.
+            prediction (Tensor): A prediction slice or a whole 3d image.
+            target (Tensor): A target slice or a whole 3d image.
         """
 
         for confidence_level, confidence_level_name in self.confidence_levels:

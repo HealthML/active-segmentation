@@ -119,6 +119,12 @@ class PytorchModel(LightningModule, ABC):
 
         return None
 
+    @abstractmethod
+    def input_dimensionality(self) -> int:
+        """
+        The dimensionality of the input. Usually 2 or 3.
+        """
+
     def configure_optimizers(
         self,
     ) -> Union[List[Optimizer], Tuple[List[Optimizer], List[LRSchedulerDict]]]:

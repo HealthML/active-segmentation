@@ -4,8 +4,8 @@ import random
 from typing import Any, List, Optional, Tuple
 from torch.utils.data import DataLoader, Dataset
 
-from datasets.data_module import ActiveLearningDataModule
-from datasets.brats_dataset import BraTSDataset
+from .data_module import ActiveLearningDataModule
+from .brats_dataset import BraTSDataset
 
 
 class BraTSDataModule(ActiveLearningDataModule):
@@ -19,6 +19,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             (default = 0).
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle: Flag if the data should be shuffled.
+        dim: 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -70,6 +71,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         cache_size: int = 0,
         pin_memory: bool = True,
         shuffle: bool = True,
+        dim: int = 2,
         **kwargs,
     ):
 
@@ -82,6 +84,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             **kwargs,
         )
         self.data_folder = self.data_dir
+        self.dim = dim
         self.cache_size = cache_size
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
@@ -97,6 +100,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         return BraTSDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,
+            dim=self.dim,
             cache_size=self.cache_size,
             shuffle=self.shuffle,
         )
@@ -126,6 +130,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         return BraTSDataset(
             image_paths=val_image_paths,
             annotation_paths=val_annotation_paths,
+            dim=self.dim,
             cache_size=self.cache_size,
         )
 

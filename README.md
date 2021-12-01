@@ -72,8 +72,12 @@ The config file should be in JSON format and has to contain the following argume
 
 ```
 {
-    "architecture": "u_net",
-    "dataset": "brats",
+    "model_config": {
+        "architecture": "u_net"
+    },
+    "dataset_config": {
+        "dataset": "brats"
+    },
     "strategy": "base"
 }
 ```
@@ -82,14 +86,22 @@ Additionally, the following optional arguments can be supplied in the same confi
 
 ```
 {
-    "data_dir": "./data",
+    "dataset_config": {
+        "data_dir": "./data",
+        "cache_size": 250,
+        "pin_memory": true
+    },
+    "model_config": {
+        "optimizer": "adam",
+        "loss": "dice",
+        "learning_rate": 0.0001,
+        "num_levels": 4,
+        "input_shape": [240, 240] // can also be 3d
+    },
     "batch_size": 16,
     "num_workers": 4,
     "epochs": 50,
     "gpus": 1,
-    "loss": "dice",
-    "optimizer": "adam",
-    "num_u_net_levels": 4
     "prediction_count": None,
     "prediction_dir": "./predictions"
 }

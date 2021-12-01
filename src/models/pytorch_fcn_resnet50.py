@@ -55,3 +55,6 @@ class PytorchFCNResnet50(PytorchModel):
         logits = self(x)["out"]
 
         # ToDo: this method should return the required performance metrics
+
+    def input_dimensionality(self) -> int:
+        return 2

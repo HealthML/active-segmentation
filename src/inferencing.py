@@ -33,6 +33,7 @@ class Inferencer:
         self.data_dir = data_dir
         self.prediction_dir = prediction_dir
         self.prediction_count = prediction_count
+        self.model_dim = model.input_dimensionality()
 
     def inference(self) -> None:
         """Run the inferencing."""
@@ -51,16 +52,23 @@ class Inferencer:
         data = BraTSDataset(
             image_paths=image_paths,
             annotation_paths=annotation_paths,
-            dimensionality="3d",
+            dim=3,
         )
 
         for i, (x, _, _) in enumerate(data):
+            # For 2d case:
             # Switching axes to predict for single slices.
             # Swap from (1, z, x, y) to (z, 1, x, y) and after predicting swap back.
             # Basically represents the 3d images as a batch of z 2d slices.
-            x = torch.swapaxes(x, 0, 1)
+            # For 3d case:
+            # Adding one more dimension to represent the image as a batch of one single image.
+            x = (
+                torch.swapaxes(x, 0, 1)
+                if self.model_dim == 2
+                else torch.unsqueeze(x, 0)
+            )
             pred = self.model.predict(x)
-            seg = np.squeeze(np.swapaxes(pred, 0, 1))
+            seg = np.squeeze(np.swapaxes(pred, 0, 1) if self.model_dim == 2 else pred)
 
             seg = (seg >= 0.5) * 255
             seg = np.moveaxis(seg, 0, 2)

@@ -23,15 +23,11 @@ def run_active_learning_pipeline(
     batch_size: int = 16,
     data_dir: str = "./data",
     dataset_config: Optional[Dict[str, Any]] = None,
+    model_config: Optional[Dict[str, Any]] = None,
     epochs: int = 50,
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
-    loss: str = "dice",
     num_workers: int = 4,
-    optimizer: str = "adam",
-    learning_rate: float = 0.0001,
-    lr_scheduler: str = None,
-    num_u_net_levels: int = 4,
     prediction_count: Optional[int] = None,
     prediction_dir: str = "./predictions",
 ) -> None:
@@ -46,15 +42,11 @@ def run_active_learning_pipeline(
         batch_size (int, optional): Size of training examples passed in one training step.
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
         dataset_config (Dict[str, Any], optional): Dictionary with dataset specific parameters.
+        model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
         epochs (int, optional): Number of iterations with the full dataset.
         experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
         gpus (int): Number of GPUS to use for model training.
-        loss (str, optional): Name of the performance measure to optimize. E.g. 'dice'.
         num_workers (int, optional): Number of workers.
-        optimizer (str, optional): Name of the optimization algorithm. E.g. 'adam'.
-        learning_rate: The step size at each iteration while moving towards a minimum of the loss.
-        lr_scheduler: Name of the learning rate scheduler algorithm. E.g. 'reduceLROnPlateau'.
-        num_u_net_levels: Number levels (encoder and decoder blocks) in the U-Net.
 
     Returns:
         None.
@@ -69,20 +61,9 @@ def run_active_learning_pipeline(
     )
 
     if architecture == "fcn_resnet50":
-        model = PytorchFCNResnet50(
-            optimizer=optimizer,
-            loss=loss,
-            learning_rate=learning_rate,
-            lr_scheduler=lr_scheduler,
-        )
+        model = PytorchFCNResnet50(**model_config)
     elif architecture == "u_net":
-        model = PytorchUNet(
-            num_levels=num_u_net_levels,
-            optimizer=optimizer,
-            learning_rate=learning_rate,
-            loss=loss,
-            lr_scheduler=lr_scheduler,
-        )
+        model = PytorchUNet(**model_config)
     else:
         raise ValueError("Invalid model architecture.")
 
@@ -100,7 +81,11 @@ def run_active_learning_pipeline(
         )
     elif dataset == "brats":
         data_module = BraTSDataModule(
-            data_dir, batch_size, num_workers, **dataset_config
+            data_dir,
+            batch_size,
+            num_workers,
+            dim=model.input_dimensionality(),
+            **dataset_config,
         )
     else:
         raise ValueError("Invalid data_module name.")
@@ -147,6 +132,14 @@ def run_active_learning_pipeline_from_config(
         if "dataset_config" in config and "data_dir" in config["dataset_config"]:
             config["data_dir"] = config["dataset_config"]["data_dir"]
             del config["dataset_config"]["data_dir"]
+
+        if "model_config" in config and "architecture" in config["model_config"]:
+            config["architecture"] = config["model_config"]["architecture"]
+            del config["model_config"]["architecture"]
+        if "model_config" in config and "input_shape" in config["model_config"]:
+            config["model_config"]["input_shape"] = tuple(
+                config["model_config"]["input_shape"]
+            )
 
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")
