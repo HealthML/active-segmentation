@@ -1,5 +1,5 @@
 {
-  "model-config": {
+  "model_config": {
     "architecture": "u_net",
     "optimizer": "adam",
     "loss": "dice",

@@ -72,7 +72,7 @@ The config file should be in JSON format and has to contain the following argume
 
 ```
 {
-    "model-config": {
+    "model_config": {
         "architecture": "u_net"
     },
     "dataset_config": {
@@ -91,7 +91,7 @@ Additionally, the following optional arguments can be supplied in the same confi
         "cache_size": 250,
         "pin_memory": true
     },
-    "model-config": {
+    "model_config": {
         "optimizer": "adam",
         "loss": "dice",
         "learning_rate": 0.0001,
