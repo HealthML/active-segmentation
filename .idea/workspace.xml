@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="309ee60c-9bf5-439e-92c4-6b4bd747ebf3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/sphinx.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/sphinx.yml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="PUSH_AUTO_UPDATE" value="true" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="20mHb3kcZvK6FkhKhtlE5sJ6NzL" />
+  <component name="ProjectLevelVcsManager">
+    <OptionsSetting value="false" id="Update" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/.github/workflows" />
+    <property name="settings.editor.selected.configurable" value="com.leinardi.pycharm.pylint.PylintConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/.github/workflows" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Python tests for test_false_positive_loss.TestFalsePositiveLoss" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="active-segmentation" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/test_functional" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_false_positive_loss.TestFalsePositiveLoss&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Python tests for test_false_positive_loss.TestFalsePositiveLoss" />
+        <item itemvalue="Python tests.Python tests for test_false_positive_loss.TestFalsePositiveLoss" />
+        <item itemvalue="Python tests.Python tests for test_false_positive_loss.TestFalsePositiveLoss" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="309ee60c-9bf5-439e-92c4-6b4bd747ebf3" name="Changes" comment="" />
+      <created>1636642910699</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1636642910699</updated>
+      <workItem from="1636642912709" duration="298000" />
+      <workItem from="1637249702896" duration="4244000" />
+      <workItem from="1637253991525" duration="8688000" />
+      <workItem from="1637761892274" duration="8441000" />
+      <workItem from="1638460542201" duration="7352000" />
+    </task>
+    <task id="LOCAL-00001" summary="Add testing to ci workflow">
+      <created>1637250647425</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1637250647425</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Add testing to ci workflow">
+      <created>1637251411784</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1637251411784</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Add testing to ci workflow">
+      <created>1637252407140</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1637252407140</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Fix yaml syntax error">
+      <created>1637252542810</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1637252542810</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Fix yaml syntax error">
+      <created>1637252954424</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1637252954424</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Remove duplicate PYTHONPATH setup">
+      <created>1637253328230</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1637253328230</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Revert Remove duplicate PYTHONPATH setup">
+      <created>1637253528964</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1637253528964</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Lint tests in ci pipeline">
+      <created>1637253737535</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1637253737535</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Disable duplicate code warning for tests">
+      <created>1637255939110</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1637255939110</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Run black on all files">
+      <created>1637261571552</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1637261571552</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Add missing module docstring">
+      <created>1637261871544</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1637261871544</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Add seperate jobs for lint and test">
+      <created>1637263823724</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1637263823724</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Add docs check action, add sphinx auto deploy to github pages">
+      <created>1637862427965</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1637862427965</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Add check documentation and auto deploy github action">
+      <created>1638462042580</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1638462042580</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Try different sphinx autodeploy action">
+      <created>1638463438433</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1638463438433</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Add command to generate sphinx docs first">
+      <created>1638464173831</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1638464173831</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Remove predefined github action as it does not support sphinx v3 or v4 yet">
+      <created>1638465473426</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1638465473426</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Remove old unused ci job file, cd into docs dir before building the documentation">
+      <created>1638465803567</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1638465803567</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Adjust repo link">
+      <created>1638466114137</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1638466114137</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Use git switch instead of another checkout">
+      <created>1638466979679</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1638466979679</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Add testing to ci workflow" />
+    <MESSAGE value="Fix yaml syntax error" />
+    <MESSAGE value="Remove duplicate PYTHONPATH setup" />
+    <MESSAGE value="Revert Remove duplicate PYTHONPATH setup" />
+    <MESSAGE value="Lint tests in ci pipeline" />
+    <MESSAGE value="Disable duplicate code warning for tests" />
+    <MESSAGE value="Format test files" />
+    <MESSAGE value="Run black on all files" />
+    <MESSAGE value="Add missing module docstring" />
+    <MESSAGE value="Add seperate jobs for lint and test" />
+    <MESSAGE value="Add docs check, and sphinx auto deployment" />
+    <MESSAGE value="Add docs check action, add sphinx auto deploy to github pages" />
+    <MESSAGE value="Add check documentation and auto deploy github action" />
+    <MESSAGE value="Try different sphinx autodeploy action" />
+    <MESSAGE value="Add command to generate sphinx docs first" />
+    <MESSAGE value="Remove predefined github action as it does not support sphinx v3 or v4 yet" />
+    <MESSAGE value="Remove old unused ci job file, cd into docs dir before building the documentation" />
+    <MESSAGE value="Adjust repo link" />
+    <MESSAGE value="Use git switch instead of another checkout" />
+    <option name="LAST_COMMIT_MESSAGE" value="Use git switch instead of another checkout" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/active_segmentation$.coverage" NAME=" Coverage Results" MODIFIED="1637250191775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/test_functional" />
+  </component>
+</project>

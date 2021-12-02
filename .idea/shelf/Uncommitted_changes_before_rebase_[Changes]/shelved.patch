@@ -1,0 +1,21 @@
+Index: .pre-commit-config.yaml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.pre-commit-config.yaml b/.pre-commit-config.yaml
+new file mode 100755
+--- /dev/null	(date 1637850973380)
++++ b/.pre-commit-config.yaml	(date 1637850973380)
+@@ -0,0 +1,11 @@
++repos:
++-   repo: https://github.com/pre-commit/pre-commit-hooks
++    rev: v2.3.0
++    hooks:
++    -   id: check-yaml
++    -   id: end-of-file-fixer
++    -   id: trailing-whitespace
++-   repo: https://github.com/psf/black
++    rev: 19.3b0
++    hooks:
++    -   id: black

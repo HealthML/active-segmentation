@@ -1,0 +1,808 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Index &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="#" />
+  <link rel="search" title="Search" href="search.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="./">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+      <li>Index</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule">ActiveLearningDataModule (class in datasets.data_module)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset.add_image">add_image() (datasets.brats_dataset.BraTSDataset method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.losses.BCEDiceLoss">BCEDiceLoss (class in functional.losses)</a>
+</li>
+      <li><a href="functional.html#functional.losses.BCELoss">BCELoss (class in functional.losses)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_data_module.BraTSDataModule">BraTSDataModule (class in datasets.brats_data_module)</a>
+</li>
+      <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset">BraTSDataset (class in datasets.brats_dataset)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.metrics.DiceScore.compute">compute() (functional.metrics.DiceScore method)</a>
+
+      <ul>
+        <li><a href="functional.html#functional.metrics.HausdorffDistance.compute">(functional.metrics.HausdorffDistance method)</a>
+</li>
+        <li><a href="functional.html#functional.metrics.Sensitivity.compute">(functional.metrics.Sensitivity method)</a>
+</li>
+        <li><a href="functional.html#functional.metrics.Specificity.compute">(functional.metrics.Specificity method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.configure_loss">configure_loss() (models.pytorch_model.PytorchModel static method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.configure_optimizers">configure_optimizers() (models.pytorch_model.PytorchModel method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    datasets.brats_data_module
+
+      <ul>
+        <li><a href="datasets.html#module-datasets.brats_data_module">module</a>
+</li>
+      </ul></li>
+      <li>
+    datasets.brats_dataset
+
+      <ul>
+        <li><a href="datasets.html#module-datasets.brats_dataset">module</a>
+</li>
+      </ul></li>
+      <li>
+    datasets.data_module
+
+      <ul>
+        <li><a href="datasets.html#module-datasets.data_module">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    datasets.pascal_voc_data_module
+
+      <ul>
+        <li><a href="datasets.html#module-datasets.pascal_voc_data_module">module</a>
+</li>
+      </ul></li>
+      <li><a href="functional.html#functional.metrics.dice_score">dice_score() (in module functional.metrics)</a>
+</li>
+      <li><a href="functional.html#functional.losses.DiceLoss">DiceLoss (class in functional.losses)</a>
+</li>
+      <li><a href="functional.html#functional.metrics.DiceScore">DiceScore (class in functional.metrics)</a>
+</li>
+      <li><a href="datasets.html#datasets.brats_data_module.BraTSDataModule.discover_paths">discover_paths() (datasets.brats_data_module.BraTSDataModule static method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.eval">eval() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.eval">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.losses.FalsePositiveDiceLoss">FalsePositiveDiceLoss (class in functional.losses)</a>
+</li>
+      <li><a href="functional.html#functional.losses.FalsePositiveLoss">FalsePositiveLoss (class in functional.losses)</a>
+</li>
+      <li><a href="functional.html#functional.losses.BCEDiceLoss.forward">forward() (functional.losses.BCEDiceLoss method)</a>
+
+      <ul>
+        <li><a href="functional.html#functional.losses.BCELoss.forward">(functional.losses.BCELoss method)</a>
+</li>
+        <li><a href="functional.html#functional.losses.DiceLoss.forward">(functional.losses.DiceLoss method)</a>
+</li>
+        <li><a href="functional.html#functional.losses.FalsePositiveDiceLoss.forward">(functional.losses.FalsePositiveDiceLoss method)</a>
+</li>
+        <li><a href="functional.html#functional.losses.FalsePositiveLoss.forward">(functional.losses.FalsePositiveLoss method)</a>
+</li>
+        <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.forward">(models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
+</li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.forward">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+        <li><a href="models.html#models.u_net.UNet.forward">(models.u_net.UNet method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    functional
+
+      <ul>
+        <li><a href="functional.html#module-functional">module</a>
+</li>
+      </ul></li>
+      <li>
+    functional.losses
+
+      <ul>
+        <li><a href="functional.html#module-functional.losses">module</a>
+</li>
+      </ul></li>
+      <li>
+    functional.metrics
+
+      <ul>
+        <li><a href="functional.html#module-functional.metrics">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_train_metrics">get_train_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_val_metrics">get_val_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.metrics.hausdorff_distance">hausdorff_distance() (in module functional.metrics)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.metrics.HausdorffDistance">HausdorffDistance (class in functional.metrics)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset.IMAGE_DIMENSIONS">IMAGE_DIMENSIONS (datasets.brats_dataset.BraTSDataset attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_data_module.BraTSDataModule.label_items">label_items() (datasets.brats_data_module.BraTSDataModule method)</a>
+
+      <ul>
+        <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.label_items">(datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+        <li><a href="datasets.html#datasets.pascal_voc_data_module.PascalVOCDataModule.label_items">(datasets.pascal_voc_data_module.PascalVOCDataModule method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    models.pytorch_fcn_resnet50
+
+      <ul>
+        <li><a href="models.html#module-models.pytorch_fcn_resnet50">module</a>
+</li>
+      </ul></li>
+      <li>
+    models.pytorch_model
+
+      <ul>
+        <li><a href="models.html#module-models.pytorch_model">module</a>
+</li>
+      </ul></li>
+      <li>
+    models.pytorch_u_net
+
+      <ul>
+        <li><a href="models.html#module-models.pytorch_u_net">module</a>
+</li>
+      </ul></li>
+      <li>
+    models.u_net
+
+      <ul>
+        <li><a href="models.html#module-models.u_net">module</a>
+</li>
+      </ul></li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="datasets.html#module-datasets.brats_data_module">datasets.brats_data_module</a>
+</li>
+        <li><a href="datasets.html#module-datasets.brats_dataset">datasets.brats_dataset</a>
+</li>
+        <li><a href="datasets.html#module-datasets.data_module">datasets.data_module</a>
+</li>
+        <li><a href="datasets.html#module-datasets.pascal_voc_data_module">datasets.pascal_voc_data_module</a>
+</li>
+        <li><a href="functional.html#module-functional">functional</a>
+</li>
+        <li><a href="functional.html#module-functional.losses">functional.losses</a>
+</li>
+        <li><a href="functional.html#module-functional.metrics">functional.metrics</a>
+</li>
+        <li><a href="models.html#module-models.pytorch_fcn_resnet50">models.pytorch_fcn_resnet50</a>
+</li>
+        <li><a href="models.html#module-models.pytorch_model">models.pytorch_model</a>
+</li>
+        <li><a href="models.html#module-models.pytorch_u_net">models.pytorch_u_net</a>
+</li>
+        <li><a href="models.html#module-models.u_net">models.u_net</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.query_strategy">query_strategies.query_strategy</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset.normalize">normalize() (datasets.brats_dataset.BraTSDataset static method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.parameters">parameters() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.parameters">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
+      <li><a href="datasets.html#datasets.pascal_voc_data_module.PascalVOCDataModule">PascalVOCDataModule (class in datasets.pascal_voc_data_module)</a>
+</li>
+      <li><a href="datasets.html#datasets.pascal_voc_data_module.PILMaskToTensor">PILMaskToTensor (class in datasets.pascal_voc_data_module)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.precision">precision (models.pytorch_u_net.PytorchUNet attribute)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.predict">predict() (models.pytorch_model.PytorchModel method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50">PytorchFCNResnet50 (class in models.pytorch_fcn_resnet50)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel">PytorchModel (class in models.pytorch_model)</a>
+</li>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet">PytorchUNet (class in models.pytorch_u_net)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    query_strategies.query_strategy
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.query_strategy">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="query_strategies.html#query_strategies.query_strategy.QueryStrategy">QueryStrategy (class in query_strategies.query_strategy)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset.remove_image">remove_image() (datasets.brats_dataset.BraTSDataset method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.losses.SegmentationLoss">SegmentationLoss (class in functional.losses)</a>
+</li>
+      <li><a href="query_strategies.html#query_strategies.query_strategy.QueryStrategy.select_items_to_label">select_items_to_label() (query_strategies.query_strategy.QueryStrategy method)</a>
+</li>
+      <li><a href="functional.html#functional.metrics.Sensitivity">Sensitivity (class in functional.metrics)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.metrics.sensitivity">sensitivity() (in module functional.metrics)</a>
+</li>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.setup">setup() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="functional.html#functional.metrics.Specificity">Specificity (class in functional.metrics)</a>
+</li>
+      <li><a href="functional.html#functional.metrics.specificity">specificity() (in module functional.metrics)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.test_dataloader">test_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.test_set_size">test_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.train">train() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.train">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.train_dataloader">train_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="functional.html#functional.losses.BCEDiceLoss.training">training (functional.losses.BCEDiceLoss attribute)</a>
+
+      <ul>
+        <li><a href="functional.html#functional.losses.BCELoss.training">(functional.losses.BCELoss attribute)</a>
+</li>
+        <li><a href="functional.html#functional.losses.DiceLoss.training">(functional.losses.DiceLoss attribute)</a>
+</li>
+        <li><a href="functional.html#functional.losses.FalsePositiveDiceLoss.training">(functional.losses.FalsePositiveDiceLoss attribute)</a>
+</li>
+        <li><a href="functional.html#functional.losses.FalsePositiveLoss.training">(functional.losses.FalsePositiveLoss attribute)</a>
+</li>
+        <li><a href="functional.html#functional.losses.SegmentationLoss.training">(functional.losses.SegmentationLoss attribute)</a>
+</li>
+        <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.training">(models.pytorch_fcn_resnet50.PytorchFCNResnet50 attribute)</a>
+</li>
+        <li><a href="models.html#models.pytorch_model.PytorchModel.training">(models.pytorch_model.PytorchModel attribute)</a>
+</li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.training">(models.pytorch_u_net.PytorchUNet attribute)</a>
+</li>
+        <li><a href="models.html#models.u_net.UNet.training">(models.u_net.UNet attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.training_epoch_end">training_epoch_end() (models.pytorch_model.PytorchModel method)</a>
+</li>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.training_set_size">training_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.training_step">training_step() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_model.PytorchModel.training_step">(models.pytorch_model.PytorchModel method)</a>
+</li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.training_step">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.u_net.UNet">UNet (class in models.u_net)</a>
+</li>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.unlabeled_dataloader">unlabeled_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.unlabeled_set_size">unlabeled_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="functional.html#functional.metrics.DiceScore.update">update() (functional.metrics.DiceScore method)</a>
+
+      <ul>
+        <li><a href="functional.html#functional.metrics.HausdorffDistance.update">(functional.metrics.HausdorffDistance method)</a>
+</li>
+        <li><a href="functional.html#functional.metrics.Sensitivity.update">(functional.metrics.Sensitivity method)</a>
+</li>
+        <li><a href="functional.html#functional.metrics.Specificity.update">(functional.metrics.Specificity method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.use_amp">use_amp (models.pytorch_u_net.PytorchUNet attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.val_dataloader">val_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.validation_epoch_end">validation_epoch_end() (models.pytorch_model.PytorchModel method)</a>
+</li>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.validation_set_size">validation_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.validation_step">validation_step() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_model.PytorchModel.validation_step">(models.pytorch_model.PytorchModel method)</a>
+</li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.validation_step">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+  <script src="_static/jquery.js"></script>
+  <script src="_static/underscore.js"></script>
+  <script src="_static/doctools.js"></script>
+  <script src="_static/clipboard.min.js"></script>
+  <script src="_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="./">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>
