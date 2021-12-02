@@ -1,0 +1,670 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>datasets &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="genindex.html" />
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="next" title="functional" href="functional.html" />
+  <link rel="prev" title="active_learning_framework" href="active_segmentation.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="./">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
+      <li>datasets</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+            <a href="_sources/datasets.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <section id="datasets">
+<h1>datasets<a class="headerlink" href="#datasets" title="Permalink to this headline">¶</a></h1>
+<section id="module-datasets.brats_data_module">
+<span id="bratsdatamodule"></span><h2>BraTSDataModule<a class="headerlink" href="#module-datasets.brats_data_module" title="Permalink to this headline">¶</a></h2>
+<p>Module containing the data module for brats data</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.brats_data_module.</span></span><span class="sig-name descname"><span class="pre">BraTSDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.data_module.ActiveLearningDataModule</span></code></a></p>
+<p>Initializes the BraTS data module.
+:param data_dir: Path of the directory that contains the data.
+:param batch_size: Batch size.
+:param num_workers: Number of workers for DataLoader.
+:param cache_size: Number of images to keep in memory between epochs to speed-up data loading</p>
+<blockquote>
+<div><p>(default = 0).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
+<li><p><strong>shuffle</strong> – Flag if the data should be shuffled.</p></li>
+<li><p><strong>dim</strong> – 2 or 3 to define if the datsets should return 2d slices of whole 3d images.</p></li>
+<li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.discover_paths">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">discover_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flair'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.discover_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.discover_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discover the .nii.gz file paths with a given modality</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dir_path</strong> – directory to discover paths in</p></li>
+<li><p><strong>modality</strong> – modality of scan</p></li>
+<li><p><strong>random_samples</strong> – the amount of random samples from the data sets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of files as tuple of image paths, annotation paths</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.label_items">
+<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.label_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.train_dataloader">
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.train_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.train_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pytorch dataloader or Keras sequence representing the training set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-datasets.brats_dataset">
+<span id="bratsdataset"></span><h2>BraTSDataset<a class="headerlink" href="#module-datasets.brats_dataset" title="Permalink to this headline">¶</a></h2>
+<p>Module to load and batch brats dataset</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.brats_dataset.</span></span><span class="sig-name descname"><span class="pre">BraTSDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unlabeled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<p>The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
+held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
+glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
+Further information: <a class="reference external" href="https://www.med.upenn.edu/cbica/brats2020/data.html">https://www.med.upenn.edu/cbica/brats2020/data.html</a>
+:param image_paths: List with the paths to the images.
+:type image_paths: List[str]
+:param annotation_paths: List with the paths to the annotations.
+:type annotation_paths: List[str]
+:param cache_size: Number of images to keep in memory to speed-up data loading in subsequent epochs.</p>
+<blockquote>
+<div><p>Defaults to zero.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clip_mask</strong> (<em>bool</em><em>, </em><em>optinal</em>) – Flag to clip the annotation labels, if True only label 1 is kept. Defaults to true.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the data should be shuffled.</p></li>
+<li><p><strong>transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the images.</p></li>
+<li><p><strong>target_transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the annotations.</p></li>
+<li><p><strong>dimensionality</strong> (<em>int</em><em>, </em><em>optional</em>) – 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+Defaults to 2.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.IMAGE_DIMENSIONS">
+<span class="sig-name descname"><span class="pre">IMAGE_DIMENSIONS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">(155,</span> <span class="pre">240,</span> <span class="pre">240)</span></em><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.IMAGE_DIMENSIONS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.add_image">
+<span class="sig-name descname"><span class="pre">add_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.add_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.add_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an image to this dataset.
+:param image_path: Path of the image to be added.
+:param annotation_path: Path of the annotation of the image to be added.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None. Raises ValueError if image already exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.normalize">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Normalizes an image by</dt><dd><ol class="arabic simple">
+<li><p>Dividing by the maximum value</p></li>
+<li><p>Subtracting the mean, zeros will be ignored while calculating the mean</p></li>
+<li><p>Dividing by the negative minimum value</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> – The input image that should be normalized.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Normalized image with background values normalized to -1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.reinforce_type">
+<span class="sig-name descname"><span class="pre">reinforce_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.reinforce_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reinforce the type for DataPipe instance. And the ‘expected_type’ is required
+to be a subtype of the original type hint to restrict the type requirement
+of DataPipe instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.remove_image">
+<span class="sig-name descname"><span class="pre">remove_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.remove_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.remove_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes an image from this dataset.
+:param image_path: Path of the image to be removed.
+:param annotation_path: Path of the annotation of the image to be removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None. Raises ValueError if image already exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-datasets.data_module">
+<span id="datamodule"></span><h2>DataModule<a class="headerlink" href="#module-datasets.data_module" title="Permalink to this headline">¶</a></h2>
+<p>Module containing abstract classes for the data modules</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.data_module.</span></span><span class="sig-name descname"><span class="pre">ActiveLearningDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.datamodule.LightningDataModule</span></code></p>
+<p>Abstract base class to structure the dataset creation for active learning
+:param data_dir: Path of the directory that contains the data.
+:param batch_size: Batch size.
+:param num_workers: Number of workers for DataLoader.
+:param pin_memory: <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.
+:type pin_memory: bool, optional
+:param shuffle: Flag if the data should be shuffled.
+:param **kwargs: Further, dataset specific parameters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.label_items">
+<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
+:param ids: IDs of the items to be labeled.
+:param labels: Labels for the selected data items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the datasets managed by this data module.
+:param stage: Current training stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.test_dataloader">
+<span class="sig-name descname"><span class="pre">test_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.test_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.test_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pytorch dataloader or Keras sequence representing the test set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.test_set_size">
+<span class="sig-name descname"><span class="pre">test_set_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.test_set_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.test_set_size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size of test set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.train_dataloader">
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.train_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.train_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pytorch dataloader or Keras sequence representing the training set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.training_set_size">
+<span class="sig-name descname"><span class="pre">training_set_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.training_set_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.training_set_size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size of training set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.unlabeled_dataloader">
+<span class="sig-name descname"><span class="pre">unlabeled_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.unlabeled_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.unlabeled_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pytorch dataloader or Keras sequence representing the unlabeled set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.unlabeled_set_size">
+<span class="sig-name descname"><span class="pre">unlabeled_set_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.unlabeled_set_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.unlabeled_set_size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of unlabeled items.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.val_dataloader">
+<span class="sig-name descname"><span class="pre">val_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.val_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.val_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pytorch dataloader or Keras sequence representing the validation set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.validation_set_size">
+<span class="sig-name descname"><span class="pre">validation_set_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.validation_set_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.validation_set_size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size of validation set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-datasets.pascal_voc_data_module">
+<span id="pascalvocdatamodule"></span><h2>PascalVocDataModule<a class="headerlink" href="#module-datasets.pascal_voc_data_module" title="Permalink to this headline">¶</a></h2>
+<p>Module to load pascal voc data</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PILMaskToTensor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.pascal_voc_data_module.</span></span><span class="sig-name descname"><span class="pre">PILMaskToTensor</span></span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PILMaskToTensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PILMaskToTensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>TBD</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.pascal_voc_data_module.</span></span><span class="sig-name descname"><span class="pre">PascalVOCDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.data_module.ActiveLearningDataModule</span></code></a></p>
+<p>The PASCAL Visual Object Classes (VOC) 2012 dataset contains 20 object categories including vehicles, household,
+animals, and other: aeroplane, bicycle, boat, bus, car, motorbike, train, bottle, chair, dining table, potted plant,
+sofa, TV/monitor, bird, cat, cow, dog, horse, sheep, and person. Each image in this dataset has pixel-level
+segmentation annotations, bounding box annotations, and object class annotations.
+Further information: <a class="reference external" href="http://host.robots.ox.ac.uk/pascal/VOC/">http://host.robots.ox.ac.uk/pascal/VOC/</a>
+:param data_dir: Path of the directory that contains the data.
+:param batch_size: Batch size.
+:param um_workers: Number of workers for DataLoader.
+:param shuffle: Flag if the data should be shuffled.
+:param **kwargs: Further, dataset specific parameters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule.label_items">
+<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule.label_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>TBD</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="functional.html" class="btn btn-neutral float-right" title="functional" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="active_segmentation.html" class="btn btn-neutral" title="active_learning_framework" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">datasets</a><ul>
+<li><a class="reference internal" href="#module-datasets.brats_data_module">BraTSDataModule</a></li>
+<li><a class="reference internal" href="#module-datasets.brats_dataset">BraTSDataset</a></li>
+<li><a class="reference internal" href="#module-datasets.data_module">DataModule</a></li>
+<li><a class="reference internal" href="#module-datasets.pascal_voc_data_module">PascalVocDataModule</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+  <script src="_static/jquery.js"></script>
+  <script src="_static/underscore.js"></script>
+  <script src="_static/doctools.js"></script>
+  <script src="_static/clipboard.min.js"></script>
+  <script src="_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="./">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>
