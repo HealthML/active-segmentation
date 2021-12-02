@@ -27,7 +27,8 @@ jobs:
       - name: Generate and build sphinx documentation from docstrings
         run: |
           sphinx-apidoc -o ./docs/source ./src
-          make clean && make html
+          cd docs
+          make html
       - name: Commit documentation changes
         run: |
           git clone https://github.com/ammaraskar/sphinx-action-test.git --branch gh-pages --single-branch gh-pages
