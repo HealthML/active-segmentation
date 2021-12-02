@@ -1,5 +1,5 @@
 program: src/main.py
-project: active-segmentation
+project: active-segmentation-sweep-runs
 entity: active-segmentation
 command:
   - ${env}
@@ -14,6 +14,8 @@ metric:
   name: validation/loss
   goal: minimize
 parameters:
+  wandb_project_name:
+    value: active-segmentation-sweep-runs
   batch_size:
     distribution: categorical
     values:

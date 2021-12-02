@@ -30,6 +30,7 @@ def run_active_learning_pipeline(
     num_workers: int = 4,
     prediction_count: Optional[int] = None,
     prediction_dir: str = "./predictions",
+    wandb_project_name: str = "active-segmentation",
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning
@@ -47,13 +48,14 @@ def run_active_learning_pipeline(
         experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
         gpus (int): Number of GPUS to use for model training.
         num_workers (int, optional): Number of workers.
+        wandb_project_name (string): Name of the project that the W&B runs are stored in
 
     Returns:
         None.
     """
 
     wandb_logger = WandbLogger(
-        project="active-segmentation",
+        project=wandb_project_name,
         entity="active-segmentation",
         name=experiment_name,
         tags=experiment_tags,
@@ -145,7 +147,7 @@ def run_active_learning_pipeline_from_config(
             print("Start Hyperparameter Optimisation using sweep.yaml file")
             wandb.init(
                 config=hyperparameter_defaults,
-                project="active-segmentation",
+                project=config["wandb_project_name"],
                 entity="active-segmentation",
             )
             # Config parameters are automatically set by W&B sweep agent
