@@ -28,6 +28,9 @@ def run_active_learning_pipeline(
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
     num_workers: int = 4,
+    learning_rate: float = 0.0001,
+    lr_scheduler: str = None,
+    num_levels: int = 4,
     prediction_count: Optional[int] = None,
     prediction_dir: str = "./predictions",
     wandb_project_name: str = "active-segmentation",
@@ -48,6 +51,10 @@ def run_active_learning_pipeline(
         experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
         gpus (int): Number of GPUS to use for model training.
         num_workers (int, optional): Number of workers.
+        learning_rate (float): The step size at each iteration while moving towards a minimum of the loss.
+        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.
+            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         wandb_project_name (string): Name of the project that the W&B runs are stored in
 
     Returns:
@@ -62,10 +69,19 @@ def run_active_learning_pipeline(
         config=locals().copy(),
     )
 
+    print("**model_config ", model_config)
+
     if architecture == "fcn_resnet50":
-        model = PytorchFCNResnet50(**model_config)
+        model = PytorchFCNResnet50(
+            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
+        )
     elif architecture == "u_net":
-        model = PytorchUNet(**model_config)
+        model = PytorchUNet(
+            learning_rate=learning_rate,
+            lr_scheduler=lr_scheduler,
+            num_levels=num_levels,
+            **model_config,
+        )
     else:
         raise ValueError("Invalid model architecture.")
 
@@ -142,6 +158,15 @@ def run_active_learning_pipeline_from_config(
             config["model_config"]["input_shape"] = tuple(
                 config["model_config"]["input_shape"]
             )
+        if "model_config" in config and "learning_rate" in config["model_config"]:
+            config["learning_rate"] = config["model_config"]["learning_rate"]
+            del config["model_config"]["learning_rate"]
+        if "model_config" in config and "lr_scheduler" in config["model_config"]:
+            config["lr_scheduler"] = config["model_config"]["lr_scheduler"]
+            del config["model_config"]["lr_scheduler"]
+        if "model_config" in config and "num_levels" in config["model_config"]:
+            config["num_levels"] = config["model_config"]["num_levels"]
+            del config["model_config"]["num_levels"]
 
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")
