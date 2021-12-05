@@ -56,7 +56,8 @@ def run_active_learning_pipeline(
         lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.
             E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
-        early_stopping (bool, optional): Enable/Disable Early stopping when model is not learning anymore (default = False).
+        early_stopping (bool, optional): Enable/Disable Early stopping when model
+            is not learning anymore (default = False).
         wandb_project_name (string): Name of the project that the W&B runs are stored in
 
     Returns:

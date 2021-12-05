@@ -20,10 +20,11 @@ class ActiveLearningPipeline:
         strategy (QueryStrategy): An active learning strategy to query for new labels.
         epochs (int): The number of epochs the model should be trained.
         gpus (int): Number of GPUS to use for model training.
-        early_stopping (bool, optional): Enable/Disable Early stopping when model is not learning anymore (default = False).
+        early_stopping (bool, optional): Enable/Disable Early stopping when model
+            is not learning anymore (default = False).
         logger: A logger object as defined by Pytorch Lightning.
-        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.
-            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        lr_scheduler (string, optional): Algorithm used for dynamically updating the
+            learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
     """
 
     # pylint: disable=too-few-public-methods
