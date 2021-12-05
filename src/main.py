@@ -109,7 +109,14 @@ def run_active_learning_pipeline(
         raise ValueError("Invalid data_module name.")
 
     pipeline = ActiveLearningPipeline(
-        data_module, model, strategy, epochs, gpus, wandb_logger, early_stopping
+        data_module,
+        model,
+        strategy,
+        epochs,
+        gpus,
+        wandb_logger,
+        early_stopping,
+        lr_scheduler,
     )
     pipeline.run()
 

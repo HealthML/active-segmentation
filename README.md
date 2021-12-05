@@ -95,6 +95,7 @@ Additionally, the following optional arguments can be supplied in the same confi
         "optimizer": "adam",
         "loss": "dice",
         "learning_rate": 0.0001,
+        "lr_scheduler": "reduceLROnPlateau",
         "num_levels": 4,
         "input_shape": [240, 240] // can also be 3d
     },

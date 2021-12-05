@@ -22,6 +22,8 @@ class ActiveLearningPipeline:
         gpus (int): Number of GPUS to use for model training.
         early_stopping (bool, optional): Enable/Disable Early stopping when model is not learning anymore (default = False).
         logger: A logger object as defined by Pytorch Lightning.
+        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.
+            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
     """
 
     # pylint: disable=too-few-public-methods
@@ -34,6 +36,7 @@ class ActiveLearningPipeline:
         gpus: int,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
+        lr_scheduler: str = None,
     ) -> None:
 
         self.data_module = data_module
@@ -41,8 +44,9 @@ class ActiveLearningPipeline:
         # log gradients, parameter histogram and model topology
         logger.watch(self.model, log="all")
 
-        callbacks = [LearningRateMonitor(logging_interval="step")]
-
+        callbacks = []
+        if lr_scheduler is not None:
+            callbacks.append(LearningRateMonitor(logging_interval="step"))
         if early_stopping:
             callbacks.append(EarlyStopping("validation/loss"))
 
