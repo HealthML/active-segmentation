@@ -27,7 +27,7 @@ class ActiveLearningPipeline:
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
     """
 
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods,too-many-arguments
     def __init__(
         self,
         data_module: ActiveLearningDataModule,
