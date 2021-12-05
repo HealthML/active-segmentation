@@ -20,6 +20,7 @@ class ActiveLearningPipeline:
         strategy (QueryStrategy): An active learning strategy to query for new labels.
         epochs (int): The number of epochs the model should be trained.
         gpus (int): Number of GPUS to use for model training.
+        early_stopping (bool, optional): Enable/Disable Early stopping when model is not learning anymore (default = False).
         logger: A logger object as defined by Pytorch Lightning.
     """
 
@@ -32,6 +33,7 @@ class ActiveLearningPipeline:
         epochs: int,
         gpus: int,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
+        early_stopping: bool = False,
     ) -> None:
 
         self.data_module = data_module
@@ -39,10 +41,11 @@ class ActiveLearningPipeline:
         # log gradients, parameter histogram and model topology
         logger.watch(self.model, log="all")
 
-        callbacks = [
-            EarlyStopping("validation/loss"),
-            LearningRateMonitor(logging_interval="step"),
-        ]
+        callbacks = [LearningRateMonitor(logging_interval="step")]
+
+        if early_stopping:
+            callbacks.append(EarlyStopping("validation/loss"))
+
         self.model_trainer = Trainer(
             deterministic=True,
             profiler="simple",

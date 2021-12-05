@@ -103,7 +103,8 @@ Additionally, the following optional arguments can be supplied in the same confi
     "epochs": 50,
     "gpus": 1,
     "prediction_count": None,
-    "prediction_dir": "./predictions"
+    "prediction_dir": "./predictions",
+    "early_stopping": false
 }
 ```
 
