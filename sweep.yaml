@@ -8,12 +8,11 @@ command:
   - "--config_file_name"
   - "brats_example_config.json"
   - "--hp-optimisation"
-  - ${args}
 method: bayes
 metric:
   name: validation/loss
   goal: minimize
-parameters:
+parameters: 
   wandb_project_name:
     value: active-segmentation-sweep-runs
   batch_size:
