@@ -29,7 +29,7 @@ def run_active_learning_pipeline(
     gpus: int = 1,
     num_workers: int = 4,
     learning_rate: float = 0.0001,
-    lr_scheduler: str = None,
+    lr_scheduler: Optional[str] = None,
     num_levels: int = 4,
     prediction_count: Optional[int] = None,
     prediction_dir: str = "./predictions",
