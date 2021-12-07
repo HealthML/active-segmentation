@@ -16,6 +16,7 @@
     "cache_size": 250,
     "pin_memory": true
   },
+  "wandb_project_name": "active-segmentation-tests",
   "strategy": "base",
   "experiment_name": "test-experiment",
   "experiment_tags": [],
@@ -24,5 +25,6 @@
   "num_workers": 8,
   "gpus": 1,
   "prediction_count": 5,
-  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions"
+  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
+  "early_stopping": false
 }

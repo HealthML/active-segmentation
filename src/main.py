@@ -28,8 +28,13 @@ def run_active_learning_pipeline(
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
     num_workers: int = 4,
+    learning_rate: float = 0.0001,
+    lr_scheduler: Optional[str] = None,
+    num_levels: int = 4,
     prediction_count: Optional[int] = None,
     prediction_dir: str = "./predictions",
+    wandb_project_name: str = "active-segmentation",
+    early_stopping: bool = False,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning
@@ -47,13 +52,20 @@ def run_active_learning_pipeline(
         experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
         gpus (int): Number of GPUS to use for model training.
         num_workers (int, optional): Number of workers.
+        learning_rate (float): The step size at each iteration while moving towards a minimum of the loss.
+        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.
+            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
+        early_stopping (bool, optional): Enable/Disable Early stopping when model
+            is not learning anymore (default = False).
+        wandb_project_name (string, optional): Name of the project that the W&B runs are stored in.
 
     Returns:
         None.
     """
 
     wandb_logger = WandbLogger(
-        project="active-segmentation",
+        project=wandb_project_name,
         entity="active-segmentation",
         name=experiment_name,
         tags=experiment_tags,
@@ -61,9 +73,16 @@ def run_active_learning_pipeline(
     )
 
     if architecture == "fcn_resnet50":
-        model = PytorchFCNResnet50(**model_config)
+        model = PytorchFCNResnet50(
+            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
+        )
     elif architecture == "u_net":
-        model = PytorchUNet(**model_config)
+        model = PytorchUNet(
+            learning_rate=learning_rate,
+            lr_scheduler=lr_scheduler,
+            num_levels=num_levels,
+            **model_config,
+        )
     else:
         raise ValueError("Invalid model architecture.")
 
@@ -91,7 +110,14 @@ def run_active_learning_pipeline(
         raise ValueError("Invalid data_module name.")
 
     pipeline = ActiveLearningPipeline(
-        data_module, model, strategy, epochs, gpus, wandb_logger
+        data_module,
+        model,
+        strategy,
+        epochs,
+        gpus,
+        wandb_logger,
+        early_stopping,
+        lr_scheduler,
     )
     pipeline.run()
 
@@ -140,12 +166,21 @@ def run_active_learning_pipeline_from_config(
             config["model_config"]["input_shape"] = tuple(
                 config["model_config"]["input_shape"]
             )
+        if "model_config" in config and "learning_rate" in config["model_config"]:
+            config["learning_rate"] = config["model_config"]["learning_rate"]
+            del config["model_config"]["learning_rate"]
+        if "model_config" in config and "lr_scheduler" in config["model_config"]:
+            config["lr_scheduler"] = config["model_config"]["lr_scheduler"]
+            del config["model_config"]["lr_scheduler"]
+        if "model_config" in config and "num_levels" in config["model_config"]:
+            config["num_levels"] = config["model_config"]["num_levels"]
+            del config["model_config"]["num_levels"]
 
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")
             wandb.init(
                 config=hyperparameter_defaults,
-                project="active-segmentation",
+                project=config["wandb_project_name"],
                 entity="active-segmentation",
             )
             # Config parameters are automatically set by W&B sweep agent

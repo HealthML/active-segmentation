@@ -1,5 +1,5 @@
 program: src/main.py
-project: active-segmentation
+project: active-segmentation-sweep-runs
 entity: active-segmentation
 command:
   - ${env}
@@ -8,19 +8,20 @@ command:
   - "--config_file_name"
   - "brats_example_config.json"
   - "--hp-optimisation"
-  - ${args}
 method: bayes
 metric:
   name: validation/loss
   goal: minimize
-parameters:
+parameters: 
+  wandb_project_name:
+    value: active-segmentation-sweep-runs
   batch_size:
     distribution: categorical
     values:
-      - 8
       - 16
       - 32
       - 64
+      - 128
   learning_rate:
     distribution: uniform
     min: 0.00001
@@ -31,7 +32,7 @@ parameters:
       - None
       - reduceLROnPlateau
       - cosineAnnealingLR
-  num_u_net_levels:
+  num_levels:
     distribution: categorical
     values:
       - 2
