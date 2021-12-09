@@ -2,6 +2,8 @@
 import os
 import random
 from typing import Any, List, Optional, Tuple
+
+from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 from .data_module import ActiveLearningDataModule
@@ -35,7 +37,7 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         Args:
             dir_path: directory to discover paths in
-            modality: modality of scan
+            modality (string, optional): modality of scan
             random_samples: the amount of random samples from the data sets
 
         Returns:
@@ -63,6 +65,26 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         return image_paths, annotation_paths
 
+    @staticmethod
+    def __case_id_to_filepaths(
+        case_id: str, dir_path: str, modality: str = "flair"
+    ) -> Tuple[str, str]:
+        """
+        Returns the image and annotation file path for a given case ID.
+
+        Args:
+            case_id: Case ID for which the file paths are to be determined.
+            dir_path: directory to where the images are located
+            modality (string, optional): modality of scan.
+
+        Returns:
+            Tuple[str]: Image and annotation path.
+        """
+
+        image_path = os.path.join(dir_path, case_id, f"{case_id}_{modality}.nii.gz")
+        annotation_path = os.path.join(dir_path, case_id, f"{case_id}_seg.nii.gz")
+        return image_path, annotation_path
+
     def __init__(
         self,
         data_dir: str,
@@ -88,15 +110,39 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.cache_size = cache_size
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
-        """TBD"""
-        # ToDo: implement labeling logic
-        return None
+        """Moves the given samples from the unlabeled dataset to the labeled dataset."""
+
+        if self._training_set is not None and self._unlabeled_set is not None:
+            labeled_image_and_annotation_paths = [
+                self.__case_id_to_filepaths(case_id, self.data_folder)
+                for case_id in ids
+            ]
+            for (
+                labeled_image_path,
+                labeled_image_annotation_path,
+            ) in labeled_image_and_annotation_paths:
+                self._training_set.add_images(
+                    labeled_image_path, labeled_image_annotation_path
+                )
+                self._unlabeled_set.remove_images(
+                    labeled_image_path, labeled_image_annotation_path
+                )
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )
+
+        if self.active_learning_mode:
+            # initialize the training set with randomly selected samples
+            (train_image_paths, _, train_annotation_paths, _) = train_test_split(
+                train_image_paths,
+                train_annotation_paths,
+                train_size=self.initial_training_set_size,
+                random_state=42,
+            )
+
         return BraTSDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,
@@ -135,13 +181,47 @@ class BraTSDataModule(ActiveLearningDataModule):
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
-        # faked test set
-        # ToDo: implement test set
-        return self._create_validation_set()
+        """Creates a test dataset."""
+
+        test_image_paths, test_annotation_paths = BraTSDataModule.discover_paths(
+            os.path.join(self.data_folder, "test")
+        )
+        return BraTSDataset(
+            image_paths=test_image_paths,
+            annotation_paths=test_annotation_paths,
+            dim=self.dim,
+            cache_size=self.cache_size,
+        )
 
     def _create_unlabeled_set(self) -> Optional[Dataset]:
-        # faked unlabeled set
-        # ToDo: implement unlabeled set
-        unlabeled_set = self._create_training_set()
-        unlabeled_set.is_unlabeled = True
-        return unlabeled_set
+        """Creates an unlabeled dataset."""
+        if self.active_learning_mode:
+            train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
+                os.path.join(self.data_folder, "train")
+            )
+
+            # use all images that are not in initial training set
+            (
+                _,
+                unlabeled_image_paths,
+                _,
+                unlabeled_annotation_paths,
+            ) = train_test_split(
+                train_image_paths,
+                train_annotation_paths,
+                train_size=self.initial_training_set_size,
+                random_state=42,
+            )
+
+        else:
+            # unlabeled set is empty
+            unlabeled_image_paths = []
+            unlabeled_annotation_paths = []
+
+        return BraTSDataset(
+            image_paths=unlabeled_image_paths,
+            annotation_paths=unlabeled_annotation_paths,
+            dim=self.dim,
+            cache_size=self.cache_size,
+            is_unlabeled=True,
+        )
