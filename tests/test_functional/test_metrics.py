@@ -682,6 +682,8 @@ class TestHausdorffDistance(unittest.TestCase):
         """
 
         prediction, target, _, _, _, _ = tests.utils.slice_all_true_negatives()
+        prediction = prediction.squeeze(dim=0)
+        target = target.squeeze(dim=0)
 
         hausdorff_dist_from_function = hausdorff_distance(prediction, target)
         self.assertTrue(

@@ -5,7 +5,7 @@ The metric implementations are based on the TorchMetrics framework. For instruct
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
 
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import torch
@@ -184,7 +184,6 @@ def _distances_to_surface(prediction: np.ndarray, target: np.ndarray) -> np.ndar
     assert prediction.ndim in [
         2,
         3,
-        4,  # ToDo: Only input one channel.
     ], "Prediction and target must have either two or three dimensions."
 
     erosion_structure = generate_binary_structure(prediction.ndim, connectivity=1)
@@ -398,11 +397,12 @@ class HausdorffDistance(torchmetrics.Metric):
         slices_per_image (int, optional): Number of slices per 3d image. Must be specified if `dim` is 2.
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         percentile: float = 0.95,
         dim: int = 2,
-        slices_per_image: Optional[int] = None
-        ):
+        slices_per_image: Optional[int] = None,
+    ):
         super().__init__()
         self.percentile = percentile
         self.predictions = []
