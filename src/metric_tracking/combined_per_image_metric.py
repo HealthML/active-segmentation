@@ -69,6 +69,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
                 elif metric == "hausdorff95":
                     self._metrics[confidence_level_name][metric] = HausdorffDistance(
                         percentile=0.95,
+                        normalize=True,
                         dim=dim,
                         slices_per_image=slices_per_image,
                     )

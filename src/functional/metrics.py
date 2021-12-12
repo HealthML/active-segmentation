@@ -201,7 +201,10 @@ def _distances_to_surface(prediction: np.ndarray, target: np.ndarray) -> np.ndar
 
 
 def hausdorff_distance(
-    prediction: torch.Tensor, target: torch.Tensor, percentile: float = 0.95
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    normalize: bool = False,
+    percentile: float = 0.95,
 ) -> torch.Tensor:
     r"""
     Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
@@ -215,6 +218,8 @@ def hausdorff_distance(
     Args:
         prediction (Tensor): The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.
         target (Tensor): The target segmentation mask, where each value is in :math:`\{0, 1\}`.
+        normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
+            distance.
         percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
             :math:`\[0, 1\]`.
 
@@ -254,10 +259,15 @@ def hausdorff_distance(
     distances_to_prediction = _distances_to_surface(target, prediction)
 
     distances = np.hstack((distances_to_target, distances_to_prediction))
+    distances = torch.from_numpy(distances)
 
-    return torch.quantile(
-        torch.from_numpy(distances), q=percentile, keepdim=False
-    ).float()
+    if normalize:
+        maximum_distance = torch.norm(
+            torch.tensor(list(prediction.shape), dtype=torch.float)
+        )
+        distances = distances / maximum_distance
+
+    return torch.quantile(distances, q=percentile, keepdim=False).float()
 
 
 class DiceScore(torchmetrics.Metric):
@@ -393,17 +403,21 @@ class HausdorffDistance(torchmetrics.Metric):
     Args:
         percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
             :math:`\[0, 1\]`.
+        normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
+            distance.
         dim (int, optional): The dimensionality of the input. Must be either 2 or 3. Defaults to 2.
         slices_per_image (int, optional): Number of slices per 3d image. Must be specified if `dim` is 2.
     """
 
     def __init__(
         self,
+        normalize: bool = False,
         percentile: float = 0.95,
         dim: int = 2,
         slices_per_image: Optional[int] = None,
     ):
         super().__init__()
+        self.normalize = normalize
         self.percentile = percentile
         self.predictions = []
         self.targets = []
@@ -462,6 +476,7 @@ class HausdorffDistance(torchmetrics.Metric):
         hausdorff_dist = hausdorff_distance(
             predictions,
             targets,
+            normalize=self.normalize,
             percentile=self.percentile,
         )
 
