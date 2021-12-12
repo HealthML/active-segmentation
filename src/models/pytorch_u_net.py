@@ -92,9 +92,6 @@ class PytorchUNet(PytorchModel):
             Loss on the training batch.
         """
 
-        self.train_average_metrics.to(self.device)
-        self.train_metrics_per_case.to(self.device)
-
         x, y, case_ids = batch
 
         probabilities = self(x)
@@ -114,9 +111,6 @@ class PytorchUNet(PytorchModel):
             batch (Tensor): Batch of validation images.
             batch_idx: Index of the validation batch.
         """
-
-        self.val_average_metrics.to(self.device)
-        self.val_metrics_per_case.to(self.device)
 
         x, y, case_ids = batch
 

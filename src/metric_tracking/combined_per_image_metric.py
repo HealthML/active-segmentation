@@ -1,4 +1,4 @@
-""" Module containing a metrics class for tracking several metrics related to one 3D MRT scan """
+""" Module containing a metrics class for tracking several metrics related to one 3d image """
 
 from typing import Dict, Iterable
 import torch
@@ -7,9 +7,9 @@ import torchmetrics
 from functional import DiceScore, Sensitivity, Specificity, HausdorffDistance
 
 
-class CombinedPerScanMetric(torchmetrics.Metric):
+class CombinedPerImageMetric(torchmetrics.Metric):
     """
-    A metrics class that tracks several metrics related to one 3D MRT scan whose slices may be scattered across
+    A metrics class that tracks several metrics related to one 3d image whose slices may be scattered across
     different batches. The metrics can be tracked for different confidence levels.
 
     Args:
@@ -75,6 +75,7 @@ class CombinedPerScanMetric(torchmetrics.Metric):
             self._metrics[confidence_level_name] = torch.nn.ModuleDict(
                 self._metrics[confidence_level_name]
             )
+        self._metrics = torch.nn.ModuleDict(self._metrics)
 
     def reset(self) -> None:
         """
@@ -94,7 +95,7 @@ class CombinedPerScanMetric(torchmetrics.Metric):
         target: torch.Tensor,
     ) -> None:
         """
-        Takes a prediction and a target of the MRT scan and updates the metrics accordingly.
+        Takes a prediction and a target slice of the 3d image and updates the metrics accordingly.
 
         Args:
             prediction (Tensor): A prediction slice or a whole 3d image.
@@ -109,7 +110,7 @@ class CombinedPerScanMetric(torchmetrics.Metric):
 
     def compute(self) -> Dict[str, torch.Tensor]:
         """
-        Computes the metrics for the scan.
+        Computes the metrics for the 3d image.
 
         Returns:
             Dict[string, Tensor]: Mapping of metric names to metric values.

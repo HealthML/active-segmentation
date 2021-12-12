@@ -1,5 +1,5 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
 import os
@@ -322,3 +322,11 @@ class BraTSDataset(IterableDataset):
             self.num_images -= 1
         else:
             raise ValueError("Image does not belong to this dataset.")
+
+    def image_ids(self) -> Iterable[str]:
+        """
+        Returns:
+            List of all image IDs included in the dataset.
+        """
+
+        return [self.__get_case_id(image_path) for image_path in self.image_paths]

@@ -1,6 +1,6 @@
 """ Base classes to implement models with pytorch """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, List, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import numpy
 import torch
 import torchmetrics
@@ -49,41 +49,48 @@ class PytorchModel(LightningModule, ABC):
 
         self.confidence_levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-        self.train_average_metrics = CombinedPerEpochMetric(
-            phase="train",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            confidence_levels=self.confidence_levels,
-            reduction="mean",
-            metrics_to_aggregate=["dice", "hausdorff95"],
-        )
+        self.train_metrics = torch.nn.ModuleList([])
+        self.val_metrics = torch.nn.ModuleList([])
+        self.test_metrics = torch.nn.ModuleList([])
 
-        self.train_metrics_per_case = CombinedPerEpochMetric(
-            phase="train",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            metrics_to_aggregate=["dice", "hausdorff95"],
-            confidence_levels=self.confidence_levels,
-            reduction="none",
-        )
+    def setup(self, stage: Optional[str] = None) -> None:
+        """
+        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
+            or predict.
+        Args:
+            stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
+        """
 
-        self.train_metrics = [self.train_average_metrics, self.train_metrics_per_case]
-
-        self.val_average_metrics = CombinedPerEpochMetric(
-            phase="val",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            confidence_levels=self.confidence_levels,
-            reduction="mean",
-            metrics_to_aggregate=["dice", "hausdorff95"],
-        )
-
-        self.val_metrics_per_case = CombinedPerEpochMetric(
-            phase="val",
-            metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-            metrics_to_aggregate=["dice", "hausdorff95"],
-            confidence_levels=self.confidence_levels,
-            reduction="none",
-        )
-
-        self.val_metrics = [self.val_average_metrics, self.val_metrics_per_case]
+        if stage == "fit":
+            train_average_metrics = CombinedPerEpochMetric(
+                stage="train",
+                metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+                confidence_levels=self.confidence_levels,
+                image_ids=self.train_dataloader().dataset.image_ids(),
+                reduction="mean",
+                metrics_to_aggregate=[],
+            )
+            self.train_metrics.append(train_average_metrics)
+        if stage in ["fit", "validate"]:
+            val_average_metrics = CombinedPerEpochMetric(
+                stage="val",
+                metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+                confidence_levels=self.confidence_levels,
+                image_ids=self.val_dataloader().dataset.image_ids(),
+                reduction="mean",
+                metrics_to_aggregate=[],
+            )
+            self.val_metrics.append(val_average_metrics)
+        if stage == "test":
+            test_average_metrics = CombinedPerEpochMetric(
+                stage="test",
+                metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
+                confidence_levels=self.confidence_levels,
+                image_ids=self.test_dataloader().dataset.image_ids(),
+                reduction="mean",
+                metrics_to_aggregate=[],
+            )
+            self.test_metrics.append(test_average_metrics)
 
     @abstractmethod
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
