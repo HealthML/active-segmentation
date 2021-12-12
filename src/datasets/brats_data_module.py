@@ -19,6 +19,10 @@ class BraTSDataModule(ActiveLearningDataModule):
         num_workers: Number of workers for DataLoader.
         cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
             (default = 0).
+        active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for
+            conventional model training (default = False).
+        initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is
+            activated.
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle: Flag if the data should be shuffled.
         dim: 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
@@ -80,7 +84,6 @@ class BraTSDataModule(ActiveLearningDataModule):
         Returns:
             Tuple[str]: Image and annotation path.
         """
-
         image_path = os.path.join(dir_path, case_id, f"{case_id}_{modality}.nii.gz")
         annotation_path = os.path.join(dir_path, case_id, f"{case_id}_seg.nii.gz")
         return image_path, annotation_path
@@ -91,6 +94,8 @@ class BraTSDataModule(ActiveLearningDataModule):
         batch_size: int,
         num_workers: int,
         cache_size: int = 0,
+        active_learning_mode: bool = False,
+        initial_training_set_size: int = 1,
         pin_memory: bool = True,
         shuffle: bool = True,
         dim: int = 2,
@@ -101,6 +106,8 @@ class BraTSDataModule(ActiveLearningDataModule):
             data_dir,
             batch_size,
             num_workers,
+            active_learning_mode,
+            initial_training_set_size,
             pin_memory=pin_memory,
             shuffle=shuffle,
             **kwargs,
@@ -111,20 +118,21 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
+        print("ids: ", ids)
 
         if self._training_set is not None and self._unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
-                self.__case_id_to_filepaths(case_id, self.data_folder)
+                self.__case_id_to_filepaths(case_id, os.path.join(self.data_folder, "train"))
                 for case_id in ids
             ]
             for (
                 labeled_image_path,
                 labeled_image_annotation_path,
             ) in labeled_image_and_annotation_paths:
-                self._training_set.add_images(
+                self._training_set.add_image(
                     labeled_image_path, labeled_image_annotation_path
                 )
-                self._unlabeled_set.remove_images(
+                self._unlabeled_set.remove_image(
                     labeled_image_path, labeled_image_annotation_path
                 )
 

@@ -162,7 +162,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         if self._unlabeled_set:
             return DataLoader(
                 self._unlabeled_set,
-                batch_size=self.batch_size,
+                batch_size=1,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
             )

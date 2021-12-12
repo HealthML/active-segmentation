@@ -11,7 +11,7 @@ from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule
-from query_strategies import QueryStrategy
+from query_strategies import QueryStrategy, RandomSamplingStrategy
 
 
 # pylint: disable=too-many-arguments,too-many-locals
@@ -88,6 +88,8 @@ def run_active_learning_pipeline(
 
     if strategy == "base":
         strategy = QueryStrategy()
+    elif strategy == "random":
+        strategy = RandomSamplingStrategy()
     else:
         raise ValueError("Invalid query strategy.")
 
@@ -103,6 +105,8 @@ def run_active_learning_pipeline(
             data_dir,
             batch_size,
             num_workers,
+            active_learning_mode=True,
+            initial_training_set_size=1,
             dim=model.input_dimensionality(),
             **dataset_config,
         )

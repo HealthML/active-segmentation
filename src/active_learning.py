@@ -52,7 +52,7 @@ class ActiveLearningPipeline:
             callbacks.append(EarlyStopping("validation/loss"))
 
         self.model_trainer = Trainer(
-            deterministic=True,
+            # deterministic=True,
             profiler="simple",
             max_epochs=epochs,
             logger=logger,
@@ -68,12 +68,18 @@ class ActiveLearningPipeline:
         """Run the pipeline"""
         self.data_module.setup()
 
-        items_to_label = self.strategy.select_items_to_label(
-            self.model,
-            self.data_module.unlabeled_dataloader(),
-            self.data_module.unlabeled_set_size(),
-        )
+        for i in range(0, self.data_module.unlabeled_set_size()):
 
-        self.data_module.label_items(items_to_label)
+            print("get new items to label")
 
-        self.model_trainer.fit(self.model, self.data_module)
+            items_to_label = self.strategy.select_items_to_label(
+                self.model, self.data_module, 10
+            )
+
+            print("label the item")
+
+            self.data_module.label_items(items_to_label)
+
+            print("train on labeled items")
+
+            self.model_trainer.fit(self.model, self.data_module)
