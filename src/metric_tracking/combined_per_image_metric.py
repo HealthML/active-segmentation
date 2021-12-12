@@ -1,6 +1,6 @@
 """ Module containing a metrics class for tracking several metrics related to one 3d image """
 
-from typing import Dict, Iterable
+from typing import Dict, Iterable, Optional
 import torch
 import torchmetrics
 
@@ -18,6 +18,8 @@ class CombinedPerImageMetric(torchmetrics.Metric):
             "specificity", and "hausdorff95".
         confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
             separately.
+        dim (int, optional): The dimensionality of the input. Must be either 2 or 3. Defaults to 2.
+        slices_per_image (int, optional): Number of slices per 3d image. Must be specified if `dim` is 2.
 
     Note:
         In this method, the `prediction` tensor is expected to be one output slice of the final sigmoid layer of a
@@ -33,6 +35,8 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         phase: str,
         metrics: Iterable[str],
         confidence_levels: Iterable[float],
+        dim: int = 2,
+        slices_per_image: Optional[int] = None,
     ):
         super().__init__()
         self.phase = phase
@@ -47,8 +51,6 @@ class CombinedPerImageMetric(torchmetrics.Metric):
             confidence_level_name: {}
             for _, confidence_level_name in self.confidence_levels
         }
-
-        # ToDo: clear metrics after epoch end
 
         for _, confidence_level_name in self.confidence_levels:
             for metric in set(metrics):
@@ -66,7 +68,9 @@ class CombinedPerImageMetric(torchmetrics.Metric):
                     )
                 elif metric == "hausdorff95":
                     self._metrics[confidence_level_name][metric] = HausdorffDistance(
-                        percentile=0.95
+                        percentile=0.95,
+                        dim=dim,
+                        slices_per_image=slices_per_image,
                     )
                 else:
                     raise ValueError(f"Invalid metric name: {metric}")

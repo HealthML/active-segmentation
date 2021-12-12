@@ -25,6 +25,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
             separately.
         image_ids (Iterable[str]): List of the ids of all images for which the metrics are to be tracked.
+        dim (int, optional): The dimensionality of the input. Must be either 2 or 3. Defaults to 2.
         metrics_to_aggregate (Iterable[str], optional): A list of metric names from which to calculate an aggregated
             metric. Must be a subset of the metric names passed to the `metrics` parameter. If, for example,
             `metrics_to_aggregate=["dice", "hausdorff95"]` and `reduction="mean"`, the mean of the dice score and the
@@ -32,6 +33,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                 parameter will be ignored.
         reduction (string, optional):  Reduction function that is to be used to aggregate the metric values of all 3d
             images, must be either "mean", "sum" or "none". Default: `"mean"`.
+        slices_per_image (int, optional): Number of slices per 3d image. Must be specified if `dim` is 2.
 
     Note:
         In this method, the `prediction` tensor is expected to be the output of the final sigmoid layer of a
@@ -49,13 +51,21 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         metrics: Iterable[str],
         confidence_levels: Iterable[float],
         image_ids: Iterable[str],
+        dim: int = 2,
         metrics_to_aggregate: Optional[Iterable[str]] = None,
         reduction: str = "mean",
+        slices_per_image: Optional[int] = None,
     ):
         super().__init__()
         self.stage = stage
         self.metrics = metrics
         self.confidence_levels = confidence_levels
+        self.dim = dim
+        if slices_per_image is None and self.dim == 2:
+            raise ValueError(
+                "If the `dim` parameter is set to 2, the `slices_per_image` parameter needs to be specified."
+            )
+        self.slices_per_image = slices_per_image
 
         if metrics_to_aggregate is not None and not set(metrics_to_aggregate).issubset(
             set(metrics)
@@ -71,6 +81,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                     self.stage,
                     self.metrics,
                     self.confidence_levels,
+                    dim=self.dim,
+                    slices_per_image=self.slices_per_image,
                 )
                 for image_id in image_ids
             }

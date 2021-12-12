@@ -5,6 +5,8 @@ The metric implementations are based on the TorchMetrics framework. For instruct
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
 
+from typing import Optional, Tuple
+
 import numpy as np
 import torch
 import torchmetrics
@@ -392,19 +394,51 @@ class HausdorffDistance(torchmetrics.Metric):
     Args:
         percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
             :math:`\[0, 1\]`.
+        dim (int, optional): The dimensionality of the input. Must be either 2 or 3. Defaults to 2.
+        slices_per_image (int, optional): Number of slices per 3d image. Must be specified if `dim` is 2.
     """
 
-    def __init__(self, percentile: float = 0.95):
+    def __init__(self,
+        percentile: float = 0.95,
+        dim: int = 2,
+        slices_per_image: Optional[int] = None
+        ):
         super().__init__()
         self.percentile = percentile
-        self.distances = []
-        self.add_state("distances", [])
+        self.predictions = []
+        self.targets = []
+        self.hausdorff_distance = torch.tensor(0.0)
+        self.add_state("predictions", [])
+        self.add_state("targets", [])
+        self.add_state("hausdorff_distance", torch.tensor(0.0))
+        self.all_image_locations = None
+        self.hausdorff_distance_cached = False
+
+        if dim not in [2, 3]:
+            raise ValueError(
+                f"Dimensionality must be either 2 or 3, but is {dim} instead."
+            )
+
+        if dim == 2 and slices_per_image is None:
+            raise ValueError(
+                "For 2d inputs the `slices_per_image` parameter needs to be specified."
+            )
+
+        self.dim = dim
+        self.slices_per_image = slices_per_image
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
-        self.distances.append(
-            hausdorff_distance(prediction, target, percentile=self.percentile)
-        )
+        self.hausdorff_distance_cached = False
+
+        # we just collect all slices of the image since, for 3d images, the Hausdorff distance needs to be computed over
+        # all slices
+        # note that this will be memory-intensive if this is done for multiple 3d images in parallel
+        self.predictions.append(prediction)
+        self.targets.append(target)
+
+        if self.dim == 3 or len(self.predictions) == self.slices_per_image:
+            self.compute()
 
     def compute(self) -> torch.Tensor:
         """
@@ -415,6 +449,33 @@ class HausdorffDistance(torchmetrics.Metric):
             Tensor: Hausdorff distance.
         """
 
-        # ToDo: compute 3D Hausdorff distance when the slices of one scan are scattered across multiple batches.
+        if self.hausdorff_distance_cached:
+            return self.hausdorff_distance
 
-        return torch.max(torch.Tensor(self.distances))
+        if self.dim == 2:
+            predictions = torch.stack(self.predictions)
+            targets = torch.stack(self.targets)
+        else:
+            predictions = torch.cat(self.predictions, dim=0)
+            targets = torch.cat(self.targets, dim=0)
+
+        hausdorff_dist = hausdorff_distance(
+            predictions,
+            targets,
+            percentile=self.percentile,
+        )
+
+        self.hausdorff_distance = hausdorff_dist
+        self.hausdorff_distance_cached = True
+
+        for tensor in self.predictions:
+            del tensor
+        for tensor in self.targets:
+            del tensor
+
+        # free memory
+        self.predictions = []
+        self.targets = []
+        self.all_image_locations = None
+
+        return hausdorff_dist

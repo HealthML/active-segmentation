@@ -62,33 +62,46 @@ class PytorchModel(LightningModule, ABC):
         """
 
         if stage == "fit":
+            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+
             train_average_metrics = CombinedPerEpochMetric(
                 stage="train",
                 metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
                 confidence_levels=self.confidence_levels,
                 image_ids=self.train_dataloader().dataset.image_ids(),
+                dim=2 if slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
+                slices_per_image=slices_per_image,
             )
             self.train_metrics.append(train_average_metrics)
+
         if stage in ["fit", "validate"]:
+            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+
             val_average_metrics = CombinedPerEpochMetric(
                 stage="val",
                 metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
                 confidence_levels=self.confidence_levels,
                 image_ids=self.val_dataloader().dataset.image_ids(),
+                dim=2 if slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
+                slices_per_image=slices_per_image,
             )
             self.val_metrics.append(val_average_metrics)
         if stage == "test":
+            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+
             test_average_metrics = CombinedPerEpochMetric(
                 stage="test",
                 metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
                 confidence_levels=self.confidence_levels,
                 image_ids=self.test_dataloader().dataset.image_ids(),
+                dim=2 if slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
+                slices_per_image=slices_per_image,
             )
             self.test_metrics.append(test_average_metrics)
 

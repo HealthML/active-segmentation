@@ -562,7 +562,7 @@ class TestHausdorffDistance(unittest.TestCase):
             f"Functional implementation correctly computes hausdorff distance when {message}.",
         )
 
-        hausdorff_distance_module = HausdorffDistance(percentile=percentile)
+        hausdorff_distance_module = HausdorffDistance(percentile=percentile, dim=prediction.dim(), slices_per_image=1)
         hausdorff_distance_from_module = hausdorff_distance_module(prediction, target)
         self.assertTrue(
             torch.equal(
@@ -689,7 +689,7 @@ class TestHausdorffDistance(unittest.TestCase):
             "Functional implementation correctly computes Hausdorff distance when there are only TN.",
         )
 
-        hausdorff_distance_module = HausdorffDistance()
+        hausdorff_distance_module = HausdorffDistance(slices_per_image=1)
         hausdorff_dist_from_module = hausdorff_distance_module(prediction, target)
         self.assertTrue(
             torch.isnan(hausdorff_dist_from_module),

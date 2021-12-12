@@ -9,9 +9,10 @@ import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
+from .dataset_hooks import DatasetHooks
 
 # pylint: disable=too-many-instance-attributes,abstract-method
-class BraTSDataset(IterableDataset):
+class BraTSDataset(IterableDataset, DatasetHooks):
     """
     The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
     held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
@@ -330,3 +331,11 @@ class BraTSDataset(IterableDataset):
         """
 
         return [self.__get_case_id(image_path) for image_path in self.image_paths]
+
+    def slices_per_image(self, **kwargs) -> Tuple[int]:
+        """
+        Returns:
+            int: Number of slices that each image of the dataset contains.
+        """
+
+        return BraTSDataset.IMAGE_DIMENSIONS
