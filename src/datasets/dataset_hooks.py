@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterable
 
+
 class DatasetHooks(ABC):
     """
     Class that defines hooks that should be implemented by each dataset class.
