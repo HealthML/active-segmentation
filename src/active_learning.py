@@ -5,6 +5,7 @@ from typing import Iterable, Union
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
+from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
@@ -38,6 +39,7 @@ class ActiveLearningPipeline:
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
+        model_selection_criterion="loss",
     ) -> None:
 
         self.data_module = data_module
@@ -50,6 +52,11 @@ class ActiveLearningPipeline:
             callbacks.append(LearningRateMonitor(logging_interval="step"))
         if early_stopping:
             callbacks.append(EarlyStopping("validation/loss"))
+
+        self.checkpoint_callback = ModelCheckpoint(
+            monitor=f"val/{model_selection_criterion}"
+        )
+        callbacks.append(self.checkpoint_callback)
 
         self.model_trainer = Trainer(
             deterministic=True,
@@ -77,3 +84,6 @@ class ActiveLearningPipeline:
         self.data_module.label_items(items_to_label)
 
         self.model_trainer.fit(self.model, self.data_module)
+
+        # compute metrics for the best model on the validation set
+        self.model_trainer.validate()

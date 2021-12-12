@@ -24,6 +24,7 @@ def run_active_learning_pipeline(
     data_dir: str = "./data",
     dataset_config: Optional[Dict[str, Any]] = None,
     model_config: Optional[Dict[str, Any]] = None,
+    model_selection_criterion: Optional[str] = "loss",
     epochs: int = 50,
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
@@ -118,6 +119,7 @@ def run_active_learning_pipeline(
         wandb_logger,
         early_stopping,
         lr_scheduler,
+        model_selection_criterion,
     )
     pipeline.run()
 
@@ -175,6 +177,14 @@ def run_active_learning_pipeline_from_config(
         if "model_config" in config and "num_levels" in config["model_config"]:
             config["num_levels"] = config["model_config"]["num_levels"]
             del config["model_config"]["num_levels"]
+        if (
+            "model_config" in config
+            and "model_selection_criterion" in config["model_config"]
+        ):
+            config["model_selection_criterion"] = config["model_config"][
+                "model_selection_criterion"
+            ]
+            del config["model_config"]["model_selection_criterion"]
 
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")

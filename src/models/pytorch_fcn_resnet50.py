@@ -56,5 +56,23 @@ class PytorchFCNResnet50(PytorchModel):
 
         # ToDo: this method should return the required performance metrics
 
+    def test_step(
+        self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
+    ) -> None:
+        """
+        Tests the model on a given batch of input images.
+
+        Args:
+            batch (Tensor): Batch of prediction images.
+            batch_idx: Index of the prediction batch.
+            dataloader_idx: Index of the dataloader.
+        """
+
+        x, y, case_ids = batch
+
+        logits = self(x)
+
+        # ToDo: this method should return the required performance metrics
+
     def input_dimensionality(self) -> int:
         return 2

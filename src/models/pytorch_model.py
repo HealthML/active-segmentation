@@ -26,10 +26,21 @@ class PytorchModel(LightningModule, ABC):
         lr_scheduler: Algorithm used for dynamically updating the learning rate during training.
             E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         loss: The measure of performance. E.g. 'dice', 'bce', 'fp'
+        train_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged
+            in each training and validation epoch of the training loop. Defaults to `["dice_score"]`.
+        train_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
+            specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`).
+            Defaults to `[0.25, 0.5, 0.75]`.
+        test_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged
+            in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Defaults to
+            `["dice_score", "sensitivity", "specificity", "hausdorff95"]`.
+        test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
+            specified in the `test_metrics` parameter should be computed in the validation or testing loop. Defaults to
+            `[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]`.
         **kwargs:
     """
 
-    # pylint: disable=too-many-ancestors,arguments-differ
+    # pylint: disable=too-many-ancestors,arguments-differ,too-many-arguments
 
     def __init__(
         self,
@@ -37,6 +48,10 @@ class PytorchModel(LightningModule, ABC):
         optimizer: str = "adam",
         lr_scheduler: str = None,
         loss: str = "dice",
+        train_metrics: Optional[Iterable[str]] = None,
+        train_metric_confidence_levels: Optional[Iterable[float]] = None,
+        test_metrics: Optional[Iterable[str]] = None,
+        test_metric_confidence_levels: Optional[Iterable[float]] = None,
         **kwargs
     ):
 
@@ -47,11 +62,37 @@ class PytorchModel(LightningModule, ABC):
         self.lr_scheduler = lr_scheduler
         self.loss = self.configure_loss(loss)
 
-        self.confidence_levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        if train_metric_confidence_levels is None:
+            train_metric_confidence_levels = [0.25, 0.5, 0.75]
+        self.train_metric_confidence_levels = train_metric_confidence_levels
+
+        if test_metric_confidence_levels is None:
+            test_metric_confidence_levels = [
+                0.1,
+                0.2,
+                0.3,
+                0.4,
+                0.5,
+                0.6,
+                0.7,
+                0.8,
+                0.9,
+            ]
+        self.test_metric_confidence_levels = test_metric_confidence_levels
+
+        if train_metrics is None:
+            train_metrics = ["dice_score"]
+        self.train_metric_names = train_metrics
+
+        if test_metrics is None:
+            test_metrics = ["dice_score", "sensitivity", "specificity", "hausdorff95"]
+        self.test_metric_names = test_metrics
 
         self.train_metrics = torch.nn.ModuleList([])
         self.val_metrics = torch.nn.ModuleList([])
         self.test_metrics = torch.nn.ModuleList([])
+
+        self.stage = None
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -60,29 +101,44 @@ class PytorchModel(LightningModule, ABC):
         Args:
             stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
         """
+        self.stage = stage
 
         if stage == "fit":
-            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+            train_slices_per_image = self.train_dataloader().dataset.slices_per_image()
 
             train_average_metrics = CombinedPerEpochMetric(
                 stage="train",
-                metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-                confidence_levels=self.confidence_levels,
+                metrics=self.train_metric_names,
+                confidence_levels=self.train_metric_confidence_levels,
                 image_ids=self.train_dataloader().dataset.image_ids(),
-                dim=2 if slices_per_image == 1 else 3,
+                dim=2 if train_slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
-                slices_per_image=slices_per_image,
+                slices_per_image=train_slices_per_image,
             )
             self.train_metrics.append(train_average_metrics)
 
-        if stage in ["fit", "validate"]:
-            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+            val_slices_per_image = self.val_dataloader().dataset.slices_per_image()
 
             val_average_metrics = CombinedPerEpochMetric(
                 stage="val",
-                metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-                confidence_levels=self.confidence_levels,
+                metrics=self.train_metric_names,
+                confidence_levels=self.train_metric_confidence_levels,
+                image_ids=self.val_dataloader().dataset.image_ids(),
+                dim=2 if val_slices_per_image == 1 else 3,
+                reduction="mean",
+                metrics_to_aggregate=[],
+                slices_per_image=val_slices_per_image,
+            )
+            self.val_metrics.append(val_average_metrics)
+
+        if stage in ["validate"]:
+            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+
+            val_average_metrics = CombinedPerEpochMetric(
+                stage="best_model/val",
+                metrics=self.test_metric_names,
+                confidence_levels=self.test_metric_confidence_levels,
                 image_ids=self.val_dataloader().dataset.image_ids(),
                 dim=2 if slices_per_image == 1 else 3,
                 reduction="mean",
@@ -94,9 +150,9 @@ class PytorchModel(LightningModule, ABC):
             slices_per_image = self.train_dataloader().dataset.slices_per_image()
 
             test_average_metrics = CombinedPerEpochMetric(
-                stage="test",
-                metrics=["dice", "sensitivity", "specificity", "hausdorff95"],
-                confidence_levels=self.confidence_levels,
+                stage="best_model/test",
+                metrics=self.test_metric_names,
+                confidence_levels=self.test_metric_confidence_levels,
                 image_ids=self.test_dataloader().dataset.image_ids(),
                 dim=2 if slices_per_image == 1 else 3,
                 reduction="mean",
@@ -119,10 +175,8 @@ class PytorchModel(LightningModule, ABC):
             Training loss.
         """
 
-        return 0
-
     @abstractmethod
-    def validation_step(self, batch, batch_idx) -> None:
+    def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:
         """
         Validates the model on a given batch of model inputs.
         # this method should match the requirements of the pytorch lightning framework.
@@ -130,14 +184,37 @@ class PytorchModel(LightningModule, ABC):
         Args:
             batch: A batch of model inputs.
             batch_idx: Index of the current batch.
-
-        Returns:
-            None.
         """
 
-        # ToDo: this method should return the required performance metrics
+    def predict_step(
+        self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
+    ) -> Any:
+        """
+        Compute the model's predictions on a given batch of model inputs.
+        # this method should match the requirements of the pytorch lightning framework.
+        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html
+        Args:
+            batch: A batch of model inputs.
+            batch_idx: Index of the current batch.
+            dataloader_idx: The index of the dataloader that produced this batch.
+                (only if multiple val dataloaders used)
+        """
 
-        return None
+        return self.predict(batch)
+
+    @abstractmethod
+    def test_step(
+        self, batch: torch.Tensor, batch_idx: int, dataloader_idx: Optional[int] = None
+    ) -> None:
+        """
+        Compute the model's predictions on a given batch of model inputs from the test set.
+
+        Args:
+            batch: The output of your :class:`~torch.utils.data.DataLoader`.
+            batch_idx: The index of this batch.
+            dataloader_id: The index of the dataloader that produced this batch.
+                (only if multiple test dataloaders used).
+        """
 
     @abstractmethod
     def input_dimensionality(self) -> int:
@@ -231,6 +308,14 @@ class PytorchModel(LightningModule, ABC):
 
         return self.val_metrics
 
+    def get_test_metrics(self) -> Iterable[torchmetrics.Metric]:
+        """
+        Returns:
+            A list of metrics to be updated in each testing step.
+        """
+
+        return self.test_metrics
+
     def training_epoch_end(self, outputs: Any):
         """
         This method is called by the Pytorch Lightning framework at the end of each training epoch.
@@ -241,7 +326,9 @@ class PytorchModel(LightningModule, ABC):
 
         for train_metric in self.train_metrics:
             train_metrics = train_metric.compute()
-            self.logger.log_metrics(train_metrics)
+            for metric_name, metric_value in train_metrics.items():
+                self.log(metric_name, metric_value)
+            train_metric.reset()
 
     def validation_epoch_end(self, outputs: Any):
         """
@@ -253,5 +340,20 @@ class PytorchModel(LightningModule, ABC):
 
         for val_metric in self.val_metrics:
             val_metrics = val_metric.compute()
-            self.logger.log_metrics(val_metrics)
+            for metric_name, metric_value in val_metrics.items():
+                self.log(metric_name, metric_value)
             val_metric.reset()
+
+    def test_epoch_end(self, outputs: Any) -> None:
+        """
+        This method is called by the Pytorch Lightning framework at the end of each testing epoch.
+
+        Args:
+            outputs: List of return values of all validation steps of the current testing epoch.
+        """
+
+        for test_metric in self.test_metrics:
+            test_metrics = test_metric.compute()
+            for metric_name, metric_value in test_metrics.items():
+                self.log(metric_name, metric_value)
+            test_metrics.reset()

@@ -54,7 +54,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
 
         for _, confidence_level_name in self.confidence_levels:
             for metric in set(metrics):
-                if metric == "dice":
+                if metric == "dice_score":
                     self._metrics[confidence_level_name][metric] = DiceScore(
                         smoothing=0
                     )

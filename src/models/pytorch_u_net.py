@@ -117,7 +117,8 @@ class PytorchUNet(PytorchModel):
         probabilities = self(x)
 
         loss = self.loss(probabilities, y)
-        self.log("validation/loss", loss)  # log validation loss via weights&biases
+        if self.stage == "fit":
+            self.log("val/loss", loss)  # log validation loss via weights&biases
 
         for val_metric in self.get_val_metrics():
             val_metric.update(probabilities, y, case_ids)
@@ -135,3 +136,25 @@ class PytorchUNet(PytorchModel):
         """
 
         return self.predict(batch)
+
+    def test_step(
+        self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
+    ) -> None:
+        """
+        Tests the model on a given batch of input images.
+
+        Args:
+            batch (Tensor): Batch of prediction images.
+            batch_idx: Index of the prediction batch.
+            dataloader_idx: Index of the dataloader.
+        """
+
+        x, y, case_ids = batch
+
+        probabilities = self(x)
+
+        loss = self.loss(probabilities, y)
+        self.log("test/loss", loss)
+
+        for test_metric in self.get_test_metrics():
+            test_metric.update(probabilities, y, case_ids)
