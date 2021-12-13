@@ -5,14 +5,10 @@ The metric implementations are based on the TorchMetrics framework. For instruct
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
 
-import numpy as np
+from typing import Optional, Tuple
+
 import torch
 import torchmetrics
-from scipy.ndimage.morphology import (
-    distance_transform_edt,
-    binary_erosion,
-    generate_binary_structure,
-)
 
 
 def _is_binary(tensor_to_check: torch.Tensor) -> bool:
@@ -161,58 +157,108 @@ def specificity(
     return (true_negatives + smoothing) / (true_negatives_false_positives + smoothing)
 
 
-def _distances_to_surface(prediction: np.ndarray, target: np.ndarray) -> np.ndarray:
+def _distance_matrix(
+    first_point_set: torch.Tensor, second_point_set: torch.Tensor
+) -> torch.Tensor:
     r"""
-    For each border point of a predicted shape, computes the distance to the nearest point of the target shape.
-
+    Computes Euclidean distances between all points in the first tensor and all points in the second tensor.
     Args:
-        prediction: The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.
-        target: The target segmentation mask, where each value is in :math:`\{0, 1\}`.
-
+        first_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d)
+        second_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d).
     Returns:
-        Array of distance values with one entry per border point of the predicted shape.
+        Matrix containing the Euclidean distances between all points in the first tensor and all points.
+    Shape:
+        first_point_set: :math:`(N, D)` where :math:`N` is the number of points in the first set and :math:`D` is the
+            dimensionality of the Euclidean space.
+        second_point_set: :math:`(M, D)` where :math:`M` is the number of points in the second set and :math:`D` is the
+            dimensionality of the Euclidean space.
+        Output: :math:`(N, M)` where :math:`N` is the number of points in the first set and :math:`M` is the number of
+            points in the second set
     """
 
-    # code adapted from
-    # https://github.com/loli/medpy/blob/39131b94f0ab5328ab14a874229320efc2f74d98/medpy/metric/binary.py#L1195
+    if len(first_point_set) == 0:
+        return torch.as_tensor(float("nan"), device=first_point_set.device)
 
-    assert (
-        prediction.shape == target.shape
-    ), "Prediction and target must have the same dimensions."
-    assert prediction.ndim in [
-        2,
-        3,
-    ], "Prediction and target must have either two or three dimensions."
+    distances = torch.cdist(first_point_set.float(), second_point_set.float())
+    minimum_distances, _ = distances.min(axis=-1)
 
-    erosion_structure = generate_binary_structure(prediction.ndim, connectivity=1)
+    return minimum_distances
 
-    # extract 1-pixel border line of predicted shapes using XOR
-    prediction_border = prediction ^ binary_erosion(
-        prediction, structure=erosion_structure, iterations=1
+
+def _compute_all_image_locations(shape: Tuple[int], device: Optional[str] = None):
+    r"""
+    Computes a tensor of points corresponding to all pixel locations of a 2d or a 3d image in Euclidean space.
+    Args:
+        shape (Tuple[int]): The shape of the image for which the pixel locations are to be computed.
+        device (str, optional): Device as defined by PyTorch.
+    Returns:
+        A tensor of points corresponding to all pixel locations of the image.
+    Shape:
+        Output: :math:`(width \cdot height, 2)` for 2d images, :math:`(S \cdot width \cdot height, 3)`, where `S =
+            number of slices`, for 3d images.
+    """
+
+    return torch.cartesian_prod(
+        *[torch.arange(dim, device=device).float() for dim in shape]
     )
 
-    # scipys distance transform is calculated only inside the borders of the foreground objects, therefore the target
-    # has to be reversed
-    distances_to_target = distance_transform_edt(~target, sampling=None)
 
-    return distances_to_target[prediction_border]
+def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
+    r"""
+    Applies an erosion filter to a tensor representing a binary 2d or 3d image.
+    Args:
+        input_image (Tensor): Binary image to be eroded.
+    Returns:
+        Tensor: Eroded imaged.
+    Shape:
+        Input Image: :math:`(height, width)` or :math:`(S, height, width)` where :math:`S = number of slices`.
+        Output: Has the same dimensions as the input.
+    """
+
+    assert input_image.dim() in [
+        2,
+        3,
+    ], "Input must be a two- or three-dimensional tensor"
+    assert _is_binary(input_image), "Input must be binary."
+
+    if input_image.dim() == 2:
+        max_pooling = torch.nn.MaxPool2d(
+            3, stride=1, padding=0, dilation=1, return_indices=False, ceil_mode=False
+        )
+    elif input_image.dim() == 3:
+        max_pooling = torch.nn.MaxPool2d(
+            3, stride=1, padding=0, dilation=1, return_indices=False, ceil_mode=False
+        )
+
+    # to implement erosion filtering, max ppooling with a 3x3 kernel is applied to the inverted image
+    inverted_input = torch.as_tensor(1.0, device=input_image.device) - input_image
+
+    # pad image with ones to maintain the input's dimensions
+    inverted_input_padded = torch.nn.functional.pad(
+        inverted_input, (1, 1, 1, 1), "constant", 1
+    )
+
+    # apply the max pooling and invert the result
+    return torch.as_tensor(1.0, device=input_image.device) - max_pooling(
+        inverted_input_padded.unsqueeze(dim=0)
+    ).squeeze(dim=0)
 
 
+# pylint: disable=too-many-locals
 def hausdorff_distance(
     prediction: torch.Tensor,
     target: torch.Tensor,
     normalize: bool = False,
     percentile: float = 0.95,
+    all_image_locations: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
     r"""
     Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
-
     Note:
         In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
         given class and thus the distances are calculated over all channels and dimensions.
         As this method is implemented using the scipy package, the returned value is not differentiable in PyTorch and
         can therefore not be used in loss functions.
-
     Args:
         prediction (Tensor): The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.
         target (Tensor): The target segmentation mask, where each value is in :math:`\{0, 1\}`.
@@ -220,14 +266,18 @@ def hausdorff_distance(
             distance.
         percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
             :math:`\[0, 1\]`.
-
+        all_image_locations (Tensor, optional): A pre-computed tensor containing one point for each pixel in the
+            prediction representing the pixel's location in 2d or 3d Euclidean space. Passing a pre-computed tensor to
+            this parameter can be used to speed up computation.
     Returns:
         Tensor: Hausdorff distance.
-
     Shape:
         - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,
           or `(height, width)` for single image segmentation tasks.
         - Target: Must have the same dimensions as the prediction.
+        - All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an
+            n-dimensional point. Typically :math:`(S \cdot height \cdot width, 3)`, where `S = number of slices`, or
+            :math:`(height \cdot width, 2)`
         - Output: Scalar.
     """
 
@@ -239,25 +289,47 @@ def hausdorff_distance(
         prediction.shape == target.shape
     ), "Prediction and target must have the same dimensions."
     assert (
-        prediction.dim() == 2
-        or prediction.dim() == 3
-        or prediction.dim() == 4  # ToDo: Only input one channel.
+        prediction.dim() == 2 or prediction.dim() == 3
     ), "Prediction and target must have either two or three dimensions."
     assert _is_binary(prediction), "Predictions must be binary."
     assert _is_binary(target), "Target must be binary."
 
-    prediction = prediction.cpu().detach().numpy().astype(np.bool)
-    target = target.cpu().detach().numpy().astype(np.bool)
+    if torch.count_nonzero(prediction) == 0 or torch.count_nonzero(target) == 0:
+        return torch.as_tensor(float("nan"), device=prediction.device)
 
-    if np.count_nonzero(prediction) == 0 or np.count_nonzero(target) == 0:
-        return torch.as_tensor(float("nan"))
+    if all_image_locations is None:
+        all_image_locations = _compute_all_image_locations(
+            prediction.shape, device=prediction.device
+        )
 
-    distances_to_target = _distances_to_surface(prediction, target)
-    # pylint: disable=arguments-out-of-order
-    distances_to_prediction = _distances_to_surface(target, prediction)
+    # to reduce computational effort, the distance calculations are only done for the border points of the predicted and
+    # the target shape
+    # to identify border pointds, binary erosion is used
+    prediction_boundaries = torch.logical_xor(
+        prediction, _binary_erosion(prediction)
+    ).int()
+    target_boundaries = torch.logical_xor(target, _binary_erosion(target)).int()
 
-    distances = np.hstack((distances_to_target, distances_to_prediction))
-    distances = torch.from_numpy(distances)
+    flattened_prediction = prediction_boundaries.view(-1).float()
+    flattened_target = target_boundaries.view(-1).float()
+
+    # select those points that belong to the target segmentation mask
+    target_mask = flattened_target.eq(1)
+    target_locations = all_image_locations[target_mask, :]
+
+    # select those points that belong to the predicted segmentation mask
+    prediction_mask = flattened_prediction.eq(1)
+    prediction_locations = all_image_locations[prediction_mask, :]
+
+    # for each point in the predicted segmentation mask, compute the Euclidean distance to all points of the target
+    # segmentation mask
+    distances_to_target = _distance_matrix(prediction_locations, target_locations)
+
+    # for each point in the target segmentation mask, compute the Euclidean distance to all points of the predicted
+    # segmentation mask
+    distances_to_prediction = _distance_matrix(target_locations, prediction_locations)
+
+    distances = torch.cat((distances_to_target, distances_to_prediction), 0)
 
     if normalize:
         maximum_distance = torch.norm(
