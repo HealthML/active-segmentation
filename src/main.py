@@ -24,6 +24,7 @@ def run_active_learning_pipeline(
     data_dir: str = "./data",
     dataset_config: Optional[Dict[str, Any]] = None,
     model_config: Optional[Dict[str, Any]] = None,
+    active_learning_config: Optional[Dict[str, Any]] = None,
     epochs: int = 50,
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
@@ -119,9 +120,10 @@ def run_active_learning_pipeline(
         strategy,
         epochs,
         gpus,
-        wandb_logger,
-        early_stopping,
-        lr_scheduler,
+        **active_learning_config,
+        logger=wandb_logger,
+        early_stopping=early_stopping,
+        lr_scheduler=lr_scheduler,
     )
     pipeline.run()
 

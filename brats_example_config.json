@@ -16,6 +16,10 @@
     "cache_size": 250,
     "pin_memory": true
   },
+  "active_learning_config": {
+    "iterations": 10,
+    "number_of_items": 2
+  },
   "wandb_project_name": "active-segmentation-tests",
   "strategy": "base",
   "experiment_name": "test-experiment",

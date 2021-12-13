@@ -25,6 +25,8 @@ class ActiveLearningPipeline:
         logger: A logger object as defined by Pytorch Lightning.
         lr_scheduler (string, optional): Algorithm used for dynamically updating the
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        number_of_items: Number of items that should be selected for labeling in the active learning run.
+        iterations: iteration times how often the active learning pipeline should be executed
     """
 
     # pylint: disable=too-few-public-methods,too-many-arguments
@@ -35,6 +37,8 @@ class ActiveLearningPipeline:
         strategy: QueryStrategy,
         epochs: int,
         gpus: int,
+        number_of_items: int,
+        iterations: int,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
@@ -63,23 +67,20 @@ class ActiveLearningPipeline:
         self.strategy = strategy
         self.epochs = epochs
         self.gpus = gpus
+        self.number_of_items = number_of_items
+        self.iterations = iterations
 
     def run(self) -> None:
         """Run the pipeline"""
         self.data_module.setup()
 
-        for i in range(0, self.data_module.unlabeled_set_size()):
-
-            print("get new items to label")
-
+        for i in range(0, self.iterations):
+            # query batch selection
             items_to_label = self.strategy.select_items_to_label(
-                self.model, self.data_module, 10
+                self.model, self.data_module, self.number_of_items
             )
-
-            print("label the item")
-
+            # label batch
             self.data_module.label_items(items_to_label)
 
-            print("train on labeled items")
-
+            # train model labeled  batch
             self.model_trainer.fit(self.model, self.data_module)

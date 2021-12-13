@@ -122,7 +122,9 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         if self._training_set is not None and self._unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
-                self.__case_id_to_filepaths(case_id, os.path.join(self.data_folder, "train"))
+                self.__case_id_to_filepaths(
+                    case_id, os.path.join(self.data_folder, "train")
+                )
                 for case_id in ids
             ]
             for (
