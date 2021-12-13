@@ -9,7 +9,7 @@
       240,
       240
     ],
-    "model_selection_criterion": "dice_score_0.5",
+    "model_selection_criterion": "mean_dice_score_0.5",
     "train_metrics": ["dice_score"],
     "train_metric_confidence_levels": [0.25, 0.5, 0.75],
     "test_metrics": ["dice_score", "sensitivity", "specificity", "hausdorff95"],
