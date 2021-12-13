@@ -159,10 +159,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                     per_image_metrics[metric_name]
                 ).sum()
 
-        if (
-            self.metrics_to_aggregate is not None
-            and len(self.metrics_to_aggregate) == 0
-        ):
+        if self.metrics_to_aggregate is not None and len(self.metrics_to_aggregate) > 0:
             for confidence_level in self.confidence_levels:
                 metric_values = []
                 for metric_name in self.metrics_to_aggregate:
