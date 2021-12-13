@@ -41,7 +41,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         # PyTorch does not allow "." in module names, therefore we first replace them by "," and later replace them
         # again by "."
         self.confidence_levels = [
-            (confidence_level, f"{str(confidence_level).strip('0')}".replace(".", ","))
+            (confidence_level, f"{str(confidence_level).rstrip('0')}".replace(".", ","))
             for confidence_level in confidence_levels
         ]
 
