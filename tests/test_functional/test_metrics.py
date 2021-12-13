@@ -563,7 +563,8 @@ class TestHausdorffDistance(unittest.TestCase):
         )
 
         hausdorff_distance_module = HausdorffDistance(
-            percentile=percentile, dim=prediction.dim(), slices_per_image=1
+            percentile=percentile,
+            slices_per_image=1 if prediction.ndim == 2 else prediction.shape[0],
         )
         hausdorff_distance_from_module = hausdorff_distance_module(prediction, target)
         self.assertTrue(
