@@ -441,10 +441,12 @@ class HausdorffDistance(torchmetrics.Metric):
         self.predictions.append(prediction)
         self.targets.append(target)
 
-        self.number_of_slices += len(prediction)
+        added_slices = 1 if prediction.ndim == 2 else prediction.shape[0]
+        self.number_of_slices += added_slices
 
         if self.number_of_slices == self.slices_per_image:
             self.compute()
+        assert self.number_of_slices <= self.slices_per_image
 
     def compute(self) -> torch.Tensor:
         """

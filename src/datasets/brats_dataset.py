@@ -338,4 +338,4 @@ class BraTSDataset(IterableDataset, DatasetHooks):
             int: Number of slices that each image of the dataset contains.
         """
 
-        return BraTSDataset.IMAGE_DIMENSIONS
+        return BraTSDataset.IMAGE_DIMENSIONS[0]
