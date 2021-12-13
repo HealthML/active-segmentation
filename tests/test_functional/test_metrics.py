@@ -715,3 +715,33 @@ class TestHausdorffDistance(unittest.TestCase):
             expected_hausdorff_dist,
             "the input is 3-dimensional",
         )
+
+    # pylint: disable=no-self-use
+    def test_splitted_3d(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when the predictions are 3-dimensional scans whose
+        slices are scattered across multiple batches.
+        """
+        (
+            prediction,
+            target,
+            expected_hausdorff_dist,
+            _,
+            _,
+        ) = tests.utils.distance_slices_3d()
+
+        hausdorff_distance_module = HausdorffDistance(
+            percentile=0.95,
+            slices_per_image=prediction.shape[0],
+        )
+
+        for idx, _ in enumerate(prediction):
+            hausdorff_distance_module.update(prediction[idx], target[idx])
+
+        hausdorff_distance_from_module = hausdorff_distance_module.compute()
+        torch.testing.assert_allclose(
+            hausdorff_distance_from_module,
+            torch.tensor(expected_hausdorff_dist).float(),
+            msg="Module-based implementation correctly computes hausdorff distance when the predictions are "
+            "3-dimensional scans whose slices are scattered across multiple batches.",
+        )
