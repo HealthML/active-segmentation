@@ -41,7 +41,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         # PyTorch does not allow "." in module names, therefore we first replace them by "," and later replace them
         # again by "."
         self.confidence_levels = [
-            (confidence_level, f"{confidence_level:.1f}".replace(".", ","))
+            (confidence_level, f"{str(confidence_level).strip('0')}".replace(".", ","))
             for confidence_level in confidence_levels
         ]
 
@@ -91,11 +91,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         super().reset()
 
     # pylint: disable=arguments-differ
-    def update(
-        self,
-        prediction: torch.Tensor,
-        target: torch.Tensor,
-    ) -> None:
+    def update(self, prediction: torch.Tensor, target: torch.Tensor,) -> None:
         """
         Takes a prediction and a target slice of the 3d image and updates the metrics accordingly.
 

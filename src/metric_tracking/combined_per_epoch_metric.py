@@ -164,7 +164,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                 metric_values = []
                 for metric_name in self.metrics_to_aggregate:
                     metric_value = aggregated_metrics[
-                        f"{self.stage}/{self.reduction}_{metric_name}_{confidence_level:.1f}"
+                        f"{self.stage}/{self.reduction}_{metric_name}_{str(confidence_level).strip('0')}"
                     ]
                     if "hausdorff" in metric_name:
                         # invert Hausdorff distances for a meaningful aggregation with the other metrics where 1.0 is
@@ -173,9 +173,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
                     metric_values.append(metric_value)
 
-                aggregated_metric_name = (
-                    f"{self.stage}/{self.reduction}_aggregated_{confidence_level:.1f}"
-                )
+                aggregated_metric_name = f"{self.stage}/{self.reduction}_aggregated_{str(confidence_level).strip('0')}"
                 if self.reduction == "mean":
                     aggregated_metrics[aggregated_metric_name] = torch.tensor(
                         metric_values
