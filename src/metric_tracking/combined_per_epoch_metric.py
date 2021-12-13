@@ -93,7 +93,10 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
     # pylint: disable=arguments-differ
     def update(
-        self, prediction: torch.Tensor, target: torch.Tensor, image_ids: Iterable[str],
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        image_ids: Iterable[str],
     ) -> None:
         """
         Takes the prediction and target of a given batch and updates the metrics accordingly.

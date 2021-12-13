@@ -1,6 +1,6 @@
 """ Module containing a metrics class for tracking several metrics related to one 3d image """
 
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable
 import torch
 import torchmetrics
 
@@ -88,7 +88,11 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         super().reset()
 
     # pylint: disable=arguments-differ
-    def update(self, prediction: torch.Tensor, target: torch.Tensor,) -> None:
+    def update(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+    ) -> None:
         """
         Takes a prediction and a target slice of the 3d image and updates the metrics accordingly.
 

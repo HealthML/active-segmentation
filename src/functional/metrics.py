@@ -5,8 +5,6 @@ The metric implementations are based on the TorchMetrics framework. For instruct
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
 
-from typing import Optional
-
 import numpy as np
 import torch
 import torchmetrics
@@ -409,7 +407,10 @@ class HausdorffDistance(torchmetrics.Metric):
     """
 
     def __init__(
-        self, slices_per_image: int, normalize: bool = False, percentile: float = 0.95,
+        self,
+        slices_per_image: int,
+        normalize: bool = False,
+        percentile: float = 0.95,
     ):
         super().__init__()
         self.normalize = normalize
@@ -430,9 +431,10 @@ class HausdorffDistance(torchmetrics.Metric):
         assert (
             prediction.shape == target.shape
         ), "Prediction and target must have the same dimensions."
-        assert (
-            prediction.ndim == 2 or prediction.ndim == 3
-        ), "Prediction and target must have either two or three dimensions."
+        assert prediction.ndim in [
+            2,
+            3,
+        ], "Prediction and target must have either two or three dimensions."
         self.hausdorff_distance_cached = False
 
         # we just collect all slices of the image since, for 3d images, the Hausdorff distance needs to be computed over
@@ -468,7 +470,10 @@ class HausdorffDistance(torchmetrics.Metric):
             targets = torch.cat(self.targets, dim=0)
 
         hausdorff_dist = hausdorff_distance(
-            predictions, targets, normalize=self.normalize, percentile=self.percentile,
+            predictions,
+            targets,
+            normalize=self.normalize,
+            percentile=self.percentile,
         )
 
         self.hausdorff_distance = hausdorff_dist
