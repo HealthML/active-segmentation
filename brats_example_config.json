@@ -22,6 +22,7 @@
     "pin_memory": true
   },
   "wandb_project_name": "active-segmentation-tests",
+  "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
   "strategy": "base",
   "experiment_name": "test-experiment",
   "experiment_tags": [],

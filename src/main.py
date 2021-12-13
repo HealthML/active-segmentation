@@ -21,6 +21,7 @@ def run_active_learning_pipeline(
     strategy: str,
     experiment_name: str,
     batch_size: int = 16,
+    checkpoint_dir: Optional[str] = None,
     data_dir: str = "./data",
     dataset_config: Optional[Dict[str, Any]] = None,
     model_config: Optional[Dict[str, Any]] = None,
@@ -46,6 +47,7 @@ def run_active_learning_pipeline(
         strategy (string): Name of the query strategy. E.g. 'base'
         experiment_name (string): Name of the experiment.
         batch_size (int, optional): Size of training examples passed in one training step.
+        checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
         dataset_config (Dict[str, Any], optional): Dictionary with dataset specific parameters.
         model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
@@ -110,12 +112,16 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid data_module name.")
 
+    if checkpoint_dir is not None:
+        checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
+
     pipeline = ActiveLearningPipeline(
         data_module,
         model,
         strategy,
         epochs,
         gpus,
+        checkpoint_dir,
         wandb_logger,
         early_stopping,
         lr_scheduler,

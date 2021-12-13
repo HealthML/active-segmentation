@@ -1,6 +1,6 @@
 """ Module containing the active learning pipeline """
 
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LightningLoggerBase
@@ -21,6 +21,7 @@ class ActiveLearningPipeline:
         strategy (QueryStrategy): An active learning strategy to query for new labels.
         epochs (int): The number of epochs the model should be trained.
         gpus (int): Number of GPUS to use for model training.
+        checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
         early_stopping (bool, optional): Enable/Disable Early stopping when model
             is not learning anymore (default = False).
         logger: A logger object as defined by Pytorch Lightning.
@@ -36,6 +37,7 @@ class ActiveLearningPipeline:
         strategy: QueryStrategy,
         epochs: int,
         gpus: int,
+        checkpoint_dir: Optional[str] = None,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
@@ -53,8 +55,17 @@ class ActiveLearningPipeline:
         if early_stopping:
             callbacks.append(EarlyStopping("validation/loss"))
 
+        monitoring_mode = "min" if "loss" in model_selection_criterion else "max"
+
         self.checkpoint_callback = ModelCheckpoint(
-            monitor=f"val/{model_selection_criterion}"
+            dirpath=checkpoint_dir,
+            filename="best_model_epoch_{epoch}",
+            auto_insert_metric_name=False,
+            monitor=f"val/{model_selection_criterion}",
+            mode=monitoring_mode,
+            save_last=True,
+            every_n_epochs=1,
+            save_on_train_epoch_end=False,
         )
         callbacks.append(self.checkpoint_callback)
 
