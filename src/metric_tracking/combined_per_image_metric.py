@@ -13,7 +13,6 @@ class CombinedPerImageMetric(torchmetrics.Metric):
     different batches. The metrics can be tracked for different confidence levels.
 
     Args:
-        phase (string): Descriptive name of the current pipeline phase, e.g. "train", "val" or "test".
         metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity",
             "specificity", and "hausdorff95".
         confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
@@ -31,13 +30,11 @@ class CombinedPerImageMetric(torchmetrics.Metric):
 
     def __init__(
         self,
-        phase: str,
         metrics: Iterable[str],
         confidence_levels: Iterable[float],
         slices_per_image: int,
     ):
         super().__init__()
-        self.phase = phase
         # PyTorch does not allow "." in module names, therefore we first replace them by "," and later replace them
         # again by "."
         self.confidence_levels = [
@@ -112,13 +109,13 @@ class CombinedPerImageMetric(torchmetrics.Metric):
 
         Returns:
             Dict[string, Tensor]: Mapping of metric names to metric values.
-                The keys have the form `<phase>/<metric name>_<confidence_level>`.
+                The keys have the form `<metric name>_<confidence_level>`.
         """
         metric_results = {}
         for _, confidence_level_name in self.confidence_levels:
             for metric_name, metric in self._metrics[confidence_level_name].items():
                 metric_results[
-                    f"{self.phase}/{metric_name}_{confidence_level_name.replace(',','.')}"
+                    f"{metric_name}_{confidence_level_name.replace(',','.')}"
                 ] = metric.compute()
 
         return metric_results

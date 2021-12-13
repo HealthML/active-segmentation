@@ -19,7 +19,6 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
     are  aggregated into global per-epoch metric values.
 
     Args:
-        stage (string): Descriptive name of the current stage, e.g. "train", "val" or "test".
         metrics (Iterable[str]): A list of metric names to be tracked. Available options: "dice", "sensitivity",
             "specificity", and "hausdorff95".
         confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
@@ -46,7 +45,6 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        stage: str,
         metrics: Iterable[str],
         confidence_levels: Iterable[float],
         image_ids: Iterable[str],
@@ -55,7 +53,6 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         reduction: str = "mean",
     ):
         super().__init__()
-        self.stage = stage
         self.metrics = metrics
         self.confidence_levels = confidence_levels
         self.slices_per_image = slices_per_image
@@ -71,7 +68,6 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         self._metrics_per_image = torch.nn.ModuleDict(
             {
                 image_id: CombinedPerImageMetric(
-                    self.stage,
                     self.metrics,
                     self.confidence_levels,
                     slices_per_image=self.slices_per_image,
@@ -122,10 +118,10 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         Returns:
             Dict[string, Tensor]: Mapping of metric names to metric values.
                 If `reduction` is `"none"`, the keys have the form
-                `<stage>/<metric name>_<confidence_level>_<image ID>`.
-                Otherwise the keys have the form `<stage>/<reduction>_<metric name>_<confidence_level>`
+                `<metric name>_<confidence_level>_<image ID>`.
+                Otherwise the keys have the form `<reduction>_<metric name>_<confidence_level>`
                 If `"metrics_to_aggregate"` is provided and `reduction` is not `"none"`, the dictionary additionally
-                contains the keys `<stage>/<reduction>_aggregated_<confidence_level>`.
+                contains the keys `<reduction>_aggregated_<confidence_level>`.
         """
         per_image_metrics = {}
 
@@ -133,9 +129,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             metrics = self._metrics_per_image[image_id].compute()
             for metric_name, metric_value in metrics.items():
                 if self.reduction == "none":
-                    per_image_metrics[
-                        f"{self.stage}/{metric_name.lstrip(f'{self.stage}/')}_{image_id}"
-                    ] = metric_value
+                    per_image_metrics[f"{metric_name}_{image_id}"] = metric_value
                 else:
                     if metric_name not in per_image_metrics:
                         per_image_metrics[metric_name] = []
@@ -147,9 +141,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         aggregated_metrics = {}
 
         for metric_name, metric_value in per_image_metrics.items():
-            aggregated_metric_name = (
-                f"{self.stage}/{self.reduction}_{metric_name.lstrip(f'{self.stage}/')}"
-            )
+            aggregated_metric_name = f"{self.reduction}_{metric_name}"
             if self.reduction == "mean":
                 aggregated_metrics[aggregated_metric_name] = torch.tensor(
                     per_image_metrics[metric_name]
@@ -164,7 +156,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                 metric_values = []
                 for metric_name in self.metrics_to_aggregate:
                     metric_value = aggregated_metrics[
-                        f"{self.stage}/{self.reduction}_{metric_name}_{str(confidence_level).rstrip('0')}"
+                        f"{self.reduction}_{metric_name}_{str(confidence_level).rstrip('0')}"
                     ]
                     if "hausdorff" in metric_name:
                         # invert Hausdorff distances for a meaningful aggregation with the other metrics where 1.0 is
@@ -173,7 +165,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
                     metric_values.append(metric_value)
 
-                aggregated_metric_name = f"{self.stage}/{self.reduction}_aggregated_{str(confidence_level).rstrip('0')}"
+                aggregated_metric_name = (
+                    f"{self.reduction}_aggregated_{str(confidence_level).rstrip('0')}"
+                )
                 if self.reduction == "mean":
                     aggregated_metrics[aggregated_metric_name] = torch.tensor(
                         metric_values
