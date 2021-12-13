@@ -111,7 +111,6 @@ class PytorchModel(LightningModule, ABC):
                 metrics=self.train_metric_names,
                 confidence_levels=self.train_metric_confidence_levels,
                 image_ids=self.train_dataloader().dataset.image_ids(),
-                dim=2 if train_slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
                 slices_per_image=train_slices_per_image,
@@ -125,7 +124,6 @@ class PytorchModel(LightningModule, ABC):
                 metrics=self.train_metric_names,
                 confidence_levels=self.train_metric_confidence_levels,
                 image_ids=self.val_dataloader().dataset.image_ids(),
-                dim=2 if val_slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
                 slices_per_image=val_slices_per_image,
@@ -140,7 +138,6 @@ class PytorchModel(LightningModule, ABC):
                 metrics=self.test_metric_names,
                 confidence_levels=self.test_metric_confidence_levels,
                 image_ids=self.val_dataloader().dataset.image_ids(),
-                dim=2 if slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
                 slices_per_image=slices_per_image,
@@ -154,7 +151,6 @@ class PytorchModel(LightningModule, ABC):
                 metrics=self.test_metric_names,
                 confidence_levels=self.test_metric_confidence_levels,
                 image_ids=self.test_dataloader().dataset.image_ids(),
-                dim=2 if slices_per_image == 1 else 3,
                 reduction="mean",
                 metrics_to_aggregate=[],
                 slices_per_image=slices_per_image,
@@ -338,11 +334,15 @@ class PytorchModel(LightningModule, ABC):
             outputs: List of return values of all validation steps of the current validation epoch.
         """
 
+        print("validation_epoch_end")
+
         for val_metric in self.val_metrics:
             val_metrics = val_metric.compute()
             for metric_name, metric_value in val_metrics.items():
                 self.log(metric_name, metric_value)
             val_metric.reset()
+
+        print("validation_epoch_end finish")
 
     def test_epoch_end(self, outputs: Any) -> None:
         """

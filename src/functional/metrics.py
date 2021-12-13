@@ -401,20 +401,15 @@ class HausdorffDistance(torchmetrics.Metric):
     Computes the Hausdorff distance. Can be used for 3D images whose slices are scattered over multiple batches.
 
     Args:
+        slices_per_image (int): Number of slices per 3d image.
         percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
             :math:`\[0, 1\]`.
         normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
             distance.
-        dim (int, optional): The dimensionality of the input. Must be either 2 or 3. Defaults to 2.
-        slices_per_image (int, optional): Number of slices per 3d image. Must be specified if `dim` is 2.
     """
 
     def __init__(
-        self,
-        normalize: bool = False,
-        percentile: float = 0.95,
-        dim: int = 2,
-        slices_per_image: Optional[int] = None,
+        self, slices_per_image: int, normalize: bool = False, percentile: float = 0.95,
     ):
         super().__init__()
         self.normalize = normalize
@@ -427,22 +422,17 @@ class HausdorffDistance(torchmetrics.Metric):
         self.add_state("hausdorff_distance", torch.tensor(0.0))
         self.all_image_locations = None
         self.hausdorff_distance_cached = False
-
-        if dim not in [2, 3]:
-            raise ValueError(
-                f"Dimensionality must be either 2 or 3, but is {dim} instead."
-            )
-
-        if dim == 2 and slices_per_image is None:
-            raise ValueError(
-                "For 2d inputs the `slices_per_image` parameter needs to be specified."
-            )
-
-        self.dim = dim
         self.slices_per_image = slices_per_image
+        self.number_of_slices = 0
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        assert (
+            prediction.shape == target.shape
+        ), "Prediction and target must have the same dimensions."
+        assert (
+            prediction.ndim == 2 or prediction.ndim == 3
+        ), "Prediction and target must have either two or three dimensions."
         self.hausdorff_distance_cached = False
 
         # we just collect all slices of the image since, for 3d images, the Hausdorff distance needs to be computed over
@@ -451,7 +441,9 @@ class HausdorffDistance(torchmetrics.Metric):
         self.predictions.append(prediction)
         self.targets.append(target)
 
-        if self.dim == 3 or len(self.predictions) == self.slices_per_image:
+        self.number_of_slices += len(prediction)
+
+        if self.number_of_slices == self.slices_per_image:
             self.compute()
 
     def compute(self) -> torch.Tensor:
@@ -466,7 +458,7 @@ class HausdorffDistance(torchmetrics.Metric):
         if self.hausdorff_distance_cached:
             return self.hausdorff_distance
 
-        if self.dim == 2:
+        if self.predictions[0].ndim == 2:
             predictions = torch.stack(self.predictions)
             targets = torch.stack(self.targets)
         else:
@@ -474,10 +466,7 @@ class HausdorffDistance(torchmetrics.Metric):
             targets = torch.cat(self.targets, dim=0)
 
         hausdorff_dist = hausdorff_distance(
-            predictions,
-            targets,
-            normalize=self.normalize,
-            percentile=self.percentile,
+            predictions, targets, normalize=self.normalize, percentile=self.percentile,
         )
 
         self.hausdorff_distance = hausdorff_dist
@@ -491,6 +480,6 @@ class HausdorffDistance(torchmetrics.Metric):
         # free memory
         self.predictions = []
         self.targets = []
-        self.all_image_locations = None
+        self.number_of_slices = 0
 
         return hausdorff_dist

@@ -18,8 +18,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
             "specificity", and "hausdorff95".
         confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
             separately.
-        dim (int, optional): The dimensionality of the input. Must be either 2 or 3. Defaults to 2.
-        slices_per_image (int, optional): Number of slices per 3d image. Must be specified if `dim` is 2.
+        slices_per_image (int): Number of slices per 3d image.
 
     Note:
         In this method, the `prediction` tensor is expected to be one output slice of the final sigmoid layer of a
@@ -35,8 +34,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         phase: str,
         metrics: Iterable[str],
         confidence_levels: Iterable[float],
-        dim: int = 2,
-        slices_per_image: Optional[int] = None,
+        slices_per_image: int,
     ):
         super().__init__()
         self.phase = phase
@@ -68,10 +66,9 @@ class CombinedPerImageMetric(torchmetrics.Metric):
                     )
                 elif metric == "hausdorff95":
                     self._metrics[confidence_level_name][metric] = HausdorffDistance(
+                        slices_per_image=slices_per_image,
                         percentile=0.95,
                         normalize=True,
-                        dim=dim,
-                        slices_per_image=slices_per_image,
                     )
                 else:
                     raise ValueError(f"Invalid metric name: {metric}")
