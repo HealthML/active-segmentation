@@ -10,7 +10,7 @@ import wandb
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
-from datasets import BraTSDataModule, PascalVOCDataModule
+from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule
 from query_strategies import QueryStrategy
 
 
@@ -106,6 +106,15 @@ def run_active_learning_pipeline(
             dim=model.input_dimensionality(),
             **dataset_config,
         )
+    elif dataset == "decathlon":
+
+        data_module = DecathlonDataModule(
+            data_dir,
+            batch_size,
+            num_workers,
+            dim=model.input_dimensionality(),
+            **dataset_config,
+        )
     else:
         raise ValueError("Invalid data_module name.")
 
@@ -158,6 +167,13 @@ def run_active_learning_pipeline_from_config(
         if "dataset_config" in config and "data_dir" in config["dataset_config"]:
             config["data_dir"] = config["dataset_config"]["data_dir"]
             del config["dataset_config"]["data_dir"]
+        if (
+            "dataset_config" in config
+            and "mask_filter_values" in config["dataset_config"]
+        ):
+            config["dataset_config"]["mask_filter_values"] = tuple(
+                config["dataset_config"]["mask_filter_values"]
+            )
 
         if "model_config" in config and "architecture" in config["model_config"]:
             config["architecture"] = config["model_config"]["architecture"]
