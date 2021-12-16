@@ -1,7 +1,7 @@
 """Module defining hooks that each dataset class should implement"""
 
 from abc import ABC, abstractmethod
-from typing import Iterable
+from typing import Iterable, List, Union
 
 
 class DatasetHooks(ABC):
@@ -17,10 +17,11 @@ class DatasetHooks(ABC):
         """
 
     @abstractmethod
-    def slices_per_image(self, **kwargs):
+    def slices_per_image(self, **kwargs) -> Union[int, List[int]]:
         """
         Args:
             kwargs: Dataset specific parameters.
         Returns:
-            int: Number of slices that each image of the dataset contains.
+            Union[int, List[int]]: Number of slices that each image of the dataset contains. If a single integer
+                value is provided, it is assumed that all images of the dataset have the same number of slices.
         """

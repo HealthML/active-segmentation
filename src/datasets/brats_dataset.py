@@ -332,7 +332,7 @@ class BraTSDataset(IterableDataset, DatasetHooks):
 
         return [self.__get_case_id(image_path) for image_path in self.image_paths]
 
-    def slices_per_image(self, **kwargs) -> Tuple[int]:
+    def slices_per_image(self, **kwargs) -> int:
         """
         Returns:
             int: Number of slices that each image of the dataset contains.

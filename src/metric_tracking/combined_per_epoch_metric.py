@@ -3,7 +3,7 @@ Module containing a metrics class for tracking and aggregating several metrics r
 whose slices may be scattered across different batches.
 """
 
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable, List, Optional, Union
 
 import torch
 import torchmetrics
@@ -24,7 +24,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked
             separately.
         image_ids (Iterable[str]): List of the ids of all images for which the metrics are to be tracked.
-        slices_per_image (int): Number of slices per 3d image.
+        slices_per_image (Union[int, List[int]]): Number of slices per 3d image. If a single integer value is
+            provided, it is assumed that all images of the dataset have the same number of slices.
         metrics_to_aggregate (Iterable[str], optional): A list of metric names from which to calculate an aggregated
             metric. Must be a subset of the metric names passed to the `metrics` parameter. If, for example,
             `metrics_to_aggregate=["dice", "hausdorff95"]` and `reduction="mean"`, the mean of the dice score and the
@@ -48,7 +49,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         metrics: Iterable[str],
         confidence_levels: Iterable[float],
         image_ids: Iterable[str],
-        slices_per_image: int,
+        slices_per_image: Union[int, List[int]],
         metrics_to_aggregate: Optional[Iterable[str]] = None,
         reduction: str = "mean",
     ):
@@ -70,9 +71,11 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                 image_id: CombinedPerImageMetric(
                     self.metrics,
                     self.confidence_levels,
-                    slices_per_image=self.slices_per_image,
+                    slices_per_image=self.slices_per_image[idx]
+                    if isinstance(self.slices_per_image, list)
+                    else self.slices_per_image,
                 )
-                for image_id in image_ids
+                for idx, image_id in enumerate(image_ids)
             }
         )
         self.metrics_to_compute = set()

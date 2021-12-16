@@ -40,7 +40,7 @@ class PascalVOCDataset(Dataset, DatasetHooks):
 
         return range(self.__len__)
 
-    def slices_per_image(self, **kwargs) -> Tuple[int]:
+    def slices_per_image(self, **kwargs) -> int:
         """
         Returns:
             int: Number of slices that each image of the dataset contains.
