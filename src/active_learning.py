@@ -69,10 +69,12 @@ class ActiveLearningPipeline:
         )
         self.strategy = strategy
         self.epochs = epochs
+        self.logger = logger
         self.gpus = gpus
         self.active_learning_mode = active_learning_mode
         self.number_of_items = number_of_items
         self.iterations = iterations
+        self.callbacks = callbacks
 
     def run(self) -> None:
         """Run the pipeline"""
@@ -89,5 +91,15 @@ class ActiveLearningPipeline:
 
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
+
+                self.model_trainer = Trainer(
+                    # deterministic=True,
+                    profiler="simple",
+                    max_epochs=self.epochs,
+                    logger=self.logger,
+                    gpus=self.gpus,
+                    benchmark=True,
+                    callbacks=self.callbacks,
+                )
         else:
             self.model_trainer.fit(self.model, self.data_module)
