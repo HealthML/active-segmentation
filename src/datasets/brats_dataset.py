@@ -298,7 +298,9 @@ class BraTSDataset(IterableDataset):
     def __len__(self) -> int:
         return len(self.image_slice_indices)
 
-    def add_image(self, image_path: str, annotation_path: str) -> None:
+    def add_image(
+        self, image_path: str, annotation_path: str, slice_index: int = None
+    ) -> None:
         """
         Adds an image to this dataset.
         Args:
@@ -309,30 +311,25 @@ class BraTSDataset(IterableDataset):
             None. Raises ValueError if image already exists.
         """
 
-        if (image_path not in self.image_paths) and (
-            annotation_path not in self.annotation_paths
-        ):
+        if image_path not in self.image_paths:
+            self.image_paths.append(image_path)
+        if annotation_path not in self.annotation_paths:
+            self.annotation_paths.append(annotation_path)
 
-            image_index = self.image_paths.index(image_path)
+        image_index = self.image_paths.index(image_path)
+        new_image_slice_index = (image_index, slice_index)
 
-            new_image_slice_indices = [
-                (image_index, slice_index)
-                for slice_index in range(
-                    BraTSDataset.IMAGE_DIMENSIONS[0] if self.dim == 2 else 1
-                )
-            ]
-
-            if self.shuffle:
-                random.shuffle(new_image_slice_indices)
-
+        if new_image_slice_index not in self.image_slice_indices:
             # add new image slice indices to existing ones
-            self.image_slice_indices = (
-                self.image_slice_indices + new_image_slice_indices
-            )
+            self.image_slice_indices = self.image_slice_indices + [
+                new_image_slice_index
+            ]
         else:
-            raise ValueError("Image already belongs to this dataset.")
+            raise ValueError("Slice of image already belongs to this dataset.")
 
-    def remove_image(self, image_path: str, annotation_path: str) -> None:
+    def remove_image(
+        self, image_path: str, annotation_path: str, slice_index: int = None
+    ) -> None:
         """
         Removes an image from this dataset.
         Args:
@@ -345,11 +342,17 @@ class BraTSDataset(IterableDataset):
 
         if image_path in self.image_paths and annotation_path in self.annotation_paths:
             image_index = self.image_paths.index(image_path)
+            image_slice_index_to_remove = (image_index, slice_index)
+            if image_slice_index_to_remove in self.image_slice_indices:
+                self.image_slice_indices.remove((image_index, slice_index))
 
-            self.image_slice_indices = [
-                (index, slice_index)
-                for (index, slice_index) in self.image_slice_indices
-                if image_index != index
-            ]
+                # remove image_path from image_paths if this was the last slice for this image
+                if image_index not in [
+                    index for (index, _) in self.image_slice_indices
+                ]:
+                    self.image_paths.remove(image_path)
+                    self.annotation_paths.remove(annotation_path)
+            else:
+                raise ValueError("Slice of image does not belong to this dataset.")
         else:
             raise ValueError("Image does not belong to this dataset.")

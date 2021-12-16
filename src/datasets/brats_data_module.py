@@ -118,25 +118,44 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
-        # print("ids: ", ids)
+        print("ids: ", ids)
 
-        # if self._training_set is not None and self._unlabeled_set is not None:
-        #     labeled_image_and_annotation_paths = [
-        #         self.__case_id_to_filepaths(
-        #             case_id, os.path.join(self.data_folder, "train")
-        #         )
-        #         for case_id in ids
-        #     ]
-        #     for (
-        #         labeled_image_path,
-        #         labeled_image_annotation_path,
-        #     ) in labeled_image_and_annotation_paths:
-        #         self._training_set.add_image(
-        #             labeled_image_path, labeled_image_annotation_path
-        #         )
-        #         self._unlabeled_set.remove_image(
-        #             labeled_image_path, labeled_image_annotation_path
-        #         )
+        if self.dim == 2:
+            # create list of files as tuple of image id and slice index
+            image_slice_ids = [
+                (case_id.split("-")[0], case_id.split("-")[1]) for case_id in ids
+            ]
+            ids = [image_id for image_id, slice_index in image_slice_ids]
+
+        if self._training_set is not None and self._unlabeled_set is not None:
+            labeled_image_and_annotation_paths = [
+                self.__case_id_to_filepaths(
+                    case_id, os.path.join(self.data_folder, "train")
+                )
+                for case_id in ids
+            ]
+            print(
+                "labeled_image_and_annotation_paths: ",
+                labeled_image_and_annotation_paths,
+            )
+            for index, (
+                labeled_image_path,
+                labeled_image_annotation_path,
+            ) in enumerate(labeled_image_and_annotation_paths):
+                if self.dim == 2:
+                    # additionally pass slice index for dimension 2
+                    slice_index = int(image_slice_ids[index][1])
+                else:
+                    # 3D images only have one slice index of 0
+                    slice_index = 0
+
+                self._training_set.add_image(
+                    labeled_image_path, labeled_image_annotation_path, slice_index
+                )
+                self._unlabeled_set.remove_image(
+                    labeled_image_path, labeled_image_annotation_path, slice_index
+                )
+
         return None
 
     def _create_training_set(self) -> Optional[Dataset]:

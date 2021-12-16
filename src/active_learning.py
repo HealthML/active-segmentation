@@ -79,7 +79,6 @@ class ActiveLearningPipeline:
         self.data_module.setup()
 
         if self.active_learning_mode:
-
             for i in range(0, self.iterations):
                 # query batch selection
                 items_to_label = self.strategy.select_items_to_label(
@@ -91,13 +90,4 @@ class ActiveLearningPipeline:
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
         else:
-
-            items_to_label = self.strategy.select_items_to_label(
-                self.model,
-                self.data_module,
-                self.data_module.unlabeled_set_size(),
-            )
-
-            self.data_module.label_items(items_to_label)
-
             self.model_trainer.fit(self.model, self.data_module)
