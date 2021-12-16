@@ -1,5 +1,9 @@
 # Master Project "Medical Image Segmentation"
 
+
+## Project Documentation
+
+The documentation of our framework is available [here](https://healthml.github.io/active-segmentation/).
 ## Project Setup
 
 The recommended way of installing the project's dependencies is to use a virtual environment. To create a virtual environment, run the venv module inside the repository:
