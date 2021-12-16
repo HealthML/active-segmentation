@@ -68,47 +68,7 @@ Example command to train a U-net with the BraTS dataset on a GPU on the DHC Serv
 srun -p gpupro --gpus=1 -c 18 --mem 150000 python3 src/main.py brats_example_config.json
 ```
 
-The config file should be in JSON format and has to contain the following arguments:
-
-```
-{
-    "model_config": {
-        "architecture": "u_net"
-    },
-    "dataset_config": {
-        "dataset": "brats"
-    },
-    "strategy": "base"
-}
-```
-
-Additionally, the following optional arguments can be supplied in the same config file, (the list contains their default values):
-
-```
-{
-    "dataset_config": {
-        "data_dir": "./data",
-        "cache_size": 250,
-        "pin_memory": true
-    },
-    "model_config": {
-        "optimizer": "adam",
-        "loss": "dice",
-        "learning_rate": 0.0001,
-        "lr_scheduler": "reduceLROnPlateau",
-        "num_levels": 4,
-        "input_shape": [240, 240] // can also be 3d
-    },
-    "batch_size": 16,
-    "num_workers": 4,
-    "epochs": 50,
-    "gpus": 1,
-    "prediction_count": None,
-    "prediction_dir": "./predictions",
-    "early_stopping": false
-}
-```
-
+For an overview of the available configuration options, see the `brats_example_config.json` file in this repository.
 ## Running Weights & Biases Sweeps
 
 To execute the hyperparameter optimisation using W&B sweeps, run:
