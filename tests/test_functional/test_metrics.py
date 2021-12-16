@@ -182,6 +182,7 @@ class TestDiceScore(unittest.TestCase):
             "Module-based implementation correctly computes smoothed dice score when there are only TN.",
         )
 
+    # pylint: disable=too-many-locals
     def test_3d(self):
         """
         Tests that the dice score is computed correctly when the inputs are three-dimensional.
@@ -191,7 +192,7 @@ class TestDiceScore(unittest.TestCase):
         prediction_2, target_2, tp_2, fp_2, tn_2, fn_2 = tests.utils.standard_slice_2()
         prediction = torch.stack([prediction_1, prediction_2])
         target = torch.stack([target_1, target_2])
-        tp, fp, tn, fn = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
+        tp, fp, _, fn = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
 
         score_from_function = dice_score(prediction, target)
 
@@ -206,6 +207,7 @@ class TestDiceScore(unittest.TestCase):
             torch.equal(score_from_module, torch.tensor(2 * tp / (2 * tp + fp + fn))),
             "Module-based implementation correctly computes dice score when the inputs are three-dimensional.",
         )
+
 
 class TestSensitivity(unittest.TestCase):
     """
@@ -377,6 +379,7 @@ class TestSensitivity(unittest.TestCase):
             "Module-based implementation correctly computes smoothed sensitivity when there are only TN.",
         )
 
+    # pylint: disable=too-many-locals
     def test_3d(self):
         """
         Tests that the sensitivity is computed correctly when the inputs are three-dimensional.
@@ -386,7 +389,7 @@ class TestSensitivity(unittest.TestCase):
         prediction_2, target_2, tp_2, fp_2, tn_2, fn_2 = tests.utils.standard_slice_2()
         prediction = torch.stack([prediction_1, prediction_2])
         target = torch.stack([target_1, target_2])
-        tp, fp, tn, fn = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
+        tp, _, _, fn = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
 
         sensitivity_from_function = sensitivity(prediction, target)
 
@@ -573,6 +576,7 @@ class TestSpecificity(unittest.TestCase):
             "Module-based implementation correctly computes smoothed specificity when there are only TN.",
         )
 
+    # pylint: disable=too-many-locals
     def test_3d(self):
         """
         Tests that the specificity is computed correctly when the inputs are three-dimensional.
@@ -582,7 +586,7 @@ class TestSpecificity(unittest.TestCase):
         prediction_2, target_2, tp_2, fp_2, tn_2, fn_2 = tests.utils.standard_slice_2()
         prediction = torch.stack([prediction_1, prediction_2])
         target = torch.stack([target_1, target_2])
-        tp, fp, tn, fn = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
+        _, fp, tn, _ = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
 
         specificity_from_function = specificity(prediction, target)
 
