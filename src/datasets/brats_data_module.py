@@ -92,7 +92,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         """
         TBD
         """
-        
+
         # ToDo: implement labeling logic
         return None
 
@@ -100,7 +100,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         """
         Creates a training dataset.
         """
-        
+
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )
