@@ -1,4 +1,4 @@
-""" Module to load and batch brats dataset """
+""" Module to load and batch decathlon datasets """
 from typing import Any, Callable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
@@ -14,10 +14,11 @@ from torch.utils.data import IterableDataset
 # pylint: disable=too-many-instance-attributes,abstract-method
 class DecathlonDataset(IterableDataset):
     """
-    The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
-    held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
-    glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
-    Further information: https://www.med.upenn.edu/cbica/brats2020/data.html
+    The Decathlon dataset is a collection of medical image segmentation datasets. Specifically, it contains data for
+    the following body organs or parts: Brain, Heart, Liver, Hippocampus, Prostate, Lung, Pancreas, Hepatic Vessel,
+    Spleen and Colon.
+    Further information: http://medicaldecathlon.com/
+
     Args:
         image_paths (List[str]): List with the paths to the images.
         annotation_paths (List[str]): List with the paths to the annotations.
@@ -32,9 +33,11 @@ class DecathlonDataset(IterableDataset):
         target_transform (Callable[[Any], Tensor], optional): Function to transform the annotations.
         dimensionality (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.
             Defaults to 2.
+        slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
+            Uses all slices if None. Defaults to None.
     """
 
-    # ToDo: Implement variable image sizes
+    # ToDo: Implement variable image sizes for U-Net
     # IMAGE_DIMENSIONS = (155, 240, 240)
 
     @staticmethod
@@ -61,12 +64,25 @@ class DecathlonDataset(IterableDataset):
         """
         Reads image or annotation.
         Args:
-            filepath: Path of the image file.
+            filepath (str): Path of the image file.
 
         Returns:
             The image. See https://nipy.org/nibabel/reference/nibabel.spatialimages.html#module-nibabel.spatialimages
         """
         return nib.load(filepath)
+
+    @staticmethod
+    def __read_slice_count(filepath: str, dim: int = 2) -> int:
+        """
+        Reads image or annotation.
+        Args:
+            filepath (str): Path of the image file.
+            dim (int, optional): The dimensionality of the dataset. Defaults to 2.
+
+        Returns:
+            The slice count of the image at the filepath or 1 if dim is not 2.
+        """
+        return DecathlonDataset.__read_image(filepath).shape[2] if dim == 2 else 1
 
     @staticmethod
     def __read_image_as_array(
@@ -119,13 +135,13 @@ class DecathlonDataset(IterableDataset):
         return os.path.split(os.path.split(filepath)[0])[1]
 
     @staticmethod
-    def __read_image_slice_indices(
+    def __arange_image_slice_indices(
         filepaths: List[str],
         dim: int = 2,
         shuffle: bool = False,
         seed: Optional[int] = None,
-        image_index_offset: int = 0,
-    ) -> np.ndarray:
+        slice_indices: Optional[List[np.array]] = None,
+    ) -> List[Tuple[int]]:
         """
         Reads the slice indices for the images at the provided slice paths and pairs them with their image index.
 
@@ -139,16 +155,17 @@ class DecathlonDataset(IterableDataset):
             dim (int, optional): The dimensionality of the dataset. Defaults to 2.
             shuffle (boolean, optional): Flag indicating wether to shuffle the slices. Defaults to False.
             seed (int, optional): Random seed for shuffling.
+            slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
+                Uses all slices if None. Defaults to None.
 
         Returns:
-            A list of slice indices.
+            A list of (image_index, slice_index) tuples.
         """
-        slice_indices = [
-            np.arange(
-                DecathlonDataset.__read_image(filepath).shape[2] if dim == 2 else 1
-            )
-            for filepath in filepaths
-        ]
+        if slice_indices is None:
+            slice_indices = [
+                np.arange(DecathlonDataset.__read_slice_count(filepath, dim=dim))
+                for filepath in filepaths
+            ]
 
         if shuffle:
             if seed is not None:
@@ -165,24 +182,16 @@ class DecathlonDataset(IterableDataset):
         else:
             enumerated_slice_indices = enumerate(slice_indices)
 
-        # Pair up the slices indices with their image index
-        # (e.g. [5,1,9,0,...] for image index 3 becomes [[3,5],[3,1],[3,9],[3,0],...])
+        # Pair up the slices indices with their image index and concatenate for all images
+        # (e.g. [5,1,9,0,...] for image index 3 becomes [(3,5),(3,1),(3,9),(3,0),...])
         image_slice_indices = [
-            np.concatenate(
-                [
-                    np.reshape(
-                        np.repeat(image_index + image_index_offset, len(slices)),
-                        (len(slices), 1),
-                    ),
-                    np.reshape(slices, (len(slices), 1)),
-                ],
-                axis=1,
-            )
+            (image_index, slice_index)
             for image_index, slices in enumerated_slice_indices
+            for slice_index in slices
         ]
 
         # Concatenate the [image_index, slice_index] pairs for all images
-        return np.concatenate(image_slice_indices)
+        return image_slice_indices
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -197,6 +206,7 @@ class DecathlonDataset(IterableDataset):
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
         dim: int = 2,
+        slice_indices: Optional[List[np.array]] = None,
     ):
 
         self.image_paths = image_paths
@@ -230,8 +240,12 @@ class DecathlonDataset(IterableDataset):
 
         self.dim = dim
 
-        self.image_slice_indices = DecathlonDataset.__read_image_slice_indices(
-            self.image_paths, self.dim, self.shuffle, 42
+        self.image_slice_indices = DecathlonDataset.__arange_image_slice_indices(
+            filepaths=self.image_paths,
+            dim=self.dim,
+            shuffle=self.shuffle,
+            seed=42,
+            slice_indices=slice_indices,
         )
 
         self.start_index = 0
@@ -347,20 +361,22 @@ class DecathlonDataset(IterableDataset):
         if (image_path not in self.image_paths) and (
             annotation_path not in self.annotation_paths
         ):
-            self.image_paths.append(image_path)
-            self.annotation_paths.append(annotation_path)
 
-            new_image_index = len(self.image_paths) - 1
+            image_index = self.image_paths.index(image_path)
 
-            new_image_slice_indices = DecathlonDataset.__read_image_slice_indices(
-                [image_path],
-                dim=self.dim,
-                shuffle=self.shuffle,
-                image_index_offset=new_image_index,
-            )
+            new_image_slice_indices = [
+                (image_index, slice_index)
+                for slice_index in range(
+                    DecathlonDataset.__read_slice_count(image_path, dim=self.dim)
+                )
+            ]
 
-            self.image_slice_indices = np.concatenate(
-                [self.image_slice_indices, new_image_slice_indices]
+            if self.shuffle:
+                random.shuffle(new_image_slice_indices)
+
+            # add new image slice indices to existing ones
+            self.image_slice_indices = (
+                self.image_slice_indices + new_image_slice_indices
             )
 
         else:
@@ -380,13 +396,10 @@ class DecathlonDataset(IterableDataset):
         if image_path in self.image_paths and annotation_path in self.annotation_paths:
             image_index = self.image_paths.index(image_path)
 
-            del self.image_paths[image_index]
-            del self.annotation_paths[image_index]
-
-            filter_out_image_index = lambda pair: pair[0] != image_index
-
-            self.image_slice_indices = self.image_slice_indices[
-                np.apply_along_axis(filter_out_image_index, 1, self.image_slice_indices)
+            self.image_slice_indices = [
+                (index, slice_index)
+                for (index, slice_index) in self.image_slice_indices
+                if image_index != index
             ]
         else:
             raise ValueError("Image does not belong to this dataset.")
