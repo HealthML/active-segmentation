@@ -17,7 +17,7 @@ class TestCombinedPerImageMetric(unittest.TestCase):
     @staticmethod
     def example_data():
         """
-        Creates a faked segmentation exmaple that contains both true and false predictions.
+        Creates a faked segmentation example that contains both true and false predictions.
 
         Returns:
             Tuple: Predicted slice, target slice, TP, FP, TN, FN for the confidence levels 0.2, 0.5, and 0.8.
@@ -189,7 +189,7 @@ class TestCombinedPerImageMetric(unittest.TestCase):
         self.assertEqual(
             len(computed_metrics.keys()),
             len(confidence_levels) * len(metrics),
-            "The returned metrics objects contains one entry per metric and confidence level",
+            "The returned metrics object contains one entry per metric and confidence level",
         )
 
         self.assertTrue(
