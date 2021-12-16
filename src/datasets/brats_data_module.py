@@ -89,11 +89,13 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
+
         # ToDo: implement labeling logic
         return None
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
+
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )
