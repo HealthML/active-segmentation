@@ -12,16 +12,18 @@
   },
   "dataset_config": {
     "dataset": "brats",
-    "data_dir": "/dhc/groups/mpws2021cl1/Data",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data/BraTS",
     "cache_size": 250,
     "pin_memory": true
   },
   "active_learning_config": {
+    "active_learning_mode": true,
+    "initial_training_set_size": 10,
     "iterations": 10,
     "number_of_items": 2
   },
   "wandb_project_name": "active-segmentation-tests",
-  "strategy": "base",
+  "strategy": "random",
   "experiment_name": "test-experiment",
   "experiment_tags": [],
   "batch_size": 16,

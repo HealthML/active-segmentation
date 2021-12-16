@@ -97,6 +97,9 @@ def run_active_learning_pipeline(
     if dataset_config is None:
         dataset_config = {}
 
+    if active_learning_config is None:
+        active_learning_config = {}
+
     if dataset == "pascal-voc":
         data_module = PascalVOCDataModule(
             data_dir, batch_size, num_workers, **dataset_config
@@ -106,8 +109,12 @@ def run_active_learning_pipeline(
             data_dir,
             batch_size,
             num_workers,
-            active_learning_mode=True,
-            initial_training_set_size=1,
+            active_learning_mode=active_learning_config.get(
+                "active_learning_mode", False
+            ),
+            initial_training_set_size=active_learning_config.get(
+                "initial_training_set_size", 10
+            ),
             dim=model.input_dimensionality(),
             **dataset_config,
         )
@@ -120,7 +127,9 @@ def run_active_learning_pipeline(
         strategy,
         epochs,
         gpus,
-        **active_learning_config,
+        active_learning_mode=active_learning_config.get("active_learning_mode", False),
+        number_of_items=active_learning_config.get("number_of_items", 1),
+        iterations=active_learning_config.get("iterations", 10),
         logger=wandb_logger,
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,

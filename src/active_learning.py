@@ -25,8 +25,10 @@ class ActiveLearningPipeline:
         logger: A logger object as defined by Pytorch Lightning.
         lr_scheduler (string, optional): Algorithm used for dynamically updating the
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).
         number_of_items: Number of items that should be selected for labeling in the active learning run.
-        iterations: iteration times how often the active learning pipeline should be executed
+            (default = 1).
+        iterations: iteration times how often the active learning pipeline should be executed (default = 10).
     """
 
     # pylint: disable=too-few-public-methods,too-many-arguments
@@ -37,8 +39,9 @@ class ActiveLearningPipeline:
         strategy: QueryStrategy,
         epochs: int,
         gpus: int,
-        number_of_items: int,
-        iterations: int,
+        active_learning_mode: bool = False,
+        number_of_items: int = 1,
+        iterations: int = 10,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
@@ -67,6 +70,7 @@ class ActiveLearningPipeline:
         self.strategy = strategy
         self.epochs = epochs
         self.gpus = gpus
+        self.active_learning_mode = active_learning_mode
         self.number_of_items = number_of_items
         self.iterations = iterations
 
@@ -74,13 +78,26 @@ class ActiveLearningPipeline:
         """Run the pipeline"""
         self.data_module.setup()
 
-        for i in range(0, self.iterations):
-            # query batch selection
+        if self.active_learning_mode:
+
+            for i in range(0, self.iterations):
+                # query batch selection
+                items_to_label = self.strategy.select_items_to_label(
+                    self.model, self.data_module, self.number_of_items
+                )
+                # label batch
+                self.data_module.label_items(items_to_label)
+
+                # train model on labeled batch
+                self.model_trainer.fit(self.model, self.data_module)
+        else:
+
             items_to_label = self.strategy.select_items_to_label(
-                self.model, self.data_module, self.number_of_items
+                self.model,
+                self.data_module,
+                self.data_module.unlabeled_set_size(),
             )
-            # label batch
+
             self.data_module.label_items(items_to_label)
 
-            # train model labeled  batch
             self.model_trainer.fit(self.model, self.data_module)

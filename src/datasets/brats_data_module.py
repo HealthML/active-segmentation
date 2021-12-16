@@ -118,25 +118,26 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
-        print("ids: ", ids)
+        # print("ids: ", ids)
 
-        if self._training_set is not None and self._unlabeled_set is not None:
-            labeled_image_and_annotation_paths = [
-                self.__case_id_to_filepaths(
-                    case_id, os.path.join(self.data_folder, "train")
-                )
-                for case_id in ids
-            ]
-            for (
-                labeled_image_path,
-                labeled_image_annotation_path,
-            ) in labeled_image_and_annotation_paths:
-                self._training_set.add_image(
-                    labeled_image_path, labeled_image_annotation_path
-                )
-                self._unlabeled_set.remove_image(
-                    labeled_image_path, labeled_image_annotation_path
-                )
+        # if self._training_set is not None and self._unlabeled_set is not None:
+        #     labeled_image_and_annotation_paths = [
+        #         self.__case_id_to_filepaths(
+        #             case_id, os.path.join(self.data_folder, "train")
+        #         )
+        #         for case_id in ids
+        #     ]
+        #     for (
+        #         labeled_image_path,
+        #         labeled_image_annotation_path,
+        #     ) in labeled_image_and_annotation_paths:
+        #         self._training_set.add_image(
+        #             labeled_image_path, labeled_image_annotation_path
+        #         )
+        #         self._unlabeled_set.remove_image(
+        #             labeled_image_path, labeled_image_annotation_path
+        #         )
+        return None
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
@@ -223,15 +224,16 @@ class BraTSDataModule(ActiveLearningDataModule):
                 random_state=42,
             )
 
+            return BraTSDataset(
+                image_paths=unlabeled_image_paths,
+                annotation_paths=unlabeled_annotation_paths,
+                dim=self.dim,
+                cache_size=self.cache_size,
+                is_unlabeled=True,
+            )
+
         else:
             # unlabeled set is empty
-            unlabeled_image_paths = []
-            unlabeled_annotation_paths = []
-
-        return BraTSDataset(
-            image_paths=unlabeled_image_paths,
-            annotation_paths=unlabeled_annotation_paths,
-            dim=self.dim,
-            cache_size=self.cache_size,
-            is_unlabeled=True,
-        )
+            unlabeled_set = self._create_training_set()
+            unlabeled_set.is_unlabeled = True
+            return unlabeled_set
