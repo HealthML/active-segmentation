@@ -115,6 +115,8 @@ def run_active_learning_pipeline(
     if checkpoint_dir is not None:
         checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
 
+    prediction_dir = os.path.join(prediction_dir, f"{wandb_logger.experiment.id}")
+
     pipeline = ActiveLearningPipeline(
         data_module,
         model,
