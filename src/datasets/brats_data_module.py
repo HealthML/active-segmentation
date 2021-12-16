@@ -11,6 +11,7 @@ from .brats_dataset import BraTSDataset
 class BraTSDataModule(ActiveLearningDataModule):
     """
     Initializes the BraTS data module.
+
     Args:
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
@@ -88,14 +89,18 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.cache_size = cache_size
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
-        """TBD"""
-
+        """
+        TBD
+        """
+        
         # ToDo: implement labeling logic
         return None
 
     def _create_training_set(self) -> Optional[Dataset]:
-        """Creates a training dataset."""
-
+        """
+        Creates a training dataset.
+        """
+        
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )

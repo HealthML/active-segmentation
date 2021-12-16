@@ -30,12 +30,12 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             metric. Must be a subset of the metric names passed to the `metrics` parameter. If, for example,
             `metrics_to_aggregate=["dice", "hausdorff95"]` and `reduction="mean"`, the mean of the dice score and the
             Hausdorff distance is calculated and returned as the `aggregated` metric. If `reduction` is `"none"`, this
-                parameter will be ignored.
+            parameter will be ignored.
         reduction (string, optional):  Reduction function that is to be used to aggregate the metric values of all 3d
             images, must be either "mean", "max", "min" or "none". Default: `"mean"`.
     Note:
         In this method, the `prediction` tensor is expected to be the output of the final sigmoid layer of a
-            single-class segmentation task.
+        single-class segmentation task.
 
     Shape:
         - Prediction: :math:`(N, height, width)`, where `N = batch size`.

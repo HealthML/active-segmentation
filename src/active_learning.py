@@ -15,6 +15,7 @@ from models import PytorchModel
 class ActiveLearningPipeline:
     """
     The pipeline or simulation environment to run active learning experiments.
+
     Args:
         data_module (ActiveLearningDataModule): A data module object providing data.
         model (PytorchModel): A model object with architecture able to be fitted with the data.
