@@ -1,6 +1,5 @@
 """ Module containing inferencing logic """
 import os
-import uuid
 import torch
 import numpy as np
 import nibabel as nib
