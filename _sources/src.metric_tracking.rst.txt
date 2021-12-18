@@ -12,10 +12,10 @@ src.metric\_tracking.combined\_per\_epoch\_metric module
    :undoc-members:
    :show-inheritance:
 
-src.metric\_tracking.combined\_per\_scan\_metric module
--------------------------------------------------------
+src.metric\_tracking.combined\_per\_image\_metric module
+--------------------------------------------------------
 
-.. automodule:: src.metric_tracking.combined_per_scan_metric
+.. automodule:: src.metric_tracking.combined_per_image_metric
    :members:
    :undoc-members:
    :show-inheritance:

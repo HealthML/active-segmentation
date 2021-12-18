@@ -268,11 +268,13 @@
 
 <div class="viewcode-block" id="BraTSDataModule.label_items"><a class="viewcode-back" href="../../datasets.html#datasets.brats_data_module.BraTSDataModule.label_items">[docs]</a>    <span class="k">def</span> <span class="nf">label_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;TBD&quot;&quot;&quot;</span>
+
         <span class="c1"># ToDo: implement labeling logic</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="nf">_create_training_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Creates a training dataset.&quot;&quot;&quot;</span>
+
         <span class="n">train_image_paths</span><span class="p">,</span> <span class="n">train_annotation_paths</span> <span class="o">=</span> <span class="n">BraTSDataModule</span><span class="o">.</span><span class="n">discover_paths</span><span class="p">(</span>
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">)</span>
         <span class="p">)</span>

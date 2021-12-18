@@ -271,9 +271,6 @@
 <span class="sd">            Loss on the training batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_average_metrics</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics_per_case</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
 
         <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -294,15 +291,13 @@
 <span class="sd">            batch_idx: Index of the validation batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">val_average_metrics</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics_per_case</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
 
         <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
         <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;validation/loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>  <span class="c1"># log validation loss via weights&amp;biases</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;val/loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>  <span class="c1"># log validation loss via weights&amp;biases</span>
 
         <span class="k">for</span> <span class="n">val_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_val_metrics</span><span class="p">():</span>
             <span class="n">val_metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span><span class="p">)</span></div>
@@ -319,7 +314,29 @@
 <span class="sd">            dataloader_idx: Index of the dataloader.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PytorchUNet.test_step"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.test_step">[docs]</a>    <span class="k">def</span> <span class="nf">test_step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tests the model on a given batch of input images.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (Tensor): Batch of prediction images.</span>
+<span class="sd">            batch_idx: Index of the prediction batch.</span>
+<span class="sd">            dataloader_idx: Index of the dataloader.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
+
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;test/loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">test_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_test_metrics</span><span class="p">():</span>
+            <span class="n">test_metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span><span class="p">)</span></div></div>
 </pre></div>
 
               </article>

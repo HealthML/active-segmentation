@@ -178,7 +178,7 @@
                 
   <h1>Source code for datasets.brats_dataset</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Module to load and batch brats dataset &quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Manager</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -188,9 +188,10 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">IterableDataset</span>
 
+<span class="kn">from</span> <span class="nn">.dataset_hooks</span> <span class="kn">import</span> <span class="n">DatasetHooks</span>
 
 <span class="c1"># pylint: disable=too-many-instance-attributes,abstract-method</span>
-<div class="viewcode-block" id="BraTSDataset"><a class="viewcode-back" href="../../datasets.html#datasets.brats_dataset.BraTSDataset">[docs]</a><span class="k">class</span> <span class="nc">BraTSDataset</span><span class="p">(</span><span class="n">IterableDataset</span><span class="p">):</span>
+<div class="viewcode-block" id="BraTSDataset"><a class="viewcode-back" href="../../datasets.html#datasets.brats_dataset.BraTSDataset">[docs]</a><span class="k">class</span> <span class="nc">BraTSDataset</span><span class="p">(</span><span class="n">IterableDataset</span><span class="p">,</span> <span class="n">DatasetHooks</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)</span>
 <span class="sd">    held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade</span>
@@ -500,7 +501,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">annotation_paths</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">annotation_path</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">num_images</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Image does not belong to this dataset.&quot;</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Image does not belong to this dataset.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BraTSDataset.image_ids"><a class="viewcode-back" href="../../datasets.html#datasets.brats_dataset.BraTSDataset.image_ids">[docs]</a>    <span class="k">def</span> <span class="nf">image_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List of all image IDs included in the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_case_id</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">image_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_paths</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BraTSDataset.slices_per_image"><a class="viewcode-back" href="../../datasets.html#datasets.brats_dataset.BraTSDataset.slices_per_image">[docs]</a>    <span class="k">def</span> <span class="nf">slices_per_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of slices that each image of the dataset contains.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">BraTSDataset</span><span class="o">.</span><span class="n">IMAGE_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div></div>
 </pre></div>
 
               </article>

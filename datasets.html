@@ -294,6 +294,16 @@ Defaults to 2.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.image_ids">
+<span class="sig-name descname"><span class="pre">image_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.image_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.image_ids" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of all image IDs included in the dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.normalize">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.normalize" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
@@ -331,6 +341,19 @@ of DataPipe instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>None. Raises ValueError if image already exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.slices_per_image">
+<span class="sig-name descname"><span class="pre">slices_per_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.slices_per_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.slices_per_image" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of slices that each image of the dataset contains.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

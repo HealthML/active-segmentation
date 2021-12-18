@@ -362,10 +362,12 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="models.html#models.pytorch_model.PytorchModel.get_train_metrics">get_train_metrics() (models.pytorch_model.PytorchModel method)</a>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_test_metrics">get_test_metrics() (models.pytorch_model.PytorchModel method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_train_metrics">get_train_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
       <li><a href="models.html#models.pytorch_model.PytorchModel.get_val_metrics">get_val_metrics() (models.pytorch_model.PytorchModel method)</a>
 </li>
   </ul></td>
@@ -388,6 +390,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset.IMAGE_DIMENSIONS">IMAGE_DIMENSIONS (datasets.brats_dataset.BraTSDataset attribute)</a>
 </li>
+      <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset.image_ids">image_ids() (datasets.brats_dataset.BraTSDataset method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.input_dimensionality">input_dimensionality() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
 
       <ul>
@@ -503,8 +509,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#models.pytorch_model.PytorchModel.predict">predict() (models.pytorch_model.PytorchModel method)</a>
 </li>
-      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.predict_step">predict_step() (models.pytorch_u_net.PytorchUNet method)</a>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.predict_step">predict_step() (models.pytorch_model.PytorchModel method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.predict_step">(models.pytorch_u_net.PytorchUNet method)</a>
 </li>
+      </ul></li>
       <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50">PytorchFCNResnet50 (class in models.pytorch_fcn_resnet50)</a>
 </li>
       <li><a href="models.html#models.pytorch_model.PytorchModel">PytorchModel (class in models.pytorch_model)</a>
@@ -552,11 +562,17 @@
 </li>
       <li><a href="functional.html#functional.metrics.Sensitivity">Sensitivity (class in functional.metrics)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functional.html#functional.metrics.sensitivity">sensitivity() (in module functional.metrics)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.setup">setup() (datasets.data_module.ActiveLearningDataModule method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_model.PytorchModel.setup">(models.pytorch_model.PytorchModel method)</a>
+</li>
+      </ul></li>
+      <li><a href="datasets.html#datasets.brats_dataset.BraTSDataset.slices_per_image">slices_per_image() (datasets.brats_dataset.BraTSDataset method)</a>
 </li>
       <li><a href="functional.html#functional.metrics.Specificity">Specificity (class in functional.metrics)</a>
 </li>
@@ -570,8 +586,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.test_dataloader">test_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.test_epoch_end">test_epoch_end() (models.pytorch_model.PytorchModel method)</a>
+</li>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.test_set_size">test_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
+      <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.test_step">test_step() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_model.PytorchModel.test_step">(models.pytorch_model.PytorchModel method)</a>
+</li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.test_step">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
       <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.train">train() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
 
       <ul>

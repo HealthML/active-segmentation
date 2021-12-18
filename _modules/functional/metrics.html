@@ -184,14 +184,10 @@
 <span class="sd">with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torchmetrics</span>
-<span class="kn">from</span> <span class="nn">scipy.ndimage.morphology</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">distance_transform_edt</span><span class="p">,</span>
-    <span class="n">binary_erosion</span><span class="p">,</span>
-    <span class="n">generate_binary_structure</span><span class="p">,</span>
-<span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_is_binary</span><span class="p">(</span><span class="n">tensor_to_check</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -333,76 +329,134 @@
     <span class="n">flattened_prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
     <span class="n">flattened_target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
-    <span class="n">ones</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">flattened_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">ones</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">flattened_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">prediction</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
     <span class="n">true_negatives</span> <span class="o">=</span> <span class="p">((</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_prediction</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_target</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="n">true_negatives_false_positives</span> <span class="o">=</span> <span class="p">(</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">true_negatives</span> <span class="o">+</span> <span class="n">smoothing</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">true_negatives_false_positives</span> <span class="o">+</span> <span class="n">smoothing</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_distances_to_surface</span><span class="p">(</span><span class="n">prediction</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_distance_matrix</span><span class="p">(</span>
+    <span class="n">first_point_set</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">second_point_set</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    For each border point of a predicted shape, computes the distance to the nearest point of the target shape.</span>
-
+<span class="sd">    Computes Euclidean distances between all points in the first tensor and all points in the second tensor.</span>
 <span class="sd">    Args:</span>
-<span class="sd">        prediction: The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.</span>
-<span class="sd">        target: The target segmentation mask, where each value is in :math:`\{0, 1\}`.</span>
-
+<span class="sd">        first_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d)</span>
+<span class="sd">        second_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d).</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Array of distance values with one entry per border point of the predicted shape.</span>
+<span class="sd">        Matrix containing the Euclidean distances between all points in the first tensor and all points.</span>
+<span class="sd">    Shape:</span>
+<span class="sd">        first_point_set: :math:`(N, D)` where :math:`N` is the number of points in the first set and :math:`D` is the</span>
+<span class="sd">            dimensionality of the Euclidean space.</span>
+<span class="sd">        second_point_set: :math:`(M, D)` where :math:`M` is the number of points in the second set and :math:`D` is the</span>
+<span class="sd">            dimensionality of the Euclidean space.</span>
+<span class="sd">        Output: :math:`(N, M)` where :math:`N` is the number of points in the first set and :math:`M` is the number of</span>
+<span class="sd">            points in the second set</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># code adapted from</span>
-    <span class="c1"># https://github.com/loli/medpy/blob/39131b94f0ab5328ab14a874229320efc2f74d98/medpy/metric/binary.py#L1195</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_point_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">first_point_set</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="p">(</span>
-        <span class="n">prediction</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span>
-    <span class="p">),</span> <span class="s2">&quot;Prediction and target must have the same dimensions.&quot;</span>
-    <span class="k">assert</span> <span class="n">prediction</span><span class="o">.</span><span class="n">ndim</span> <span class="ow">in</span> <span class="p">[</span>
-        <span class="mi">2</span><span class="p">,</span>
-        <span class="mi">3</span><span class="p">,</span>
-        <span class="mi">4</span><span class="p">,</span>  <span class="c1"># ToDo: Only input one channel.</span>
-    <span class="p">],</span> <span class="s2">&quot;Prediction and target must have either two or three dimensions.&quot;</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">first_point_set</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">second_point_set</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+    <span class="n">minimum_distances</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">erosion_structure</span> <span class="o">=</span> <span class="n">generate_binary_structure</span><span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">connectivity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">minimum_distances</span>
 
-    <span class="c1"># extract 1-pixel border line of predicted shapes using XOR</span>
-    <span class="n">prediction_border</span> <span class="o">=</span> <span class="n">prediction</span> <span class="o">^</span> <span class="n">binary_erosion</span><span class="p">(</span>
-        <span class="n">prediction</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">erosion_structure</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">_compute_all_image_locations</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes a tensor of points corresponding to all pixel locations of a 2d or a 3d image in Euclidean space.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        shape (Tuple[int]): The shape of the image for which the pixel locations are to be computed.</span>
+<span class="sd">        device (str, optional): Device as defined by PyTorch.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A tensor of points corresponding to all pixel locations of the image.</span>
+<span class="sd">    Shape:</span>
+<span class="sd">        Output: :math:`(width \cdot height, 2)` for 2d images, :math:`(S \cdot width \cdot height, 3)`, where `S =</span>
+<span class="sd">            number of slices`, for 3d images.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">]</span>
     <span class="p">)</span>
 
-    <span class="c1"># scipys distance transform is calculated only inside the borders of the foreground objects, therefore the target</span>
-    <span class="c1"># has to be reversed</span>
-    <span class="n">distances_to_target</span> <span class="o">=</span> <span class="n">distance_transform_edt</span><span class="p">(</span><span class="o">~</span><span class="n">target</span><span class="p">,</span> <span class="n">sampling</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">distances_to_target</span><span class="p">[</span><span class="n">prediction_border</span><span class="p">]</span>
+<span class="k">def</span> <span class="nf">_binary_erosion</span><span class="p">(</span><span class="n">input_image</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies an erosion filter to a tensor representing a binary 2d or 3d image.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        input_image (Tensor): Binary image to be eroded.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor: Eroded imaged.</span>
+<span class="sd">    Shape:</span>
+<span class="sd">        Input Image: :math:`(height, width)` or :math:`(S, height, width)` where :math:`S = number of slices`.</span>
+<span class="sd">        Output: Has the same dimensions as the input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">input_image</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">,</span>
+    <span class="p">],</span> <span class="s2">&quot;Input must be a two- or three-dimensional tensor&quot;</span>
+    <span class="k">assert</span> <span class="n">_is_binary</span><span class="p">(</span><span class="n">input_image</span><span class="p">),</span> <span class="s2">&quot;Input must be binary.&quot;</span>
+
+    <span class="k">if</span> <span class="n">input_image</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">max_pooling</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span>
+            <span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_indices</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ceil_mode</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">input_image</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">max_pooling</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span>
+            <span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_indices</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ceil_mode</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+    <span class="c1"># to implement erosion filtering, max ppooling with a 3x3 kernel is applied to the inverted image</span>
+    <span class="n">inverted_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">input_image</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-</span> <span class="n">input_image</span>
+
+    <span class="c1"># pad image with ones to maintain the input&#39;s dimensions</span>
+    <span class="n">inverted_input_padded</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+        <span class="n">inverted_input</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="c1"># apply the max pooling and invert the result</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">input_image</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_pooling</span><span class="p">(</span>
+        <span class="n">inverted_input_padded</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
+<span class="c1"># pylint: disable=too-many-locals</span>
 <div class="viewcode-block" id="hausdorff_distance"><a class="viewcode-back" href="../../functional.html#functional.metrics.hausdorff_distance">[docs]</a><span class="k">def</span> <span class="nf">hausdorff_distance</span><span class="p">(</span>
-    <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">all_image_locations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the Hausdorff distance between a predicted segmentation mask and the target mask.</span>
-
 <span class="sd">    Note:</span>
 <span class="sd">        In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a</span>
 <span class="sd">        given class and thus the distances are calculated over all channels and dimensions.</span>
 <span class="sd">        As this method is implemented using the scipy package, the returned value is not differentiable in PyTorch and</span>
 <span class="sd">        can therefore not be used in loss functions.</span>
-
 <span class="sd">    Args:</span>
 <span class="sd">        prediction (Tensor): The predicted segmentation mask, where each value is in :math:`\{0, 1\}`.</span>
 <span class="sd">        target (Tensor): The target segmentation mask, where each value is in :math:`\{0, 1\}`.</span>
+<span class="sd">        normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal</span>
+<span class="sd">            distance.</span>
 <span class="sd">        percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in</span>
 <span class="sd">            :math:`\[0, 1\]`.</span>
-
+<span class="sd">        all_image_locations (Tensor, optional): A pre-computed tensor containing one point for each pixel in the</span>
+<span class="sd">            prediction representing the pixel&#39;s location in 2d or 3d Euclidean space. Passing a pre-computed tensor to</span>
+<span class="sd">            this parameter can be used to speed up computation.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        Tensor: Hausdorff distance.</span>
-
 <span class="sd">    Shape:</span>
 <span class="sd">        - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,</span>
 <span class="sd">          or `(height, width)` for single image segmentation tasks.</span>
 <span class="sd">        - Target: Must have the same dimensions as the prediction.</span>
+<span class="sd">        - All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an</span>
+<span class="sd">            n-dimensional point. Typically :math:`(S \cdot height \cdot width, 3)`, where `S = number of slices`, or</span>
+<span class="sd">            :math:`(height \cdot width, 2)`</span>
 <span class="sd">        - Output: Scalar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -414,32 +468,55 @@
         <span class="n">prediction</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span>
     <span class="p">),</span> <span class="s2">&quot;Prediction and target must have the same dimensions.&quot;</span>
     <span class="k">assert</span> <span class="p">(</span>
-        <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span>
-        <span class="ow">or</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span>
-        <span class="ow">or</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span>  <span class="c1"># ToDo: Only input one channel.</span>
+        <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span>
     <span class="p">),</span> <span class="s2">&quot;Prediction and target must have either two or three dimensions.&quot;</span>
     <span class="k">assert</span> <span class="n">_is_binary</span><span class="p">(</span><span class="n">prediction</span><span class="p">),</span> <span class="s2">&quot;Predictions must be binary.&quot;</span>
     <span class="k">assert</span> <span class="n">_is_binary</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="s2">&quot;Target must be binary.&quot;</span>
 
-    <span class="n">device</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">device</span>
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">torch</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">prediction</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
-    <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
-    <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">all_image_locations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">all_image_locations</span> <span class="o">=</span> <span class="n">_compute_all_image_locations</span><span class="p">(</span>
+            <span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">prediction</span><span class="o">.</span><span class="n">device</span>
+        <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
+    <span class="c1"># to reduce computational effort, the distance calculations are only done for the border points of the predicted and</span>
+    <span class="c1"># the target shape</span>
+    <span class="c1"># to identify border pointds, binary erosion is used</span>
+    <span class="n">prediction_boundaries</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span>
+        <span class="n">prediction</span><span class="p">,</span> <span class="n">_binary_erosion</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+    <span class="n">target_boundaries</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">_binary_erosion</span><span class="p">(</span><span class="n">target</span><span class="p">))</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
 
-    <span class="n">distances_to_target</span> <span class="o">=</span> <span class="n">_distances_to_surface</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-    <span class="c1"># pylint: disable=arguments-out-of-order</span>
-    <span class="n">distances_to_prediction</span> <span class="o">=</span> <span class="n">_distances_to_surface</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+    <span class="n">flattened_prediction</span> <span class="o">=</span> <span class="n">prediction_boundaries</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="n">flattened_target</span> <span class="o">=</span> <span class="n">target_boundaries</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
-    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">distances_to_target</span><span class="p">,</span> <span class="n">distances_to_prediction</span><span class="p">))</span>
+    <span class="c1"># select those points that belong to the target segmentation mask</span>
+    <span class="n">target_mask</span> <span class="o">=</span> <span class="n">flattened_target</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">target_locations</span> <span class="o">=</span> <span class="n">all_image_locations</span><span class="p">[</span><span class="n">target_mask</span><span class="p">,</span> <span class="p">:]</span>
 
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">distances</span><span class="p">),</span> <span class="n">q</span><span class="o">=</span><span class="n">percentile</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">float</span><span class="p">()</span>
-        <span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-    <span class="p">)</span></div>
+    <span class="c1"># select those points that belong to the predicted segmentation mask</span>
+    <span class="n">prediction_mask</span> <span class="o">=</span> <span class="n">flattened_prediction</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">prediction_locations</span> <span class="o">=</span> <span class="n">all_image_locations</span><span class="p">[</span><span class="n">prediction_mask</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="c1"># for each point in the predicted segmentation mask, compute the Euclidean distance to all points of the target</span>
+    <span class="c1"># segmentation mask</span>
+    <span class="n">distances_to_target</span> <span class="o">=</span> <span class="n">_distance_matrix</span><span class="p">(</span><span class="n">prediction_locations</span><span class="p">,</span> <span class="n">target_locations</span><span class="p">)</span>
+
+    <span class="c1"># for each point in the target segmentation mask, compute the Euclidean distance to all points of the predicted</span>
+    <span class="c1"># segmentation mask</span>
+    <span class="n">distances_to_prediction</span> <span class="o">=</span> <span class="n">_distance_matrix</span><span class="p">(</span><span class="n">target_locations</span><span class="p">,</span> <span class="n">prediction_locations</span><span class="p">)</span>
+
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">distances_to_target</span><span class="p">,</span> <span class="n">distances_to_prediction</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+        <span class="n">maximum_distance</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">distances</span> <span class="o">/</span> <span class="n">maximum_distance</span>
+
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">percentile</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="DiceScore"><a class="viewcode-back" href="../../functional.html#functional.metrics.DiceScore">[docs]</a><span class="k">class</span> <span class="nc">DiceScore</span><span class="p">(</span><span class="n">torchmetrics</span><span class="o">.</span><span class="n">Metric</span><span class="p">):</span>
@@ -449,20 +526,16 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        smoothing (int, optional): Laplacian smoothing factor.</span>
-<span class="sd">        device: The target device as defined in PyTorch.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">=</span> <span class="n">smoothing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;numerator&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;denominator&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;numerator&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;denominator&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
 
     <span class="c1"># pylint: disable=arguments-differ</span>
 <div class="viewcode-block" id="DiceScore.update"><a class="viewcode-back" href="../../functional.html#functional.metrics.DiceScore.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -472,12 +545,8 @@
         <span class="n">flattened_prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
         <span class="n">flattened_target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span> <span class="o">+=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">flattened_prediction</span> <span class="o">*</span> <span class="n">flattened_target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span> <span class="o">+=</span> <span class="p">(</span><span class="n">flattened_prediction</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">flattened_target</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
-        <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span> <span class="o">+=</span> <span class="p">(</span><span class="n">flattened_prediction</span> <span class="o">*</span> <span class="n">flattened_target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span> <span class="o">+=</span> <span class="n">flattened_prediction</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">flattened_target</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="DiceScore.compute"><a class="viewcode-back" href="../../functional.html#functional.metrics.DiceScore.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -498,21 +567,15 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        smoothing (int, optional): Laplacian smoothing factor.</span>
-<span class="sd">        device: The target device as defined in PyTorch.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">=</span> <span class="n">smoothing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives_false_negatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;true_positives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span>
-            <span class="s2">&quot;true_positives_false_negatives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives_false_negatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;true_positives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;true_positives_false_negatives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
 
     <span class="c1"># pylint: disable=arguments-differ</span>
 <div class="viewcode-block" id="Sensitivity.update"><a class="viewcode-back" href="../../functional.html#functional.metrics.Sensitivity.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -522,10 +585,8 @@
         <span class="n">flattened_prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
         <span class="n">flattened_target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives</span> <span class="o">+=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">flattened_prediction</span> <span class="o">*</span> <span class="n">flattened_target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives_false_negatives</span> <span class="o">+=</span> <span class="n">flattened_target</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives</span> <span class="o">+=</span> <span class="p">(</span><span class="n">flattened_prediction</span> <span class="o">*</span> <span class="n">flattened_target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_positives_false_negatives</span> <span class="o">+=</span> <span class="n">flattened_target</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Sensitivity.compute"><a class="viewcode-back" href="../../functional.html#functional.metrics.Sensitivity.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -546,21 +607,15 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        smoothing (int, optional): Laplacian smoothing factor.</span>
-<span class="sd">        device: The target device as defined in PyTorch.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smoothing</span> <span class="o">=</span> <span class="n">smoothing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">true_negatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">true_negatives_false_positives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;true_negatives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span>
-            <span class="s2">&quot;true_negatives_false_positives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_negatives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_negatives_false_positives</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;true_negatives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;true_negatives_false_positives&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
 
     <span class="c1"># pylint: disable=arguments-differ</span>
 <div class="viewcode-block" id="Specificity.update"><a class="viewcode-back" href="../../functional.html#functional.metrics.Specificity.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -573,13 +628,9 @@
         <span class="n">ones</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">flattened_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">prediction</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">true_negatives</span> <span class="o">+=</span> <span class="p">(</span>
-            <span class="p">((</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_prediction</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_target</span><span class="p">))</span>
-            <span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            <span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">true_negatives_false_positives</span> <span class="o">+=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="p">)</span></div>
+            <span class="p">(</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_prediction</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_target</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_negatives_false_positives</span> <span class="o">+=</span> <span class="p">(</span><span class="n">ones</span> <span class="o">-</span> <span class="n">flattened_target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Specificity.compute"><a class="viewcode-back" href="../../functional.html#functional.metrics.Specificity.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -599,27 +650,56 @@
 <span class="sd">    Computes the Hausdorff distance. Can be used for 3D images whose slices are scattered over multiple batches.</span>
 
 <span class="sd">    Args:</span>
+<span class="sd">        slices_per_image (int): Number of slices per 3d image.</span>
 <span class="sd">        percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in</span>
 <span class="sd">            :math:`\[0, 1\]`.</span>
-<span class="sd">        device: The target device as defined in PyTorch.</span>
+<span class="sd">        normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal</span>
+<span class="sd">            distance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">slices_per_image</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span> <span class="o">=</span> <span class="n">normalize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">percentile</span> <span class="o">=</span> <span class="n">percentile</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">distances</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;distances&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hausdorff_distance</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;predictions&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;targets&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_state</span><span class="p">(</span><span class="s2">&quot;hausdorff_distance&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_image_locations</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hausdorff_distance_cached</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slices_per_image</span> <span class="o">=</span> <span class="n">slices_per_image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_slices</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># pylint: disable=arguments-differ</span>
 <div class="viewcode-block" id="HausdorffDistance.update"><a class="viewcode-back" href="../../functional.html#functional.metrics.HausdorffDistance.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">hausdorff_distance</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">percentile</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
-            <span class="p">)</span>
-        <span class="p">)</span></div>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">prediction</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">),</span> <span class="s2">&quot;Prediction and target must have the same dimensions.&quot;</span>
+        <span class="k">assert</span> <span class="n">prediction</span><span class="o">.</span><span class="n">ndim</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="mi">2</span><span class="p">,</span>
+            <span class="mi">3</span><span class="p">,</span>
+        <span class="p">],</span> <span class="s2">&quot;Prediction and target must have either two or three dimensions.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hausdorff_distance_cached</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># we just collect all slices of the image since, for 3d images, the Hausdorff distance needs to be computed over</span>
+        <span class="c1"># all slices</span>
+        <span class="c1"># note that this will be memory-intensive if this is done for multiple 3d images in parallel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="n">added_slices</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">prediction</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_slices</span> <span class="o">+=</span> <span class="n">added_slices</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_slices</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_slices</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slices_per_image</span></div>
 
 <div class="viewcode-block" id="HausdorffDistance.compute"><a class="viewcode-back" href="../../functional.html#functional.metrics.HausdorffDistance.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -630,9 +710,37 @@
 <span class="sd">            Tensor: Hausdorff distance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># ToDo: compute 3D Hausdorff distance when the slices of one scan are scattered across multiple batches.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hausdorff_distance_cached</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hausdorff_distance</span>
 
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distances</span><span class="p">))</span></div></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="p">)</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">hausdorff_dist</span> <span class="o">=</span> <span class="n">hausdorff_distance</span><span class="p">(</span>
+            <span class="n">predictions</span><span class="p">,</span>
+            <span class="n">targets</span><span class="p">,</span>
+            <span class="n">normalize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">,</span>
+            <span class="n">percentile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">percentile</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hausdorff_distance</span> <span class="o">=</span> <span class="n">hausdorff_dist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hausdorff_distance_cached</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">tensor</span>
+        <span class="k">for</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">tensor</span>
+
+        <span class="c1"># free memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_slices</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">hausdorff_dist</span></div></div>
 </pre></div>
 
               </article>

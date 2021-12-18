@@ -496,16 +496,13 @@ one batch, must be either “mean”, “sum” or “none”.</p></li>
 with this framework, see <a class="reference external" href="https://torchmetrics.readthedocs.io/en/latest/pages/implement.html">https://torchmetrics.readthedocs.io/en/latest/pages/implement.html</a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.DiceScore">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">DiceScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#DiceScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.DiceScore" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">DiceScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#DiceScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.DiceScore" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
 <p>Computes the Dice similarity coefficient (DSC). Can be used for 3D images whose slices are scattered over multiple
 batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>device</strong> – The target device as defined in PyTorch.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -531,15 +528,17 @@ batches.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.HausdorffDistance">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">HausdorffDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#HausdorffDistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.HausdorffDistance" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">HausdorffDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#HausdorffDistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.HausdorffDistance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
 <p>Computes the Hausdorff distance. Can be used for 3D images whose slices are scattered over multiple batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>slices_per_image</strong> (<em>int</em>) – Number of slices per 3d image.</p></li>
 <li><p><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentile for which the Hausdorff distance is to be calculated, must be in
 <span class="math">\(\[0, 1\]\)</span>.</p></li>
-<li><p><strong>device</strong> – The target device as defined in PyTorch.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the Hausdorff distance should be normalized by dividing it by the diagonal
+distance.</p></li>
 </ul>
 </dd>
 </dl>
@@ -569,15 +568,12 @@ batches.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.Sensitivity">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Sensitivity" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Sensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
 <p>Computes the sensitivity. Can be used for 3D images whose slices are scattered over multiple batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>device</strong> – The target device as defined in PyTorch.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -603,15 +599,12 @@ batches.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.Specificity">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Specificity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Specificity" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Specificity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Specificity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
 <p>Computes the specificity. Can be used for 3D images whose slices are scattered over multiple batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>device</strong> – The target device as defined in PyTorch.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -679,22 +672,27 @@ or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="functional.metrics.hausdorff_distance">
-<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">hausdorff_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#hausdorff_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.hausdorff_distance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the Hausdorff distance between a predicted segmentation mask and the target mask.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In this method, the <cite>prediction</cite> tensor is considered as a segmentation mask of a single 2D or 3D image for a
+<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">hausdorff_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_image_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#hausdorff_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.hausdorff_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
+.. note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
 given class and thus the distances are calculated over all channels and dimensions.
 As this method is implemented using the scipy package, the returned value is not differentiable in PyTorch and
-can therefore not be used in loss functions.</p>
+can therefore not be used in loss functions.
+</pre></div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prediction</strong> (<em>Tensor</em>) – The predicted segmentation mask, where each value is in <span class="math">\(\{0, 1\}\)</span>.</p></li>
 <li><p><strong>target</strong> (<em>Tensor</em>) – The target segmentation mask, where each value is in <span class="math">\(\{0, 1\}\)</span>.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the Hausdorff distance should be normalized by dividing it by the diagonal
+distance.</p></li>
 <li><p><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentile for which the Hausdorff distance is to be calculated, must be in
 <span class="math">\(\[0, 1\]\)</span>.</p></li>
+<li><p><strong>all_image_locations</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – A pre-computed tensor containing one point for each pixel in the
+prediction representing the pixel’s location in 2d or 3d Euclidean space. Passing a pre-computed tensor to
+this parameter can be used to speed up computation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -709,6 +707,12 @@ can therefore not be used in loss functions.</p>
 <li><p>Prediction: Can have arbitrary dimensions. Typically <span class="math">\((S, height, width)\)</span>, where <cite>S = number of slices</cite>,
 or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
 <li><p>Target: Must have the same dimensions as the prediction.</p></li>
+<li><dl class="simple">
+<dt>All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an</dt><dd><p>n-dimensional point. Typically <span class="math">\((S \cdot height \cdot width, 3)\)</span>, where <cite>S = number of slices</cite>, or
+<span class="math">\((height \cdot width, 2)\)</span></p>
+</dd>
+</dl>
+</li>
 <li><p>Output: Scalar.</p></li>
 </ul>
 </dd>

@@ -182,10 +182,11 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">random_split</span>
-<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">transforms</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">from</span> <span class="nn">datasets.data_module</span> <span class="kn">import</span> <span class="n">ActiveLearningDataModule</span>
+<span class="kn">from</span> <span class="nn">.pascal_voc_dataset</span> <span class="kn">import</span> <span class="n">PascalVOCDataset</span>
 
 
 <div class="viewcode-block" id="PILMaskToTensor"><a class="viewcode-back" href="../../datasets.html#datasets.pascal_voc_data_module.PILMaskToTensor">[docs]</a><span class="k">class</span> <span class="nc">PILMaskToTensor</span><span class="p">:</span>
@@ -244,7 +245,7 @@
 
     <span class="k">def</span> <span class="nf">_create_training_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Creates a training dataset.&quot;&quot;&quot;</span>
-        <span class="n">training_set</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">VOCSegmentation</span><span class="p">(</span>
+        <span class="n">training_set</span> <span class="o">=</span> <span class="n">PascalVOCDataset</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span>
             <span class="n">year</span><span class="o">=</span><span class="s2">&quot;2012&quot;</span><span class="p">,</span>
             <span class="n">image_set</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
@@ -259,7 +260,7 @@
 
     <span class="k">def</span> <span class="nf">_create_validation_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Creates a validation dataset.&quot;&quot;&quot;</span>
-        <span class="n">validation_set</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">VOCSegmentation</span><span class="p">(</span>
+        <span class="n">validation_set</span> <span class="o">=</span> <span class="n">PascalVOCDataset</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span>
             <span class="n">year</span><span class="o">=</span><span class="s2">&quot;2012&quot;</span><span class="p">,</span>
             <span class="n">image_set</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">,</span>

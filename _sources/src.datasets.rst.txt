@@ -28,10 +28,26 @@ src.datasets.data\_module module
    :undoc-members:
    :show-inheritance:
 
+src.datasets.dataset\_hooks module
+----------------------------------
+
+.. automodule:: src.datasets.dataset_hooks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 src.datasets.pascal\_voc\_data\_module module
 ---------------------------------------------
 
 .. automodule:: src.datasets.pascal_voc_data_module
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+src.datasets.pascal\_voc\_dataset module
+----------------------------------------
+
+.. automodule:: src.datasets.pascal_voc_dataset
    :members:
    :undoc-members:
    :show-inheritance:
