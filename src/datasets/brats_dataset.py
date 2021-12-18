@@ -1,5 +1,5 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
 import os
@@ -9,9 +9,10 @@ import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
+from .dataset_hooks import DatasetHooks
 
 # pylint: disable=too-many-instance-attributes,abstract-method
-class BraTSDataset(IterableDataset):
+class BraTSDataset(IterableDataset, DatasetHooks):
     """
     The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
     held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
@@ -322,3 +323,19 @@ class BraTSDataset(IterableDataset):
             self.num_images -= 1
         else:
             raise ValueError("Image does not belong to this dataset.")
+
+    def image_ids(self) -> Iterable[str]:
+        """
+        Returns:
+            List of all image IDs included in the dataset.
+        """
+
+        return [self.__get_case_id(image_path) for image_path in self.image_paths]
+
+    def slices_per_image(self, **kwargs) -> int:
+        """
+        Returns:
+            int: Number of slices that each image of the dataset contains.
+        """
+
+        return BraTSDataset.IMAGE_DIMENSIONS[0]

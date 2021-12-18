@@ -21,9 +21,11 @@ def run_active_learning_pipeline(
     strategy: str,
     experiment_name: str,
     batch_size: int = 16,
+    checkpoint_dir: Optional[str] = None,
     data_dir: str = "./data",
     dataset_config: Optional[Dict[str, Any]] = None,
     model_config: Optional[Dict[str, Any]] = None,
+    model_selection_criterion: Optional[str] = "loss",
     epochs: int = 50,
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
@@ -45,6 +47,7 @@ def run_active_learning_pipeline(
         strategy (string): Name of the query strategy. E.g. 'base'
         experiment_name (string): Name of the experiment.
         batch_size (int, optional): Size of training examples passed in one training step.
+        checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
         dataset_config (Dict[str, Any], optional): Dictionary with dataset specific parameters.
         model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
@@ -109,15 +112,22 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid data_module name.")
 
+    if checkpoint_dir is not None:
+        checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
+
+    prediction_dir = os.path.join(prediction_dir, f"{wandb_logger.experiment.id}")
+
     pipeline = ActiveLearningPipeline(
         data_module,
         model,
         strategy,
         epochs,
         gpus,
+        checkpoint_dir,
         wandb_logger,
         early_stopping,
         lr_scheduler,
+        model_selection_criterion,
     )
     pipeline.run()
 
@@ -175,6 +185,14 @@ def run_active_learning_pipeline_from_config(
         if "model_config" in config and "num_levels" in config["model_config"]:
             config["num_levels"] = config["model_config"]["num_levels"]
             del config["model_config"]["num_levels"]
+        if (
+            "model_config" in config
+            and "model_selection_criterion" in config["model_config"]
+        ):
+            config["model_selection_criterion"] = config["model_config"][
+                "model_selection_criterion"
+            ]
+            del config["model_config"]["model_selection_criterion"]
 
         if hp_optimisation:
             print("Start Hyperparameter Optimisation using sweep.yaml file")

@@ -1,6 +1,5 @@
 """ Module containing inferencing logic """
 import os
-import uuid
 import torch
 import numpy as np
 import nibabel as nib
@@ -41,9 +40,7 @@ class Inferencer:
             print(f"Inferencing is not implemented for the {self.dataset} dataset.")
             return
 
-        output_folder_name = f"model-{str(uuid.uuid4())}"
-        output_dir = os.path.join(self.prediction_dir, output_folder_name)
-        os.mkdir(output_dir)
+        os.makedirs(self.prediction_dir, exist_ok=True)
 
         image_paths, annotation_paths = BraTSDataModule.discover_paths(
             dir_path=self.data_dir,
@@ -77,6 +74,6 @@ class Inferencer:
 
             img = nib.Nifti1Image(seg, np.eye(4))
             file_name = os.path.basename(annotation_paths[i]).replace("seg", "pred")
-            path = os.path.join(output_dir, file_name)
+            path = os.path.join(self.prediction_dir, file_name)
             nib.save(img, path)
             print(f"Predictions stored in path {path}")

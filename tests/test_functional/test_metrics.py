@@ -530,8 +530,8 @@ class TestHausdorffDistance(unittest.TestCase):
     Test cases for Hausdorff distance.
     """
 
+    @staticmethod
     def _test_hausdorff_distance(
-        self,
         prediction: torch.Tensor,
         target: torch.Tensor,
         expected_distance: float,
@@ -554,22 +554,21 @@ class TestHausdorffDistance(unittest.TestCase):
             prediction, target, percentile=percentile
         )
 
-        self.assertTrue(
-            torch.equal(
-                hausdorff_distance_from_function,
-                torch.tensor(expected_distance).float(),
-            ),
-            f"Functional implementation correctly computes hausdorff distance when {message}.",
+        torch.testing.assert_allclose(
+            hausdorff_distance_from_function,
+            torch.tensor(expected_distance).float(),
+            msg=f"Functional implementation correctly computes hausdorff distance when {message}.",
         )
 
-        hausdorff_distance_module = HausdorffDistance(percentile=percentile)
+        hausdorff_distance_module = HausdorffDistance(
+            percentile=percentile,
+            slices_per_image=1 if prediction.ndim == 2 else prediction.shape[0],
+        )
         hausdorff_distance_from_module = hausdorff_distance_module(prediction, target)
-        self.assertTrue(
-            torch.equal(
-                hausdorff_distance_from_module,
-                torch.tensor(expected_distance).float(),
-            ),
-            f"Module-based implementation correctly computes hausdorff distance when {message}.",
+        torch.testing.assert_allclose(
+            hausdorff_distance_from_module,
+            torch.tensor(expected_distance).float(),
+            msg=f"Module-based implementation correctly computes hausdorff distance when {message}.",
         )
 
     def test_standard_case(self):
@@ -682,6 +681,8 @@ class TestHausdorffDistance(unittest.TestCase):
         """
 
         prediction, target, _, _, _, _ = tests.utils.slice_all_true_negatives()
+        prediction = prediction.squeeze(dim=0)
+        target = target.squeeze(dim=0)
 
         hausdorff_dist_from_function = hausdorff_distance(prediction, target)
         self.assertTrue(
@@ -689,7 +690,7 @@ class TestHausdorffDistance(unittest.TestCase):
             "Functional implementation correctly computes Hausdorff distance when there are only TN.",
         )
 
-        hausdorff_distance_module = HausdorffDistance()
+        hausdorff_distance_module = HausdorffDistance(slices_per_image=1)
         hausdorff_dist_from_module = hausdorff_distance_module(prediction, target)
         self.assertTrue(
             torch.isnan(hausdorff_dist_from_module),
