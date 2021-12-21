@@ -20,6 +20,7 @@ LRSchedulerDict = Dict[str, Union[str, LRScheduler]]
 class PytorchModel(LightningModule, ABC):
     """
     Base class to implement Pytorch models.
+
     Args:
         learning_rate: The step size at each iteration while moving towards a minimum of the loss.
         optimizer: Algorithm used to calculate the loss and update the weights. E.g. 'adam' or 'sgd'.
@@ -37,7 +38,7 @@ class PytorchModel(LightningModule, ABC):
         test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
             specified in the `test_metrics` parameter should be computed in the validation or testing loop. Defaults to
             `[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]`.
-        **kwargs:
+        **kwargs: Further, dataset specific parameters.
     """
 
     # pylint: disable=too-many-ancestors,arguments-differ,too-many-arguments
@@ -98,6 +99,7 @@ class PytorchModel(LightningModule, ABC):
         """
         Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
             or predict.
+
         Args:
             stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
         """
@@ -185,6 +187,7 @@ class PytorchModel(LightningModule, ABC):
         Compute the model's predictions on a given batch of model inputs.
         # this method should match the requirements of the pytorch lightning framework.
         # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html
+
         Args:
             batch: A batch of model inputs.
             batch_idx: Index of the current batch.

@@ -18,6 +18,7 @@ class BraTSDataset(IterableDataset, DatasetHooks):
     held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
     glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
     Further information: https://www.med.upenn.edu/cbica/brats2020/data.html
+
     Args:
         image_paths (List[str]): List with the paths to the images.
         annotation_paths (List[str]): List with the paths to the annotations.
@@ -40,6 +41,7 @@ class BraTSDataset(IterableDataset, DatasetHooks):
             1. Dividing by the maximum value
             2. Subtracting the mean, zeros will be ignored while calculating the mean
             3. Dividing by the negative minimum value
+
         Args:
             img: The input image that should be normalized.
 
@@ -58,6 +60,7 @@ class BraTSDataset(IterableDataset, DatasetHooks):
     ) -> np.ndarray:
         """
         Reads image or annotation as numpy array.
+
         Args:
             filepath: Path of the image file.
             norm: Whether the image should be normalized.
