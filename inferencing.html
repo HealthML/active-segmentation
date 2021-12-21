@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>src.functional package &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>inferencing &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -38,7 +38,9 @@
   <link rel="stylesheet" href="_static/katex-math.css" type="text/css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
-  <link rel="search" title="Search" href="search.html" /> 
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="next" title="datasets" href="datasets.html" />
+  <link rel="prev" title="active_learning" href="active_learning.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -133,10 +135,13 @@
         
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">inferencing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
 </ul>
@@ -156,9 +161,10 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-      <li>src.functional package</li>
+          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
+      <li>inferencing</li>
       <li class="sphinx-template-breadcrumbs-aside">
-            <a href="_sources/src.functional.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
+            <a href="_sources/inferencing.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
   </ul>
 </div>
@@ -177,20 +183,27 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="src-functional-package">
-<h1>src.functional package<a class="headerlink" href="#src-functional-package" title="Permalink to this headline">¶</a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="src-functional-losses-module">
-<h2>src.functional.losses module<a class="headerlink" href="#src-functional-losses-module" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="src-functional-metrics-module">
-<h2>src.functional.metrics module<a class="headerlink" href="#src-functional-metrics-module" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
-</section>
+  <section id="module-inferencing">
+<span id="inferencing"></span><h1>inferencing<a class="headerlink" href="#module-inferencing" title="Permalink to this headline">¶</a></h1>
+<p>Module containing inferencing logic</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="inferencing.Inferencer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">inferencing.</span></span><span class="sig-name descname"><span class="pre">Inferencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inferencing.html#Inferencer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inferencing.Inferencer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The inferencer to use a given model for inferencing.
+:param model: A model object to be used for inferencing.
+:param dataset: Name of the dataset. E.g. ‘brats’
+:param data_dir: Main directory with the dataset. E.g. ‘./data’
+:param prediction_dir: Main directory with the predictions. E.g. ‘./predictions’
+:param prediction_count: The amount of predictions to be generated.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="inferencing.Inferencer.inference">
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/inferencing.html#Inferencer.inference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inferencing.Inferencer.inference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the inferencing.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -198,6 +211,15 @@
               
             </div>
             <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="datasets.html" class="btn btn-neutral float-right" title="datasets" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="active_learning.html" class="btn btn-neutral" title="active_learning" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
   
   
   <hr>
@@ -223,13 +245,7 @@
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">src.functional package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#src-functional-losses-module">src.functional.losses module</a></li>
-<li><a class="reference internal" href="#src-functional-metrics-module">src.functional.metrics module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">inferencing</a></li>
 </ul>
 
             </div>

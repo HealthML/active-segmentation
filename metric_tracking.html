@@ -1,0 +1,525 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metric_tracking &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="genindex.html" />
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="next" title="models" href="models.html" />
+  <link rel="prev" title="functional" href="functional.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="./">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">metric_tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
+      <li>metric_tracking</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+            <a href="_sources/metric_tracking.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <section id="metric-tracking">
+<h1>metric_tracking<a class="headerlink" href="#metric-tracking" title="Permalink to this headline">¶</a></h1>
+<section id="module-metric_tracking.combined_per_epoch_metric">
+<span id="combined-per-epoch-metric"></span><h2>combined_per_epoch_metric<a class="headerlink" href="#module-metric_tracking.combined_per_epoch_metric" title="Permalink to this headline">¶</a></h2>
+<p>Module containing a metrics class for tracking and aggregating several metrics related to multiple 3D MRT scans
+whose slices may be scattered across different batches.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_epoch_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerEpochMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_to_aggregate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
+<p>A metrics class that tracks the metrics of multiple 3D images whose slices may be scattered across
+different batches. Different metrics can be tracked per scan, e.g. dice score and Hausdorff distance, and the
+metrics can also be tracked for different confidence levels. If <cite>reduction</cite> is not <cite>“none”</cite>, the per-scan metrics
+are  aggregated into global per-epoch metric values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – A list of metric names to be tracked. Available options: “dice”, “sensitivity”,
+“specificity”, and “hausdorff95”.</p></li>
+<li><p><strong>confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em>) – A list of confidence levels for which the metrics are to be tracked
+separately.</p></li>
+<li><p><strong>image_ids</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – List of the ids of all images for which the metrics are to be tracked.</p></li>
+<li><p><strong>slices_per_image</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Number of slices per 3d image. If a single integer value is
+provided, it is assumed that all images of the dataset have the same number of slices.</p></li>
+<li><p><strong>metrics_to_aggregate</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A list of metric names from which to calculate an aggregated
+metric. Must be a subset of the metric names passed to the <cite>metrics</cite> parameter. If, for example,
+<cite>metrics_to_aggregate=[“dice”, “hausdorff95”]</cite> and <cite>reduction=”mean”</cite>, the mean of the dice score and the
+Hausdorff distance is calculated and returned as the <cite>aggregated</cite> metric. If <cite>reduction</cite> is <cite>“none”</cite>, this
+parameter will be ignored.</p></li>
+<li><p><strong>reduction</strong> (<em>string</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the metric values of all 3d
+images, must be either “mean”, “max”, “min” or “none”. Default: <cite>“mean”</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In this method, the <cite>prediction</cite> tensor is expected to be the output of the final sigmoid layer of a
+single-class segmentation task.</p>
+</div>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Prediction: <span class="math">\((N, height, width)\)</span>, where <cite>N = batch size</cite>.</p></li>
+<li><p>Target: Must have the same dimensions as the prediction.</p></li>
+<li><p>Image_ids: <span class="math">\((N)\)</span>, where <cite>N = batch size</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the metrics for each scan and aggregates them if <cite>reduction</cite> is not <cite>“none”</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Mapping of metric names to metric values.</dt><dd><p>If <cite>reduction</cite> is <cite>“none”</cite>, the keys have the form
+<cite>&lt;metric name&gt;_&lt;confidence_level&gt;_&lt;image ID&gt;</cite>.
+Otherwise the keys have the form <cite>&lt;reduction&gt;_&lt;metric name&gt;_&lt;confidence_level&gt;</cite>
+If <cite>“metrics_to_aggregate”</cite> is provided and <cite>reduction</cite> is not <cite>“none”</cite>, the dictionary additionally
+contains the keys <cite>&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;</cite>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[string, Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets internal state such that metric ready for new data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_ids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes the prediction and target of a given batch and updates the metrics accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – A batch of predictions.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – A batch of targets.</p></li>
+<li><p><strong>image_ids</strong> (<em>Iterable</em><em>[</em><em>string</em><em>]</em>) – Image IDs of each slice in the prediction and target batches.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-metric_tracking.combined_per_image_metric">
+<span id="combined-per-image-metric"></span><h2>combined_per_image_metric<a class="headerlink" href="#module-metric_tracking.combined_per_image_metric" title="Permalink to this headline">¶</a></h2>
+<p>Module containing a metrics class for tracking several metrics related to one 3d image</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_image_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerImageMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
+<p>A metrics class that tracks several metrics related to one 3d image whose slices may be scattered across
+different batches. The metrics can be tracked for different confidence levels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – A list of metric names to be tracked. Available options: “dice”, “sensitivity”,
+“specificity”, and “hausdorff95”.</p></li>
+<li><p><strong>confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em>) – A list of confidence levels for which the metrics are to be tracked
+separately.</p></li>
+<li><p><strong>slices_per_image</strong> (<em>int</em>) – Number of slices per 3d image.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>In this method, the <cite>prediction</cite> tensor is expected to be one output slice of the final sigmoid layer of a</dt><dd><p>single-class segmentation task.</p>
+</dd>
+</dl>
+</div>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Prediction: <span class="math">\((height, width)\)</span>.</p></li>
+<li><p>Target: Must have the same dimensions as the prediction.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the metrics for the 3d image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Mapping of metric names to metric values.</dt><dd><p>The keys have the form <cite>&lt;metric name&gt;_&lt;confidence_level&gt;</cite>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[string, Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets internal state such that metric ready for new data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a prediction and a target slice of the 3d image and updates the metrics accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – A prediction slice or a whole 3d image.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – A target slice or a whole 3d image.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="models.html" class="btn btn-neutral float-right" title="models" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="functional.html" class="btn btn-neutral" title="functional" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">metric_tracking</a><ul>
+<li><a class="reference internal" href="#module-metric_tracking.combined_per_epoch_metric">combined_per_epoch_metric</a></li>
+<li><a class="reference internal" href="#module-metric_tracking.combined_per_image_metric">combined_per_image_metric</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+  <script src="_static/jquery.js"></script>
+  <script src="_static/underscore.js"></script>
+  <script src="_static/doctools.js"></script>
+  <script src="_static/clipboard.min.js"></script>
+  <script src="_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="./">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>src package &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>main module &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -135,8 +135,11 @@
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
 </ul>
@@ -156,9 +159,9 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-      <li>src package</li>
+      <li>main module</li>
       <li class="sphinx-template-breadcrumbs-aside">
-            <a href="_sources/src.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
+            <a href="_sources/main.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
   </ul>
 </div>
@@ -177,70 +180,58 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="src-package">
-<h1>src package<a class="headerlink" href="#src-package" title="Permalink to this headline">¶</a></h1>
-<section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="src.datasets.html">src.datasets package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#src-datasets-brats-data-module-module">src.datasets.brats_data_module module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#src-datasets-brats-dataset-module">src.datasets.brats_dataset module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#src-datasets-data-module-module">src.datasets.data_module module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#src-datasets-dataset-hooks-module">src.datasets.dataset_hooks module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#src-datasets-pascal-voc-data-module-module">src.datasets.pascal_voc_data_module module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#src-datasets-pascal-voc-dataset-module">src.datasets.pascal_voc_dataset module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.datasets.html#module-contents">Module contents</a></li>
+  <section id="module-main">
+<span id="main-module"></span><h1>main module<a class="headerlink" href="#module-main" title="Permalink to this headline">¶</a></h1>
+<p>Main module to execute active learning pipeline from CLI</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="main.run_active_learning_pipeline">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">run_active_learning_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">architecture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selection_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'loss'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./predictions'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_project_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'active-segmentation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#run_active_learning_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.run_active_learning_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Main function to execute an active learning pipeline run, or start an active learning</dt><dd><p>simulation.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>architecture</strong> (<em>string</em>) – Name of the desired model architecture. E.g. ‘u_net’.</p></li>
+<li><p><strong>dataset</strong> (<em>string</em>) – Name of the dataset. E.g. ‘brats’</p></li>
+<li><p><strong>strategy</strong> (<em>string</em>) – Name of the query strategy. E.g. ‘base’</p></li>
+<li><p><strong>experiment_name</strong> (<em>string</em>) – Name of the experiment.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of training examples passed in one training step.</p></li>
+<li><p><strong>checkpoint_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory where the model checkpoints are to be saved.</p></li>
+<li><p><strong>data_dir</strong> (<em>string</em><em>, </em><em>optional</em>) – Main directory with the dataset. E.g. ‘./data’</p></li>
+<li><p><strong>dataset_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Dictionary with dataset specific parameters.</p></li>
+<li><p><strong>model_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Dictionary with model specific parameters.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of iterations with the full dataset.</p></li>
+<li><p><strong>experiment_tags</strong> (<em>Iterable</em><em>[</em><em>string</em><em>]</em><em>, </em><em>optional</em>) – Tags with which to label the experiment.</p></li>
+<li><p><strong>gpus</strong> (<em>int</em>) – Number of GPUS to use for model training.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of workers.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – The step size at each iteration while moving towards a minimum of the loss.</p></li>
+<li><p><strong>lr_scheduler</strong> (<em>string</em><em>, </em><em>optional</em>) – Algorithm used for dynamically updating the learning rate during training.
+E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p></li>
+<li><p><strong>num_levels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</p></li>
+<li><p><strong>early_stopping</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable/Disable Early stopping when model
+is not learning anymore (default = False).</p></li>
+<li><p><strong>wandb_project_name</strong> (<em>string</em><em>, </em><em>optional</em>) – Name of the project that the W&amp;B runs are stored in.</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="src.functional.html">src.functional package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.functional.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.functional.html#src-functional-losses-module">src.functional.losses module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.functional.html#src-functional-metrics-module">src.functional.metrics module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.functional.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="src.metric_tracking.html">src.metric_tracking package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.metric_tracking.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.metric_tracking.html#src-metric-tracking-combined-per-epoch-metric-module">src.metric_tracking.combined_per_epoch_metric module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.metric_tracking.html#src-metric-tracking-combined-per-image-metric-module">src.metric_tracking.combined_per_image_metric module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.metric_tracking.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="src.models.html">src.models package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.models.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.models.html#src-models-pytorch-fcn-resnet50-module">src.models.pytorch_fcn_resnet50 module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.models.html#src-models-pytorch-model-module">src.models.pytorch_model module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.models.html#src-models-pytorch-u-net-module">src.models.pytorch_u_net module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.models.html#src-models-u-net-module">src.models.u_net module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.models.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="src.query_strategies.html">src.query_strategies package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.query_strategies.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.query_strategies.html#src-query-strategies-query-strategy-module">src.query_strategies.query_strategy module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.query_strategies.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</section>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="src-active-learning-module">
-<h2>src.active_learning module<a class="headerlink" href="#src-active-learning-module" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="src-inferencing-module">
-<h2>src.inferencing module<a class="headerlink" href="#src-inferencing-module" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="src-main-module">
-<h2>src.main module<a class="headerlink" href="#src-main-module" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
-</section>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.run_active_learning_pipeline_from_config">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">run_active_learning_pipeline_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hp_optimisation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#run_active_learning_pipeline_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.run_active_learning_pipeline_from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the active learning pipeline based on a config file.
+:param config_file_name: Name of or path to the config file.
+:param hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based</p>
+<blockquote>
+<div><p>on the configured sweep file</p>
+</div></blockquote>
+</dd></dl>
+
 </section>
 
 
@@ -273,15 +264,7 @@
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">src package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#src-active-learning-module">src.active_learning module</a></li>
-<li><a class="reference internal" href="#src-inferencing-module">src.inferencing module</a></li>
-<li><a class="reference internal" href="#src-main-module">src.main module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">main module</a></li>
 </ul>
 
             </div>

@@ -1,0 +1,527 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metric_tracking.combined_per_epoch_metric &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="../../genindex.html" />
+  <link rel="search" title="Search" href="../../search.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="../../">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="../../index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="../index.html">Module code</a> &gt;</li>
+      <li>metric_tracking.combined_per_epoch_metric</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <h1>Source code for metric_tracking.combined_per_epoch_metric</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module containing a metrics class for tracking and aggregating several metrics related to multiple 3D MRT scans</span>
+<span class="sd">whose slices may be scattered across different batches.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torchmetrics</span>
+
+<span class="kn">from</span> <span class="nn">.combined_per_image_metric</span> <span class="kn">import</span> <span class="n">CombinedPerImageMetric</span>
+
+
+<div class="viewcode-block" id="CombinedPerEpochMetric"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric">[docs]</a><span class="k">class</span> <span class="nc">CombinedPerEpochMetric</span><span class="p">(</span><span class="n">torchmetrics</span><span class="o">.</span><span class="n">Metric</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A metrics class that tracks the metrics of multiple 3D images whose slices may be scattered across</span>
+<span class="sd">    different batches. Different metrics can be tracked per scan, e.g. dice score and Hausdorff distance, and the</span>
+<span class="sd">    metrics can also be tracked for different confidence levels. If `reduction` is not `&quot;none&quot;`, the per-scan metrics</span>
+<span class="sd">    are  aggregated into global per-epoch metric values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        metrics (Iterable[str]): A list of metric names to be tracked. Available options: &quot;dice&quot;, &quot;sensitivity&quot;,</span>
+<span class="sd">            &quot;specificity&quot;, and &quot;hausdorff95&quot;.</span>
+<span class="sd">        confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked</span>
+<span class="sd">            separately.</span>
+<span class="sd">        image_ids (Iterable[str]): List of the ids of all images for which the metrics are to be tracked.</span>
+<span class="sd">        slices_per_image (Union[int, List[int]]): Number of slices per 3d image. If a single integer value is</span>
+<span class="sd">            provided, it is assumed that all images of the dataset have the same number of slices.</span>
+<span class="sd">        metrics_to_aggregate (Iterable[str], optional): A list of metric names from which to calculate an aggregated</span>
+<span class="sd">            metric. Must be a subset of the metric names passed to the `metrics` parameter. If, for example,</span>
+<span class="sd">            `metrics_to_aggregate=[&quot;dice&quot;, &quot;hausdorff95&quot;]` and `reduction=&quot;mean&quot;`, the mean of the dice score and the</span>
+<span class="sd">            Hausdorff distance is calculated and returned as the `aggregated` metric. If `reduction` is `&quot;none&quot;`, this</span>
+<span class="sd">            parameter will be ignored.</span>
+<span class="sd">        reduction (string, optional):  Reduction function that is to be used to aggregate the metric values of all 3d</span>
+<span class="sd">            images, must be either &quot;mean&quot;, &quot;max&quot;, &quot;min&quot; or &quot;none&quot;. Default: `&quot;mean&quot;`.</span>
+<span class="sd">    Note:</span>
+<span class="sd">        In this method, the `prediction` tensor is expected to be the output of the final sigmoid layer of a</span>
+<span class="sd">        single-class segmentation task.</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - Prediction: :math:`(N, height, width)`, where `N = batch size`.</span>
+<span class="sd">        - Target: Must have the same dimensions as the prediction.</span>
+<span class="sd">        - Image_ids: :math:`(N)`, where `N = batch size`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=too-many-arguments</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">confidence_levels</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">image_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">slices_per_image</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+        <span class="n">metrics_to_aggregate</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">reduction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span> <span class="o">=</span> <span class="n">confidence_levels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slices_per_image</span> <span class="o">=</span> <span class="n">slices_per_image</span>
+
+        <span class="k">if</span> <span class="n">metrics_to_aggregate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">metrics_to_aggregate</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;metrics_to_aggregate must be a subset&#39; of the metric names passed to the &#39;metrics&#39; parameter.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_aggregate</span> <span class="o">=</span> <span class="n">metrics_to_aggregate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_image</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleDict</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">image_id</span><span class="p">:</span> <span class="n">CombinedPerImageMetric</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">,</span>
+                    <span class="n">slices_per_image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">image_ids</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_compute</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">reduction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid reduction method.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">=</span> <span class="n">reduction</span>
+
+<div class="viewcode-block" id="CombinedPerEpochMetric.reset"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets internal state such that metric ready for new data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_image</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">metric</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+
+    <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="CombinedPerEpochMetric.update"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">image_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the prediction and target of a given batch and updates the metrics accordingly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prediction (Tensor): A batch of predictions.</span>
+<span class="sd">            target (Tensor): A batch of targets.</span>
+<span class="sd">            image_ids (Iterable[string]): Image IDs of each slice in the prediction and target batches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">image_ids</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_image</span><span class="p">[</span><span class="n">image_id</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">prediction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">target</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_compute</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span></div>
+
+    <span class="c1"># pylint: disable=too-many-branches</span>
+<div class="viewcode-block" id="CombinedPerEpochMetric.compute"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the metrics for each scan and aggregates them if `reduction` is not `&quot;none&quot;`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[string, Tensor]: Mapping of metric names to metric values.</span>
+<span class="sd">                If `reduction` is `&quot;none&quot;`, the keys have the form</span>
+<span class="sd">                `&lt;metric name&gt;_&lt;confidence_level&gt;_&lt;image ID&gt;`.</span>
+<span class="sd">                Otherwise the keys have the form `&lt;reduction&gt;_&lt;metric name&gt;_&lt;confidence_level&gt;`</span>
+<span class="sd">                If `&quot;metrics_to_aggregate&quot;` is provided and `reduction` is not `&quot;none&quot;`, the dictionary additionally</span>
+<span class="sd">                contains the keys `&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">per_image_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_compute</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_image</span><span class="p">[</span><span class="n">image_id</span><span class="p">]</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+                    <span class="n">per_image_metrics</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">per_image_metrics</span><span class="p">:</span>
+                        <span class="n">per_image_metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">per_image_metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">per_image_metrics</span>
+
+        <span class="n">aggregated_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">per_image_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">aggregated_metric_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+                <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">aggregated_metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                    <span class="n">per_image_metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+                <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">aggregated_metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                    <span class="n">per_image_metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+                <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">aggregated_metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                    <span class="n">per_image_metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_aggregate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_aggregate</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">confidence_level</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
+                <span class="n">metric_values</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_aggregate</span><span class="p">:</span>
+                    <span class="n">metric_value</span> <span class="o">=</span> <span class="n">aggregated_metrics</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">confidence_level</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">]</span>
+                    <span class="k">if</span> <span class="s2">&quot;hausdorff&quot;</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
+                        <span class="c1"># invert Hausdorff distances for a meaningful aggregation with the other metrics where 1.0 is</span>
+                        <span class="c1"># the best value and 0.0 the worst</span>
+                        <span class="n">metric_value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="n">metric_value</span>
+
+                    <span class="n">metric_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_value</span><span class="p">)</span>
+
+                <span class="n">aggregated_metric_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction</span><span class="si">}</span><span class="s2">_aggregated_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">confidence_level</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+                    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">aggregated_metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                        <span class="n">metric_values</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span>
+                    <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">aggregated_metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                        <span class="n">metric_values</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">aggregated_metrics</span></div></div>
+</pre></div>
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+  <script src="../../_static/jquery.js"></script>
+  <script src="../../_static/underscore.js"></script>
+  <script src="../../_static/doctools.js"></script>
+  <script src="../../_static/clipboard.min.js"></script>
+  <script src="../../_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="../../_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="../../index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="../../">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

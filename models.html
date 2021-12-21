@@ -40,7 +40,7 @@
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
   <link rel="next" title="query_strategies" href="query_strategies.html" />
-  <link rel="prev" title="functional" href="functional.html" /> 
+  <link rel="prev" title="metric_tracking" href="metric_tracking.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -137,8 +137,11 @@
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
 </ul>
@@ -264,16 +267,14 @@ Details about the Resnet50 architecture: <a class="reference external" href="htt
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.pytorch_model.</span></span><span class="sig-name descname"><span class="pre">PytorchModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'adam'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dice'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_metric_confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_metric_confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.lightning.LightningModule</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>Base class to implement Pytorch models.
-:param learning_rate: The step size at each iteration while moving towards a minimum of the loss.
-:param optimizer: Algorithm used to calculate the loss and update the weights. E.g. ‘adam’ or ‘sgd’.
-:param lr_scheduler: Algorithm used for dynamically updating the learning rate during training.</p>
-<blockquote>
-<div><p>E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p>
-</div></blockquote>
+<p>Base class to implement Pytorch models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>learning_rate</strong> – The step size at each iteration while moving towards a minimum of the loss.</p></li>
+<li><p><strong>optimizer</strong> – Algorithm used to calculate the loss and update the weights. E.g. ‘adam’ or ‘sgd’.</p></li>
+<li><p><strong>lr_scheduler</strong> – Algorithm used for dynamically updating the learning rate during training.
+E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p></li>
 <li><p><strong>loss</strong> – The measure of performance. E.g. ‘dice’, ‘bce’, ‘fp’</p></li>
 <li><p><strong>train_metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A list with the names of the metrics that should be computed and logged
 in each training and validation epoch of the training loop. Defaults to <cite>[“dice_score”]</cite>.</p></li>
@@ -286,7 +287,7 @@ in the model validation or testing loop (<cite>trainer.validate()</cite>, <cite>
 <li><p><strong>test_metric_confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – A list of confidence levels for which the metrics
 specified in the <cite>test_metrics</cite> parameter should be computed in the validation or testing loop. Defaults to
 <cite>[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]</cite>.</p></li>
-<li><p><strong>**kwargs</strong> – </p></li>
+<li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
 </ul>
 </dd>
 </dl>
@@ -366,13 +367,17 @@ specified in the <cite>test_metrics</cite> parameter should be computed in the v
 <span class="sig-name descname"><span class="pre">predict_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.predict_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.predict_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the model’s predictions on a given batch of model inputs.
 # this method should match the requirements of the pytorch lightning framework.
-# see <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</a>
-:param batch: A batch of model inputs.
-:param batch_idx: Index of the current batch.
-:param dataloader_idx: The index of the dataloader that produced this batch.</p>
-<blockquote>
-<div><p>(only if multiple val dataloaders used)</p>
-</div></blockquote>
+# see <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> – A batch of model inputs.</p></li>
+<li><p><strong>batch_idx</strong> – Index of the current batch.</p></li>
+<li><p><strong>dataloader_idx</strong> – The index of the dataloader that produced this batch.
+(only if multiple val dataloaders used)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -691,7 +696,7 @@ step for concatenation.</p>
         <a href="query_strategies.html" class="btn btn-neutral float-right" title="query_strategies" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="functional.html" class="btn btn-neutral" title="functional" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="metric_tracking.html" class="btn btn-neutral" title="metric_tracking" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   

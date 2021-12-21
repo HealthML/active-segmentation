@@ -135,8 +135,11 @@
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
 </ul>
@@ -181,55 +184,35 @@
 <h1>src<a class="headerlink" href="#src" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src.html">src package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="src.datasets.html">src.datasets package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#src-datasets-brats-data-module-module">src.datasets.brats_data_module module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#src-datasets-brats-dataset-module">src.datasets.brats_dataset module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#src-datasets-data-module-module">src.datasets.data_module module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#src-datasets-dataset-hooks-module">src.datasets.dataset_hooks module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#src-datasets-pascal-voc-data-module-module">src.datasets.pascal_voc_data_module module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#src-datasets-pascal-voc-dataset-module">src.datasets.pascal_voc_dataset module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.datasets.html#module-contents">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="active_learning.html">active_learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#module-datasets.brats_data_module">BraTSDataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#module-datasets.brats_dataset">BraTSDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#module-datasets.data_module">DataModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#module-datasets.pascal_voc_data_module">PascalVocDataModule</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="src.functional.html">src.functional package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.functional.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.functional.html#src-functional-losses-module">src.functional.losses module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.functional.html#src-functional-metrics-module">src.functional.metrics module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.functional.html#module-contents">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functional.html">functional</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="functional.html#module-functional.losses">losses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html#module-functional.metrics">metrics</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="src.metric_tracking.html">src.metric_tracking package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.metric_tracking.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.metric_tracking.html#src-metric-tracking-combined-per-epoch-metric-module">src.metric_tracking.combined_per_epoch_metric module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.metric_tracking.html#src-metric-tracking-combined-per-image-metric-module">src.metric_tracking.combined_per_image_metric module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.metric_tracking.html#module-contents">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inferencing.html">inferencing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metric_tracking.html">metric_tracking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html#module-metric_tracking.combined_per_epoch_metric">combined_per_epoch_metric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html#module-metric_tracking.combined_per_image_metric">combined_per_image_metric</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="src.models.html">src.models package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.models.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.models.html#src-models-pytorch-fcn-resnet50-module">src.models.pytorch_fcn_resnet50 module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.models.html#src-models-pytorch-model-module">src.models.pytorch_model module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.models.html#src-models-pytorch-u-net-module">src.models.pytorch_u_net module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.models.html#src-models-u-net-module">src.models.u_net module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.models.html#module-contents">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.pytorch_fcn_resnet50">PytorchFCNResnet50</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.pytorch_model">PytorchModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.pytorch_u_net">PytorchUNet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.u_net">UNet</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="src.query_strategies.html">src.query_strategies package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="src.query_strategies.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.query_strategies.html#src-query-strategies-query-strategy-module">src.query_strategies.query_strategy module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="src.query_strategies.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="src.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.html#src-active-learning-module">src.active_learning module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.html#src-inferencing-module">src.inferencing module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.html#src-main-module">src.main module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src.html#module-contents">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="query_strategies.html">query_strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html#module-query_strategies.query_strategy">QueryStrategy</a></li>
 </ul>
 </li>
 </ul>

@@ -136,8 +136,11 @@
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
 </ul>
@@ -216,50 +219,53 @@ To have a proper validation on a held out dataset, we decided to further split t
 <li><p>40 files in total were moved: 24 scans from TCIA, 12 scans from CBICA, 4 scans from 2013 randomly selected</p></li>
 </ul>
 <p>List of scans moved from training data:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-    <span class="s1">&#39;Brats18_TCIA01_231_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_309_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA03_133_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA10_282_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_300_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA06_603_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_377_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA10_449_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA01_221_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_370_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA08_162_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA08_205_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA10_629_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_473_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_198_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA08_167_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_314_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA10_387_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA09_255_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA09_620_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA06_211_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA01_429_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA02_300_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_TCIA09_402_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_AYU_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_ABB_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_AQQ_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_AQJ_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_AUQ_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_ARW_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_AYA_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_ABM_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_AQG_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_ABN_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_AQY_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_CBICA_ALX_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_2013_9_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_2013_26_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_2013_19_1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Brats18_2013_16_1&#39;</span><span class="p">,</span>
-<span class="p">]</span>
-</pre></div>
-</div>
+<dl>
+<dt>::</dt><dd><dl class="simple">
+<dt>[</dt><dd><p>‘Brats18_TCIA01_231_1’,
+‘Brats18_TCIA02_309_1’,
+‘Brats18_TCIA03_133_1’,
+‘Brats18_TCIA10_282_1’,
+‘Brats18_TCIA02_300_1’,
+‘Brats18_TCIA06_603_1’,
+‘Brats18_TCIA02_377_1’,
+‘Brats18_TCIA10_449_1’,
+‘Brats18_TCIA01_221_1’,
+‘Brats18_TCIA02_370_1’,
+‘Brats18_TCIA08_162_1’,
+‘Brats18_TCIA08_205_1’,
+‘Brats18_TCIA10_629_1’,
+‘Brats18_TCIA02_473_1’,
+‘Brats18_TCIA02_198_1’,
+‘Brats18_TCIA08_167_1’,
+‘Brats18_TCIA02_314_1’,
+‘Brats18_TCIA10_387_1’,
+‘Brats18_TCIA09_255_1’,
+‘Brats18_TCIA09_620_1’,
+‘Brats18_TCIA06_211_1’,
+‘Brats18_TCIA01_429_1’,
+‘Brats18_TCIA02_300_1’,
+‘Brats18_TCIA09_402_1’,
+‘Brats18_CBICA_AYU_1’,
+‘Brats18_CBICA_ABB_1’,
+‘Brats18_CBICA_AQQ_1’,
+‘Brats18_CBICA_AQJ_1’,
+‘Brats18_CBICA_AUQ_1’,
+‘Brats18_CBICA_ARW_1’,
+‘Brats18_CBICA_AYA_1’,
+‘Brats18_CBICA_ABM_1’,
+‘Brats18_CBICA_AQG_1’,
+‘Brats18_CBICA_ABN_1’,
+‘Brats18_CBICA_AQY_1’,
+‘Brats18_CBICA_ALX_1’,
+‘Brats18_2013_9_1’,
+‘Brats18_2013_26_1’,
+‘Brats18_2013_19_1’,
+‘Brats18_2013_16_1’,</p>
+</dd>
+</dl>
+<p>]</p>
+</dd>
+</dl>
 <ol class="arabic simple" start="2">
 <li><p>From validation dataset to holdout dataset:</p></li>
 </ol>

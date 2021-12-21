@@ -4,4 +4,11 @@ src
 .. toctree::
    :maxdepth: 4
 
-   src
+   active_learning
+   datasets
+   functional
+   inferencing
+   main
+   metric_tracking
+   models
+   query_strategies

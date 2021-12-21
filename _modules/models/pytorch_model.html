@@ -134,8 +134,11 @@
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
 </ul>
@@ -199,6 +202,7 @@
 <div class="viewcode-block" id="PytorchModel"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel">[docs]</a><span class="k">class</span> <span class="nc">PytorchModel</span><span class="p">(</span><span class="n">LightningModule</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class to implement Pytorch models.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        learning_rate: The step size at each iteration while moving towards a minimum of the loss.</span>
 <span class="sd">        optimizer: Algorithm used to calculate the loss and update the weights. E.g. &#39;adam&#39; or &#39;sgd&#39;.</span>
@@ -216,7 +220,7 @@
 <span class="sd">        test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics</span>
 <span class="sd">            specified in the `test_metrics` parameter should be computed in the validation or testing loop. Defaults to</span>
 <span class="sd">            `[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]`.</span>
-<span class="sd">        **kwargs:</span>
+<span class="sd">        **kwargs: Further, dataset specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># pylint: disable=too-many-ancestors,arguments-differ,too-many-arguments</span>
@@ -277,6 +281,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,</span>
 <span class="sd">            or predict.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            stage(string, optional): Either &#39;fit&#39;, &#39;validate&#39;, &#39;test&#39;, or &#39;predict&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -364,6 +369,7 @@
 <span class="sd">        Compute the model&#39;s predictions on a given batch of model inputs.</span>
 <span class="sd">        # this method should match the requirements of the pytorch lightning framework.</span>
 <span class="sd">        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            batch: A batch of model inputs.</span>
 <span class="sd">            batch_idx: Index of the current batch.</span>
