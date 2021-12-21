@@ -1,11 +1,11 @@
 """U-Net architecture."""
 
 from collections import OrderedDict
-from typing import Tuple
+from typing import List, Tuple
 
 import torch
 from torch import nn
-import numpy as np
+import torch.nn.functional as F
 
 
 class UNet(nn.Module):
@@ -76,7 +76,6 @@ class UNet(nn.Module):
                     features * (2 ** level),
                     kernel_size=2,
                     stride=2,
-                    output_padding=UNet.upconv_output_padding(level, input_shape),
                 )
                 for level in range(num_levels)
             ]
@@ -106,7 +105,8 @@ class UNet(nn.Module):
         """
 
         x = x.float()
-        encs = []  # individually store encoding results for skip connections
+        # individually store encoding results for skip connections
+        encs: List[torch.Tensor] = []
         for level in range(self.num_levels):
             encs.append(
                 self.encoders[level](
@@ -119,6 +119,11 @@ class UNet(nn.Module):
         dec = bottleneck
         for level in reversed(range(self.num_levels)):
             dec = self.upconvs[level](dec)
+
+            # for the relevant dimensions [0, 0] for even and [0, 1] for odd in reversed order flattened
+            pad = [p for dim in reversed(encs[level].size()[2:]) for p in [0, dim % 2]]
+            dec = F.pad(dec, tuple(pad), "constant", 0)
+
             dec = torch.cat((dec, encs[level]), dim=1)
             dec = self.decoders[level](dec)
 
@@ -160,22 +165,3 @@ class UNet(nn.Module):
                 ]
             )
         )
-
-    @staticmethod
-    def upconv_output_padding(level: int, input_shape: Tuple[int]) -> Tuple[int]:
-        """
-        Calculates the output padding for transpose convolutions to match the output size to the corresponding encoding
-        step for concatenation.
-
-        Args:
-            level (int): The level in the UNet the transpose convolution is on.
-            input_shape (Tuple[int]): The input shape for the whole UNet.
-
-        Returns:
-            Tuple[int]: The output padding for the transpose convolution.
-        """
-        shape = np.asarray(input_shape)
-        for _ in range(level):
-            shape = np.floor_divide(shape, 2)
-        odd = shape % 2
-        return tuple(odd)
