@@ -119,6 +119,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 

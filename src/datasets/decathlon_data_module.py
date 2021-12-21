@@ -2,9 +2,10 @@
 import json
 import os
 import random
-from typing import Any, List, Literal, Optional, Tuple
+from typing import Any, Callable, List, Literal, Optional, Tuple
 from torch.utils.data import DataLoader, Dataset
 
+from .collate import batch_padding_collate_fn
 from .data_module import ActiveLearningDataModule
 from .decathlon_dataset import DecathlonDataset
 
@@ -113,6 +114,11 @@ class DecathlonDataModule(ActiveLearningDataModule):
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
 
+    def _get_collate_fn(self) -> Optional[Callable[[List[Any]], Any]]:
+        """Returns the batchwise padding collate function."""
+
+        return batch_padding_collate_fn
+
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
         # ToDo: implement labeling logic
@@ -148,6 +154,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
