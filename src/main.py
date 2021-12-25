@@ -146,9 +146,10 @@ def run_active_learning_pipeline(
     inferencer = Inferencer(
         model,
         dataset,
-        os.path.join(data_dir, "val"),
+        data_dir,
         prediction_dir,
         prediction_count,
+        dataset_config=dataset_config,
     )
     inferencer.inference()
 

@@ -34,14 +34,11 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
         shuffle (bool, optional): Whether the data should be shuffled.
         transform (Callable[[Any], Tensor], optional): Function to transform the images.
         target_transform (Callable[[Any], Tensor], optional): Function to transform the annotations.
-        dimensionality (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+        dim (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.
             Defaults to 2.
         slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
             Uses all slices if None. Defaults to None.
     """
-
-    # ToDo: Implement variable image sizes for U-Net
-    # IMAGE_DIMENSIONS = (155, 240, 240)
 
     @staticmethod
     def normalize(img: np.ndarray) -> np.ndarray:
