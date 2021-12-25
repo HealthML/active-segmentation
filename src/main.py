@@ -178,10 +178,6 @@ def run_active_learning_pipeline_from_config(
         if "model_config" in config and "architecture" in config["model_config"]:
             config["architecture"] = config["model_config"]["architecture"]
             del config["model_config"]["architecture"]
-        if "model_config" in config and "input_shape" in config["model_config"]:
-            config["model_config"]["input_shape"] = tuple(
-                config["model_config"]["input_shape"]
-            )
         if "model_config" in config and "learning_rate" in config["model_config"]:
             config["learning_rate"] = config["model_config"]["learning_rate"]
             del config["model_config"]["learning_rate"]

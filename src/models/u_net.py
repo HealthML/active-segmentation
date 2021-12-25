@@ -1,7 +1,7 @@
 """U-Net architecture."""
 
 from collections import OrderedDict
-from typing import List, Tuple
+from typing import List
 
 import torch
 from torch import nn
@@ -21,7 +21,7 @@ class UNet(nn.Module):
         init_features (int, optional): Number of feature channels of the first U-Net block,
             in each down-sampling block, the number of feature channels is doubled. Defaults to 32.
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
-        input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).
+        dim (int, optional): The dimensionality of the U-Net. Defaults to 2.
     """
 
     # pylint: disable-msg=too-many-instance-attributes
@@ -32,14 +32,12 @@ class UNet(nn.Module):
         out_channels: int = 1,
         init_features: int = 32,
         num_levels: int = 4,
-        input_shape: Tuple[int] = (240, 240),
+        dim: int = 2,
     ):
 
         super().__init__()
 
         self.num_levels = num_levels
-
-        dim = len(input_shape)
 
         MaxPool = nn.MaxPool2d if dim == 2 else nn.MaxPool3d
         ConvTranspose = nn.ConvTranspose2d if dim == 2 else nn.ConvTranspose3d

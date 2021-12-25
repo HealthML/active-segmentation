@@ -97,7 +97,7 @@ Additionally, the following optional arguments can be supplied in the same confi
         "learning_rate": 0.0001,
         "lr_scheduler": "reduceLROnPlateau",
         "num_levels": 4,
-        "input_shape": [240, 240] // can also be 3d
+        "dim": 2 // can be 2 or 3
     },
     "batch_size": 16,
     "num_workers": 4,

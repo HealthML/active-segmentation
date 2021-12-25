@@ -5,10 +5,7 @@
     "loss": "dice",
     "learning_rate": 0.0001,
     "num_levels": 4,
-    "input_shape": [
-      240,
-      240
-    ]
+    "dim": 2
   },
   "dataset_config": {
     "dataset": "brats",

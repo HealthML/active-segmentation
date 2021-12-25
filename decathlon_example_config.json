@@ -5,14 +5,11 @@
     "loss": "dice",
     "learning_rate": 0.0001,
     "num_levels": 4,
-    "input_shape": [
-      240,
-      240
-    ]
+    "dim": 2
   },
   "dataset_config": {
     "dataset": "decathlon",
-    "data_dir": "/dhc/groups/mpws2021cl1/Decathlon",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data/Decathlon",
     "cache_size": 250,
     "pin_memory": true,
     "task": "Task09_Spleen"
