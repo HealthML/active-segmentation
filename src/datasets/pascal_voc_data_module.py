@@ -3,10 +3,11 @@ import os
 from typing import Any, List, Optional
 import numpy as np
 from torch.utils.data import Dataset, random_split
-from torchvision import datasets, transforms
+from torchvision import transforms
 import torch
 
 from datasets.data_module import ActiveLearningDataModule
+from .pascal_voc_dataset import PascalVOCDataset
 
 
 class PILMaskToTensor:
@@ -65,7 +66,7 @@ class PascalVOCDataModule(ActiveLearningDataModule):
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
-        training_set = datasets.VOCSegmentation(
+        training_set = PascalVOCDataset(
             self.data_folder,
             year="2012",
             image_set="train",
@@ -80,7 +81,7 @@ class PascalVOCDataModule(ActiveLearningDataModule):
 
     def _create_validation_set(self) -> Optional[Dataset]:
         """Creates a validation dataset."""
-        validation_set = datasets.VOCSegmentation(
+        validation_set = PascalVOCDataset(
             self.data_folder,
             year="2012",
             image_set="val",

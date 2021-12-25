@@ -1,5 +1,6 @@
 """ Module to load and batch decathlon datasets """
-from typing import Any, Callable, List, Optional, Tuple
+from functools import reduce
+from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
 import os
@@ -10,9 +11,11 @@ import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
+from datasets.dataset_hooks import DatasetHooks
+
 
 # pylint: disable=too-many-instance-attributes,abstract-method
-class DecathlonDataset(IterableDataset):
+class DecathlonDataset(IterableDataset, DatasetHooks):
     """
     The Decathlon dataset is a collection of medical image segmentation datasets. Specifically, it contains data for
     the following body organs or parts: Brain, Heart, Liver, Hippocampus, Prostate, Lung, Pancreas, Hepatic Vessel,
@@ -403,3 +406,22 @@ class DecathlonDataset(IterableDataset):
             ]
         else:
             raise ValueError("Image does not belong to this dataset.")
+
+    def __image_indices(self) -> Iterable[str]:
+        return reduce(
+            lambda acc, elem: acc + [elem] if not elem in acc else acc,
+            [image_id for image_id, _ in self.image_slice_indices],
+            [],
+        )
+
+    def image_ids(self) -> Iterable[str]:
+        return [
+            DecathlonDataset.__get_case_id(self.image_paths[image_idx])
+            for image_idx in self.__image_indices()
+        ]
+
+    def slices_per_image(self, **kwargs) -> List[int]:
+        return [
+            DecathlonDataset.__read_slice_count(self.image_paths[image_idx])
+            for image_idx in self.__image_indices()
+        ]

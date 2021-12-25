@@ -258,20 +258,20 @@ def standard_distance_slice(
 
     # fmt: off
     prediction_slice = torch.Tensor(
-        [[
+        [
             [0, 0, 0, 0],
             [1, 1, 1, 0],
             [1, 1, 0, 0],
             [1, 1, 1, 0],
-        ]])
+        ])
 
     target_slice = torch.Tensor(
-        [[
+        [
             [0, 0, 0, 0],
             [1, 1, 1, 1],
             [1, 1, 0, 1],
             [1, 0, 0, 0],
-        ]])
+        ])
     # fmt: on
 
     dists_prediction_target = [0, 0, 0, 0, 0, 0, 1, np.sqrt(2)]
@@ -312,20 +312,20 @@ def distance_slice_all_false(
 
     # fmt: off
     prediction_slice = torch.Tensor(
-        [[
+        [
             [0, 0, 0, 0],
             [1, 1, 0, 0],
             [1, 1, 0, 0],
             [1, 1, 0, 0],
-        ]])
+        ])
 
     target_slice = torch.Tensor(
-        [[
+        [
             [0, 0, 1, 0],
             [0, 0, 0, 1],
             [0, 0, 0, 1],
             [0, 0, 0, 0],
-        ]])
+        ])
     # fmt: on
 
     dists_prediction_target = [
@@ -373,20 +373,20 @@ def distance_slice_subset(
 
     # fmt: off
     prediction_slice = torch.Tensor(
-        [[
+        [
             [0, 0, 0, 0],
             [0, 1, 1, 0],
             [0, 1, 1, 0],
             [0, 0, 0, 0],
-        ]])
+        ])
 
     target_slice = torch.Tensor(
-        [[
+        [
             [0, 0, 0, 0],
             [0, 1, 1, 0],
             [0, 1, 1, 1],
             [0, 1, 0, 0],
-        ]])
+        ])
     # fmt: on
 
     dists_prediction_target = [0, 0, 0, 0]
