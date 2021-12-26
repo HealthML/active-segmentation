@@ -2,6 +2,7 @@
 from torch.utils.data import DataLoader
 from typing import List, Union
 
+from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
 
 
@@ -9,7 +10,7 @@ class QueryStrategy:
     def select_items_to_label(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
-        dataloader: DataLoader,
+        data_module: ActiveLearningDataModule,
         number_of_items: int,
         **kwargs
     ) -> List[str]:
@@ -30,7 +31,7 @@ class QueryStrategy:
         selected_ids = []
         selected_items = 0
 
-        for image, image_id in dataloader:
+        for image, image_id in data_module.unlabeled_dataloader():
             if selected_items == number_of_items:
                 break
             selected_ids.append(image_id)

@@ -285,13 +285,13 @@ class BraTSDataset(IterableDataset):
         if self.target_transform:
             y = self.target_transform(y)
 
+        self.current_index += 1
+
         if self.is_unlabeled:
             return (
                 torch.unsqueeze(x, 0),
                 f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
             )
-
-        self.current_index += 1
 
         return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
 

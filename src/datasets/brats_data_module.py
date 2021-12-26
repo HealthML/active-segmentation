@@ -233,9 +233,9 @@ class BraTSDataModule(ActiveLearningDataModule):
             # use all images that are not in initial training set
             (
                 _,
-                unlabeled_image_paths,
+                initial_unlabeled_image_paths,
                 _,
-                unlabeled_annotation_paths,
+                initial_unlabeled_annotation_paths,
             ) = train_test_split(
                 train_image_paths,
                 train_annotation_paths,
@@ -244,11 +244,12 @@ class BraTSDataModule(ActiveLearningDataModule):
             )
 
             return BraTSDataset(
-                image_paths=unlabeled_image_paths,
-                annotation_paths=unlabeled_annotation_paths,
+                image_paths=initial_unlabeled_image_paths,
+                annotation_paths=initial_unlabeled_annotation_paths,
                 dim=self.dim,
                 cache_size=self.cache_size,
                 is_unlabeled=True,
+                shuffle=self.shuffle,
             )
 
         else:
