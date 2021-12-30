@@ -85,6 +85,23 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
         return DecathlonDataset.__read_image(filepath).shape[2] if dim == 2 else 1
 
     @staticmethod
+    def __align_axes(img: np.ndarray) -> np.ndarray:
+        """
+        Aligns the axes to (slice, x, y) or (channel, slice, x, y), depending on if there is a channel dimension
+        Args:
+            img (np.ndarray): The image
+
+        Returns:
+            The images with realigned axes.
+        """
+        img = np.moveaxis(img, 2, 0)  # slice dimension to front
+
+        if len(img.shape) == 4:
+            img = np.moveaxis(img, 3, 0)  # channel dimension to front
+
+        return img
+
+    @staticmethod
     def __read_image_as_array(
         filepath: str,
         norm: bool,
@@ -117,7 +134,11 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
 
         if norm:
             img = DecathlonDataset.normalize(img)
-        return np.moveaxis(img, 2, 0)
+        return DecathlonDataset.__align_axes(img)
+
+    @staticmethod
+    def __ensure_channel_dim(img: torch.Tensor, dim: int) -> torch.Tensor:
+        return img if len(img.shape) == dim + 1 else torch.unsqueeze(img, 0)
 
     @staticmethod
     def __get_case_id(filepath: str) -> str:
@@ -323,7 +344,10 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
         if self.dim == 2:
             slice_index = image_slice_index[1]
 
-            x = torch.from_numpy(self._current_image[slice_index, :, :])
+            if len(self._current_image.shape) == 4:
+                x = torch.from_numpy(self._current_image[:, slice_index, :, :])
+            else:
+                x = torch.from_numpy(self._current_image[slice_index, :, :])
             y = torch.from_numpy(self._current_mask[slice_index, :, :])
         else:
             x = torch.from_numpy(self._current_image)
@@ -336,13 +360,17 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
 
         if self.is_unlabeled:
             return (
-                torch.unsqueeze(x, 0),
+                DecathlonDataset.__ensure_channel_dim(x, self.dim),
                 f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
             )
 
         self.current_index += 1
 
-        return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
+        return (
+            DecathlonDataset.__ensure_channel_dim(x, self.dim),
+            DecathlonDataset.__ensure_channel_dim(y, self.dim),
+            case_id,
+        )
 
     def __len__(self) -> int:
         return len(self.image_slice_indices)

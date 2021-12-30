@@ -19,14 +19,14 @@ class PytorchUNet(PytorchModel):
         **kwargs: Further, dataset specific parameters.
     """
 
-    def __init__(self, num_levels: int = 4, dim: int = 2, **kwargs):
+    def __init__(self, num_levels: int = 4, dim: int = 2, in_channels=1, **kwargs):
 
         super().__init__(**kwargs)
 
         self.dim = dim
 
         self.model = UNet(
-            in_channels=1,
+            in_channels=in_channels,
             out_channels=1,
             init_features=32,
             num_levels=num_levels,

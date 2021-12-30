@@ -1,4 +1,5 @@
 """ Module containing the data module for decathlon data """
+from io import TextIOWrapper
 import json
 import os
 import random
@@ -30,7 +31,40 @@ class DecathlonDataModule(ActiveLearningDataModule):
         **kwargs: Further, dataset specific parameters.
     """
 
-    # pylint: disable=unused-argument,no-self-use
+    @staticmethod
+    def __open_dataset_file(dir_path: str) -> TextIOWrapper:
+        """
+        Open the dataset JSON file.
+
+        Args:
+            dir_path (str): Directory the dataset is inside.
+
+        Returns:
+            The openend file.
+        """
+        dataset_file_name = os.path.join(dir_path, "dataset.json")
+
+        if not os.path.isfile(dataset_file_name):
+            print("Dataset file could not be found.")
+            raise FileNotFoundError(f"{dataset_file_name} is not a valid filename.")
+
+        return open(dataset_file_name, encoding="utf-8")
+
+    @staticmethod
+    def __read_data_channels(dir_path: str) -> int:
+        """
+        Read the amount of data channels from the dataset JSON file.
+
+        Args:
+            dir_path (str): Directory the dataset is inside.
+
+        Returns:
+            The amount of dataset channels.
+        """
+        with DecathlonDataModule.__open_dataset_file(dir_path) as dataset_file:
+            dataset_info = json.load(dataset_file)
+            return len(dataset_info["modality"])
+
     @staticmethod
     def discover_paths(
         dir_path: str,
@@ -38,7 +72,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         random_samples: Optional[int] = None,
     ) -> Tuple[List[str], List[str]]:
         """
-        Discover the .nii.gz file paths with a given modality
+        Discover the .nii file paths from the corresponding JSON file.
 
         Args:
             dir_path (str): Directory the dataset is inside.
@@ -49,13 +83,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             list of files as tuple of image paths, annotation paths
         """
 
-        dataset_file_name = os.path.join(dir_path, "dataset.json")
-
-        if not os.path.isfile(dataset_file_name):
-            print("Dataset file could not be found.")
-            raise FileNotFoundError(f"{dataset_file_name} is not a valid filename.")
-
-        with open(dataset_file_name, encoding="utf-8") as dataset_file:
+        with DecathlonDataModule.__open_dataset_file(dir_path) as dataset_file:
             dataset_info = json.load(dataset_file)
 
             if subset in ("train", "val"):
@@ -113,6 +141,12 @@ class DecathlonDataModule(ActiveLearningDataModule):
         self.cache_size = cache_size
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
+        self._data_channels = DecathlonDataModule.__read_data_channels(self.data_folder)
+
+    def data_channels(self) -> int:
+        """Returns the amount of data channels."""
+
+        return self._data_channels
 
     def _get_collate_fn(self) -> Optional[Callable[[List[Any]], Any]]:
         """Returns the batchwise padding collate function."""
