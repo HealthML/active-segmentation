@@ -82,7 +82,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
     def _flatten_tensors(
         self, prediction: torch.Tensor, target: torch.Tensor
-    ) -> Tuple[torch.Tensor]:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         r"""
         Reshapes and flattens prediction and target tensors except for the first two dimensions (batch dimension and
         class dimension).
@@ -126,7 +126,9 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
-        super().__init__(epsilon=epsilon, reduction=reduction)
+        super().__init__(
+            epsilon=epsilon, include_background=include_background, reduction=reduction
+        )
 
     @abc.abstractmethod
     def get_dice_loss_module(self) -> torch.nn.Module:

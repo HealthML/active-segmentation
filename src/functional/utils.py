@@ -11,7 +11,7 @@ def flatten_tensors(
     num_classes: int,
     convert_to_one_hot: bool = True,
     include_background: bool = True,
-) -> Tuple[torch.Tensor]:
+) -> Tuple[torch.Tensor, torch.Tensor]:
     r"""
     Reshapes and flattens prediction and target tensors except for the first dimension (class dimension).
 
@@ -59,10 +59,10 @@ def flatten_tensors(
         # for single-label segmentation tasks, prediction and target are one-hot or multi-hot encoded
         # they have the shape (C, X, Y, ...)
 
-        assert _is_binary(
+        assert is_binary(
             prediction
         ), "Prediction needs to be binary if `convert_to_one_hot` is False."
-        assert _is_binary(
+        assert is_binary(
             target
         ), "Target needs to be binary if `convert_to_one_hot` is False."
 
@@ -88,7 +88,7 @@ def is_binary(tensor_to_check: torch.Tensor) -> bool:
     Checks whether the input contains only zeros and ones.
 
     Args:
-        input (Tensor): tensor to check.
+        tensor_to_check (Tensor): tensor to check.
     Returns:
         bool: True if contains only zeros and ones, False otherwise.
     """
@@ -100,7 +100,7 @@ def is_binary(tensor_to_check: torch.Tensor) -> bool:
 
 def one_hot_encode(tensor: torch.Tensor, num_classes: int) -> torch.Tensor:
     r"""
-    Comverts a label encoded tensor to a one-hot encoded tensor.
+    Converts a label encoded tensor to a one-hot encoded tensor.
 
     Args:
         tensor (Tensor): Label encoded tensor that is to be converted to one-hot encoding.

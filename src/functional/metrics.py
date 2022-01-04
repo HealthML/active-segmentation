@@ -4,7 +4,7 @@ Module containing model evaluation metrics.
 The metric implementations are based on the TorchMetrics framework. For instructions on how to implement custom metrics
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
-
+import abc
 from typing import Literal, Optional, Tuple
 
 import torch
@@ -39,7 +39,7 @@ def dice_score(
         num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
-        epsilon (float, optional): Laplacian smothing factor (default = 0).
+        epsilon (float, optional): Laplacian smoothing factor (default = 0).
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string): A method to reduce metric scores of multiple classes.
@@ -103,7 +103,7 @@ def sensitivity(
         num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
-        epsilon (float, optional): Laplacian smothing factor (default = 0).
+        epsilon (float, optional): Laplacian smoothing factor (default = 0).
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string): A method to reduce metric scores of multiple classes.
@@ -169,7 +169,7 @@ def specificity(
         num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
-        epsilon (float, optional): Laplacian smothing factor (default = 0).
+        epsilon (float, optional): Laplacian smoothing factor (default = 0).
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string): A method to reduce metric scores of multiple classes.
@@ -286,7 +286,7 @@ def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
             3, stride=1, padding=0, dilation=1, return_indices=False, ceil_mode=False
         )
 
-    # to implement erosion filtering, max ppooling with a 3x3 kernel is applied to the inverted image
+    # to implement erosion filtering, max pooling with a 3x3 kernel is applied to the inverted image
     inverted_input = (
         torch.ones(input_image.shape, device=input_image.device) - input_image
     )
@@ -362,7 +362,7 @@ def single_class_hausdorff_distance(
 
     # to reduce computational effort, the distance calculations are only done for the border points of the predicted and
     # the target shape
-    # to identify border pointds, binary erosion is used
+    # to identify border points, binary erosion is used
     prediction_boundaries = torch.logical_xor(
         prediction, _binary_erosion(prediction)
     ).int()
@@ -424,7 +424,6 @@ def hausdorff_distance(
             this parameter can be used to speed up computation.
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
-        epsilon (float, optional): Laplacian smothing factor (default = 0).
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
@@ -481,7 +480,7 @@ def hausdorff_distance(
     return reduce_metric(per_class_hausdorff_distances, reduction)
 
 
-class SegmentationMetric(torchmetrics.Metric):
+class SegmentationMetric(torchmetrics.Metric, abc.ABC):
     """
     Base class for segmentation metrics.
 
@@ -517,7 +516,7 @@ class SegmentationMetric(torchmetrics.Metric):
 
     def _flatten_tensors(
         self, prediction: torch.Tensor, target: torch.Tensor
-    ) -> Tuple[torch.Tensor]:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         r"""
         Reshapes and flattens prediction and target tensors except for the first dimension (class dimension).
 
@@ -862,8 +861,8 @@ class HausdorffDistance(SegmentationMetric):
 
     def compute(self) -> torch.Tensor:
         """
-        Computes the Hausdorf distance over all slices that were registered using the `update` method as the maximum per
-         slice-distance.
+        Computes the Hausdorff distance over all slices that were registered using the `update` method as the maximum
+        per slice-distance.
 
         Returns:
             Tensor: Hausdorff distance.
@@ -894,10 +893,10 @@ class HausdorffDistance(SegmentationMetric):
         self.hausdorff_distance = hausdorff_dist
         self.hausdorff_distance_cached = True
 
-        for tensor in self.predictions:
-            del tensor
-        for tensor in self.targets:
-            del tensor
+        for prediction in self.predictions:
+            del prediction
+        for target in self.targets:
+            del target
 
         # free memory
         self.predictions = []
