@@ -1,5 +1,6 @@
 fire==0.4.0
 git+https://github.com/ain-soph/trojanzoo_sphinx_theme.git
+monai==0.8.0
 nibabel==3.2.1
 numpy==1.19.5
 Pillow==8.4.0
