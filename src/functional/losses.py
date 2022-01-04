@@ -471,7 +471,7 @@ class CrossEntropyLoss(SegmentationLoss):
         return self._reduce_loss(loss)
 
 
-class BCEDiceLoss(SegmentationLoss):
+class CrossEntropyDiceLoss(SegmentationLoss):
     """
     Implements a loss function that combines the Dice loss with the binary cross-entropy (negative log-likelihood) loss.
 
