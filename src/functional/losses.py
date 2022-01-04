@@ -15,7 +15,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
     Args:
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -24,7 +24,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
     def __init__(
         self,
-        include_background: bool = False,
+        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
@@ -137,7 +137,7 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
 
     Args:
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -146,7 +146,7 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
 
     def __init__(
         self,
-        include_background: bool = False,
+        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
@@ -219,7 +219,7 @@ class DiceLoss(AbstractDiceLoss):
 
     Args:
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -228,7 +228,7 @@ class DiceLoss(AbstractDiceLoss):
 
     def __init__(
         self,
-        include_background: bool = False,
+        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
@@ -272,7 +272,7 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
 
     Args:
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         weight_type (string, optional): Type of function to transform ground truth volume to a weight factor:
             `"square"` | `"simple"` | `"uniform"`. Defaults to `"square"`.
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -283,7 +283,7 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
 
     def __init__(
         self,
-        include_background: bool = False,
+        include_background: bool = True,
         weight_type: Literal["square", "simple", "uniform"] = "square",
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
@@ -312,7 +312,7 @@ class FalsePositiveLoss(SegmentationLoss):
 
     Args:
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -321,7 +321,7 @@ class FalsePositiveLoss(SegmentationLoss):
 
     def __init__(
         self,
-        include_background: bool = False,
+        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
@@ -375,7 +375,7 @@ class FalsePositiveDiceLoss(SegmentationLoss):
 
     Args:
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -384,7 +384,7 @@ class FalsePositiveDiceLoss(SegmentationLoss):
 
     def __init__(
         self,
-        include_background: bool = False,
+        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
@@ -425,7 +425,7 @@ class CrossEntropyLoss(SegmentationLoss):
     Args:
         multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -434,7 +434,7 @@ class CrossEntropyLoss(SegmentationLoss):
     def __init__(
         self,
         multi_label: bool = False,
-        include_background: bool = False,
+        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
     ):
         super().__init__(include_background=include_background, reduction=reduction)
@@ -494,7 +494,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
     Args:
         multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `False`).
+            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -504,7 +504,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
     def __init__(
         self,
         multi_label: bool = False,
-        include_background: bool = False,
+        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
