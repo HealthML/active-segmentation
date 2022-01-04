@@ -5,6 +5,7 @@ from functional.losses import (
     CrossEntropyLoss,
     CrossEntropyDiceLoss,
     DiceLoss,
+    GeneralizedDiceLoss,
     FalsePositiveLoss,
     FalsePositiveDiceLoss,
 )
