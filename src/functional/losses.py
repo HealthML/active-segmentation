@@ -8,6 +8,8 @@ from monai.losses.dice import (
 )
 import torch
 
+from .utils import one_hot_encode
+
 
 class SegmentationLoss(torch.nn.Module, abc.ABC):
     r"""
@@ -62,32 +64,6 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         return loss
 
     @staticmethod
-    def _one_hot_encode(tensor: torch.Tensor, num_classes: int) -> torch.Tensor:
-        r"""
-        Comverts a label encoded tensor to a one-hot encoded tensor.
-
-        Args:
-            tensor (Tensor): Label encoded tensor that is to be converted to one-hot encoding.
-            num_classes (int): Number of classes.
-
-        Returns:
-            Tensor: One-hot encoded tensor.
-
-        Shape:
-            - Tensor: :math:`(N, X, Y, ...)` where each element represents a class index of integer type and `N = batch
-                size`.
-            - Output: :math:`(N, C, X, Y, ...)` where each element represent a binary class label.
-        """
-
-        tensor_one_hot = torch.nn.functional.one_hot(tensor.long(), num_classes)
-
-        # one_hot outputs a tensor of shape (N, X, Y, ..., C)
-        # this tensor is converted to a tensor of shape (N, C, X, Y, ...)
-        return tensor_one_hot.permute(
-            (0, tensor_one_hot.ndim - 1, *range(1, tensor_one_hot.ndim - 1))
-        )
-
-    @staticmethod
     def _flatten_tensor(tensor: torch.Tensor) -> torch.Tensor:
         r"""
         Flattens a tensor except for its first two dimensions (batch dimension and class dimension).
@@ -126,7 +102,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
         if prediction.ndim != target.ndim:
             # in this case the target tensor is label encoded and needs to be converted to a one-hot encoding
-            target = self._one_hot_encode(target, prediction.shape[1])
+            target = one_hot_encode(target, prediction.shape[1])
 
         return self._flatten_tensor(prediction), self._flatten_tensor(target)
 
@@ -181,7 +157,7 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
 
         if prediction.dim() != target.dim():
-            target = self._one_hot_encode(target, prediction.shape[1])
+            target = one_hot_encode(target, prediction.shape[1])
 
         dice_loss_module = self.get_dice_loss_module()
         dice_loss = dice_loss_module(prediction, target)
