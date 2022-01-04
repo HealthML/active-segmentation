@@ -1,8 +1,8 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
 import os
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import nibabel as nib
 import numpy as np
@@ -342,3 +342,19 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         """
 
         return BraTSDataset.IMAGE_DIMENSIONS[0]
+
+    def multi_label(self) -> bool:
+        """
+        Returns:
+            bool: Whether the dataset is a multi-label or a single-label dataset.
+        """
+
+        return True
+
+    def id_to_class_names(self) -> Dict[int, str]:
+        """
+        Returns:
+            Dict[int, str]: A mapping of class indices to descriptive class names.
+        """
+
+        return {0: "tumor"}
