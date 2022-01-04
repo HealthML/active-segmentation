@@ -131,7 +131,70 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         return self._flatten_tensor(prediction), self._flatten_tensor(target)
 
 
-class DiceLoss(SegmentationLoss):
+class AbstractDiceLoss(SegmentationLoss, abc.ABC):
+    r"""
+    Base class for implementation of Dice loss and Generalized Dice loss.
+
+    Args:
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `False`).
+        reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
+            multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
+            of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+    """
+
+    def __init__(
+        self,
+        include_background: bool = False,
+        reduction: Literal["mean", "sum", "none"] = "mean",
+        epsilon: float = 1e-5,
+    ):
+        super().__init__(epsilon=epsilon, reduction=reduction)
+
+    @abc.abstractmethod
+    def get_dice_loss_module(self) -> torch.nn.Module:
+        """
+        Returns:
+            Module: Dice loss module.
+        """
+
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        r"""
+
+        Args:
+            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
+            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+                encoded.
+        Returns:
+            Tensor: Dice loss.
+
+        Shape:
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+                in :math:`[0, 1]`
+            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                or :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding.
+            - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
+        """
+
+        assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
+
+        if prediction.dim() != target.dim():
+            target = self._one_hot_encode(target, prediction.shape[1])
+
+        dice_loss_module = self.get_dice_loss_module()
+        dice_loss = dice_loss_module(prediction, target)
+
+        if self.reduction == "none":
+            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
+            # set to "none"
+            # since the spatial dimensions only contain a single element, they are squeezed here
+            dice_loss = dice_loss.reshape((dice_loss.shape[0], dice_loss.shape[1]))
+        return dice_loss
+
+
+class DiceLoss(AbstractDiceLoss):
     r"""
     Implementation of the Dice loss for segmentation tasks. The Dice loss for binary segmentation tasks originally was
     formulated in:
@@ -177,41 +240,16 @@ class DiceLoss(SegmentationLoss):
             smooth_dr=epsilon,
         )
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        r"""
-
-        Args:
-            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
-            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
-                encoded.
+    def get_dice_loss_module(self) -> torch.nn.Module:
+        """
         Returns:
-            Tensor: Dice loss.
-
-        Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                or :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
-            - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
+            Module: Dice loss module.
         """
 
-        assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
-
-        if prediction.dim() != target.dim():
-            target = self._one_hot_encode(target, prediction.shape[1])
-
-        dice_loss = self.dice_loss(prediction, target)
-
-        if self.reduction == "none":
-            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
-            # set to "none"
-            # since the spatial dimensions only contain a single element, they are squeezed here
-            dice_loss = dice_loss.reshape((dice_loss.shape[0], dice_loss.shape[1]))
-        return dice_loss
+        return self.dice_loss
 
 
-class GeneralizedDiceLoss(SegmentationLoss):
+class GeneralizedDiceLoss(AbstractDiceLoss):
     r"""
     Implementation of Generalized Dice loss for segmentation tasks. The Generalized Dice loss was formulated in:
 
@@ -259,40 +297,13 @@ class GeneralizedDiceLoss(SegmentationLoss):
             smooth_dr=epsilon,
         )
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        r"""
-
-        Args:
-            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
-            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
-            encoded.
+    def get_dice_loss_module(self) -> torch.nn.Module:
+        """
         Returns:
-            Tensor: Generalized Dice loss.
-
-        Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`.
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
-            - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
+            Module: Dice loss module.
         """
 
-        # ToDo: refactor duplicated code
-
-        assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
-
-        if prediction.dim() != target.dim():
-            target = self._one_hot_encode(target, prediction.shape[1])
-
-        dice_loss = self.generalized_dice_loss(prediction, target)
-
-        if self.reduction == "none":
-            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
-            # set to "none"
-            # since the spatial dimensions only contain a single element, they are squeezed here
-            dice_loss = dice_loss.reshape((dice_loss.shape[0], dice_loss.shape[1]))
-        return dice_loss
+        return self.generalized_dice_loss
 
 
 class FalsePositiveLoss(SegmentationLoss):
