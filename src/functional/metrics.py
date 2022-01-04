@@ -5,156 +5,212 @@ The metric implementations are based on the TorchMetrics framework. For instruct
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
 
-from typing import Optional, Tuple
+from typing import Literal, Optional, Tuple
 
 import torch
 import torchmetrics
 
-
-def _is_binary(tensor_to_check: torch.Tensor) -> bool:
-    """
-    Checks whether the input contains only zeros and ones.
-
-    Args:
-        input (Tensor): tensor to check.
-    Returns:
-        bool: True if contains only zeros and ones, False otherwise.
-    """
-
-    return torch.equal(
-        tensor_to_check, tensor_to_check.bool().to(dtype=tensor_to_check.dtype)
-    )
+from .utils import flatten_tensors, is_binary, one_hot_encode, reduce_metric
 
 
 def dice_score(
-    prediction: torch.Tensor, target: torch.Tensor, smoothing: float = 0
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    num_classes: int,
+    convert_to_one_hot: bool = True,
+    epsilon: float = 0,
+    include_background: bool = True,
+    reduction: Literal["mean", "min", "max", "none"] = "none",
 ) -> torch.Tensor:
     r"""
     Computes the Dice similarity coefficient (DSC) between a predicted segmentation mask and the target mask:
 
         :math:`DSC = \frac{2 \cdot TP}{2 \cdot TP + FP + FN}`
 
-    Using the `smoothing` parameter, Laplacian smoothing can be applied:
+    Using the `epsilon` parameter, Laplacian smoothing can be applied:
 
         :math:`DSC = \frac{2 \cdot TP + \lambda}{2 \cdot TP + FP + FN + \lambda}`
 
-    Note:
-        In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
-        given class and thus it aggregates over :math:`TP`, :math:`FP`, and :math:`FN` over all channels and dimensions.
+    This metric supports both single-label and multi-label segmentation tasks.
 
     Args:
-        prediction (Tensor): The predicted segmentation mask, where each value is in :math:`[0, 1]`.
-        target (Tensor): The target segmentation mask, where each value is in :math:`\{0, 1\}`.
-        smoothing (float, optional): Laplacian smoothing factor.
+        prediction (Tensor): The prediction tensor.
+        target (Tensor): The target tensor.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        epsilon (float, optional): Laplacian smothing factor (default = 0).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
+        reduction (string): A method to reduce metric scores of multiple classes.
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
 
     Returns:
         Tensor: Dice similarity coefficient.
 
     Shape:
-        - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,
-          or `(height, width)` for single image segmentation tasks.
-        - Target: Must have the same dimensions as the prediction.
-        - Output: Scalar.
+        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
+            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+            (`C = number of classes`).
+        - Target: Same shape and type as prediction.
+        - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
     assert prediction.device == target.device
-    assert prediction.shape == target.shape
 
-    flattened_prediction = prediction.view(-1).float()
-    flattened_target = target.view(-1).float()
-
-    intersection = (flattened_prediction * flattened_target).sum()
-    score = (2.0 * intersection + smoothing) / (
-        flattened_prediction.sum() + flattened_target.sum() + smoothing
+    flattened_prediction, flattened_target = flatten_tensors(
+        prediction,
+        target,
+        num_classes,
+        convert_to_one_hot=convert_to_one_hot,
+        include_background=include_background,
     )
 
-    return score
+    intersection = (flattened_prediction * flattened_target).sum(dim=1)
+    per_class_dice_score = (2.0 * intersection + epsilon) / (
+        flattened_prediction.sum(dim=1) + flattened_target.sum(dim=1) + epsilon
+    )
+
+    return reduce_metric(per_class_dice_score, reduction)
 
 
 def sensitivity(
-    prediction: torch.Tensor, target: torch.Tensor, smoothing: float = 0
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    num_classes: int,
+    convert_to_one_hot: bool = True,
+    epsilon: float = 0,
+    include_background: bool = True,
+    reduction: Literal["mean", "min", "max", "none"] = "none",
 ) -> torch.Tensor:
     r"""
     Computes the sensitivity from a predicted segmentation mask and the target mask:
 
         :math:`Sensitivity = \frac{TP}{TP + FN}`
 
-    Using the `smoothing` parameter, Laplacian smoothing can be applied:
+    Using the `epsilon` parameter, Laplacian smoothing can be applied:
 
         :math:`Sensitivity = \frac{TP + \lambda}{TP + FN + \lambda}`
 
-    Note:
-        In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
-        given class and thus it aggregates over :math:`TP`, and :math:`FN` over all channels and dimensions.
+    This metric supports both single-label and multi-label segmentation tasks.
 
     Args:
-        prediction (Tensor): The predicted segmentation mask, where each value is in :math:`[0, 1]`.
-        target (Tensor): The target segmentation mask, where each value is in :math:`\{0, 1\}`.
-        smoothing (float, optional): Laplacian smoothing factor.
+        prediction (Tensor): The prediction tensor.
+        target (Tensor): The target tensor.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        epsilon (float, optional): Laplacian smothing factor (default = 0).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
+        reduction (string): A method to reduce metric scores of multiple classes.
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
 
     Returns:
         Tensor: Sensitivity.
 
     Shape:
-        - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,
-          or `(height, width)` for single image segmentation tasks.
-        - Target: Must have the same dimensions as the prediction.
-        - Output: Scalar.
+        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
+            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+            (`C = number of classes`).
+        - Target: Same shape and type as prediction.
+        - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
     assert prediction.device == target.device
-    assert prediction.shape == target.shape
 
-    flattened_prediction = prediction.view(-1).float()
-    flattened_target = target.view(-1).float()
+    flattened_prediction, flattened_target = flatten_tensors(
+        prediction,
+        target,
+        num_classes,
+        convert_to_one_hot=convert_to_one_hot,
+        include_background=include_background,
+    )
 
-    true_positives = (flattened_prediction * flattened_target).sum()
-    true_positives_false_negatives = flattened_target.sum()
-    return (true_positives + smoothing) / (true_positives_false_negatives + smoothing)
+    true_positives = (flattened_prediction * flattened_target).sum(dim=1)
+    true_positives_false_negatives = flattened_target.sum(dim=1)
+
+    per_class_sensitivity = (true_positives + epsilon) / (
+        true_positives_false_negatives + epsilon
+    )
+
+    return reduce_metric(per_class_sensitivity, reduction)
 
 
 def specificity(
-    prediction: torch.Tensor, target: torch.Tensor, smoothing: float = 0
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    num_classes: int,
+    convert_to_one_hot: bool = True,
+    epsilon: float = 0,
+    include_background: bool = True,
+    reduction: Literal["mean", "min", "max", "none"] = "none",
 ) -> torch.Tensor:
     r"""
     Computes the specificity from a predicted segmentation mask and the target mask:
 
         :math:`Specificity = \frac{TN}{TN + FP}`
 
-    Using the `smoothing` parameter, Laplacian smoothing can be applied:
+    Using the `epsilon` parameter, Laplacian smoothing can be applied:
 
         :math:`Specificity = \frac{TN + \lambda}{TN + FP + \lambda}`
 
-    Note:
-        In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
-        given class and thus it aggregates over :math:`TP`, and :math:`FN` over all channels and dimensions.
+    This metric supports both single-label and multi-label segmentation tasks.
 
     Args:
-        prediction (Tensor): The predicted segmentation mask, where each value is in :math:`[0, 1]`.
-        target (Tensor): The target segmentation mask, where each value is in :math:`\{0, 1\}`.
-        smoothing (float, optional): Laplacian smoothing factor.
+        prediction (Tensor): The prediction tensor.
+        target (Tensor): The target tensor.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        epsilon (float, optional): Laplacian smothing factor (default = 0).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
+        reduction (string): A method to reduce metric scores of multiple classes.
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
 
     Returns:
         Tensor: Specificity.
 
     Shape:
-        - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,
-          or `(height, width)` for single image segmentation tasks.
-        - Target: Must have the same dimensions as the prediction.
-        - Output: Scalar.
+        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
+            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+            (`C = number of classes`).
+        - Target: Same shape and type as prediction.
+        - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
     assert prediction.device == target.device
-    assert prediction.shape == target.shape
 
-    flattened_prediction = prediction.view(-1).float()
-    flattened_target = target.view(-1).float()
+    flattened_prediction, flattened_target = flatten_tensors(
+        prediction,
+        target,
+        num_classes,
+        convert_to_one_hot=convert_to_one_hot,
+        include_background=include_background,
+    )
 
     ones = torch.ones(flattened_prediction.shape, device=prediction.device)
 
-    true_negatives = ((ones - flattened_prediction) * (ones - flattened_target)).sum()
-    true_negatives_false_positives = (ones - flattened_target).sum()
-    return (true_negatives + smoothing) / (true_negatives_false_positives + smoothing)
+    true_negatives = ((ones - flattened_prediction) * (ones - flattened_target)).sum(
+        dim=1
+    )
+    true_negatives_false_positives = (ones - flattened_target).sum(dim=1)
+
+    per_class_specificity = (true_negatives + epsilon) / (
+        true_negatives_false_positives + epsilon
+    )
+
+    return reduce_metric(per_class_specificity, reduction)
 
 
 def _distance_matrix(
@@ -219,7 +275,7 @@ def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
         2,
         3,
     ], "Input must be a two- or three-dimensional tensor"
-    assert _is_binary(input_image), "Input must be binary."
+    assert is_binary(input_image), "Input must be binary."
 
     if input_image.dim() == 2:
         max_pooling = torch.nn.MaxPool2d(
@@ -231,7 +287,9 @@ def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
         )
 
     # to implement erosion filtering, max ppooling with a 3x3 kernel is applied to the inverted image
-    inverted_input = torch.as_tensor(1.0, device=input_image.device) - input_image
+    inverted_input = (
+        torch.ones(input_image.shape, device=input_image.device) - input_image
+    )
 
     # pad image with ones to maintain the input's dimensions
     inverted_input_padded = torch.nn.functional.pad(
@@ -239,13 +297,13 @@ def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
     )
 
     # apply the max pooling and invert the result
-    return torch.as_tensor(1.0, device=input_image.device) - max_pooling(
-        inverted_input_padded.unsqueeze(dim=0)
-    ).squeeze(dim=0)
+    return torch.ones(input_image.shape, device=input_image.device) - max_pooling(
+        inverted_input_padded
+    )
 
 
 # pylint: disable=too-many-locals
-def hausdorff_distance(
+def single_class_hausdorff_distance(
     prediction: torch.Tensor,
     target: torch.Tensor,
     normalize: bool = False,
@@ -291,8 +349,8 @@ def hausdorff_distance(
     assert (
         prediction.dim() == 2 or prediction.dim() == 3
     ), "Prediction and target must have either two or three dimensions."
-    assert _is_binary(prediction), "Predictions must be binary."
-    assert _is_binary(target), "Target must be binary."
+    assert is_binary(prediction), "Predictions must be binary."
+    assert is_binary(target), "Target must be binary."
 
     if torch.count_nonzero(prediction) == 0 or torch.count_nonzero(target) == 0:
         return torch.as_tensor(float("nan"), device=prediction.device)
@@ -340,34 +398,214 @@ def hausdorff_distance(
     return torch.quantile(distances, q=percentile, keepdim=False).float()
 
 
-class DiceScore(torchmetrics.Metric):
+# pylint: disable=too-many-arguments
+def hausdorff_distance(
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    num_classes: int,
+    all_image_locations: Optional[torch.Tensor] = None,
+    convert_to_one_hot: bool = True,
+    include_background: bool = True,
+    normalize: bool = False,
+    percentile: float = 0.95,
+    reduction: Literal["mean", "min", "max", "none"] = "none",
+) -> torch.Tensor:
+    r"""
+    Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
+
+    This metric supports both single-label and multi-label segmentation tasks.
+
+    Args:
+        prediction (Tensor): The prediction tensor.
+        target (Tensor): The target tensor.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        all_image_locations (Tensor, optional): A pre-computed tensor containing one point for each pixel in the
+            prediction representing the pixel's location in 2d or 3d Euclidean space. Passing a pre-computed tensor to
+            this parameter can be used to speed up computation.
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        epsilon (float, optional): Laplacian smothing factor (default = 0).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
+        normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
+            distance.
+        percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
+            :math:`\[0, 1\]`.
+        reduction (string): A method to reduce metric scores of multiple classes.
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
+
+    Returns:
+        Tensor: Hausdorff distance.
+
+    Shape:
+        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
+            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+            (`C = number of classes`).
+        - Target: Same shape and type as prediction.
+        - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
+    """
+
+    # adapted code from
+    # https://github.com/PiechaczekMyller/brats/blob/eb9f7eade1066dd12c90f6cef101b74c5e974bfa/brats/functional.py#L135
+
+    assert prediction.device == target.device
+    assert (
+        prediction.shape == target.shape
+    ), "Prediction and target must have the same dimensions."
+    assert (
+        prediction.dim() == 3 or prediction.dim() == 4
+    ), "Prediction and target must have either two or three dimensions."
+
+    if convert_to_one_hot:
+        prediction = one_hot_encode(prediction, num_classes)
+        target = one_hot_encode(target, num_classes)
+
+    if not include_background:
+        # drop the channel of the background class
+        prediction = prediction[1:]
+        target = target[1:]
+
+    per_class_hausdorff_distances = torch.ones(num_classes, device=prediction.device)
+
+    for i in range(num_classes):
+        per_class_hausdorff_distances[i] = single_class_hausdorff_distance(
+            prediction,
+            target,
+            normalize=normalize,
+            percentile=percentile,
+            all_image_locations=all_image_locations,
+        )
+    return reduce_metric(per_class_hausdorff_distances, reduction)
+
+
+class SegmentationMetric(torchmetrics.Metric):
+    """
+    Base class for segmentation metrics.
+
+    Args:
+    num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+    convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+        encoding or not (default = `True`).
+    include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+        calculation (default = `True`).
+    reduction (string, optional): A method to reduce metric scores of multiple classes.
+
+        - ``"none"``: no reduction will be applied (default)
+        - ``"mean"``: takes the mean
+        - ``"min"``: takes the minimum
+        - ``"max"``: takes the maximum
+    """
+
+    def __init__(
+        self,
+        num_classes: int,
+        convert_to_one_hot: bool = True,
+        include_background: bool = True,
+        reduction: Literal["mean", "min", "max", "none"] = "none",
+    ):
+        super().__init__()
+
+        self.num_classes = num_classes
+        self.convert_to_one_hot = convert_to_one_hot
+        self.include_background = include_background
+        if reduction not in ["mean", "min", "max", "none"]:
+            raise ValueError("Invalid reduction method.")
+        self.reduction = reduction
+
+    def _flatten_tensors(
+        self, prediction: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor]:
+        r"""
+        Reshapes and flattens prediction and target tensors except for the first dimension (class dimension).
+
+        Args:
+            prediction (Tensor): The prediction tensor (either label-encoded, one-hot encoded or multi-hot encoded).
+            target (Tensor): The target tensor (either label-encoded, one-hot encoded or multi-hot encoded).
+
+        Returns:
+            Tuple[Tensor]: Flattened prediction and target tensors (one-hot or multi-hot encoded).
+
+        Shape:
+            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding (`C = number of classes`).
+            - Target: Same shape and type as prediction.
+            - Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /
+                presence of the respective class (one-hot / multi-hot encoding).
+        """
+
+        return flatten_tensors(
+            prediction,
+            target,
+            self.num_classes,
+            convert_to_one_hot=self.convert_to_one_hot,
+            include_background=self.include_background,
+        )
+
+
+class DiceScore(SegmentationMetric):
     """
     Computes the Dice similarity coefficient (DSC). Can be used for 3D images whose slices are scattered over multiple
     batches.
 
     Args:
-        smoothing (int, optional): Laplacian smoothing factor.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        reduction (string, optional): A method to reduce metric scores of multiple classes.
+
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
     """
 
-    def __init__(self, smoothing: float = 0):
-        super().__init__()
-        self.smoothing = smoothing
-
-        self.numerator = torch.tensor(0.0)
-        self.denominator = torch.tensor(0.0)
-        self.add_state("numerator", torch.tensor(0.0))
-        self.add_state("denominator", torch.tensor(0.0))
+    def __init__(
+        self,
+        num_classes: int,
+        convert_to_one_hot: bool = True,
+        epsilon: float = 0,
+        reduction: Literal["none", "mean", "min", "max"] = "none",
+    ):
+        super().__init__(
+            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+        )
+        self.epsilon = epsilon
+        self.numerator = torch.zeros(num_classes)
+        self.denominator = torch.zeros(num_classes)
+        self.add_state("numerator", torch.zeros(num_classes))
+        self.add_state("denominator", torch.zeros(num_classes))
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        r"""
+        Updates metric using the provided prediction.
+
+        Args:
+            prediction (Tensor): The prediction tensor.
+            target (Tensor): The target tensor.
+
+        Shape:
+            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding (`C = number of classes`).
+            - Target: Same shape and type as prediction.
+        """
+
         assert prediction.device == target.device
-        assert prediction.shape == target.shape
 
-        flattened_prediction = prediction.view(-1).float()
-        flattened_target = target.view(-1).float()
+        flattened_prediction, flattened_target = self._flatten_tensors(
+            prediction, target
+        )
 
-        self.numerator += (flattened_prediction * flattened_target).sum()
-        self.denominator += flattened_prediction.sum() + flattened_target.sum()
+        self.numerator += (flattened_prediction * flattened_target).sum(dim=1)
+        self.denominator += flattened_prediction.sum(dim=1) + flattened_target.sum(
+            dim=1
+        )
 
     def compute(self) -> torch.Tensor:
         """
@@ -375,24 +613,46 @@ class DiceScore(torchmetrics.Metric):
 
         Returns:
             Tensor: Dice similarity coefficient.
+
+        Shape:
+            - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
         """
 
-        return (2.0 * self.numerator + self.smoothing) / (
-            self.denominator + self.smoothing
+        per_class_dice_score = (2.0 * self.numerator + self.epsilon) / (
+            self.denominator + self.epsilon
         )
 
+        return reduce_metric(per_class_dice_score, self.reduction)
 
-class Sensitivity(torchmetrics.Metric):
+
+class Sensitivity(SegmentationMetric):
     """
     Computes the sensitivity. Can be used for 3D images whose slices are scattered over multiple batches.
 
     Args:
-        smoothing (int, optional): Laplacian smoothing factor.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        reduction (string, optional): A method to reduce metric scores of multiple classes.
+
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
     """
 
-    def __init__(self, smoothing: float = 0):
-        super().__init__()
-        self.smoothing = smoothing
+    def __init__(
+        self,
+        num_classes: int,
+        convert_to_one_hot: bool = True,
+        epsilon: float = 0,
+        reduction: Literal["none", "mean", "min", "max"] = "none",
+    ):
+        super().__init__(
+            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+        )
+        self.epsilon = epsilon
         self.true_positives = torch.tensor(0.0)
         self.true_positives_false_negatives = torch.tensor(0.0)
         self.add_state("true_positives", torch.tensor(0.0))
@@ -400,14 +660,28 @@ class Sensitivity(torchmetrics.Metric):
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        r"""
+        Updates metric using the provided prediction.
+
+        Args:
+            prediction (Tensor): The prediction tensor.
+            target (Tensor): The target tensor.
+
+        Shape:
+            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding (`C = number of classes`).
+            - Target: Same shape and type as prediction.
+        """
+
         assert prediction.device == target.device
-        assert prediction.shape == target.shape
 
-        flattened_prediction = prediction.view(-1).float()
-        flattened_target = target.view(-1).float()
+        flattened_prediction, flattened_target = self._flatten_tensors(
+            prediction, target
+        )
 
-        self.true_positives += (flattened_prediction * flattened_target).sum()
-        self.true_positives_false_negatives += flattened_target.sum()
+        self.true_positives += (flattened_prediction * flattened_target).sum(dim=1)
+        self.true_positives_false_negatives += flattened_target.sum(dim=1)
 
     def compute(self) -> torch.Tensor:
         """
@@ -415,24 +689,46 @@ class Sensitivity(torchmetrics.Metric):
 
         Returns:
             Tensor: Sensitivity.
+
+        Shape:
+            - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
         """
 
-        return (self.true_positives + self.smoothing) / (
-            self.true_positives_false_negatives + self.smoothing
+        per_class_sensitivity = (self.true_positives + self.epsilon) / (
+            self.true_positives_false_negatives + self.epsilon
         )
 
+        return reduce_metric(per_class_sensitivity, self.reduction)
 
-class Specificity(torchmetrics.Metric):
+
+class Specificity(SegmentationMetric):
     """
     Computes the specificity. Can be used for 3D images whose slices are scattered over multiple batches.
 
     Args:
-        smoothing (int, optional): Laplacian smoothing factor.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        reduction (string, optional): A method to reduce metric scores of multiple classes (default = `"none"`).
+
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
     """
 
-    def __init__(self, smoothing: float = 0):
-        super().__init__()
-        self.smoothing = smoothing
+    def __init__(
+        self,
+        num_classes: int,
+        convert_to_one_hot: bool = True,
+        epsilon: float = 0,
+        reduction: Literal["none", "mean", "min", "max"] = "none",
+    ):
+        super().__init__(
+            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+        )
+        self.epsilon = epsilon
         self.true_negatives = torch.tensor(0.0)
         self.true_negatives_false_positives = torch.tensor(0.0)
         self.add_state("true_negatives", torch.tensor(0.0))
@@ -440,18 +736,32 @@ class Specificity(torchmetrics.Metric):
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
-        assert prediction.device == target.device
-        assert prediction.shape == target.shape
+        r"""
+        Updates metric using the provided prediction.
 
-        flattened_prediction = prediction.view(-1).float()
-        flattened_target = target.view(-1).float()
+        Args:
+            prediction (Tensor): The prediction tensor.
+            target (Tensor): The target tensor.
+
+        Shape:
+            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding (`C = number of classes`).
+            - Target: Same shape and type as prediction.
+        """
+
+        assert prediction.device == target.device
+
+        flattened_prediction, flattened_target = self._flatten_tensors(
+            prediction, target
+        )
 
         ones = torch.ones(flattened_prediction.shape, device=prediction.device)
 
         self.true_negatives += (
             (ones - flattened_prediction) * (ones - flattened_target)
-        ).sum()
-        self.true_negatives_false_positives += (ones - flattened_target).sum()
+        ).sum(dim=1)
+        self.true_negatives_false_positives += (ones - flattened_target).sum(dim=1)
 
     def compute(self) -> torch.Tensor:
         """
@@ -459,32 +769,51 @@ class Specificity(torchmetrics.Metric):
 
         Returns:
             Tensor: Sensitivity.
+
+        Shape:
+            - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
         """
 
-        return (self.true_negatives + self.smoothing) / (
-            self.true_negatives_false_positives + self.smoothing
+        per_class_sensitivity = (self.true_negatives + self.epsilon) / (
+            self.true_negatives_false_positives + self.epsilon
         )
 
+        return reduce_metric(per_class_sensitivity, self.reduction)
 
-class HausdorffDistance(torchmetrics.Metric):
+
+class HausdorffDistance(SegmentationMetric):
     r"""
     Computes the Hausdorff distance. Can be used for 3D images whose slices are scattered over multiple batches.
 
     Args:
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
         slices_per_image (int): Number of slices per 3d image.
-        percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
-            :math:`\[0, 1\]`.
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
         normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
             distance.
+        percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
+            :math:`\[0, 1\]`.
+        reduction (string, optional): A method to reduce metric scores of multiple classes (default = `"none"`).
+
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
     """
 
     def __init__(
         self,
+        num_classes: int,
         slices_per_image: int,
+        convert_to_one_hot: bool = True,
         normalize: bool = False,
         percentile: float = 0.95,
+        reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
-        super().__init__()
+        super().__init__(
+            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+        )
         self.normalize = normalize
         self.percentile = percentile
         self.predictions = []
@@ -503,10 +832,16 @@ class HausdorffDistance(torchmetrics.Metric):
         assert (
             prediction.shape == target.shape
         ), "Prediction and target must have the same dimensions."
-        assert prediction.ndim in [
+        assert prediction.dim() in [
             2,
             3,
-        ], "Prediction and target must have either two or three dimensions."
+            4,
+        ], "Prediction and target must have either two, three or four dimensions."
+
+        if not self.multi_label:
+            prediction = one_hot_encode(prediction, self.num_classes)
+            target = one_hot_encode(target, self.num_classes)
+
         self.hausdorff_distance_cached = False
 
         # we just collect all slices of the image since, for 3d images, the Hausdorff distance needs to be computed over
@@ -515,7 +850,10 @@ class HausdorffDistance(torchmetrics.Metric):
         self.predictions.append(prediction)
         self.targets.append(target)
 
-        added_slices = 1 if prediction.ndim == 2 else prediction.shape[0]
+        if self.multi_label:
+            added_slices = 1 if prediction.dim() == 3 else prediction.shape[1]
+        else:
+            added_slices = 1 if prediction.dim() == 2 else prediction.shape[0]
         self.number_of_slices += added_slices
 
         if self.number_of_slices == self.slices_per_image:
@@ -529,21 +867,26 @@ class HausdorffDistance(torchmetrics.Metric):
 
         Returns:
             Tensor: Hausdorff distance.
+
+        Shape:
+            - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
         """
 
         if self.hausdorff_distance_cached:
             return self.hausdorff_distance
 
-        if self.predictions[0].ndim == 2:
-            predictions = torch.stack(self.predictions)
-            targets = torch.stack(self.targets)
+        if self.predictions[0].dim() == 3:
+            predictions = torch.stack(self.predictions, dim=1)
+            targets = torch.stack(self.targets, dim=1)
         else:
-            predictions = torch.cat(self.predictions, dim=0)
-            targets = torch.cat(self.targets, dim=0)
+            predictions = torch.cat(self.predictions, dim=1)
+            targets = torch.cat(self.targets, dim=1)
 
         hausdorff_dist = hausdorff_distance(
             predictions,
             targets,
+            self.num_classes,
+            convert_to_one_hot=False,
             normalize=self.normalize,
             percentile=self.percentile,
         )
@@ -561,4 +904,4 @@ class HausdorffDistance(torchmetrics.Metric):
         self.targets = []
         self.number_of_slices = 0
 
-        return hausdorff_dist
+        return reduce_metric(hausdorff_dist, self.reduction)
