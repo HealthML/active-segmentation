@@ -125,7 +125,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             Pytorch dataloader or Keras sequence representing the training set.
         """
 
-        # disable shuffling in the dataloader since the BraTS dataset is a subclass of
+        # disable shuffling in the dataloader since the dataset is a subclass of
         # IterableDataset and implements it's own shuffling
         if self._training_set:
             return DataLoader(
