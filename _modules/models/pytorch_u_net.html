@@ -182,7 +182,7 @@
   <h1>Source code for models.pytorch_u_net</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;U-Net architecture wrapped as PytorchModel&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -197,28 +197,26 @@
 <span class="sd">    Details about the architecture: https://arxiv.org/pdf/1505.04597.pdf</span>
 <span class="sd">    Args:</span>
 <span class="sd">        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</span>
-<span class="sd">        input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).</span>
+<span class="sd">        dim (int, optional): The dimensionality of the U-Net. Defaults to 2.</span>
 <span class="sd">        **kwargs: Further, dataset specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">in_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span> <span class="o">=</span> <span class="n">input_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span>
-            <span class="n">in_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">in_channels</span><span class="o">=</span><span class="n">in_channels</span><span class="p">,</span>
             <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">init_features</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
             <span class="n">num_levels</span><span class="o">=</span><span class="n">num_levels</span><span class="p">,</span>
-            <span class="n">input_shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">,</span>
+            <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="PytorchUNet.input_dimensionality"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.input_dimensionality">[docs]</a>    <span class="k">def</span> <span class="nf">input_dimensionality</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span></div>
 
     <span class="c1"># wrap model interface</span>
 <div class="viewcode-block" id="PytorchUNet.eval"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

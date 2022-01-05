@@ -245,118 +245,8 @@
 </dd></dl>
 
 </section>
-<section id="module-datasets.brats_dataset">
-<span id="bratsdataset"></span><h2>BraTSDataset<a class="headerlink" href="#module-datasets.brats_dataset" title="Permalink to this headline">¶</a></h2>
-<p>Module to load and batch brats dataset</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.brats_dataset.</span></span><span class="sig-name descname"><span class="pre">BraTSDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unlabeled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
-<p>The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
-held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
-glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
-Further information: <a class="reference external" href="https://www.med.upenn.edu/cbica/brats2020/data.html">https://www.med.upenn.edu/cbica/brats2020/data.html</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>image_paths</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List with the paths to the images.</p></li>
-<li><p><strong>annotation_paths</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List with the paths to the annotations.</p></li>
-<li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory to speed-up data loading in subsequent epochs.
-Defaults to zero.</p></li>
-<li><p><strong>clip_mask</strong> (<em>bool</em><em>, </em><em>optinal</em>) – Flag to clip the annotation labels, if True only label 1 is kept. Defaults to true.</p></li>
-<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the data should be shuffled.</p></li>
-<li><p><strong>transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the images.</p></li>
-<li><p><strong>target_transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the annotations.</p></li>
-<li><p><strong>dimensionality</strong> (<em>int</em><em>, </em><em>optional</em>) – 2 or 3 to define if the datset should return 2d slices of whole 3d images.
-Defaults to 2.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.IMAGE_DIMENSIONS">
-<span class="sig-name descname"><span class="pre">IMAGE_DIMENSIONS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">(155,</span> <span class="pre">240,</span> <span class="pre">240)</span></em><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.IMAGE_DIMENSIONS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.add_image">
-<span class="sig-name descname"><span class="pre">add_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.add_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.add_image" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds an image to this dataset.
-:param image_path: Path of the image to be added.
-:param annotation_path: Path of the annotation of the image to be added.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None. Raises ValueError if image already exists.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.image_ids">
-<span class="sig-name descname"><span class="pre">image_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.image_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.image_ids" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>List of all image IDs included in the dataset.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.normalize">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Normalizes an image by</dt><dd><ol class="arabic simple">
-<li><p>Dividing by the maximum value</p></li>
-<li><p>Subtracting the mean, zeros will be ignored while calculating the mean</p></li>
-<li><p>Dividing by the negative minimum value</p></li>
-</ol>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>img</strong> – The input image that should be normalized.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Normalized image with background values normalized to -1</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.reinforce_type">
-<span class="sig-name descname"><span class="pre">reinforce_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.reinforce_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reinforce the type for DataPipe instance. And the ‘expected_type’ is required
-to be a subtype of the original type hint to restrict the type requirement
-of DataPipe instance.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.remove_image">
-<span class="sig-name descname"><span class="pre">remove_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.remove_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.remove_image" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes an image from this dataset.
-:param image_path: Path of the image to be removed.
-:param annotation_path: Path of the annotation of the image to be removed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None. Raises ValueError if image already exists.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.slices_per_image">
-<span class="sig-name descname"><span class="pre">slices_per_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.slices_per_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.slices_per_image" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Number of slices that each image of the dataset contains.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<section id="bratsdataset">
+<h2>BraTSDataset<a class="headerlink" href="#bratsdataset" title="Permalink to this headline">¶</a></h2>
 </section>
 <section id="module-datasets.data_module">
 <span id="datamodule"></span><h2>DataModule<a class="headerlink" href="#module-datasets.data_module" title="Permalink to this headline">¶</a></h2>
@@ -373,6 +263,17 @@ of DataPipe instance.</p>
 :type pin_memory: bool, optional
 :param shuffle: Flag if the data should be shuffled.
 :param **kwargs: Further, dataset specific parameters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.data_channels">
+<span class="sig-name descname"><span class="pre">data_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.data_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.data_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overwritten by subclasses if the data has multiple channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The amount of data channels. Defaults to 1.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.label_items">
 <span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
@@ -391,11 +292,6 @@ of DataPipe instance.</p>
 <span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates the datasets managed by this data module.
 :param stage: Current training stage.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -557,7 +453,7 @@ Further information: <a class="reference external" href="http://host.robots.ox.a
               <ul>
 <li><a class="reference internal" href="#">datasets</a><ul>
 <li><a class="reference internal" href="#module-datasets.brats_data_module">BraTSDataModule</a></li>
-<li><a class="reference internal" href="#module-datasets.brats_dataset">BraTSDataset</a></li>
+<li><a class="reference internal" href="#bratsdataset">BraTSDataset</a></li>
 <li><a class="reference internal" href="#module-datasets.data_module">DataModule</a></li>
 <li><a class="reference internal" href="#module-datasets.pascal_voc_data_module">PascalVocDataModule</a></li>
 </ul>

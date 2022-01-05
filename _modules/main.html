@@ -192,11 +192,11 @@
 <span class="kn">from</span> <span class="nn">active_learning</span> <span class="kn">import</span> <span class="n">ActiveLearningPipeline</span>
 <span class="kn">from</span> <span class="nn">inferencing</span> <span class="kn">import</span> <span class="n">Inferencer</span>
 <span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">PytorchFCNResnet50</span><span class="p">,</span> <span class="n">PytorchUNet</span>
-<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">BraTSDataModule</span><span class="p">,</span> <span class="n">PascalVOCDataModule</span>
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">BraTSDataModule</span><span class="p">,</span> <span class="n">PascalVOCDataModule</span><span class="p">,</span> <span class="n">DecathlonDataModule</span>
 <span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="n">QueryStrategy</span>
 
 
-<span class="c1"># pylint: disable=too-many-arguments,too-many-locals</span>
+<span class="c1"># pylint: disable=too-many-arguments,too-many-locals,too-many-branches</span>
 <div class="viewcode-block" id="run_active_learning_pipeline"><a class="viewcode-back" href="../main.html#main.run_active_learning_pipeline">[docs]</a><span class="k">def</span> <span class="nf">run_active_learning_pipeline</span><span class="p">(</span>
     <span class="n">architecture</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">dataset</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -257,25 +257,6 @@
         <span class="n">config</span><span class="o">=</span><span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;fcn_resnet50&quot;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchFCNResnet50</span><span class="p">(</span>
-            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span> <span class="o">**</span><span class="n">model_config</span>
-        <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;u_net&quot;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchUNet</span><span class="p">(</span>
-            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
-            <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
-            <span class="n">num_levels</span><span class="o">=</span><span class="n">num_levels</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">model_config</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid model architecture.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;base&quot;</span><span class="p">:</span>
-        <span class="n">strategy</span> <span class="o">=</span> <span class="n">QueryStrategy</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid query strategy.&quot;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="n">dataset_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dataset_config</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -288,11 +269,42 @@
             <span class="n">data_dir</span><span class="p">,</span>
             <span class="n">batch_size</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="p">,</span>
-            <span class="n">dim</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">input_dimensionality</span><span class="p">(),</span>
+            <span class="o">**</span><span class="n">dataset_config</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">dataset</span> <span class="o">==</span> <span class="s2">&quot;decathlon&quot;</span><span class="p">:</span>
+        <span class="n">data_module</span> <span class="o">=</span> <span class="n">DecathlonDataModule</span><span class="p">(</span>
+            <span class="n">data_dir</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="p">,</span>
             <span class="o">**</span><span class="n">dataset_config</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data_module name.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;fcn_resnet50&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">architecture</span><span class="si">}</span><span class="s2"> does not support multiple input channels.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchFCNResnet50</span><span class="p">(</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span> <span class="o">**</span><span class="n">model_config</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;u_net&quot;</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchUNet</span><span class="p">(</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
+            <span class="n">num_levels</span><span class="o">=</span><span class="n">num_levels</span><span class="p">,</span>
+            <span class="n">in_channels</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">(),</span>
+            <span class="o">**</span><span class="n">model_config</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid model architecture.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;base&quot;</span><span class="p">:</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="n">QueryStrategy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid query strategy.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">checkpoint_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wandb_logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -319,9 +331,10 @@
     <span class="n">inferencer</span> <span class="o">=</span> <span class="n">Inferencer</span><span class="p">(</span>
         <span class="n">model</span><span class="p">,</span>
         <span class="n">dataset</span><span class="p">,</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">),</span>
+        <span class="n">data_dir</span><span class="p">,</span>
         <span class="n">prediction_dir</span><span class="p">,</span>
         <span class="n">prediction_count</span><span class="p">,</span>
+        <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">inferencer</span><span class="o">.</span><span class="n">inference</span><span class="p">()</span></div>
 
@@ -350,14 +363,23 @@
         <span class="k">if</span> <span class="s2">&quot;dataset_config&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="s2">&quot;data_dir&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;dataset_config&quot;</span><span class="p">]:</span>
             <span class="n">config</span><span class="p">[</span><span class="s2">&quot;data_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;dataset_config&quot;</span><span class="p">][</span><span class="s2">&quot;data_dir&quot;</span><span class="p">]</span>
             <span class="k">del</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;dataset_config&quot;</span><span class="p">][</span><span class="s2">&quot;data_dir&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="s2">&quot;dataset_config&quot;</span> <span class="ow">in</span> <span class="n">config</span>
+            <span class="ow">and</span> <span class="s2">&quot;mask_filter_values&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;dataset_config&quot;</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;dataset_config&quot;</span><span class="p">][</span><span class="s2">&quot;mask_filter_values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">config</span><span class="p">[</span><span class="s2">&quot;dataset_config&quot;</span><span class="p">][</span><span class="s2">&quot;mask_filter_values&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
 
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="s2">&quot;model_config&quot;</span> <span class="ow">in</span> <span class="n">config</span>
+            <span class="ow">and</span> <span class="s2">&quot;dim&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="s2">&quot;dataset_config&quot;</span> <span class="ow">in</span> <span class="n">config</span>
+        <span class="p">):</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;dataset_config&quot;</span><span class="p">][</span><span class="s2">&quot;dim&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;dim&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="s2">&quot;model_config&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="s2">&quot;architecture&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">]:</span>
             <span class="n">config</span><span class="p">[</span><span class="s2">&quot;architecture&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;architecture&quot;</span><span class="p">]</span>
             <span class="k">del</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;architecture&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s2">&quot;model_config&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="s2">&quot;input_shape&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">]:</span>
-            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;input_shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;input_shape&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;model_config&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="s2">&quot;learning_rate&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">]:</span>
             <span class="n">config</span><span class="p">[</span><span class="s2">&quot;learning_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;learning_rate&quot;</span><span class="p">]</span>
             <span class="k">del</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;learning_rate&quot;</span><span class="p">]</span>

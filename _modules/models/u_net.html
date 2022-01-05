@@ -183,11 +183,11 @@
 <span></span><span class="sd">&quot;&quot;&quot;U-Net architecture.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 
 
 <div class="viewcode-block" id="UNet"><a class="viewcode-back" href="../../models.html#models.u_net.UNet">[docs]</a><span class="k">class</span> <span class="nc">UNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -203,7 +203,7 @@
 <span class="sd">        init_features (int, optional): Number of feature channels of the first U-Net block,</span>
 <span class="sd">            in each down-sampling block, the number of feature channels is doubled. Defaults to 32.</span>
 <span class="sd">        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</span>
-<span class="sd">        input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).</span>
+<span class="sd">        dim (int, optional): The dimensionality of the U-Net. Defaults to 2.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># pylint: disable-msg=too-many-instance-attributes</span>
@@ -214,14 +214,12 @@
         <span class="n">out_channels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">init_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
         <span class="n">num_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="n">input_shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">),</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span> <span class="o">=</span> <span class="n">num_levels</span>
-
-        <span class="n">dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span>
 
         <span class="n">MaxPool</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool3d</span>
         <span class="n">ConvTranspose</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose3d</span>
@@ -258,7 +256,6 @@
                     <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">level</span><span class="p">),</span>
                     <span class="n">kernel_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                     <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                    <span class="n">output_padding</span><span class="o">=</span><span class="n">UNet</span><span class="o">.</span><span class="n">upconv_output_padding</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_levels</span><span class="p">)</span>
             <span class="p">]</span>
@@ -288,7 +285,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-        <span class="n">encs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># individually store encoding results for skip connections</span>
+        <span class="c1"># individually store encoding results for skip connections</span>
+        <span class="n">encs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">):</span>
             <span class="n">encs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">level</span><span class="p">](</span>
@@ -301,6 +299,11 @@
         <span class="n">dec</span> <span class="o">=</span> <span class="n">bottleneck</span>
         <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">)):</span>
             <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upconvs</span><span class="p">[</span><span class="n">level</span><span class="p">](</span><span class="n">dec</span><span class="p">)</span>
+
+            <span class="c1"># for the relevant dimensions [0, 0] for even and [0, 1] for odd in reversed order flattened</span>
+            <span class="n">pad</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">encs</span><span class="p">[</span><span class="n">level</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">2</span><span class="p">:])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim</span> <span class="o">%</span> <span class="mi">2</span><span class="p">]]</span>
+            <span class="n">dec</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pad</span><span class="p">),</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
             <span class="n">dec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">dec</span><span class="p">,</span> <span class="n">encs</span><span class="p">[</span><span class="n">level</span><span class="p">]),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoders</span><span class="p">[</span><span class="n">level</span><span class="p">](</span><span class="n">dec</span><span class="p">)</span>
 
@@ -341,26 +344,7 @@
                     <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;relu2&quot;</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
                 <span class="p">]</span>
             <span class="p">)</span>
-        <span class="p">)</span>
-
-<div class="viewcode-block" id="UNet.upconv_output_padding"><a class="viewcode-back" href="../../models.html#models.u_net.UNet.upconv_output_padding">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">upconv_output_padding</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates the output padding for transpose convolutions to match the output size to the corresponding encoding</span>
-<span class="sd">        step for concatenation.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            level (int): The level in the UNet the transpose convolution is on.</span>
-<span class="sd">            input_shape (Tuple[int]): The input shape for the whole UNet.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Tuple[int]: The output padding for the transpose convolution.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
-            <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor_divide</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">odd</span> <span class="o">=</span> <span class="n">shape</span> <span class="o">%</span> <span class="mi">2</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">odd</span><span class="p">)</span></div></div>
+        <span class="p">)</span></div>
 </pre></div>
 
               </article>

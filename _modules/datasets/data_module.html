@@ -182,7 +182,7 @@
   <h1>Source code for datasets.data_module</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Module containing abstract classes for the data modules&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">pytorch_lightning.core.datamodule</span> <span class="kn">import</span> <span class="n">LightningDataModule</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Dataset</span>
 
@@ -233,15 +233,32 @@
 <span class="sd">        Creates the datasets managed by this data module.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            stage: Current training stage.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_training_set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_validation_set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_test_set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_unlabeled_set</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ActiveLearningDataModule.data_channels"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.data_channels">[docs]</a>    <span class="k">def</span> <span class="nf">data_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Can be overwritten by subclasses if the data has multiple channels.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The amount of data channels. Defaults to 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_collate_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Can be overwritten by subclasses to pass a custom collate function to the dataloaders.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Callable[[List[torch.Tensor]], Any] that combines batches. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_create_training_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -306,6 +323,7 @@
                 <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+                <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_collate_fn</span><span class="p">(),</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
@@ -321,6 +339,7 @@
                 <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+                <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_collate_fn</span><span class="p">(),</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
@@ -332,7 +351,10 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+                <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_collate_fn</span><span class="p">(),</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
@@ -348,6 +370,7 @@
                 <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+                <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_collate_fn</span><span class="p">(),</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
