@@ -6,6 +6,7 @@ from models.pytorch_model import PytorchModel
 from .query_strategy import QueryStrategy
 
 
+# pylint: disable=too-few-public-methods
 class RandomSamplingStrategy(QueryStrategy):
     """
     Class for selecting items via a random sampling strategy

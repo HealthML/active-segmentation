@@ -88,7 +88,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         annotation_path = os.path.join(dir_path, case_id, f"{case_id}_seg.nii.gz")
         return image_path, annotation_path
 
-    # pylint: too-many-arguments
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         data_dir: str,
