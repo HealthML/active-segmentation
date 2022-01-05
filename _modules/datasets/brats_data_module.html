@@ -184,6 +184,8 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Dataset</span>
 
 <span class="kn">from</span> <span class="nn">.data_module</span> <span class="kn">import</span> <span class="n">ActiveLearningDataModule</span>
@@ -200,6 +202,10 @@
 <span class="sd">        num_workers: Number of workers for DataLoader.</span>
 <span class="sd">        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading</span>
 <span class="sd">            (default = 0).</span>
+<span class="sd">        active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for</span>
+<span class="sd">            conventional model training (default = False).</span>
+<span class="sd">        initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is</span>
+<span class="sd">            activated.</span>
 <span class="sd">        pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.</span>
 <span class="sd">        shuffle: Flag if the data should be shuffled.</span>
 <span class="sd">        dim: 2 or 3 to define if the datsets should return 2d slices of whole 3d images.</span>
@@ -218,7 +224,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            dir_path: directory to discover paths in</span>
-<span class="sd">            modality: modality of scan</span>
+<span class="sd">            modality (string, optional): modality of scan</span>
 <span class="sd">            random_samples: the amount of random samples from the data sets</span>
 
 <span class="sd">        Returns:</span>
@@ -226,7 +232,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cases</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_path</span><span class="p">))</span>
         <span class="n">cases</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">case</span>
+            <span class="k">case</span>
             <span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">cases</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">case</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case</span><span class="p">))</span>
         <span class="p">]</span>
@@ -246,12 +252,34 @@
 
         <span class="k">return</span> <span class="n">image_paths</span><span class="p">,</span> <span class="n">annotation_paths</span></div>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__case_id_to_filepaths</span><span class="p">(</span>
+        <span class="n">case_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">modality</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flair&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the image and annotation file path for a given case ID.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            case_id: Case ID for which the file paths are to be determined.</span>
+<span class="sd">            dir_path: directory to where the images are located</span>
+<span class="sd">            modality (string, optional): modality of scan.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[str]: Image and annotation path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">image_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">modality</span><span class="si">}</span><span class="s2">.nii.gz&quot;</span><span class="p">)</span>
+        <span class="n">annotation_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">_seg.nii.gz&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">image_path</span><span class="p">,</span> <span class="n">annotation_path</span>
+
+    <span class="c1"># pylint: disable=too-many-arguments</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">cache_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">active_learning_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">initial_training_set_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
@@ -262,6 +290,8 @@
             <span class="n">data_dir</span><span class="p">,</span>
             <span class="n">batch_size</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="p">,</span>
+            <span class="n">active_learning_mode</span><span class="p">,</span>
+            <span class="n">initial_training_set_size</span><span class="p">,</span>
             <span class="n">pin_memory</span><span class="o">=</span><span class="n">pin_memory</span><span class="p">,</span>
             <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -271,12 +301,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cache_size</span> <span class="o">=</span> <span class="n">cache_size</span>
 
 <div class="viewcode-block" id="BraTSDataModule.label_items"><a class="viewcode-back" href="../../datasets.html#datasets.brats_data_module.BraTSDataModule.label_items">[docs]</a>    <span class="k">def</span> <span class="nf">label_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        TBD</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Moves the given samples from the unlabeled dataset to the labeled dataset.&quot;&quot;&quot;</span>
 
-        <span class="c1"># ToDo: implement labeling logic</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># create list of files as tuple of image id and slice index</span>
+            <span class="n">image_slice_ids</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">case_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">case_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">ids</span>
+            <span class="p">]</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">image_id</span> <span class="k">for</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">slice_index</span> <span class="ow">in</span> <span class="n">image_slice_ids</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">labeled_image_and_annotation_paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__case_id_to_filepaths</span><span class="p">(</span>
+                    <span class="n">case_id</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">ids</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span>
+                <span class="n">labeled_image_path</span><span class="p">,</span>
+                <span class="n">labeled_image_annotation_path</span><span class="p">,</span>
+            <span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labeled_image_and_annotation_paths</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># additionally pass slice index for dimension 2</span>
+                    <span class="n">slice_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_slice_ids</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># 3D images only have one slice index of 0</span>
+                    <span class="n">slice_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span>
+                    <span class="n">labeled_image_path</span><span class="p">,</span> <span class="n">labeled_image_annotation_path</span><span class="p">,</span> <span class="n">slice_index</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="o">.</span><span class="n">remove_image</span><span class="p">(</span>
+                    <span class="n">labeled_image_path</span><span class="p">,</span> <span class="n">labeled_image_annotation_path</span><span class="p">,</span> <span class="n">slice_index</span>
+                <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_create_training_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -286,6 +343,16 @@
         <span class="n">train_image_paths</span><span class="p">,</span> <span class="n">train_annotation_paths</span> <span class="o">=</span> <span class="n">BraTSDataModule</span><span class="o">.</span><span class="n">discover_paths</span><span class="p">(</span>
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">)</span>
         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span><span class="p">:</span>
+            <span class="c1"># initialize the training set with randomly selected samples</span>
+            <span class="p">(</span><span class="n">train_image_paths</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">train_annotation_paths</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+                <span class="n">train_image_paths</span><span class="p">,</span>
+                <span class="n">train_annotation_paths</span><span class="p">,</span>
+                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_training_set_size</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">BraTSDataset</span><span class="p">(</span>
             <span class="n">image_paths</span><span class="o">=</span><span class="n">train_image_paths</span><span class="p">,</span>
             <span class="n">annotation_paths</span><span class="o">=</span><span class="n">train_annotation_paths</span><span class="p">,</span>
@@ -324,13 +391,48 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_create_test_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
-        <span class="c1"># faked test set</span>
-        <span class="c1"># ToDo: implement test set</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_validation_set</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;Creates a test dataset.&quot;&quot;&quot;</span>
+
+        <span class="n">test_image_paths</span><span class="p">,</span> <span class="n">test_annotation_paths</span> <span class="o">=</span> <span class="n">BraTSDataModule</span><span class="o">.</span><span class="n">discover_paths</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">BraTSDataset</span><span class="p">(</span>
+            <span class="n">image_paths</span><span class="o">=</span><span class="n">test_image_paths</span><span class="p">,</span>
+            <span class="n">annotation_paths</span><span class="o">=</span><span class="n">test_annotation_paths</span><span class="p">,</span>
+            <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+            <span class="n">cache_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_size</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_create_unlabeled_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
-        <span class="c1"># faked unlabeled set</span>
-        <span class="c1"># ToDo: implement unlabeled set</span>
+        <span class="sd">&quot;&quot;&quot;Creates an unlabeled dataset.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span><span class="p">:</span>
+            <span class="n">train_image_paths</span><span class="p">,</span> <span class="n">train_annotation_paths</span> <span class="o">=</span> <span class="n">BraTSDataModule</span><span class="o">.</span><span class="n">discover_paths</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># use all images that are not in initial training set</span>
+            <span class="p">(</span>
+                <span class="n">_</span><span class="p">,</span>
+                <span class="n">initial_unlabeled_image_paths</span><span class="p">,</span>
+                <span class="n">_</span><span class="p">,</span>
+                <span class="n">initial_unlabeled_annotation_paths</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+                <span class="n">train_image_paths</span><span class="p">,</span>
+                <span class="n">train_annotation_paths</span><span class="p">,</span>
+                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_training_set_size</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">BraTSDataset</span><span class="p">(</span>
+                <span class="n">image_paths</span><span class="o">=</span><span class="n">initial_unlabeled_image_paths</span><span class="p">,</span>
+                <span class="n">annotation_paths</span><span class="o">=</span><span class="n">initial_unlabeled_annotation_paths</span><span class="p">,</span>
+                <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+                <span class="n">cache_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_size</span><span class="p">,</span>
+                <span class="n">is_unlabeled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># unlabeled set is empty</span>
         <span class="n">unlabeled_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_training_set</span><span class="p">()</span>
         <span class="n">unlabeled_set</span><span class="o">.</span><span class="n">is_unlabeled</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">unlabeled_set</span></div>

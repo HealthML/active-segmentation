@@ -210,9 +210,13 @@
 <span class="sd">        logger: A logger object as defined by Pytorch Lightning.</span>
 <span class="sd">        lr_scheduler (string, optional): Algorithm used for dynamically updating the</span>
 <span class="sd">            learning rate during training. E.g. &#39;reduceLROnPlateau&#39; or &#39;cosineAnnealingLR&#39;</span>
+<span class="sd">        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).</span>
+<span class="sd">        number_of_items: Number of items that should be selected for labeling in the active learning run.</span>
+<span class="sd">            (default = 1).</span>
+<span class="sd">        iterations: iteration times how often the active learning pipeline should be executed (default = 10).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># pylint: disable=too-few-public-methods,too-many-arguments</span>
+    <span class="c1"># pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
@@ -221,6 +225,9 @@
         <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">gpus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">checkpoint_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">active_learning_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">number_of_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LightningLoggerBase</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">LightningLoggerBase</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">early_stopping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">lr_scheduler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -263,21 +270,43 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">strategy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gpus</span> <span class="o">=</span> <span class="n">gpus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span> <span class="o">=</span> <span class="n">active_learning_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_items</span> <span class="o">=</span> <span class="n">number_of_items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="n">iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span> <span class="o">=</span> <span class="n">callbacks</span>
 
 <div class="viewcode-block" id="ActiveLearningPipeline.run"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Run the pipeline&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
-        <span class="n">items_to_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">select_items_to_label</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_dataloader</span><span class="p">(),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_set_size</span><span class="p">(),</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span><span class="p">:</span>
+            <span class="c1"># run pipeline</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="p">):</span>
+                <span class="c1"># query batch selection</span>
+                <span class="n">items_to_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">select_items_to_label</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_items</span>
+                <span class="p">)</span>
+                <span class="c1"># label batch</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">)</span>
+                <span class="c1"># train model on labeled batch</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
+                <span class="c1"># reset model trainer</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
+                    <span class="n">deterministic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">profiler</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
+                    <span class="n">max_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+                    <span class="n">gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gpus</span><span class="p">,</span>
+                    <span class="n">benchmark</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">callbacks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># run regular fit run with all the data if no active learning mode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
 
         <span class="c1"># compute metrics for the best model on the validation set</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span></div></div>

@@ -201,6 +201,10 @@
 <li><p><strong>num_workers</strong> – Number of workers for DataLoader.</p></li>
 <li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
 (default = 0).</p></li>
+<li><p><strong>active_learning_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the datamodule should be configured for active learning or for
+conventional model training (default = False).</p></li>
+<li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
+activated.</p></li>
 <li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
 <li><p><strong>shuffle</strong> – Flag if the data should be shuffled.</p></li>
 <li><p><strong>dim</strong> – 2 or 3 to define if the datsets should return 2d slices of whole 3d images.</p></li>
@@ -216,7 +220,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dir_path</strong> – directory to discover paths in</p></li>
-<li><p><strong>modality</strong> – modality of scan</p></li>
+<li><p><strong>modality</strong> (<em>string</em><em>, </em><em>optional</em>) – modality of scan</p></li>
 <li><p><strong>random_samples</strong> – the amount of random samples from the data sets</p></li>
 </ul>
 </dd>
@@ -229,7 +233,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.label_items">
 <span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.label_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>TBD</p>
+<dd><p>Moves the given samples from the unlabeled dataset to the labeled dataset.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -250,7 +254,7 @@
 <p>Module to load and batch brats dataset</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.brats_dataset.</span></span><span class="sig-name descname"><span class="pre">BraTSDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unlabeled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.brats_dataset.</span></span><span class="sig-name descname"><span class="pre">BraTSDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unlabeled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
 <p>The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
 held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
@@ -269,6 +273,8 @@ Defaults to zero.</p></li>
 <li><p><strong>target_transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the annotations.</p></li>
 <li><p><strong>dimensionality</strong> (<em>int</em><em>, </em><em>optional</em>) – 2 or 3 to define if the datset should return 2d slices of whole 3d images.
 Defaults to 2.</p></li>
+<li><p><strong>slice_indices</strong> (<em>List</em><em>[</em><em>np.array</em><em>]</em><em>, </em><em>optional</em>) – Array of indices per image which should be part of the dataset.
+Uses all slices if None. Defaults to None.</p></li>
 </ul>
 </dd>
 </dl>
@@ -279,7 +285,7 @@ Defaults to 2.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.add_image">
-<span class="sig-name descname"><span class="pre">add_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.add_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.add_image" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.add_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.add_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an image to this dataset.
 :param image_path: Path of the image to be added.
 :param annotation_path: Path of the annotation of the image to be added.</p>
@@ -331,7 +337,7 @@ of DataPipe instance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.brats_dataset.BraTSDataset.remove_image">
-<span class="sig-name descname"><span class="pre">remove_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.remove_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.remove_image" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">remove_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_dataset.html#BraTSDataset.remove_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_dataset.BraTSDataset.remove_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes an image from this dataset.
 :param image_path: Path of the image to be removed.
 :param annotation_path: Path of the annotation of the image to be removed.</p>
@@ -364,18 +370,29 @@ of DataPipe instance.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.data_module.</span></span><span class="sig-name descname"><span class="pre">ActiveLearningDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.datamodule.LightningDataModule</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.datamodule.LightningDataModule</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Abstract base class to structure the dataset creation for active learning
 :param data_dir: Path of the directory that contains the data.
 :param batch_size: Batch size.
 :param num_workers: Number of workers for DataLoader.
-:param pin_memory: <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.
-:type pin_memory: bool, optional
-:param shuffle: Flag if the data should be shuffled.
-:param **kwargs: Further, dataset specific parameters.</p>
+:param active_learning_mode: Whether the datamodule should be configured for active learning or for</p>
+<blockquote>
+<div><p>conventional model training (default = False).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
+activated.</p></li>
+<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
+<li><p><strong>shuffle</strong> – Flag if the data should be shuffled.</p></li>
+<li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.label_items">
-<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
 :param ids: IDs of the items to be labeled.
 :param labels: Labels for the selected data items.</p>
