@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from .collate import batch_padding_collate_fn
 from .data_module import ActiveLearningDataModule
-from .decathlon_dataset import DecathlonDataset
+from .doubly_shuffled_nifti_dataset import DoublyShuffledNIfTIDataset
 
 
 class DecathlonDataModule(ActiveLearningDataModule):
@@ -164,7 +164,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             self.data_folder, "train"
         )
 
-        return DecathlonDataset(
+        return DoublyShuffledNIfTIDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,
             dim=self.dim,
@@ -197,7 +197,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         val_image_paths, val_annotation_paths = DecathlonDataModule.discover_paths(
             self.data_folder, "val"
         )
-        return DecathlonDataset(
+        return DoublyShuffledNIfTIDataset(
             image_paths=val_image_paths,
             annotation_paths=val_annotation_paths,
             dim=self.dim,

@@ -1,4 +1,4 @@
-""" Module to load and batch decathlon datasets """
+""" Module to load and batch nifti datasets """
 from functools import reduce
 from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
@@ -15,12 +15,9 @@ from datasets.dataset_hooks import DatasetHooks
 
 
 # pylint: disable=too-many-instance-attributes,abstract-method
-class DecathlonDataset(IterableDataset, DatasetHooks):
+class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     """
-    The Decathlon dataset is a collection of medical image segmentation datasets. Specifically, it contains data for
-    the following body organs or parts: Brain, Heart, Liver, Hippocampus, Prostate, Lung, Pancreas, Hepatic Vessel,
-    Spleen and Colon.
-    Further information: http://medicaldecathlon.com/
+    This datset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.
 
     Args:
         image_paths (List[str]): List with the paths to the images.
@@ -82,7 +79,11 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
         Returns:
             The slice count of the image at the filepath or 1 if dim is not 2.
         """
-        return DecathlonDataset.__read_image(filepath).shape[2] if dim == 2 else 1
+        return (
+            DoublyShuffledNIfTIDataset.__read_image(filepath).shape[2]
+            if dim == 2
+            else 1
+        )
 
     @staticmethod
     def __align_axes(img: np.ndarray) -> np.ndarray:
@@ -120,7 +121,7 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
         Returns:
             The array representation of an image.
         """
-        img = DecathlonDataset.__read_image(filepath).get_fdata()
+        img = DoublyShuffledNIfTIDataset.__read_image(filepath).get_fdata()
 
         if filter_values is not None:
             map_to_filtered_value = np.vectorize(
@@ -133,8 +134,8 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
             img = np.clip(img, 0, 1)
 
         if norm:
-            img = DecathlonDataset.normalize(img)
-        return DecathlonDataset.__align_axes(img)
+            img = DoublyShuffledNIfTIDataset.normalize(img)
+        return DoublyShuffledNIfTIDataset.__align_axes(img)
 
     @staticmethod
     def __ensure_channel_dim(img: torch.Tensor, dim: int) -> torch.Tensor:
@@ -166,10 +167,10 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
         """
         Reads the slice indices for the images at the provided slice paths and pairs them with their image index.
 
-        Implements efficient shuffling for 2D image datasets like the DecathlonDataset whose elements represent the
-        slices of multiple 3D images. To allow for efficient image pre-fetching, first the order of all 3D images is
-        shuffled and then the order of slices within each 3D image is shuffled. This way the 3D images can still be
-        loaded as a whole.
+        Implements efficient shuffling for 2D image datasets like the DoublyShuffledNIfTIDataset whose elements
+        represent the slices of multiple 3D images. To allow for efficient image pre-fetching, first the order of all 3D
+        images is shuffled and then the order of slices within each 3D image is shuffled. This way the 3D images can
+        still be loaded as a whole.
 
         Args:
             filepaths (List[str]): The paths of the images.
@@ -184,7 +185,9 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
         """
         if slice_indices is None:
             slice_indices = [
-                np.arange(DecathlonDataset.__read_slice_count(filepath, dim=dim))
+                np.arange(
+                    DoublyShuffledNIfTIDataset.__read_slice_count(filepath, dim=dim)
+                )
                 for filepath in filepaths
             ]
 
@@ -261,12 +264,14 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
 
         self.dim = dim
 
-        self.image_slice_indices = DecathlonDataset.__arange_image_slice_indices(
-            filepaths=self.image_paths,
-            dim=self.dim,
-            shuffle=self.shuffle,
-            seed=42,
-            slice_indices=slice_indices,
+        self.image_slice_indices = (
+            DoublyShuffledNIfTIDataset.__arange_image_slice_indices(
+                filepaths=self.image_paths,
+                dim=self.dim,
+                shuffle=self.shuffle,
+                seed=42,
+                slice_indices=slice_indices,
+            )
         )
 
         self.start_index = 0
@@ -360,22 +365,24 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
 
         if self.is_unlabeled:
             return (
-                DecathlonDataset.__ensure_channel_dim(x, self.dim),
+                DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
                 f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
             )
 
         self.current_index += 1
 
         return (
-            DecathlonDataset.__ensure_channel_dim(x, self.dim),
-            DecathlonDataset.__ensure_channel_dim(y, self.dim),
+            DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
+            DoublyShuffledNIfTIDataset.__ensure_channel_dim(y, self.dim),
             case_id,
         )
 
     def __len__(self) -> int:
         return len(self.image_slice_indices)
 
-    def add_image(self, image_path: str, annotation_path: str) -> None:
+    def add_image(
+        self, image_path: str, annotation_path: str, slice_index: int = 0
+    ) -> None:
         """
         Adds an image to this dataset.
         Args:
@@ -386,31 +393,25 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
             None. Raises ValueError if image already exists.
         """
 
-        if (image_path not in self.image_paths) and (
-            annotation_path not in self.annotation_paths
-        ):
+        if image_path not in self.image_paths:
+            self.image_paths.append(image_path)
+        if annotation_path not in self.annotation_paths:
+            self.annotation_paths.append(annotation_path)
 
-            image_index = self.image_paths.index(image_path)
+        image_index = self.image_paths.index(image_path)
+        new_image_slice_index = (image_index, slice_index)
 
-            new_image_slice_indices = [
-                (image_index, slice_index)
-                for slice_index in range(
-                    DecathlonDataset.__read_slice_count(image_path, dim=self.dim)
-                )
-            ]
-
-            if self.shuffle:
-                random.shuffle(new_image_slice_indices)
-
+        if new_image_slice_index not in self.image_slice_indices:
             # add new image slice indices to existing ones
-            self.image_slice_indices = (
-                self.image_slice_indices + new_image_slice_indices
-            )
-
+            self.image_slice_indices = self.image_slice_indices + [
+                new_image_slice_index
+            ]
         else:
-            raise ValueError("Image already belongs to this dataset.")
+            raise ValueError("Slice of image already belongs to this dataset.")
 
-    def remove_image(self, image_path: str, annotation_path: str) -> None:
+    def remove_image(
+        self, image_path: str, annotation_path: str, slice_index: int = 0
+    ) -> None:
         """
         Removes an image from this dataset.
         Args:
@@ -423,12 +424,18 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
 
         if image_path in self.image_paths and annotation_path in self.annotation_paths:
             image_index = self.image_paths.index(image_path)
+            image_slice_index_to_remove = (image_index, slice_index)
+            if image_slice_index_to_remove in self.image_slice_indices:
+                self.image_slice_indices.remove((image_index, slice_index))
 
-            self.image_slice_indices = [
-                (index, slice_index)
-                for (index, slice_index) in self.image_slice_indices
-                if image_index != index
-            ]
+                # remove image_path from image_paths if this was the last slice for this image
+                if image_index not in [
+                    index for (index, _) in self.image_slice_indices
+                ]:
+                    self.image_paths.remove(image_path)
+                    self.annotation_paths.remove(annotation_path)
+            else:
+                raise ValueError("Slice of image does not belong to this dataset.")
         else:
             raise ValueError("Image does not belong to this dataset.")
 
@@ -441,12 +448,12 @@ class DecathlonDataset(IterableDataset, DatasetHooks):
 
     def image_ids(self) -> Iterable[str]:
         return [
-            DecathlonDataset.__get_case_id(self.image_paths[image_idx])
+            DoublyShuffledNIfTIDataset.__get_case_id(self.image_paths[image_idx])
             for image_idx in self.__image_indices()
         ]
 
     def slices_per_image(self, **kwargs) -> List[int]:
         return [
-            DecathlonDataset.__read_slice_count(self.image_paths[image_idx])
+            DoublyShuffledNIfTIDataset.__read_slice_count(self.image_paths[image_idx])
             for image_idx in self.__image_indices()
         ]

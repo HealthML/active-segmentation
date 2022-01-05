@@ -5,12 +5,7 @@ import torch
 import numpy as np
 import nibabel as nib
 from models import PytorchModel
-from datasets import (
-    BraTSDataModule,
-    BraTSDataset,
-    DecathlonDataModule,
-    DecathlonDataset,
-)
+from datasets import BraTSDataModule, DecathlonDataModule, DoublyShuffledNIfTIDataset
 
 
 class Inferencer:
@@ -52,30 +47,31 @@ class Inferencer:
             image_paths, annotation_paths = BraTSDataModule.discover_paths(
                 dir_path=self.data_dir, random_samples=self.prediction_count
             )
-            data = BraTSDataset(
-                image_paths=image_paths, annotation_paths=annotation_paths, dim=3
-            )
+
         elif self.dataset == "decathlon":
             image_paths, annotation_paths = DecathlonDataModule.discover_paths(
                 dir_path=os.path.join(self.data_dir, self.dataset_config["task"]),
                 subset="val",
                 random_samples=self.prediction_count,
             )
-            self.dataset_config["dim"] = 3
-            if "cache_size" in self.dataset_config:
-                del self.dataset_config["cache_size"]
-            if "pin_memory" in self.dataset_config:
-                del self.dataset_config["pin_memory"]
-            if "task" in self.dataset_config:
-                del self.dataset_config["task"]
-            data = DecathlonDataset(
-                image_paths=image_paths,
-                annotation_paths=annotation_paths,
-                **self.dataset_config,
-            )
+
         else:
             print(f"Inferencing is not implemented for the {self.dataset} dataset.")
             return
+
+        self.dataset_config["dim"] = 3
+        if "cache_size" in self.dataset_config:
+            del self.dataset_config["cache_size"]
+        if "pin_memory" in self.dataset_config:
+            del self.dataset_config["pin_memory"]
+        if "task" in self.dataset_config:
+            del self.dataset_config["task"]
+
+        data = DoublyShuffledNIfTIDataset(
+            image_paths=image_paths,
+            annotation_paths=annotation_paths,
+            **self.dataset_config,
+        )
 
         for i, (x, _, _) in enumerate(data):
             # For 2d case:
