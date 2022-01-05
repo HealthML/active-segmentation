@@ -115,6 +115,8 @@ class BraTSDataModule(ActiveLearningDataModule):
             dim=self.dim,
             cache_size=self.cache_size,
             shuffle=self.shuffle,
+            mask_join_non_zero=self.mask_join_non_zero,
+            mask_filter_values=self.mask_filter_values,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -145,6 +147,8 @@ class BraTSDataModule(ActiveLearningDataModule):
             annotation_paths=val_annotation_paths,
             dim=self.dim,
             cache_size=self.cache_size,
+            mask_join_non_zero=self.mask_join_non_zero,
+            mask_filter_values=self.mask_filter_values,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
