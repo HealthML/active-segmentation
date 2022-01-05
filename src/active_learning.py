@@ -31,7 +31,7 @@ class ActiveLearningPipeline:
         iterations: iteration times how often the active learning pipeline should be executed (default = 10).
     """
 
-    # pylint: disable=too-few-public-methods,too-many-arguments
+    # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         data_module: ActiveLearningDataModule,
@@ -82,7 +82,7 @@ class ActiveLearningPipeline:
 
         if self.active_learning_mode:
             # run pipeline
-            for i in range(0, self.iterations):
+            for _ in range(0, self.iterations):
                 # query batch selection
                 items_to_label = self.strategy.select_items_to_label(
                     self.model, self.data_module, self.number_of_items

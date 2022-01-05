@@ -88,6 +88,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         annotation_path = os.path.join(dir_path, case_id, f"{case_id}_seg.nii.gz")
         return image_path, annotation_path
 
+    # pylint: too-many-arguments
     def __init__(
         self,
         data_dir: str,
@@ -150,8 +151,6 @@ class BraTSDataModule(ActiveLearningDataModule):
                 self._unlabeled_set.remove_image(
                     labeled_image_path, labeled_image_annotation_path, slice_index
                 )
-
-        return None
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
@@ -247,8 +246,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 shuffle=self.shuffle,
             )
 
-        else:
-            # unlabeled set is empty
-            unlabeled_set = self._create_training_set()
-            unlabeled_set.is_unlabeled = True
-            return unlabeled_set
+        # unlabeled set is empty
+        unlabeled_set = self._create_training_set()
+        unlabeled_set.is_unlabeled = True
+        return unlabeled_set

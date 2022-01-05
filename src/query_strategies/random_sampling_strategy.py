@@ -1,13 +1,16 @@
-import random
-from torch.utils.data import DataLoader
+""" Module for random sampling strategy """
 from typing import List, Union
 
 from datasets import ActiveLearningDataModule
-from .query_strategy import QueryStrategy
 from models.pytorch_model import PytorchModel
+from .query_strategy import QueryStrategy
 
 
 class RandomSamplingStrategy(QueryStrategy):
+    """
+    Class for selecting items via a random sampling strategy
+    """
+
     def select_items_to_label(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
@@ -31,7 +34,7 @@ class RandomSamplingStrategy(QueryStrategy):
         selected_ids = []
         selected_items = 0
 
-        for image, image_id in data_module.unlabeled_dataloader():
+        for _, image_id in data_module.unlabeled_dataloader():
             if selected_items == number_of_items:
                 break
             selected_ids.append(image_id[0])
