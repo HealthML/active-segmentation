@@ -14,7 +14,7 @@ from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy, RandomSamplingStrategy
 
 
-# pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments,too-many-locals, too-many-branches
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,

@@ -34,7 +34,7 @@ class ActiveLearningPipeline:
         iterations: iteration times how often the active learning pipeline should be executed (default = 10).
     """
 
-    # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals
     def __init__(
         self,
         data_module: ActiveLearningDataModule,
