@@ -118,7 +118,6 @@ class BraTSDataModule(ActiveLearningDataModule):
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
-        print("ids: ", ids)
 
         if self.dim == 2:
             # create list of files as tuple of image id and slice index
@@ -134,10 +133,6 @@ class BraTSDataModule(ActiveLearningDataModule):
                 )
                 for case_id in ids
             ]
-            print(
-                "labeled_image_and_annotation_paths: ",
-                labeled_image_and_annotation_paths,
-            )
             for index, (
                 labeled_image_path,
                 labeled_image_annotation_path,

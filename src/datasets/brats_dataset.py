@@ -103,7 +103,7 @@ class BraTSDataset(IterableDataset):
         """
         Reads the slice indices for the images at the provided slice paths and pairs them with their image index.
 
-        Implements efficient shuffling for 2D image datasets like the DecathlonDataset whose elements represent the
+        Implements efficient shuffling for 2D image datasets like the BraTSDataset whose elements represent the
         slices of multiple 3D images. To allow for efficient image pre-fetching, first the order of all 3D images is
         shuffled and then the order of slices within each 3D image is shuffled. This way the 3D images can still be
         loaded as a whole.

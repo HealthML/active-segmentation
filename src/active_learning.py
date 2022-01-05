@@ -59,7 +59,7 @@ class ActiveLearningPipeline:
             callbacks.append(EarlyStopping("validation/loss"))
 
         self.model_trainer = Trainer(
-            # deterministic=True,
+            deterministic=True,
             profiler="simple",
             max_epochs=epochs,
             logger=logger,
@@ -81,6 +81,7 @@ class ActiveLearningPipeline:
         self.data_module.setup()
 
         if self.active_learning_mode:
+            # run pipeline
             for i in range(0, self.iterations):
                 # query batch selection
                 items_to_label = self.strategy.select_items_to_label(
@@ -92,8 +93,9 @@ class ActiveLearningPipeline:
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
 
+                # reset model trainer
                 self.model_trainer = Trainer(
-                    # deterministic=True,
+                    deterministic=True,
                     profiler="simple",
                     max_epochs=self.epochs,
                     logger=self.logger,
@@ -102,4 +104,5 @@ class ActiveLearningPipeline:
                     callbacks=self.callbacks,
                 )
         else:
+            # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)
