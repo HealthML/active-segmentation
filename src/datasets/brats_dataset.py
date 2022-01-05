@@ -1,5 +1,5 @@
 """ Module to load and batch brats dataset """
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
 import os
@@ -10,14 +10,16 @@ import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
+from .dataset_hooks import DatasetHooks
 
 # pylint: disable=too-many-instance-attributes,abstract-method
-class BraTSDataset(IterableDataset):
+class BraTSDataset(IterableDataset, DatasetHooks):
     """
     The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
     held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
     glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
     Further information: https://www.med.upenn.edu/cbica/brats2020/data.html
+
     Args:
         image_paths (List[str]): List with the paths to the images.
         annotation_paths (List[str]): List with the paths to the annotations.
@@ -42,6 +44,7 @@ class BraTSDataset(IterableDataset):
             1. Dividing by the maximum value
             2. Subtracting the mean, zeros will be ignored while calculating the mean
             3. Dividing by the negative minimum value
+
         Args:
             img: The input image that should be normalized.
 
@@ -60,6 +63,7 @@ class BraTSDataset(IterableDataset):
     ) -> np.ndarray:
         """
         Reads image or annotation as numpy array.
+
         Args:
             filepath: Path of the image file.
             norm: Whether the image should be normalized.
@@ -356,3 +360,19 @@ class BraTSDataset(IterableDataset):
                 raise ValueError("Slice of image does not belong to this dataset.")
         else:
             raise ValueError("Image does not belong to this dataset.")
+
+    def image_ids(self) -> Iterable[str]:
+        """
+        Returns:
+            List of all image IDs included in the dataset.
+        """
+
+        return [self.__get_case_id(image_path) for image_path in self.image_paths]
+
+    def slices_per_image(self, **kwargs) -> int:
+        """
+        Returns:
+            int: Number of slices that each image of the dataset contains.
+        """
+
+        return BraTSDataset.IMAGE_DIMENSIONS[0]

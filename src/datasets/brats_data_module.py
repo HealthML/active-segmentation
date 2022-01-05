@@ -13,6 +13,7 @@ from .brats_dataset import BraTSDataset
 class BraTSDataModule(ActiveLearningDataModule):
     """
     Initializes the BraTS data module.
+
     Args:
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
@@ -153,7 +154,10 @@ class BraTSDataModule(ActiveLearningDataModule):
                 )
 
     def _create_training_set(self) -> Optional[Dataset]:
-        """Creates a training dataset."""
+        """
+        Creates a training dataset.
+        """
+
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )

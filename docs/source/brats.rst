@@ -1,12 +1,12 @@
 The BraTS Dataset
-============
+=================
 
 The BraTS 2018 dataset was published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
 held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade glioma,
 as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
 
 General Information
-**********
+*******************
 
 Contributors from 19 different institutions from the U.S., Europe, and Asia provided data acquired by several MRI
 scanners and according to different clinical protocols. All MRI scans were taken from patients who received a
@@ -24,7 +24,7 @@ categories:
 3. the “active” tumor region, including “enhancing core”
 
 Sample Size and Data Split
-***********
+**************************
 
 The BraTS 2018 dataset consists of a total of 471 scans. Of these, 405 scans are labeled, and 66 are unlabeled.
 By default the 405 labeled scans were split into a training dataset with 285 scans and a validation dataset with 120 scans.
@@ -41,6 +41,7 @@ To setup the holdout dataset following scans were moved:
 * 40 files in total were moved: 24 scans from TCIA, 12 scans from CBICA, 4 scans from 2013 randomly selected
 
 List of scans moved from training data:
+
 ::
     [
         'Brats18_TCIA01_231_1',
@@ -83,6 +84,7 @@ List of scans moved from training data:
         'Brats18_2013_26_1',
         'Brats18_2013_19_1',
         'Brats18_2013_16_1',
+
     ]
 
 2. From validation dataset to holdout dataset:
@@ -133,4 +135,5 @@ List of scans moved from validation data:
         'Brats17_2013_3_1',
         'Brats17_2013_24_1',
         'Brats17_2013_5_1',
+
     ]

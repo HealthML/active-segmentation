@@ -8,7 +8,12 @@
     "input_shape": [
       240,
       240
-    ]
+    ],
+    "model_selection_criterion": "mean_dice_score_0.5",
+    "train_metrics": ["dice_score"],
+    "train_metric_confidence_levels": [0.25, 0.5, 0.75],
+    "test_metrics": ["dice_score", "sensitivity", "specificity", "hausdorff95"],
+    "test_metric_confidence_levels": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
   },
   "dataset_config": {
     "dataset": "brats",
@@ -23,6 +28,7 @@
     "number_of_items": 2
   },
   "wandb_project_name": "active-segmentation-tests",
+  "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
   "strategy": "random",
   "experiment_name": "test-experiment",
   "experiment_tags": [],

@@ -182,6 +182,32 @@ class TestDiceScore(unittest.TestCase):
             "Module-based implementation correctly computes smoothed dice score when there are only TN.",
         )
 
+    # pylint: disable=too-many-locals
+    def test_3d(self):
+        """
+        Tests that the dice score is computed correctly when the inputs are three-dimensional.
+        """
+
+        prediction_1, target_1, tp_1, fp_1, tn_1, fn_1 = tests.utils.standard_slice_1()
+        prediction_2, target_2, tp_2, fp_2, tn_2, fn_2 = tests.utils.standard_slice_2()
+        prediction = torch.stack([prediction_1, prediction_2])
+        target = torch.stack([target_1, target_2])
+        tp, fp, _, fn = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
+
+        score_from_function = dice_score(prediction, target)
+
+        self.assertTrue(
+            torch.equal(score_from_function, torch.tensor(2 * tp / (2 * tp + fp + fn))),
+            "Functional implementation correctly computes dice score when the inputs are three-dimensional.",
+        )
+
+        dice_score_module = DiceScore()
+        score_from_module = dice_score_module(prediction, target)
+        self.assertTrue(
+            torch.equal(score_from_module, torch.tensor(2 * tp / (2 * tp + fp + fn))),
+            "Module-based implementation correctly computes dice score when the inputs are three-dimensional.",
+        )
+
 
 class TestSensitivity(unittest.TestCase):
     """
@@ -351,6 +377,32 @@ class TestSensitivity(unittest.TestCase):
         self.assertTrue(
             torch.equal(smoothed_sensitivity_from_module, torch.tensor(1.0)),
             "Module-based implementation correctly computes smoothed sensitivity when there are only TN.",
+        )
+
+    # pylint: disable=too-many-locals
+    def test_3d(self):
+        """
+        Tests that the sensitivity is computed correctly when the inputs are three-dimensional.
+        """
+
+        prediction_1, target_1, tp_1, fp_1, tn_1, fn_1 = tests.utils.standard_slice_1()
+        prediction_2, target_2, tp_2, fp_2, tn_2, fn_2 = tests.utils.standard_slice_2()
+        prediction = torch.stack([prediction_1, prediction_2])
+        target = torch.stack([target_1, target_2])
+        tp, _, _, fn = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
+
+        sensitivity_from_function = sensitivity(prediction, target)
+
+        self.assertTrue(
+            torch.equal(sensitivity_from_function, torch.tensor(tp / (tp + fn))),
+            "Functional implementation correctly computes sensitivity when the inputs are three-dimensional.",
+        )
+
+        sensitivity_module = Sensitivity()
+        sensitivity_from_module = sensitivity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(sensitivity_from_module, torch.tensor(tp / (tp + fn))),
+            "Module-based implementation correctly computes sensitivity when the inputs are three-dimensional.",
         )
 
 
@@ -524,14 +576,40 @@ class TestSpecificity(unittest.TestCase):
             "Module-based implementation correctly computes smoothed specificity when there are only TN.",
         )
 
+    # pylint: disable=too-many-locals
+    def test_3d(self):
+        """
+        Tests that the specificity is computed correctly when the inputs are three-dimensional.
+        """
+
+        prediction_1, target_1, tp_1, fp_1, tn_1, fn_1 = tests.utils.standard_slice_1()
+        prediction_2, target_2, tp_2, fp_2, tn_2, fn_2 = tests.utils.standard_slice_2()
+        prediction = torch.stack([prediction_1, prediction_2])
+        target = torch.stack([target_1, target_2])
+        _, fp, tn, _ = tp_1 + tp_2, fp_1 + fp_2, tn_1 + tn_2, fn_1 + fn_2
+
+        specificity_from_function = specificity(prediction, target)
+
+        self.assertTrue(
+            torch.equal(specificity_from_function, torch.tensor(tn / (tn + fp))),
+            "Functional implementation correctly computes specificity when the inputs are three-dimensional.",
+        )
+
+        specificity_module = Specificity()
+        specificity_from_module = specificity_module(prediction, target)
+        self.assertTrue(
+            torch.equal(specificity_from_module, torch.tensor(tn / (tn + fp))),
+            "Module-based implementation correctly computes specificity when the inputs are three-dimensional.",
+        )
+
 
 class TestHausdorffDistance(unittest.TestCase):
     """
     Test cases for Hausdorff distance.
     """
 
+    @staticmethod
     def _test_hausdorff_distance(
-        self,
         prediction: torch.Tensor,
         target: torch.Tensor,
         expected_distance: float,
@@ -554,22 +632,21 @@ class TestHausdorffDistance(unittest.TestCase):
             prediction, target, percentile=percentile
         )
 
-        self.assertTrue(
-            torch.equal(
-                hausdorff_distance_from_function,
-                torch.tensor(expected_distance).float(),
-            ),
-            f"Functional implementation correctly computes hausdorff distance when {message}.",
+        torch.testing.assert_allclose(
+            hausdorff_distance_from_function,
+            torch.tensor(expected_distance).float(),
+            msg=f"Functional implementation correctly computes hausdorff distance when {message}.",
         )
 
-        hausdorff_distance_module = HausdorffDistance(percentile=percentile)
+        hausdorff_distance_module = HausdorffDistance(
+            percentile=percentile,
+            slices_per_image=1 if prediction.ndim == 2 else prediction.shape[0],
+        )
         hausdorff_distance_from_module = hausdorff_distance_module(prediction, target)
-        self.assertTrue(
-            torch.equal(
-                hausdorff_distance_from_module,
-                torch.tensor(expected_distance).float(),
-            ),
-            f"Module-based implementation correctly computes hausdorff distance when {message}.",
+        torch.testing.assert_allclose(
+            hausdorff_distance_from_module,
+            torch.tensor(expected_distance).float(),
+            msg=f"Module-based implementation correctly computes hausdorff distance when {message}.",
         )
 
     def test_standard_case(self):
@@ -682,6 +759,8 @@ class TestHausdorffDistance(unittest.TestCase):
         """
 
         prediction, target, _, _, _, _ = tests.utils.slice_all_true_negatives()
+        prediction = prediction.squeeze(dim=0)
+        target = target.squeeze(dim=0)
 
         hausdorff_dist_from_function = hausdorff_distance(prediction, target)
         self.assertTrue(
@@ -689,7 +768,7 @@ class TestHausdorffDistance(unittest.TestCase):
             "Functional implementation correctly computes Hausdorff distance when there are only TN.",
         )
 
-        hausdorff_distance_module = HausdorffDistance()
+        hausdorff_distance_module = HausdorffDistance(slices_per_image=1)
         hausdorff_dist_from_module = hausdorff_distance_module(prediction, target)
         self.assertTrue(
             torch.isnan(hausdorff_dist_from_module),
@@ -713,4 +792,34 @@ class TestHausdorffDistance(unittest.TestCase):
             target,
             expected_hausdorff_dist,
             "the input is 3-dimensional",
+        )
+
+    # pylint: disable=no-self-use
+    def test_splitted_3d(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when the predictions are 3-dimensional scans whose
+        slices are scattered across multiple batches.
+        """
+        (
+            prediction,
+            target,
+            expected_hausdorff_dist,
+            _,
+            _,
+        ) = tests.utils.distance_slices_3d()
+
+        hausdorff_distance_module = HausdorffDistance(
+            percentile=0.95,
+            slices_per_image=prediction.shape[0],
+        )
+
+        for idx, _ in enumerate(prediction):
+            hausdorff_distance_module.update(prediction[idx], target[idx])
+
+        hausdorff_distance_from_module = hausdorff_distance_module.compute()
+        torch.testing.assert_allclose(
+            hausdorff_distance_from_module,
+            torch.tensor(expected_hausdorff_dist).float(),
+            msg="Module-based implementation correctly computes hausdorff distance when the predictions are "
+            "3-dimensional scans whose slices are scattered across multiple batches.",
         )
