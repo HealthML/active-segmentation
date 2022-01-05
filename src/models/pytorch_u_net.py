@@ -1,6 +1,6 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable, Tuple
+from typing import Iterable
 
 import torch
 import numpy as np
@@ -15,28 +15,26 @@ class PytorchUNet(PytorchModel):
     Details about the architecture: https://arxiv.org/pdf/1505.04597.pdf
     Args:
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
-        input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).
+        dim (int, optional): The dimensionality of the U-Net. Defaults to 2.
         **kwargs: Further, dataset specific parameters.
     """
 
-    def __init__(
-        self, num_levels: int = 4, input_shape: Tuple[int] = (240, 240), **kwargs
-    ):
+    def __init__(self, num_levels: int = 4, dim: int = 2, in_channels=1, **kwargs):
 
         super().__init__(**kwargs)
 
-        self.input_shape = input_shape
+        self.dim = dim
 
         self.model = UNet(
-            in_channels=1,
+            in_channels=in_channels,
             out_channels=1,
             init_features=32,
             num_levels=num_levels,
-            input_shape=input_shape,
+            dim=dim,
         )
 
     def input_dimensionality(self) -> int:
-        return len(self.input_shape)
+        return self.dim
 
     # wrap model interface
     def eval(self) -> None:

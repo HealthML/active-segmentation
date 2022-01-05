@@ -13,21 +13,19 @@
     "test_metric_confidence_levels": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
   },
   "dataset_config": {
-    "dataset": "brats",
-    "data_dir": "/dhc/groups/mpws2021cl1/Data",
+    "dataset": "decathlon",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data/Decathlon",
     "cache_size": 250,
-    "pin_memory": true
+    "pin_memory": true,
+    "task": "Task09_Spleen"
   },
   "wandb_project_name": "active-segmentation-tests",
-  "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
   "strategy": "base",
-  "experiment_name": "test-experiment",
+  "experiment_name": "test-Spleen",
   "experiment_tags": [],
   "batch_size": 16,
-  "epochs": 3,
+  "epochs": 5,
   "num_workers": 8,
   "gpus": 1,
-  "prediction_count": 5,
-  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
   "early_stopping": false
 }
