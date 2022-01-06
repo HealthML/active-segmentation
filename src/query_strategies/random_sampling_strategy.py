@@ -20,8 +20,8 @@ class RandomSamplingStrategy(QueryStrategy):
         **kwargs
     ) -> List[str]:
         """
-        Selects random subset of the unlabeled data that should be labeled next. We the shuffling 
-        of the dataset for randomisation.
+        Selects random subset of the unlabeled data that should be labeled next. We are using
+        the shuffling of the dataset for randomisation.
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.

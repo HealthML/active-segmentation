@@ -155,6 +155,7 @@ def run_active_learning_pipeline(
     )
     inferencer.inference()
 
+
 def createQueryStrategy(strategy: str):
     """
     Initialises the chosen query strategy
@@ -167,6 +168,7 @@ def createQueryStrategy(strategy: str):
         return RandomSamplingStrategy()
     else:
         raise ValueError("Invalid query strategy.")
+
 
 def run_active_learning_pipeline_from_config(
     config_file_name: str, hp_optimisation: bool = False
