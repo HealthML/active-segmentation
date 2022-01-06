@@ -201,6 +201,10 @@
 <li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers for DataLoader.</p></li>
 <li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
 (default = 0).</p></li>
+<li><p><strong>active_learning_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the datamodule should be configured for active learning or for
+conventional model training (default = False).</p></li>
+<li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
+activated.</p></li>
 <li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
 <li><p><strong>shuffle</strong> (<em>boolean</em>) – Flag if the data should be shuffled.</p></li>
 <li><p><strong>dim</strong> (<em>int</em>) – 2 or 3 to define if the datsets should return 2d slices of whole 3d images.</p></li>
@@ -208,6 +212,7 @@
 (default = True)</p></li>
 <li><p><strong>mask_filter_values</strong> (<em>Tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Values from the annotations which should be used. Defaults to using
 all values.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – Random constant for shuffling the data</p></li>
 <li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
 </ul>
 </dd>
@@ -220,7 +225,7 @@ all values.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dir_path</strong> – directory to discover paths in</p></li>
-<li><p><strong>modality</strong> – modality of scan</p></li>
+<li><p><strong>modality</strong> (<em>string</em><em>, </em><em>optional</em>) – modality of scan</p></li>
 <li><p><strong>random_samples</strong> – the amount of random samples from the data sets</p></li>
 </ul>
 </dd>
@@ -233,7 +238,7 @@ all values.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.label_items">
 <span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.label_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>TBD</p>
+<dd><p>Moves the given samples from the unlabeled dataset to the labeled dataset.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -258,18 +263,29 @@ all values.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.data_module.</span></span><span class="sig-name descname"><span class="pre">ActiveLearningDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.datamodule.LightningDataModule</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.datamodule.LightningDataModule</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Abstract base class to structure the dataset creation for active learning
 :param data_dir: Path of the directory that contains the data.
 :param batch_size: Batch size.
 :param num_workers: Number of workers for DataLoader.
-:param pin_memory: <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.
-:type pin_memory: bool, optional
-:param shuffle: Flag if the data should be shuffled.
-:param **kwargs: Further, dataset specific parameters.</p>
+:param active_learning_mode: Whether the datamodule should be configured for active learning or for</p>
+<blockquote>
+<div><p>conventional model training (default = False).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
+activated.</p></li>
+<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
+<li><p><strong>shuffle</strong> – Flag if the data should be shuffled.</p></li>
+<li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.data_channels">
-<span class="sig-name descname"><span class="pre">data_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.data_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.data_channels" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">data_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.data_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.data_channels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Can be overwritten by subclasses if the data has multiple channels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -280,7 +296,7 @@ all values.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.label_items">
-<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
 :param ids: IDs of the items to be labeled.
 :param labels: Labels for the selected data items.</p>

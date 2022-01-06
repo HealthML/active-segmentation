@@ -184,6 +184,7 @@
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">ActiveLearningDataModule</span>
 <span class="kn">from</span> <span class="nn">models.pytorch_model</span> <span class="kn">import</span> <span class="n">PytorchModel</span>
 
 
@@ -191,8 +192,8 @@
 <div class="viewcode-block" id="QueryStrategy.select_items_to_label"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.query_strategy.QueryStrategy.select_items_to_label">[docs]</a>    <span class="k">def</span> <span class="nf">select_items_to_label</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">]],</span>
-        <span class="n">dataloader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
-        <span class="n">number_of_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
+        <span class="n">items_to_label</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -200,7 +201,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            models: Current models that should be improved by selecting additional data for labeling.</span>
 <span class="sd">            dataloader: Pytorch dataloader representing the unlabeled dataset.</span>
-<span class="sd">            number_of_items: Number of items that should be selected for labeling.</span>
+<span class="sd">            items_to_label: Number of items that should be selected for labeling.</span>
 <span class="sd">            **kwargs: Additional, strategy-specific parameters.</span>
 
 <span class="sd">        Returns:</span>
@@ -212,8 +213,8 @@
         <span class="n">selected_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">selected_items</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">for</span> <span class="n">image</span><span class="p">,</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">selected_items</span> <span class="o">==</span> <span class="n">number_of_items</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">image</span><span class="p">,</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_dataloader</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">selected_items</span> <span class="o">==</span> <span class="n">items_to_label</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">selected_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
             <span class="n">selected_items</span> <span class="o">+=</span> <span class="mi">1</span>
