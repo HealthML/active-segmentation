@@ -555,6 +555,8 @@ class DiceScore(SegmentationMetric):
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
         reduction (string, optional): A method to reduce metric scores of multiple classes.
 
             - ``"none"``: no reduction will be applied (default)
@@ -568,10 +570,14 @@ class DiceScore(SegmentationMetric):
         num_classes: int,
         convert_to_one_hot: bool = True,
         epsilon: float = 0,
+        include_background: bool = True,
         reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
         super().__init__(
-            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+            num_classes,
+            convert_to_one_hot=convert_to_one_hot,
+            include_background=include_background,
+            reduction=reduction,
         )
         self.epsilon = epsilon
         self.numerator = torch.zeros(num_classes)
@@ -633,6 +639,8 @@ class Sensitivity(SegmentationMetric):
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
         reduction (string, optional): A method to reduce metric scores of multiple classes.
 
             - ``"none"``: no reduction will be applied (default)
@@ -646,10 +654,14 @@ class Sensitivity(SegmentationMetric):
         num_classes: int,
         convert_to_one_hot: bool = True,
         epsilon: float = 0,
+        include_background: bool = True,
         reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
         super().__init__(
-            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+            num_classes,
+            convert_to_one_hot=convert_to_one_hot,
+            include_background=include_background,
+            reduction=reduction,
         )
         self.epsilon = epsilon
         self.true_positives = torch.tensor(0.0)
@@ -709,6 +721,8 @@ class Specificity(SegmentationMetric):
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
         reduction (string, optional): A method to reduce metric scores of multiple classes (default = `"none"`).
 
             - ``"none"``: no reduction will be applied (default)
@@ -722,10 +736,14 @@ class Specificity(SegmentationMetric):
         num_classes: int,
         convert_to_one_hot: bool = True,
         epsilon: float = 0,
+        include_background: bool = True,
         reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
         super().__init__(
-            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+            num_classes,
+            convert_to_one_hot=convert_to_one_hot,
+            include_background=include_background,
+            reduction=reduction,
         )
         self.epsilon = epsilon
         self.true_negatives = torch.tensor(0.0)
@@ -789,6 +807,8 @@ class HausdorffDistance(SegmentationMetric):
         slices_per_image (int): Number of slices per 3d image.
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
         normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
             distance.
         percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
@@ -806,12 +826,16 @@ class HausdorffDistance(SegmentationMetric):
         num_classes: int,
         slices_per_image: int,
         convert_to_one_hot: bool = True,
+        include_background: bool = True,
         normalize: bool = False,
         percentile: float = 0.95,
         reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
         super().__init__(
-            num_classes, convert_to_one_hot=convert_to_one_hot, reduction=reduction
+            num_classes,
+            convert_to_one_hot=convert_to_one_hot,
+            include_background=include_background,
+            reduction=reduction,
         )
         self.normalize = normalize
         self.percentile = percentile
