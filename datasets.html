@@ -196,14 +196,18 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_dir</strong> – Path of the directory that contains the data.</p></li>
-<li><p><strong>batch_size</strong> – Batch size.</p></li>
-<li><p><strong>num_workers</strong> – Number of workers for DataLoader.</p></li>
+<li><p><strong>data_dir</strong> (<em>string</em>) – Path of the directory that contains the data.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers for DataLoader.</p></li>
 <li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
 (default = 0).</p></li>
 <li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
-<li><p><strong>shuffle</strong> – Flag if the data should be shuffled.</p></li>
-<li><p><strong>dim</strong> – 2 or 3 to define if the datsets should return 2d slices of whole 3d images.</p></li>
+<li><p><strong>shuffle</strong> (<em>boolean</em>) – Flag if the data should be shuffled.</p></li>
+<li><p><strong>dim</strong> (<em>int</em>) – 2 or 3 to define if the datsets should return 2d slices of whole 3d images.</p></li>
+<li><p><strong>mask_join_non_zero</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the non zero values of the annotations should be merged.
+(default = True)</p></li>
+<li><p><strong>mask_filter_values</strong> (<em>Tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Values from the annotations which should be used. Defaults to using
+all values.</p></li>
 <li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
 </ul>
 </dd>
