@@ -16,15 +16,16 @@ class RandomSamplingStrategy(QueryStrategy):
         self,
         models: Union[PytorchModel, List[PytorchModel]],
         data_module: ActiveLearningDataModule,
-        number_of_items: int,
+        items_to_label: int,
         **kwargs
     ) -> List[str]:
         """
-        Selects random subset of the unlabeled data that should be labeled next.
+        Selects random subset of the unlabeled data that should be labeled next. We the shuffling 
+        of the dataset for randomisation.
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
-            number_of_items: Number of items that should be selected for labeling.
+            items_to_label (int): Number of items that should be selected for labeling.
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
@@ -35,8 +36,9 @@ class RandomSamplingStrategy(QueryStrategy):
         selected_ids = []
         selected_items = 0
 
+        # shuffling of the dataset is used for randomization
         for _, image_id in data_module.unlabeled_dataloader():
-            if selected_items == number_of_items:
+            if selected_items == items_to_label:
                 break
             selected_ids.append(image_id[0])
             selected_items += 1

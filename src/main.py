@@ -14,7 +14,7 @@ from datasets import BraTSDataModule, PascalVOCDataModule
 from query_strategies import QueryStrategy, RandomSamplingStrategy
 
 
-# pylint: disable=too-many-arguments,too-many-locals, too-many-branches
+# pylint: disable=too-many-arguments,too-many-locals
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
@@ -38,6 +38,7 @@ def run_active_learning_pipeline(
     prediction_dir: str = "./predictions",
     wandb_project_name: str = "active-segmentation",
     early_stopping: bool = False,
+    random_state: int = 42,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning
@@ -62,6 +63,7 @@ def run_active_learning_pipeline(
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         early_stopping (bool, optional): Enable/Disable Early stopping when model
             is not learning anymore (default = False).
+        random_state (int): Random constant for shuffling the data
         wandb_project_name (string, optional): Name of the project that the W&B runs are stored in.
 
     Returns:
@@ -90,12 +92,7 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid model architecture.")
 
-    if strategy == "base":
-        strategy = QueryStrategy()
-    elif strategy == "random":
-        strategy = RandomSamplingStrategy()
-    else:
-        raise ValueError("Invalid query strategy.")
+    strategy = createQueryStrategy(strategy)
 
     if dataset_config is None:
         dataset_config = {}
@@ -137,7 +134,7 @@ def run_active_learning_pipeline(
         gpus,
         checkpoint_dir,
         active_learning_mode=active_learning_config.get("active_learning_mode", False),
-        number_of_items=active_learning_config.get("number_of_items", 1),
+        items_to_label=active_learning_config.get("items_to_label", 1),
         iterations=active_learning_config.get("iterations", 10),
         logger=wandb_logger,
         early_stopping=early_stopping,
@@ -158,6 +155,18 @@ def run_active_learning_pipeline(
     )
     inferencer.inference()
 
+def createQueryStrategy(strategy: str):
+    """
+    Initialises the chosen query strategy
+    Args:
+        strategy (str): Name of the query strategy. E.g. 'base'
+    """
+    if strategy == "base":
+        return QueryStrategy()
+    elif strategy == "random":
+        return RandomSamplingStrategy()
+    else:
+        raise ValueError("Invalid query strategy.")
 
 def run_active_learning_pipeline_from_config(
     config_file_name: str, hp_optimisation: bool = False

@@ -11,7 +11,7 @@ class QueryStrategy:
         self,
         models: Union[PytorchModel, List[PytorchModel]],
         data_module: ActiveLearningDataModule,
-        number_of_items: int,
+        items_to_label: int,
         **kwargs
     ) -> List[str]:
         """
@@ -19,7 +19,7 @@ class QueryStrategy:
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             dataloader: Pytorch dataloader representing the unlabeled dataset.
-            number_of_items: Number of items that should be selected for labeling.
+            items_to_label: Number of items that should be selected for labeling.
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
@@ -32,7 +32,7 @@ class QueryStrategy:
         selected_items = 0
 
         for image, image_id in data_module.unlabeled_dataloader():
-            if selected_items == number_of_items:
+            if selected_items == items_to_label:
                 break
             selected_ids.append(image_id)
             selected_items += 1

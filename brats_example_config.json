@@ -25,7 +25,7 @@
     "active_learning_mode": true,
     "initial_training_set_size": 10,
     "iterations": 10,
-    "number_of_items": 2
+    "items_to_label": 32
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
@@ -38,5 +38,6 @@
   "gpus": 1,
   "prediction_count": 5,
   "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
-  "early_stopping": false
+  "early_stopping": false,
+  "random_state": 42
 }

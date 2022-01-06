@@ -29,7 +29,7 @@ class ActiveLearningPipeline:
         lr_scheduler (string, optional): Algorithm used for dynamically updating the
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).
-        number_of_items: Number of items that should be selected for labeling in the active learning run.
+        items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.
             (default = 1).
         iterations (int, optional): iteration times how often the active learning pipeline should be executed (default = 10).
     """
@@ -44,7 +44,7 @@ class ActiveLearningPipeline:
         gpus: int,
         checkpoint_dir: Optional[str] = None,
         active_learning_mode: bool = False,
-        number_of_items: int = 1,
+        items_to_label: int = 1,
         iterations: int = 10,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
@@ -91,7 +91,7 @@ class ActiveLearningPipeline:
         self.logger = logger
         self.gpus = gpus
         self.active_learning_mode = active_learning_mode
-        self.number_of_items = number_of_items
+        self.items_to_label = items_to_label
         self.iterations = iterations
         self.callbacks = callbacks
 
@@ -104,7 +104,7 @@ class ActiveLearningPipeline:
             for _ in range(0, self.iterations):
                 # query batch selection
                 items_to_label = self.strategy.select_items_to_label(
-                    self.model, self.data_module, self.number_of_items
+                    self.model, self.data_module, self.items_to_label
                 )
                 # label batch
                 self.data_module.label_items(items_to_label)
