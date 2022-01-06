@@ -363,13 +363,13 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         if self.target_transform:
             y = self.target_transform(y)
 
+        self.current_index += 1
+
         if self.is_unlabeled:
             return (
                 DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
                 f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
             )
-
-        self.current_index += 1
 
         return (
             DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),

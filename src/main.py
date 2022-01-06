@@ -11,7 +11,7 @@ from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule
-from query_strategies import QueryStrategy
+from query_strategies import QueryStrategy, RandomSamplingStrategy
 
 
 def create_data_module(
@@ -19,6 +19,8 @@ def create_data_module(
     data_dir: str,
     batch_size: int,
     num_workers: int,
+    random_state: int,
+    active_learning_config: Dict[str, Any],
     dataset_config: Dict[str, Any],
 ):
     """
@@ -29,6 +31,8 @@ def create_data_module(
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
         batch_size (int, optional): Size of training examples passed in one training step.
         num_workers (int, optional): Number of workers.
+        random_state (int): Random constant for shuffling the data
+        active_learning_config (Dict[str, Any): Dictionary with active learning specific parameters.
         dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
 
     Returns:
@@ -44,6 +48,13 @@ def create_data_module(
             data_dir,
             batch_size,
             num_workers,
+            active_learning_mode=active_learning_config.get(
+                "active_learning_mode", False
+            ),
+            initial_training_set_size=active_learning_config.get(
+                "initial_training_set_size", 10
+            ),
+            random_state=random_state,
             **dataset_config,
         )
     elif dataset == "decathlon":
@@ -71,6 +82,7 @@ def run_active_learning_pipeline(
     dataset_config: Optional[Dict[str, Any]] = None,
     model_config: Optional[Dict[str, Any]] = None,
     model_selection_criterion: Optional[str] = "loss",
+    active_learning_config: Optional[Dict[str, Any]] = None,
     epochs: int = 50,
     experiment_tags: Optional[Iterable[str]] = None,
     gpus: int = 1,
@@ -82,6 +94,7 @@ def run_active_learning_pipeline(
     prediction_dir: str = "./predictions",
     wandb_project_name: str = "active-segmentation",
     early_stopping: bool = False,
+    random_state: int = 42,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning
@@ -96,6 +109,7 @@ def run_active_learning_pipeline(
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
         dataset_config (Dict[str, Any], optional): Dictionary with dataset specific parameters.
         model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
+        active_learning_config (Dict[str, Any], optional): Dictionary with active learning specific parameters.
         epochs (int, optional): Number of iterations with the full dataset.
         experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
         gpus (int): Number of GPUS to use for model training.
@@ -106,6 +120,7 @@ def run_active_learning_pipeline(
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         early_stopping (bool, optional): Enable/Disable Early stopping when model
             is not learning anymore (default = False).
+        random_state (int): Random constant for shuffling the data
         wandb_project_name (string, optional): Name of the project that the W&B runs are stored in.
 
     Returns:
@@ -123,8 +138,17 @@ def run_active_learning_pipeline(
     if dataset_config is None:
         dataset_config = {}
 
+    if active_learning_config is None:
+        active_learning_config = {}
+
     data_module = create_data_module(
-        dataset, data_dir, batch_size, num_workers, dataset_config
+        dataset,
+        data_dir,
+        batch_size,
+        num_workers,
+        random_state,
+        active_learning_config,
+        dataset_config,
     )
 
     if architecture == "fcn_resnet50":
@@ -147,10 +171,7 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid model architecture.")
 
-    if strategy == "base":
-        strategy = QueryStrategy()
-    else:
-        raise ValueError("Invalid query strategy.")
+    strategy = create_query_strategy(strategy)
 
     if checkpoint_dir is not None:
         checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
@@ -164,10 +185,13 @@ def run_active_learning_pipeline(
         epochs,
         gpus,
         checkpoint_dir,
-        wandb_logger,
-        early_stopping,
-        lr_scheduler,
-        model_selection_criterion,
+        active_learning_mode=active_learning_config.get("active_learning_mode", False),
+        items_to_label=active_learning_config.get("items_to_label", 1),
+        iterations=active_learning_config.get("iterations", 10),
+        logger=wandb_logger,
+        early_stopping=early_stopping,
+        lr_scheduler=lr_scheduler,
+        model_selection_criterion=model_selection_criterion,
     )
     pipeline.run()
 
@@ -183,6 +207,19 @@ def run_active_learning_pipeline(
         dataset_config=dataset_config,
     )
     inferencer.inference()
+
+
+def create_query_strategy(strategy: str):
+    """
+    Initialises the chosen query strategy
+    Args:
+        strategy (str): Name of the query strategy. E.g. 'base'
+    """
+    if strategy == "base":
+        return QueryStrategy()
+    if strategy == "random":
+        return RandomSamplingStrategy()
+    raise ValueError("Invalid query strategy.")
 
 
 def run_active_learning_pipeline_from_config(
