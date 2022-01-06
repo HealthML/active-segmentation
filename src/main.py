@@ -14,7 +14,52 @@ from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule
 from query_strategies import QueryStrategy
 
 
-# pylint: disable=too-many-arguments,too-many-locals,too-many-branches
+def create_data_module(
+    dataset: str,
+    data_dir: str,
+    batch_size: int,
+    num_workers: int,
+    dataset_config: Dict[str, Any],
+):
+    """
+    Creates the correct data module.
+
+    Args:
+        dataset (string): Name of the dataset. E.g. 'brats'
+        data_dir (string, optional): Main directory with the dataset. E.g. './data'
+        batch_size (int, optional): Size of training examples passed in one training step.
+        num_workers (int, optional): Number of workers.
+        dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
+
+    Returns:
+        The data module.
+    """
+
+    if dataset == "pascal-voc":
+        data_module = PascalVOCDataModule(
+            data_dir, batch_size, num_workers, **dataset_config
+        )
+    elif dataset == "brats":
+        data_module = BraTSDataModule(
+            data_dir,
+            batch_size,
+            num_workers,
+            **dataset_config,
+        )
+    elif dataset == "decathlon":
+        data_module = DecathlonDataModule(
+            data_dir,
+            batch_size,
+            num_workers,
+            **dataset_config,
+        )
+    else:
+        raise ValueError("Invalid data_module name.")
+
+    return data_module
+
+
+# pylint: disable=too-many-arguments,too-many-locals
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
@@ -78,26 +123,9 @@ def run_active_learning_pipeline(
     if dataset_config is None:
         dataset_config = {}
 
-    if dataset == "pascal-voc":
-        data_module = PascalVOCDataModule(
-            data_dir, batch_size, num_workers, **dataset_config
-        )
-    elif dataset == "brats":
-        data_module = BraTSDataModule(
-            data_dir,
-            batch_size,
-            num_workers,
-            **dataset_config,
-        )
-    elif dataset == "decathlon":
-        data_module = DecathlonDataModule(
-            data_dir,
-            batch_size,
-            num_workers,
-            **dataset_config,
-        )
-    else:
-        raise ValueError("Invalid data_module name.")
+    data_module = create_data_module(
+        dataset, data_dir, batch_size, num_workers, dataset_config
+    )
 
     if architecture == "fcn_resnet50":
         if data_module.data_channels() != 1:

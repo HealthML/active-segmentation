@@ -15,15 +15,15 @@ class DecathlonDataModule(ActiveLearningDataModule):
     """
     Initializes the Decathlon data module.
     Args:
-        data_dir: Path of the directory that contains the data.
-        batch_size: Batch size.
-        num_workers: Number of workers for DataLoader.
+        data_dir (string): Path of the directory that contains the data.
+        batch_size (int): Batch size.
+        num_workers (int): Number of workers for DataLoader.
         task (str, optional): The task from the medical segmentation decathlon.
         cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
             (default = 0).
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
-        shuffle: Flag if the data should be shuffled.
-        dim: 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
+        shuffle (boolean): Flag if the data should be shuffled.
+        dim (int): 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
         mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
             (default = True)
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
