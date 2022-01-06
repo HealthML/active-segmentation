@@ -173,6 +173,16 @@ class BraTSDataModule(ActiveLearningDataModule):
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )
+
+        if self.active_learning_mode:
+            # initialize the training set with randomly selected samples
+            (train_image_paths, _, train_annotation_paths, _) = train_test_split(
+                train_image_paths,
+                train_annotation_paths,
+                train_size=self.initial_training_set_size,
+                random_state=self.random_state,
+            )
+
         return DoublyShuffledNIfTIDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,

@@ -20,6 +20,7 @@ def create_data_module(
     batch_size: int,
     num_workers: int,
     random_state: int,
+    active_learning_config: Dict[str, Any],
     dataset_config: Dict[str, Any],
 ):
     """
@@ -31,6 +32,7 @@ def create_data_module(
         batch_size (int, optional): Size of training examples passed in one training step.
         num_workers (int, optional): Number of workers.
         random_state (int): Random constant for shuffling the data
+        active_learning_config (Dict[str, Any): Dictionary with active learning specific parameters.
         dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
 
     Returns:
@@ -46,6 +48,12 @@ def create_data_module(
             data_dir,
             batch_size,
             num_workers,
+            active_learning_mode=active_learning_config.get(
+                "active_learning_mode", False
+            ),
+            initial_training_set_size=active_learning_config.get(
+                "initial_training_set_size", 10
+            ),
             random_state=random_state,
             **dataset_config,
         )
@@ -101,6 +109,7 @@ def run_active_learning_pipeline(
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
         dataset_config (Dict[str, Any], optional): Dictionary with dataset specific parameters.
         model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
+        active_learning_config (Dict[str, Any], optional): Dictionary with active learning specific parameters.
         epochs (int, optional): Number of iterations with the full dataset.
         experiment_tags (Iterable[string], optional): Tags with which to label the experiment.
         gpus (int): Number of GPUS to use for model training.
@@ -129,8 +138,11 @@ def run_active_learning_pipeline(
     if dataset_config is None:
         dataset_config = {}
 
+    if active_learning_config is None:
+        active_learning_config = {}
+
     data_module = create_data_module(
-        dataset, data_dir, batch_size, num_workers, random_state, dataset_config
+        dataset, data_dir, batch_size, num_workers, random_state, active_learning_config, dataset_config
     )
 
     if architecture == "fcn_resnet50":
@@ -154,9 +166,6 @@ def run_active_learning_pipeline(
         raise ValueError("Invalid model architecture.")
 
     strategy = create_query_strategy(strategy)
-
-    if active_learning_config is None:
-        active_learning_config = {}
         
     if checkpoint_dir is not None:
         checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
