@@ -1,6 +1,6 @@
 """ Base classes to implement models with pytorch """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union
 import numpy
 import torch
 import torchmetrics
@@ -22,22 +22,27 @@ class PytorchModel(LightningModule, ABC):
     Base class to implement Pytorch models.
 
     Args:
-        learning_rate: The step size at each iteration while moving towards a minimum of the loss.
-        optimizer: Algorithm used to calculate the loss and update the weights. E.g. 'adam' or 'sgd'.
-        lr_scheduler: Algorithm used for dynamically updating the learning rate during training.
-            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
-        loss: The measure of performance. E.g. 'dice', 'bce', 'fp'
+        learning_rate (float, optional): The step size at each iteration while moving towards a minimum of the loss.
+            Defaults to `0.0001`.
+        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training:
+            ``"reduceLROnPlateau"`` | ``"cosineAnnealingLR"``. Defaults to using no scheduler.
+        loss (string, optional): The optimization criterion: ``"cross_entropy"`` | ``"dice"`` |``"cross_entropy_dice"``
+            | ``"general_dice"`` | ``"fp"`` | ``"fp_dice"``. Defaults to ``"cross_entropy"``.
+        optimizer (string, optional): Algorithm used to calculate the loss and update the weights: ``"adam"`` |
+            ``"sgd"``. Defaults to ``"adam"``.
         train_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged
-            in each training and validation epoch of the training loop. Defaults to `["dice_score"]`.
+            in each training and validation epoch of the training loop. Available options: ``"dice_score"`` |
+            ``"sensitivity"`` | ``"specificity"`` | ``"hausdorff95"``. Defaults to `["dice_score"]`.
         train_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
-            specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`).
-            Defaults to `[0.25, 0.5, 0.75]`.
+            specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`). This
+            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.
         test_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged
-            in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Defaults to
+            in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Available options:
+            ``"dice_score"`` | ``"sensitivity"`` | ``"specificity"`` | ``"hausdorff95"`` Defaults to
             `["dice_score", "sensitivity", "specificity", "hausdorff95"]`.
         test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
-            specified in the `test_metrics` parameter should be computed in the validation or testing loop. Defaults to
-            `[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]`.
+            specified in the `test_metrics` parameter should be computed in the validation or testing loop. This
+            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -46,9 +51,18 @@ class PytorchModel(LightningModule, ABC):
     def __init__(
         self,
         learning_rate: float = 0.0001,
-        optimizer: str = "adam",
-        lr_scheduler: str = None,
-        loss: str = "dice",
+        lr_scheduler: Optional[
+            Literal["reduceLROnPlateau", "cosineAnnealingLR"]
+        ] = None,
+        loss: Literal[
+            "cross_entropy",
+            "dice",
+            "cross_entropy_dice",
+            "general_dice",
+            "fp",
+            "fp_dice",
+        ] = "cross_entropy",
+        optimizer: Literal["adam", "sgd"] = "adam",
         train_metrics: Optional[Iterable[str]] = None,
         train_metric_confidence_levels: Optional[Iterable[float]] = None,
         test_metrics: Optional[Iterable[str]] = None,
@@ -61,24 +75,10 @@ class PytorchModel(LightningModule, ABC):
         self.learning_rate = learning_rate
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
-        self.loss = self.configure_loss(loss)
+        self.loss = loss
+        self.loss_module = None
 
-        if train_metric_confidence_levels is None:
-            train_metric_confidence_levels = [0.25, 0.5, 0.75]
         self.train_metric_confidence_levels = train_metric_confidence_levels
-
-        if test_metric_confidence_levels is None:
-            test_metric_confidence_levels = [
-                0.1,
-                0.2,
-                0.3,
-                0.4,
-                0.5,
-                0.6,
-                0.7,
-                0.8,
-                0.9,
-            ]
         self.test_metric_confidence_levels = test_metric_confidence_levels
 
         if train_metrics is None:
@@ -106,54 +106,69 @@ class PytorchModel(LightningModule, ABC):
         self.stage = stage
 
         if stage == "fit":
-            train_slices_per_image = self.train_dataloader().dataset.slices_per_image()
+            training_set = self.train_dataloader().dataset
+            id_to_class_names = training_set.id_to_class_names()
+            multi_label = training_set.multi_label()
 
             train_average_metrics = CombinedPerEpochMetric(
                 metrics=self.train_metric_names,
                 confidence_levels=self.train_metric_confidence_levels,
-                image_ids=self.train_dataloader().dataset.image_ids(),
+                id_to_class_names=id_to_class_names,
+                image_ids=training_set.image_ids(),
+                multi_label=multi_label,
                 reduction="mean",
-                metrics_to_aggregate=[],
-                slices_per_image=train_slices_per_image,
+                slices_per_image=training_set.slices_per_image(),
             )
             self.train_metrics = torch.nn.ModuleList([train_average_metrics])
 
-            val_slices_per_image = self.val_dataloader().dataset.slices_per_image()
+            validation_set = self.val_dataloader().dataset
 
             val_average_metrics = CombinedPerEpochMetric(
                 metrics=self.train_metric_names,
                 confidence_levels=self.train_metric_confidence_levels,
-                image_ids=self.val_dataloader().dataset.image_ids(),
+                id_to_class_names=id_to_class_names,
+                image_ids=validation_set.image_ids(),
+                multi_label=multi_label,
                 reduction="mean",
-                metrics_to_aggregate=[],
-                slices_per_image=val_slices_per_image,
+                slices_per_image=validation_set.slices_per_image(),
             )
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
 
-        if stage in ["validate"]:
-            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+        if stage == "validate":
+            validation_set = self.val_dataloader().dataset
+            slices_per_image = validation_set.slices_per_image()
+            id_to_class_names = validation_set.id_to_class_names()
+            multi_label = validation_set.multi_label()
 
             val_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,
                 confidence_levels=self.test_metric_confidence_levels,
-                image_ids=self.val_dataloader().dataset.image_ids(),
+                id_to_class_names=id_to_class_names,
+                image_ids=validation_set.image_ids(),
+                multi_label=multi_label,
                 reduction="mean",
-                metrics_to_aggregate=[],
                 slices_per_image=slices_per_image,
             )
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
         if stage == "test":
-            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+            test_set = self.test_dataloader().dataset
+            slices_per_image = test_set.slices_per_image()
+            id_to_class_names = test_set.id_to_class_names()
+            multi_label = test_set.multi_label()
 
             test_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,
                 confidence_levels=self.test_metric_confidence_levels,
-                image_ids=self.test_dataloader().dataset.image_ids(),
+                id_to_class_names=id_to_class_names,
+                image_ids=test_set.image_ids(),
+                multi_label=multi_label,
                 reduction="mean",
-                metrics_to_aggregate=[],
                 slices_per_image=slices_per_image,
             )
             self.test_metrics = torch.nn.ModuleList([test_average_metrics])
+
+        if stage in ["fit", "validate", "test"]:
+            self.loss_module = self.configure_loss(self.loss, multi_label)
 
     @abstractmethod
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
@@ -251,26 +266,45 @@ class PytorchModel(LightningModule, ABC):
         return [opt]
 
     @staticmethod
-    def configure_loss(loss: str) -> functional.losses.SegmentationLoss:
+    def configure_loss(
+        loss: Literal[
+            "cross_entropy",
+            "dice",
+            "cross_entropy_dice",
+            "general_dice",
+            "fp",
+            "fp_dice",
+        ],
+        multi_label: bool = False,
+    ) -> functional.losses.SegmentationLoss:
         """
         Configures the loss.
         Args:
-            loss: name of the loss
+            loss (string, optional): The optimization criterion: ``"cross_entropy"`` | ``"dice"`` |
+                ``"cross_entropy_dice"`` | ``"general_dice"`` | ``"fp"`` | ``"fp_dice"``. Defaults to
+                ``"cross_entropy"``.
+            multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
 
         Returns:
             The loss object.
         """
 
-        if loss == "bce":
-            return functional.BCELoss()
-        if loss == "bce_dice":
-            return functional.BCEDiceLoss()
+        if loss == "cross_entropy":
+            return functional.CrossEntropyLoss(
+                multi_label=multi_label, include_background=multi_label
+            )
+        if loss == "cross_entropy_dice":
+            return functional.CrossEntropyDiceLoss(
+                multi_label=multi_label, include_background=multi_label
+            )
         if loss == "dice":
-            return functional.DiceLoss()
+            return functional.DiceLoss(include_background=multi_label)
+        if loss == "general_dice":
+            return functional.GeneralizedDiceLoss(include_background=multi_label)
         if loss == "fp":
-            return functional.FalsePositiveLoss()
+            return functional.FalsePositiveLoss(include_background=multi_label)
         if loss == "fp_dice":
-            return functional.FalsePositiveDiceLoss()
+            return functional.FalsePositiveDiceLoss(include_background=multi_label)
         raise ValueError("Invalid loss name.")
 
     def predict(self, batch: torch.Tensor) -> numpy.ndarray:

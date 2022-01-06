@@ -1,6 +1,6 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable, Tuple
+from typing import Iterable, Optional, Tuple
 
 import torch
 import numpy as np
@@ -16,7 +16,7 @@ class PytorchUNet(PytorchModel):
     Args:
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).
-        **kwargs: Further, dataset specific parameters.
+        **kwargs: Further, model specific parameters.
     """
 
     def __init__(
@@ -25,18 +25,43 @@ class PytorchUNet(PytorchModel):
 
         super().__init__(**kwargs)
 
+        self.num_levels = num_levels
         self.input_shape = input_shape
 
-        self.model = UNet(
-            in_channels=1,
-            out_channels=1,
-            init_features=32,
-            num_levels=num_levels,
-            input_shape=input_shape,
-        )
+        self.model = None
 
     def input_dimensionality(self) -> int:
         return len(self.input_shape)
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        """
+        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
+            or predict.
+
+        Args:
+            stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
+        """
+
+        super().setup(stage)
+
+        if stage == "fit":
+            dataset = self.train_dataloader().dataset
+        elif stage == "validate":
+            dataset = self.val_dataloader().dataset
+        elif stage == "test":
+            dataset = self.test_dataloader().dataset
+
+        multi_label = dataset.multi_label()
+        num_classes = len(dataset.id_to_class_names())
+
+        self.model = UNet(
+            in_channels=1,
+            out_channels=num_classes,
+            multi_label=multi_label,
+            init_features=32,
+            num_levels=self.num_levels,
+            input_shape=self.input_shape,
+        )
 
     # wrap model interface
     def eval(self) -> None:
