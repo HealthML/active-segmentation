@@ -112,25 +112,27 @@ class UNet(nn.Module):
 
         x = x.float()
         # individually store encoding results for skip connections
-        encs: List[torch.Tensor] = []
+        encodings: List[torch.Tensor] = []
         for level in range(self.num_levels):
-            encs.append(
+            encodings.append(
                 self.encoders[level](
-                    x if level == 0 else self.pools[level - 1](encs[level - 1])
+                    x if level == 0 else self.pools[level - 1](encodings[level - 1])
                 )
             )
 
-        bottleneck = self.bottleneck(self.pools[-1](encs[-1]))
+        bottleneck = self.bottleneck(self.pools[-1](encodings[-1]))
 
         dec = bottleneck
         for level in reversed(range(self.num_levels)):
             dec = self.upconvs[level](dec)
 
             # for the relevant dimensions [0, 0] for even and [0, 1] for odd in reversed order flattened
-            pad = [p for dim in reversed(encs[level].size()[2:]) for p in [0, dim % 2]]
+            pad = [
+                p for dim in reversed(encodings[level].size()[2:]) for p in [0, dim % 2]
+            ]
             dec = F.pad(dec, tuple(pad), "constant", 0)
 
-            dec = torch.cat((dec, encs[level]), dim=1)
+            dec = torch.cat((dec, encodings[level]), dim=1)
             dec = self.decoders[level](dec)
 
         return self.prediction_layer(self.conv(dec))
