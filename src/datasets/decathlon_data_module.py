@@ -159,7 +159,6 @@ class DecathlonDataModule(ActiveLearningDataModule):
             bool: Whether the dataset is a multi-label or a single-label dataset.
         """
 
-        # ToDo: return value depending on task
         return False
 
     def id_to_class_names(self) -> Dict[int, str]:
@@ -168,8 +167,20 @@ class DecathlonDataModule(ActiveLearningDataModule):
             Dict[int, str]: A mapping of class indices to descriptive class names.
         """
 
-        # ToDo: return value depending on task
-        return {0: "tumor"}
+        with DecathlonDataModule.__open_dataset_file(self.data_dir) as dataset_file:
+            dataset_info = json.load(dataset_file)
+            labels = dataset_info["labels"]
+
+        if self.mask_join_non_zero:
+            return {0: "background", 1: "foreground"}
+
+        if self.mask_filter_values is not None:
+            return {
+                class_id: class_name
+                for class_id, class_name in labels.items()
+                if class_id in self.mask_filter_values or class_id == 0
+            }
+        return labels
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""

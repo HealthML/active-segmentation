@@ -1,7 +1,7 @@
 """ Module containing the data module for brats data """
 import os
 import random
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from torch.utils.data import DataLoader, Dataset
 
 from .data_module import ActiveLearningDataModule
@@ -96,6 +96,38 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.cache_size = cache_size
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
+
+    def multi_label(self) -> bool:
+        """
+        Returns:
+            bool: Whether the dataset is a multi-label or a single-label dataset.
+        """
+
+        return False
+
+    def id_to_class_names(self) -> Dict[int, str]:
+        """
+        Returns:
+            Dict[int, str]: A mapping of class indices to descriptive class names.
+        """
+
+        if self.mask_join_non_zero:
+            return {0: "background", 1: "tumor"}
+
+        labels = {
+            0: "background",
+            1: "non-enhancing tumor core",
+            2: "peritumoral edema",
+            4: "GD-enhancing tumor",
+        }
+
+        if self.mask_filter_values is not None:
+            return {
+                class_id: class_name
+                for class_id, class_name in labels.items()
+                if class_id in self.mask_filter_values or class_id == 0
+            }
+        return labels
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """
