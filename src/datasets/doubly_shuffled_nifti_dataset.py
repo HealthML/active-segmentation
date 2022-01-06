@@ -370,7 +370,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
                 f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
             )
-        
+
         return (
             DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
             DoublyShuffledNIfTIDataset.__ensure_channel_dim(y, self.dim),

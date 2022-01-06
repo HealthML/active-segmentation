@@ -142,7 +142,13 @@ def run_active_learning_pipeline(
         active_learning_config = {}
 
     data_module = create_data_module(
-        dataset, data_dir, batch_size, num_workers, random_state, active_learning_config, dataset_config
+        dataset,
+        data_dir,
+        batch_size,
+        num_workers,
+        random_state,
+        active_learning_config,
+        dataset_config,
     )
 
     if architecture == "fcn_resnet50":
@@ -166,7 +172,7 @@ def run_active_learning_pipeline(
         raise ValueError("Invalid model architecture.")
 
     strategy = create_query_strategy(strategy)
-        
+
     if checkpoint_dir is not None:
         checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
 

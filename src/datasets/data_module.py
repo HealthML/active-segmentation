@@ -67,7 +67,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         self._test_set = self._create_test_set()
         self._unlabeled_set = self._create_unlabeled_set()
 
-    def data_channels(self) -> int:
+    @staticmethod
+    def data_channels() -> int:
         """
         Can be overwritten by subclasses if the data has multiple channels.
 
@@ -77,7 +78,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
 
         return 1
 
-    def _get_collate_fn(self) -> Optional[Callable[[List[Any]], Any]]:
+    @staticmethod
+    def _get_collate_fn() -> Optional[Callable[[List[Any]], Any]]:
         """
         Can be overwritten by subclasses to pass a custom collate function to the dataloaders.
 
