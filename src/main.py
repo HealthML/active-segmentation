@@ -92,7 +92,7 @@ def run_active_learning_pipeline(
     else:
         raise ValueError("Invalid model architecture.")
 
-    strategy = createQueryStrategy(strategy)
+    strategy = create_query_strategy(strategy)
 
     if dataset_config is None:
         dataset_config = {}
@@ -116,6 +116,7 @@ def run_active_learning_pipeline(
                 "initial_training_set_size", 10
             ),
             dim=model.input_dimensionality(),
+            random_state=random_state,
             **dataset_config,
         )
     else:
@@ -156,7 +157,7 @@ def run_active_learning_pipeline(
     inferencer.inference()
 
 
-def createQueryStrategy(strategy: str):
+def create_query_strategy(strategy: str):
     """
     Initialises the chosen query strategy
     Args:
@@ -164,10 +165,9 @@ def createQueryStrategy(strategy: str):
     """
     if strategy == "base":
         return QueryStrategy()
-    elif strategy == "random":
+    if strategy == "random":
         return RandomSamplingStrategy()
-    else:
-        raise ValueError("Invalid query strategy.")
+    raise ValueError("Invalid query strategy.")
 
 
 def run_active_learning_pipeline_from_config(
