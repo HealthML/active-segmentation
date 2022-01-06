@@ -9,32 +9,23 @@
     "model_selection_criterion": "mean_dice_score_0.5",
     "train_metrics": ["dice_score"],
     "train_metric_confidence_levels": [0.25, 0.5, 0.75],
-    "test_metrics": ["dice_score", "sensitivity", "specificity", "hausdorff95"],
+    "test_metrics": ["dice_score", "sensitivity", "specificity"],
     "test_metric_confidence_levels": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
   },
   "dataset_config": {
-    "dataset": "brats",
-    "data_dir": "/dhc/groups/mpws2021cl1/Data/BraTS",
+    "dataset": "decathlon",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data/Decathlon",
     "cache_size": 250,
-    "pin_memory": true
-  },
-  "active_learning_config": {
-    "active_learning_mode": true,
-    "initial_training_set_size": 10,
-    "iterations": 10,
-    "items_to_label": 32
+    "pin_memory": true,
+    "task": "Task09_Spleen"
   },
   "wandb_project_name": "active-segmentation-tests",
-  "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
-  "strategy": "random",
+  "strategy": "base",
   "experiment_name": "test-experiment",
   "experiment_tags": [],
   "batch_size": 16,
-  "epochs": 3,
+  "epochs": 5,
   "num_workers": 8,
   "gpus": 1,
-  "prediction_count": 5,
-  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
-  "early_stopping": false,
-  "random_state": 42
+  "early_stopping": false
 }

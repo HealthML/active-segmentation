@@ -26,7 +26,8 @@ disable=
     fixme,
     bad-continuation,
     bad-whitespace,
-    useless-super-delegation
+    useless-super-delegation,
+    duplicate-code
 
 [REPORTS]
 reports=yes

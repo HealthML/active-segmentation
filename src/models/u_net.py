@@ -1,11 +1,11 @@
 """U-Net architecture."""
 
 from collections import OrderedDict
-from typing import Tuple
+from typing import List
 
 import torch
 from torch import nn
-import numpy as np
+import torch.nn.functional as F
 
 
 class UNet(nn.Module):
@@ -21,7 +21,7 @@ class UNet(nn.Module):
         init_features (int, optional): Number of feature channels of the first U-Net block,
             in each down-sampling block, the number of feature channels is doubled. Defaults to 32.
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
-        input_shape (Tuple[int], optional): The input shape of the U-Net. Defaults to (240, 240).
+        dim (int, optional): The dimensionality of the U-Net. Defaults to 2.
     """
 
     # pylint: disable-msg=too-many-instance-attributes
@@ -32,14 +32,12 @@ class UNet(nn.Module):
         out_channels: int = 1,
         init_features: int = 32,
         num_levels: int = 4,
-        input_shape: Tuple[int] = (240, 240),
+        dim: int = 2,
     ):
 
         super().__init__()
 
         self.num_levels = num_levels
-
-        dim = len(input_shape)
 
         MaxPool = nn.MaxPool2d if dim == 2 else nn.MaxPool3d
         ConvTranspose = nn.ConvTranspose2d if dim == 2 else nn.ConvTranspose3d
@@ -76,7 +74,6 @@ class UNet(nn.Module):
                     features * (2 ** level),
                     kernel_size=2,
                     stride=2,
-                    output_padding=UNet.upconv_output_padding(level, input_shape),
                 )
                 for level in range(num_levels)
             ]
@@ -106,20 +103,28 @@ class UNet(nn.Module):
         """
 
         x = x.float()
-        encs = []  # individually store encoding results for skip connections
+        # individually store encoding results for skip connections
+        encodings: List[torch.Tensor] = []
         for level in range(self.num_levels):
-            encs.append(
+            encodings.append(
                 self.encoders[level](
-                    x if level == 0 else self.pools[level - 1](encs[level - 1])
+                    x if level == 0 else self.pools[level - 1](encodings[level - 1])
                 )
             )
 
-        bottleneck = self.bottleneck(self.pools[-1](encs[-1]))
+        bottleneck = self.bottleneck(self.pools[-1](encodings[-1]))
 
         dec = bottleneck
         for level in reversed(range(self.num_levels)):
             dec = self.upconvs[level](dec)
-            dec = torch.cat((dec, encs[level]), dim=1)
+
+            # for the relevant dimensions [0, 0] for even and [0, 1] for odd in reversed order flattened
+            pad = [
+                p for dim in reversed(encodings[level].size()[2:]) for p in [0, dim % 2]
+            ]
+            dec = F.pad(dec, tuple(pad), "constant", 0)
+
+            dec = torch.cat((dec, encodings[level]), dim=1)
             dec = self.decoders[level](dec)
 
         return torch.sigmoid(self.conv(dec))
@@ -160,22 +165,3 @@ class UNet(nn.Module):
                 ]
             )
         )
-
-    @staticmethod
-    def upconv_output_padding(level: int, input_shape: Tuple[int]) -> Tuple[int]:
-        """
-        Calculates the output padding for transpose convolutions to match the output size to the corresponding encoding
-        step for concatenation.
-
-        Args:
-            level (int): The level in the UNet the transpose convolution is on.
-            input_shape (Tuple[int]): The input shape for the whole UNet.
-
-        Returns:
-            Tuple[int]: The output padding for the transpose convolution.
-        """
-        shape = np.asarray(input_shape)
-        for _ in range(level):
-            shape = np.floor_divide(shape, 2)
-        odd = shape % 2
-        return tuple(odd)

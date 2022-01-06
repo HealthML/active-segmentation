@@ -10,8 +10,53 @@ import wandb
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
-from datasets import BraTSDataModule, PascalVOCDataModule
+from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule
 from query_strategies import QueryStrategy, RandomSamplingStrategy
+
+
+def create_data_module(
+    dataset: str,
+    data_dir: str,
+    batch_size: int,
+    num_workers: int,
+    dataset_config: Dict[str, Any],
+):
+    """
+    Creates the correct data module.
+
+    Args:
+        dataset (string): Name of the dataset. E.g. 'brats'
+        data_dir (string, optional): Main directory with the dataset. E.g. './data'
+        batch_size (int, optional): Size of training examples passed in one training step.
+        num_workers (int, optional): Number of workers.
+        dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
+
+    Returns:
+        The data module.
+    """
+
+    if dataset == "pascal-voc":
+        data_module = PascalVOCDataModule(
+            data_dir, batch_size, num_workers, **dataset_config
+        )
+    elif dataset == "brats":
+        data_module = BraTSDataModule(
+            data_dir,
+            batch_size,
+            num_workers,
+            **dataset_config,
+        )
+    elif dataset == "decathlon":
+        data_module = DecathlonDataModule(
+            data_dir,
+            batch_size,
+            num_workers,
+            **dataset_config,
+        )
+    else:
+        raise ValueError("Invalid data_module name.")
+
+    return data_module
 
 
 # pylint: disable=too-many-arguments,too-many-locals
@@ -78,7 +123,19 @@ def run_active_learning_pipeline(
         config=locals().copy(),
     )
 
+    if dataset_config is None:
+        dataset_config = {}
+
+    data_module = create_data_module(
+        dataset, data_dir, batch_size, num_workers, dataset_config
+    )
+
     if architecture == "fcn_resnet50":
+        if data_module.data_channels() != 1:
+            raise ValueError(
+                f"{architecture} does not support multiple input channels."
+            )
+
         model = PytorchFCNResnet50(
             learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
         )
@@ -87,6 +144,7 @@ def run_active_learning_pipeline(
             learning_rate=learning_rate,
             lr_scheduler=lr_scheduler,
             num_levels=num_levels,
+            in_channels=data_module.data_channels(),
             **model_config,
         )
     else:
@@ -94,34 +152,9 @@ def run_active_learning_pipeline(
 
     strategy = create_query_strategy(strategy)
 
-    if dataset_config is None:
-        dataset_config = {}
-
     if active_learning_config is None:
         active_learning_config = {}
-
-    if dataset == "pascal-voc":
-        data_module = PascalVOCDataModule(
-            data_dir, batch_size, num_workers, **dataset_config
-        )
-    elif dataset == "brats":
-        data_module = BraTSDataModule(
-            data_dir,
-            batch_size,
-            num_workers,
-            active_learning_mode=active_learning_config.get(
-                "active_learning_mode", False
-            ),
-            initial_training_set_size=active_learning_config.get(
-                "initial_training_set_size", 10
-            ),
-            dim=model.input_dimensionality(),
-            random_state=random_state,
-            **dataset_config,
-        )
-    else:
-        raise ValueError("Invalid data_module name.")
-
+        
     if checkpoint_dir is not None:
         checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
 
@@ -150,9 +183,10 @@ def run_active_learning_pipeline(
     inferencer = Inferencer(
         model,
         dataset,
-        os.path.join(data_dir, "val"),
+        data_dir,
         prediction_dir,
         prediction_count,
+        dataset_config=dataset_config,
     )
     inferencer.inference()
 
@@ -194,14 +228,23 @@ def run_active_learning_pipeline_from_config(
         if "dataset_config" in config and "data_dir" in config["dataset_config"]:
             config["data_dir"] = config["dataset_config"]["data_dir"]
             del config["dataset_config"]["data_dir"]
+        if (
+            "dataset_config" in config
+            and "mask_filter_values" in config["dataset_config"]
+        ):
+            config["dataset_config"]["mask_filter_values"] = tuple(
+                config["dataset_config"]["mask_filter_values"]
+            )
 
+        if (
+            "model_config" in config
+            and "dim" in config["model_config"]
+            and "dataset_config" in config
+        ):
+            config["dataset_config"]["dim"] = config["model_config"]["dim"]
         if "model_config" in config and "architecture" in config["model_config"]:
             config["architecture"] = config["model_config"]["architecture"]
             del config["model_config"]["architecture"]
-        if "model_config" in config and "input_shape" in config["model_config"]:
-            config["model_config"]["input_shape"] = tuple(
-                config["model_config"]["input_shape"]
-            )
         if "model_config" in config and "learning_rate" in config["model_config"]:
             config["learning_rate"] = config["model_config"]["learning_rate"]
             del config["model_config"]["learning_rate"]

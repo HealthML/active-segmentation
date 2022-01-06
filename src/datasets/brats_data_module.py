@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 from .data_module import ActiveLearningDataModule
-from .brats_dataset import BraTSDataset
+from .doubly_shuffled_nifti_dataset import DoublyShuffledNIfTIDataset
 
 
 class BraTSDataModule(ActiveLearningDataModule):
@@ -15,9 +15,9 @@ class BraTSDataModule(ActiveLearningDataModule):
     Initializes the BraTS data module.
 
     Args:
-        data_dir: Path of the directory that contains the data.
-        batch_size: Batch size.
-        num_workers: Number of workers for DataLoader.
+        data_dir (string): Path of the directory that contains the data.
+        batch_size (int): Batch size.
+        num_workers (int): Number of workers for DataLoader.
         cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
             (default = 0).
         active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for
@@ -25,8 +25,12 @@ class BraTSDataModule(ActiveLearningDataModule):
         initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is
             activated.
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
-        shuffle: Flag if the data should be shuffled.
-        dim: 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
+        shuffle (boolean): Flag if the data should be shuffled.
+        dim (int): 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
+        mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
+            (default = True)
+        mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
+            all values.
         random_state (int): Random constant for shuffling the data
         **kwargs: Further, dataset specific parameters.
     """
@@ -71,25 +75,6 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         return image_paths, annotation_paths
 
-    @staticmethod
-    def __case_id_to_filepaths(
-        case_id: str, dir_path: str, modality: str = "flair"
-    ) -> Tuple[str, str]:
-        """
-        Returns the image and annotation file path for a given case ID.
-
-        Args:
-            case_id: Case ID for which the file paths are to be determined.
-            dir_path: directory to where the images are located
-            modality (string, optional): modality of scan.
-
-        Returns:
-            Tuple[str]: Image and annotation path.
-        """
-        image_path = os.path.join(dir_path, case_id, f"{case_id}_{modality}.nii.gz")
-        annotation_path = os.path.join(dir_path, case_id, f"{case_id}_seg.nii.gz")
-        return image_path, annotation_path
-
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -102,6 +87,8 @@ class BraTSDataModule(ActiveLearningDataModule):
         pin_memory: bool = True,
         shuffle: bool = True,
         dim: int = 2,
+        mask_join_non_zero: bool = True,
+        mask_filter_values: Optional[Tuple[int]] = None,
         random_state: int = 42,
         **kwargs,
     ):
@@ -119,6 +106,8 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.data_folder = self.data_dir
         self.dim = dim
         self.cache_size = cache_size
+        self.mask_join_non_zero = mask_join_non_zero
+        self.mask_filter_values = mask_filter_values
         self.random_state = random_state
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
@@ -164,22 +153,14 @@ class BraTSDataModule(ActiveLearningDataModule):
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )
-
-        if self.active_learning_mode:
-            # initialize the training set with randomly selected samples
-            (train_image_paths, _, train_annotation_paths, _) = train_test_split(
-                train_image_paths,
-                train_annotation_paths,
-                train_size=self.initial_training_set_size,
-                random_state=self.random_state,
-            )
-
-        return BraTSDataset(
+        return DoublyShuffledNIfTIDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,
             dim=self.dim,
             cache_size=self.cache_size,
             shuffle=self.shuffle,
+            mask_join_non_zero=self.mask_join_non_zero,
+            mask_filter_values=self.mask_filter_values,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -188,7 +169,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             Pytorch dataloader or Keras sequence representing the training set.
         """
 
-        # disable shuffling in the dataloader since the BraTS dataset is a subclass of
+        # disable shuffling in the dataloader since the dataset is a subclass of
         # IterableDataset and implements it's own shuffling
         if self._training_set:
             return DataLoader(
@@ -196,6 +177,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -204,11 +186,13 @@ class BraTSDataModule(ActiveLearningDataModule):
         val_image_paths, val_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "val")
         )
-        return BraTSDataset(
+        return DoublyShuffledNIfTIDataset(
             image_paths=val_image_paths,
             annotation_paths=val_annotation_paths,
             dim=self.dim,
             cache_size=self.cache_size,
+            mask_join_non_zero=self.mask_join_non_zero,
+            mask_filter_values=self.mask_filter_values,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:

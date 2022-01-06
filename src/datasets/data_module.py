@@ -1,7 +1,7 @@
 """ Module containing abstract classes for the data modules"""
 from abc import ABC, abstractmethod
 import warnings
-from typing import Any, List, Optional
+from typing import Any, Callable, List, Optional
 from pytorch_lightning.core.datamodule import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
@@ -60,15 +60,32 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         Creates the datasets managed by this data module.
         Args:
             stage: Current training stage.
-
-        Returns:
-            None.
         """
 
         self._training_set = self._create_training_set()
         self._validation_set = self._create_validation_set()
         self._test_set = self._create_test_set()
         self._unlabeled_set = self._create_unlabeled_set()
+
+    def data_channels(self) -> int:
+        """
+        Can be overwritten by subclasses if the data has multiple channels.
+
+        Returns:
+            The amount of data channels. Defaults to 1.
+        """
+
+        return 1
+
+    def _get_collate_fn(self) -> Optional[Callable[[List[Any]], Any]]:
+        """
+        Can be overwritten by subclasses to pass a custom collate function to the dataloaders.
+
+        Returns:
+            Callable[[List[torch.Tensor]], Any] that combines batches. Defaults to None.
+        """
+
+        return None
 
     @abstractmethod
     def _create_training_set(self) -> Optional[Dataset]:
@@ -123,6 +140,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
                 shuffle=self.shuffle,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -138,6 +156,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -149,7 +168,10 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
 
         if self._test_set:
             return DataLoader(
-                self._test_set, batch_size=self.batch_size, num_workers=self.num_workers
+                self._test_set,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -165,6 +187,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
                 batch_size=1,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 

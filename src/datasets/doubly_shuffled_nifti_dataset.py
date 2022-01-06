@@ -1,4 +1,5 @@
-""" Module to load and batch brats dataset """
+""" Module to load and batch nifti datasets """
+from functools import reduce
 from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
@@ -10,32 +11,31 @@ import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
-from .dataset_hooks import DatasetHooks
+from datasets.dataset_hooks import DatasetHooks
+
 
 # pylint: disable=too-many-instance-attributes,abstract-method
-class BraTSDataset(IterableDataset, DatasetHooks):
+class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     """
-    The BraTS dataset is published in the course of the annual MultimodalBrainTumorSegmentation Challenge (BraTS)
-    held since 2012. It is composed of 3T multimodal MRI scans from patients affected by glioblastoma or lower grade
-    glioma, as well as corresponding ground truth labels provided by expert board-certified neuroradiologists.
-    Further information: https://www.med.upenn.edu/cbica/brats2020/data.html
+    This datset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.
 
     Args:
         image_paths (List[str]): List with the paths to the images.
         annotation_paths (List[str]): List with the paths to the annotations.
         cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.
             Defaults to zero.
-        clip_mask (bool, optinal): Flag to clip the annotation labels, if True only label 1 is kept. Defaults to true.
+        mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
+            Defaults to True.
+        mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
+            all values.
         shuffle (bool, optional): Whether the data should be shuffled.
         transform (Callable[[Any], Tensor], optional): Function to transform the images.
         target_transform (Callable[[Any], Tensor], optional): Function to transform the annotations.
-        dimensionality (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+        dim (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.
             Defaults to 2.
         slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
             Uses all slices if None. Defaults to None.
     """
-
-    IMAGE_DIMENSIONS = (155, 240, 240)
 
     @staticmethod
     def normalize(img: np.ndarray) -> np.ndarray:
@@ -44,7 +44,6 @@ class BraTSDataset(IterableDataset, DatasetHooks):
             1. Dividing by the maximum value
             2. Subtracting the mean, zeros will be ignored while calculating the mean
             3. Dividing by the negative minimum value
-
         Args:
             img: The input image that should be normalized.
 
@@ -58,28 +57,89 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         return tmp / (-np.min(tmp))
 
     @staticmethod
+    def __read_image(filepath: str) -> Any:
+        """
+        Reads image or annotation.
+        Args:
+            filepath (str): Path of the image file.
+
+        Returns:
+            The image. See https://nipy.org/nibabel/reference/nibabel.spatialimages.html#module-nibabel.spatialimages
+        """
+        return nib.load(filepath)
+
+    @staticmethod
+    def __read_slice_count(filepath: str, dim: int = 2) -> int:
+        """
+        Reads image or annotation.
+        Args:
+            filepath (str): Path of the image file.
+            dim (int, optional): The dimensionality of the dataset. Defaults to 2.
+
+        Returns:
+            The slice count of the image at the filepath or 1 if dim is not 2.
+        """
+        return (
+            DoublyShuffledNIfTIDataset.__read_image(filepath).shape[2]
+            if dim == 2
+            else 1
+        )
+
+    @staticmethod
+    def __align_axes(img: np.ndarray) -> np.ndarray:
+        """
+        Aligns the axes to (slice, x, y) or (channel, slice, x, y), depending on if there is a channel dimension
+        Args:
+            img (np.ndarray): The image
+
+        Returns:
+            The images with realigned axes.
+        """
+        img = np.moveaxis(img, 2, 0)  # slice dimension to front
+
+        if len(img.shape) == 4:
+            img = np.moveaxis(img, 3, 0)  # channel dimension to front
+
+        return img
+
+    @staticmethod
     def __read_image_as_array(
-        filepath: str, norm: bool, clip: bool = False
+        filepath: str,
+        norm: bool,
+        join_non_zero: bool = False,
+        filter_values: Optional[Tuple[int]] = None,
     ) -> np.ndarray:
         """
         Reads image or annotation as numpy array.
-
         Args:
             filepath: Path of the image file.
             norm: Whether the image should be normalized.
-            clip: Whether the image should be clipped.
+            join_non_zero: Whether the non zero values of the image should be joined. Will set all non zero values to 1.
+            filter_values: Values to be filtered from the images. All other values will be set to zero.
+                Can be used togther with join_non_zero. Filtering will be applied befor joining.
 
         Returns:
             The array representation of an image.
         """
-        img = nib.load(filepath).get_fdata()
+        img = DoublyShuffledNIfTIDataset.__read_image(filepath).get_fdata()
 
-        if clip:
+        if filter_values is not None:
+            map_to_filtered_value = np.vectorize(
+                lambda value: value if value in filter_values else 0
+            )
+
+            img = map_to_filtered_value(img)
+
+        if join_non_zero:
             img = np.clip(img, 0, 1)
 
         if norm:
-            img = BraTSDataset.normalize(img)
-        return np.moveaxis(img, 2, 0)
+            img = DoublyShuffledNIfTIDataset.normalize(img)
+        return DoublyShuffledNIfTIDataset.__align_axes(img)
+
+    @staticmethod
+    def __ensure_channel_dim(img: torch.Tensor, dim: int) -> torch.Tensor:
+        return img if len(img.shape) == dim + 1 else torch.unsqueeze(img, 0)
 
     @staticmethod
     def __get_case_id(filepath: str) -> str:
@@ -107,10 +167,10 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         """
         Reads the slice indices for the images at the provided slice paths and pairs them with their image index.
 
-        Implements efficient shuffling for 2D image datasets like the BraTSDataset whose elements represent the
-        slices of multiple 3D images. To allow for efficient image pre-fetching, first the order of all 3D images is
-        shuffled and then the order of slices within each 3D image is shuffled. This way the 3D images can still be
-        loaded as a whole.
+        Implements efficient shuffling for 2D image datasets like the DoublyShuffledNIfTIDataset whose elements
+        represent the slices of multiple 3D images. To allow for efficient image pre-fetching, first the order of all 3D
+        images is shuffled and then the order of slices within each 3D image is shuffled. This way the 3D images can
+        still be loaded as a whole.
 
         Args:
             filepaths (List[str]): The paths of the images.
@@ -125,8 +185,10 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         """
         if slice_indices is None:
             slice_indices = [
-                np.arange(BraTSDataset.IMAGE_DIMENSIONS[0] if dim == 2 else 1)
-                for _ in filepaths
+                np.arange(
+                    DoublyShuffledNIfTIDataset.__read_slice_count(filepath, dim=dim)
+                )
+                for filepath in filepaths
             ]
 
         if shuffle:
@@ -161,7 +223,8 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         image_paths: List[str],
         annotation_paths: List[str],
         cache_size: int = 0,
-        clip_mask: bool = True,
+        mask_join_non_zero: bool = True,
+        mask_filter_values: Optional[Tuple[int]] = None,
         is_unlabeled: bool = False,
         shuffle: bool = False,
         transform: Optional[Callable[[Any], torch.Tensor]] = None,
@@ -172,7 +235,10 @@ class BraTSDataset(IterableDataset, DatasetHooks):
 
         self.image_paths = image_paths
         self.annotation_paths = annotation_paths
-        self.clip_mask = clip_mask
+        self.mask_join_non_zero = mask_join_non_zero
+        self.mask_filter_values = mask_filter_values
+
+        assert len(image_paths) == len(annotation_paths)
 
         self.is_unlabeled = is_unlabeled
 
@@ -198,12 +264,14 @@ class BraTSDataset(IterableDataset, DatasetHooks):
 
         self.dim = dim
 
-        self.image_slice_indices = BraTSDataset.__arange_image_slice_indices(
-            filepaths=self.image_paths,
-            dim=self.dim,
-            shuffle=self.shuffle,
-            seed=42,
-            slice_indices=slice_indices,
+        self.image_slice_indices = (
+            DoublyShuffledNIfTIDataset.__arange_image_slice_indices(
+                filepaths=self.image_paths,
+                dim=self.dim,
+                shuffle=self.shuffle,
+                seed=42,
+                slice_indices=slice_indices,
+            )
         )
 
         self.start_index = 0
@@ -253,7 +321,10 @@ class BraTSDataset(IterableDataset, DatasetHooks):
                 self.image_paths[image_index], norm=True
             )
             self._current_mask = self.__read_image_as_array(
-                self.annotation_paths[image_index], norm=False, clip=self.clip_mask
+                self.annotation_paths[image_index],
+                norm=False,
+                join_non_zero=self.mask_join_non_zero,
+                filter_values=self.mask_filter_values,
             )
 
         # cache image and mask if there is still space in cache
@@ -278,7 +349,10 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         if self.dim == 2:
             slice_index = image_slice_index[1]
 
-            x = torch.from_numpy(self._current_image[slice_index, :, :])
+            if len(self._current_image.shape) == 4:
+                x = torch.from_numpy(self._current_image[:, slice_index, :, :])
+            else:
+                x = torch.from_numpy(self._current_image[slice_index, :, :])
             y = torch.from_numpy(self._current_mask[slice_index, :, :])
         else:
             x = torch.from_numpy(self._current_image)
@@ -289,21 +363,25 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         if self.target_transform:
             y = self.target_transform(y)
 
-        self.current_index += 1
-
         if self.is_unlabeled:
             return (
-                torch.unsqueeze(x, 0),
+                DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
                 f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
             )
 
-        return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
+        self.current_index += 1
+
+        return (
+            DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
+            DoublyShuffledNIfTIDataset.__ensure_channel_dim(y, self.dim),
+            case_id,
+        )
 
     def __len__(self) -> int:
         return len(self.image_slice_indices)
 
     def add_image(
-        self, image_path: str, annotation_path: str, slice_index: int = None
+        self, image_path: str, annotation_path: str, slice_index: int = 0
     ) -> None:
         """
         Adds an image to this dataset.
@@ -332,7 +410,7 @@ class BraTSDataset(IterableDataset, DatasetHooks):
             raise ValueError("Slice of image already belongs to this dataset.")
 
     def remove_image(
-        self, image_path: str, annotation_path: str, slice_index: int = None
+        self, image_path: str, annotation_path: str, slice_index: int = 0
     ) -> None:
         """
         Removes an image from this dataset.
@@ -361,18 +439,21 @@ class BraTSDataset(IterableDataset, DatasetHooks):
         else:
             raise ValueError("Image does not belong to this dataset.")
 
+    def __image_indices(self) -> Iterable[str]:
+        return reduce(
+            lambda acc, elem: acc + [elem] if not elem in acc else acc,
+            [image_id for image_id, _ in self.image_slice_indices],
+            [],
+        )
+
     def image_ids(self) -> Iterable[str]:
-        """
-        Returns:
-            List of all image IDs included in the dataset.
-        """
+        return [
+            DoublyShuffledNIfTIDataset.__get_case_id(self.image_paths[image_idx])
+            for image_idx in self.__image_indices()
+        ]
 
-        return [self.__get_case_id(image_path) for image_path in self.image_paths]
-
-    def slices_per_image(self, **kwargs) -> int:
-        """
-        Returns:
-            int: Number of slices that each image of the dataset contains.
-        """
-
-        return BraTSDataset.IMAGE_DIMENSIONS[0]
+    def slices_per_image(self, **kwargs) -> List[int]:
+        return [
+            DoublyShuffledNIfTIDataset.__read_slice_count(self.image_paths[image_idx])
+            for image_idx in self.__image_indices()
+        ]
