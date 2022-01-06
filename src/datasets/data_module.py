@@ -1,6 +1,7 @@
 """ Module containing abstract classes for the data modules"""
+import abc
 import warnings
-from typing import Any, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from pytorch_lightning.core.datamodule import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
@@ -11,7 +12,7 @@ warnings.filterwarnings(
 )
 
 
-class ActiveLearningDataModule(LightningDataModule):
+class ActiveLearningDataModule(LightningDataModule, abc.ABC):
     """
     Abstract base class to structure the dataset creation for active learning
     Args:
@@ -51,15 +52,46 @@ class ActiveLearningDataModule(LightningDataModule):
         Creates the datasets managed by this data module.
         Args:
             stage: Current training stage.
-
-        Returns:
-            None.
         """
 
         self._training_set = self._create_training_set()
         self._validation_set = self._create_validation_set()
         self._test_set = self._create_test_set()
         self._unlabeled_set = self._create_unlabeled_set()
+
+    def data_channels(self) -> int:
+        """
+        Can be overwritten by subclasses if the data has multiple channels.
+
+        Returns:
+            The amount of data channels. Defaults to 1.
+        """
+
+        return 1
+
+    def _get_collate_fn(self) -> Optional[Callable[[List[Any]], Any]]:
+        """
+        Can be overwritten by subclasses to pass a custom collate function to the dataloaders.
+
+        Returns:
+            Callable[[List[torch.Tensor]], Any] that combines batches. Defaults to None.
+        """
+
+        return None
+
+    @abc.abstractmethod
+    def multi_label(self) -> bool:
+        """
+        Returns:
+            bool: Whether the dataset is a multi-label or a single-label dataset.
+        """
+
+    @abc.abstractmethod
+    def id_to_class_names(self) -> Dict[int, str]:
+        """
+        Returns:
+            Dict[int, str]: A mapping of class indices to descriptive class names.
+        """
 
     def _create_training_set(self) -> Optional[Dataset]:
         """
@@ -124,6 +156,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 shuffle=self.shuffle,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -139,6 +172,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -150,7 +184,10 @@ class ActiveLearningDataModule(LightningDataModule):
 
         if self._test_set:
             return DataLoader(
-                self._test_set, batch_size=self.batch_size, num_workers=self.num_workers
+                self._test_set,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -166,6 +203,7 @@ class ActiveLearningDataModule(LightningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
