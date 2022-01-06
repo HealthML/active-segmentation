@@ -31,7 +31,7 @@ class ActiveLearningPipeline:
         active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).
         number_of_items: Number of items that should be selected for labeling in the active learning run.
             (default = 1).
-        iterations: iteration times how often the active learning pipeline should be executed (default = 10).
+        iterations (int, optional): iteration times how often the active learning pipeline should be executed (default = 10).
     """
 
     # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals
