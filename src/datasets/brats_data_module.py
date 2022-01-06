@@ -138,7 +138,6 @@ class BraTSDataModule(ActiveLearningDataModule):
                 (case_id.split("-")[0], case_id.split("-")[1]) for case_id in ids
             ]
             ids = [image_id for image_id, slice_index in image_slice_ids]
-            print("ids: ", ids)
 
         if self._training_set is not None and self._unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
