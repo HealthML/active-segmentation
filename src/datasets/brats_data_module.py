@@ -75,6 +75,25 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         return image_paths, annotation_paths
 
+    @staticmethod
+    def __case_id_to_filepaths(
+        case_id: str, dir_path: str, modality: str = "flair"
+    ) -> Tuple[str, str]:
+        """
+        Returns the image and annotation file path for a given case ID.
+
+        Args:
+            case_id: Case ID for which the file paths are to be determined.
+            dir_path: directory to where the images are located
+            modality (string, optional): modality of scan.
+
+        Returns:
+            Tuple[str]: Image and annotation path.
+        """
+        image_path = os.path.join(dir_path, case_id, f"{case_id}_{modality}.nii.gz")
+        annotation_path = os.path.join(dir_path, case_id, f"{case_id}_seg.nii.gz")
+        return image_path, annotation_path
+
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -119,6 +138,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 (case_id.split("-")[0], case_id.split("-")[1]) for case_id in ids
             ]
             ids = [image_id for image_id, slice_index in image_slice_ids]
+            print("ids: ", ids)
 
         if self._training_set is not None and self._unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
@@ -196,17 +216,9 @@ class BraTSDataModule(ActiveLearningDataModule):
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
-        """Creates a test dataset."""
-
-        test_image_paths, test_annotation_paths = BraTSDataModule.discover_paths(
-            os.path.join(self.data_folder, "test")
-        )
-        return BraTSDataset(
-            image_paths=test_image_paths,
-            annotation_paths=test_annotation_paths,
-            dim=self.dim,
-            cache_size=self.cache_size,
-        )
+        # faked test set
+        # ToDo: implement test set
+        return self._create_validation_set()
 
     def _create_unlabeled_set(self) -> Optional[Dataset]:
         """Creates an unlabeled dataset."""
@@ -228,13 +240,15 @@ class BraTSDataModule(ActiveLearningDataModule):
                 random_state=self.random_state,
             )
 
-            return BraTSDataset(
+            return DoublyShuffledNIfTIDataset(
                 image_paths=initial_unlabeled_image_paths,
                 annotation_paths=initial_unlabeled_annotation_paths,
                 dim=self.dim,
                 cache_size=self.cache_size,
                 is_unlabeled=True,
                 shuffle=self.shuffle,
+                mask_join_non_zero=self.mask_join_non_zero,
+                mask_filter_values=self.mask_filter_values,
             )
 
         # unlabeled set is empty

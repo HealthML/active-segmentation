@@ -19,6 +19,7 @@ def create_data_module(
     data_dir: str,
     batch_size: int,
     num_workers: int,
+    random_state: int,
     dataset_config: Dict[str, Any],
 ):
     """
@@ -29,6 +30,7 @@ def create_data_module(
         data_dir (string, optional): Main directory with the dataset. E.g. './data'
         batch_size (int, optional): Size of training examples passed in one training step.
         num_workers (int, optional): Number of workers.
+        random_state (int): Random constant for shuffling the data
         dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
 
     Returns:
@@ -44,6 +46,7 @@ def create_data_module(
             data_dir,
             batch_size,
             num_workers,
+            random_state=random_state,
             **dataset_config,
         )
     elif dataset == "decathlon":
@@ -127,7 +130,7 @@ def run_active_learning_pipeline(
         dataset_config = {}
 
     data_module = create_data_module(
-        dataset, data_dir, batch_size, num_workers, dataset_config
+        dataset, data_dir, batch_size, num_workers, random_state, dataset_config
     )
 
     if architecture == "fcn_resnet50":
