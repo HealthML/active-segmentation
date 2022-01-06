@@ -117,6 +117,7 @@ def run_active_learning_pipeline(
         entity="active-segmentation",
         name=experiment_name,
         tags=experiment_tags,
+        log_model="all",
         config=locals().copy(),
     )
 
