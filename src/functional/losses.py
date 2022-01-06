@@ -1,6 +1,6 @@
 """ Module containing segmentation losses """
 import abc
-from typing import Literal, Tuple
+from typing import Literal, Optional
 
 from monai.losses.dice import (
     DiceLoss as MonaiDiceLoss,
@@ -16,6 +16,8 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
     Base class for implementation of segmentation losses.
 
     Args:
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -26,12 +28,14 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
     def __init__(
         self,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
 
         super().__init__()
+        self.ignore_index = ignore_index
         self.include_background = include_background
         if reduction and reduction not in ["mean", "sum", "none"]:
             raise ValueError("Invalid reduction method.")
@@ -80,38 +84,14 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
         return tensor.view(*tensor.shape[0:2], -1).float()
 
-    def _flatten_tensors(
-        self, prediction: torch.Tensor, target: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        r"""
-        Reshapes and flattens prediction and target tensors except for the first two dimensions (batch dimension and
-        class dimension).
-
-        Args:
-            prediction (Tensor): A prediction tensor to be flattened.
-            target (Tensor): A target tensor to be flattened.
-        Returns:
-            Tuple[torch.Tensor]: Flattened prediction and target tensor.
-
-        Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)` where `N = batch size`, and `C = number of classes`.
-            - Target: :math:`(N, C, X, Y, ...)` in case of one-hot or multi-hot encoding or :math:`(N, X, Y, ...)` in
-                case of label encoding.
-            - Output: :math:`(N, C, X*Y*...)` for both tensors.
-        """
-
-        if prediction.ndim != target.ndim:
-            # in this case the target tensor is label encoded and needs to be converted to a one-hot encoding
-            target = one_hot_encode(target, prediction.shape[1])
-
-        return self._flatten_tensor(prediction), self._flatten_tensor(target)
-
 
 class AbstractDiceLoss(SegmentationLoss, abc.ABC):
     r"""
     Base class for implementation of Dice loss and Generalized Dice loss.
 
     Args:
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -122,12 +102,16 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
 
     def __init__(
         self,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
         super().__init__(
-            epsilon=epsilon, include_background=include_background, reduction=reduction
+            epsilon=epsilon,
+            ignore_index=ignore_index,
+            include_background=include_background,
+            reduction=reduction,
         )
 
     @abc.abstractmethod
@@ -159,7 +143,14 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
 
         if prediction.dim() != target.dim():
-            target = one_hot_encode(target, prediction.shape[1])
+            target = one_hot_encode(
+                target, prediction.shape[1], ignore_index=self.ignore_index
+            )
+
+        if self.ignore_index is not None:
+            # map ignore_index to true negatives
+            prediction[target == self.ignore_index] = 0
+            target[target == self.ignore_index] = 0
 
         dice_loss_module = self.get_dice_loss_module()
         dice_loss = dice_loss_module(prediction, target)
@@ -196,6 +187,8 @@ class DiceLoss(AbstractDiceLoss):
     https://github.com/pytorch/pytorch/issues/1249.
 
     Args:
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -206,11 +199,14 @@ class DiceLoss(AbstractDiceLoss):
 
     def __init__(
         self,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
-        super().__init__(epsilon=epsilon, reduction=reduction)
+        super().__init__(
+            epsilon=epsilon, ignore_index=ignore_index, reduction=reduction
+        )
         self.dice_loss = MonaiDiceLoss(
             include_background=include_background,
             reduction=reduction,
@@ -249,6 +245,8 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
     both single-label and multi-label segmentation tasks.
 
     Args:
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         weight_type (string, optional): Type of function to transform ground truth volume to a weight factor:
@@ -261,12 +259,15 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
 
     def __init__(
         self,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         weight_type: Literal["square", "simple", "uniform"] = "square",
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
-        super().__init__(epsilon=epsilon, reduction=reduction)
+        super().__init__(
+            epsilon=epsilon, ignore_index=ignore_index, reduction=reduction
+        )
         self.generalized_dice_loss = MonaiGeneralizedDiceLoss(
             include_background=include_background,
             w_type=weight_type,
@@ -289,6 +290,8 @@ class FalsePositiveLoss(SegmentationLoss):
     Implementation of false positive loss.
 
     Args:
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -299,12 +302,16 @@ class FalsePositiveLoss(SegmentationLoss):
 
     def __init__(
         self,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
         super().__init__(
-            include_background=include_background, reduction=reduction, epsilon=epsilon
+            ignore_index=ignore_index,
+            include_background=include_background,
+            reduction=reduction,
+            epsilon=epsilon,
         )
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -328,14 +335,23 @@ class FalsePositiveLoss(SegmentationLoss):
 
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
 
+        if prediction.dim() != target.dim():
+            target = one_hot_encode(
+                target, prediction.shape[1], ignore_index=self.ignore_index
+            )
+
+        if self.ignore_index is not None:
+            # map ignore_index to true negatives
+            prediction[target == self.ignore_index] = 0
+            target[target == self.ignore_index] = 0
+
         if not self.include_background:
             prediction = prediction[:, 1:]
             target = target[:, 1:]
 
         # flatten spatial dimensions
-        flattened_prediction, flattened_target = self._flatten_tensors(
-            prediction, target
-        )
+        flattened_prediction = self._flatten_tensor(prediction)
+        flattened_target = self._flatten_tensor(target)
 
         false_positives = ((1 - flattened_target) * flattened_prediction).sum(-1)
         positives = flattened_prediction.sum(-1)
@@ -352,6 +368,8 @@ class FalsePositiveDiceLoss(SegmentationLoss):
     Implements a loss function that combines the Dice loss with the false positive loss.
 
     Args:
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -362,16 +380,23 @@ class FalsePositiveDiceLoss(SegmentationLoss):
 
     def __init__(
         self,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
     ):
         super().__init__(reduction=reduction, epsilon=epsilon)
         self.fp_loss = FalsePositiveLoss(
-            include_background=include_background, reduction=reduction, epsilon=epsilon
+            ignore_index=ignore_index,
+            include_background=include_background,
+            reduction=reduction,
+            epsilon=epsilon,
         )
         self.dice_loss = DiceLoss(
-            include_background=include_background, reduction=reduction, epsilon=epsilon
+            ignore_index=ignore_index,
+            include_background=include_background,
+            reduction=reduction,
+            epsilon=epsilon,
         )
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -402,6 +427,8 @@ class CrossEntropyLoss(SegmentationLoss):
 
     Args:
         multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -412,6 +439,7 @@ class CrossEntropyLoss(SegmentationLoss):
     def __init__(
         self,
         multi_label: bool = False,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
     ):
@@ -420,7 +448,9 @@ class CrossEntropyLoss(SegmentationLoss):
         if self.multi_label:
             self.cross_entropy_loss = torch.nn.BCELoss(reduction="none")
         else:
-            self.cross_entropy_loss = torch.nn.NLLLoss(reduction="none")
+            self.cross_entropy_loss = torch.nn.NLLLoss(
+                ignore_index=ignore_index, reduction="none"
+            )
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         r"""
@@ -449,6 +479,11 @@ class CrossEntropyLoss(SegmentationLoss):
 
         loss = self.cross_entropy_loss(prediction.float(), target.float())
 
+        if self.multi_label and self.ignore_index is not None:
+            # the BCELoss from Pytorch does not provide an `ignore_index` argument
+            # therefore the loss values for the voxels to be ignored have to be set to zero here
+            loss[target == self.ignore_index] = 0
+
         if self.reduction == "mean":
             # the images in one batch can have different sizes and thus the padding size can differ
             # in order to weight the loss term of each image equally regardless of its size, the loss tensor is averaged
@@ -471,6 +506,8 @@ class CrossEntropyDiceLoss(SegmentationLoss):
 
     Args:
         multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
@@ -482,6 +519,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
     def __init__(
         self,
         multi_label: bool = False,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
         epsilon: float = 1e-5,
@@ -491,11 +529,15 @@ class CrossEntropyDiceLoss(SegmentationLoss):
         )
         self.bce_loss = CrossEntropyLoss(
             multi_label=multi_label,
+            ignore_index=ignore_index,
             include_background=include_background,
             reduction=reduction,
         )
         self.dice_loss = DiceLoss(
-            include_background=include_background, reduction=reduction, epsilon=epsilon
+            ignore_index=ignore_index,
+            include_background=include_background,
+            reduction=reduction,
+            epsilon=epsilon,
         )
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:

@@ -98,13 +98,14 @@ def is_binary(tensor_to_check: torch.Tensor) -> bool:
     )
 
 
-def one_hot_encode(tensor: torch.Tensor, num_classes: int) -> torch.Tensor:
+def one_hot_encode(tensor: torch.Tensor, num_classes: int, ignore_index: Optional[int] = None) -> torch.Tensor:
     r"""
     Converts a label encoded tensor to a one-hot encoded tensor.
 
     Args:
         tensor (Tensor): Label encoded tensor that is to be converted to one-hot encoding.
-        num_classes (int): Number of classes.
+        num_classes (int): Number of classes (excluding the class labeled with :attr:`ignore_label`).
+        ignore_index (int, optional): Class value for which no one-hot encoded channel should be created in the output.
 
     Returns:
         Tensor: One-hot encoded tensor.
@@ -112,10 +113,20 @@ def one_hot_encode(tensor: torch.Tensor, num_classes: int) -> torch.Tensor:
     Shape:
         - Tensor: :math:`(N, X, Y, ...)` where each element represents a class index of integer type and `N = batch
             size`.
-        - Output: :math:`(N, C, X, Y, ...)` where each element represent a binary class label.
+        - Output: :math:`(N, C, X, Y, ...)` where each element represent a binary class label and :math:`C` is the
+            number of classes (excluding the ignored class labeled with :attr:`ignore_label`).
     """
 
-    tensor_one_hot = torch.nn.functional.one_hot(tensor.long(), num_classes)
+    if ignore_index is not None:
+        # shift labels since `torch.nn.functional.one_hot` only accepts positive labels
+        tensor[tensor == ignore_index] = -1
+        tensor += 1
+
+    tensor_one_hot = torch.nn.functional.one_hot(tensor.long(), num_classes + 1)
+
+    if ignore_index is not None:
+        # drop ignored channel
+        tensor_one_hot = tensor_one_hot[..., 1:]
 
     # one_hot outputs a tensor of shape (N, X, Y, ..., C)
     # this tensor is converted to a tensor of shape (N, C, X, Y, ...)
