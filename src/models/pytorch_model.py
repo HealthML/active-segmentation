@@ -244,12 +244,12 @@ class PytorchModel(LightningModule, ABC):
         if self.lr_scheduler == "reduceLROnPlateau":
             scheduler = {
                 "scheduler": ReduceLROnPlateau(opt),
-                "monitor": "validation/loss",
+                "monitor": "val/loss",
             }
         elif self.lr_scheduler == "cosineAnnealingLR":
             scheduler = {
                 "scheduler": CosineAnnealingLR(opt, T_max=50),
-                "monitor": "validation/loss",
+                "monitor": "val/loss",
             }
 
         if scheduler is not None:
