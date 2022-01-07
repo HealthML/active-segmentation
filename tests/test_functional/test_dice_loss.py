@@ -26,8 +26,8 @@
 #         expected_loss: Optional[torch.Tensor] = None,
 #     ) -> None:
 #         """
-#         Helper function that calculates the dice loss with the given settings for the given predictions and compares it
-#         with an expected value.
+#         Helper function that calculates the dice loss with the given settings for the given predictions and compares
+#         it with an expected value.
 #
 #         Args:
 #             get_first_slice: Getter function that returns prediction, target and cardinalities for the first slice.
