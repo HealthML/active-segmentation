@@ -10,7 +10,12 @@ from typing import Literal, Optional, Tuple
 import torch
 import torchmetrics
 
-from .utils import flatten_tensors, is_binary, one_hot_encode, reduce_metric
+from .utils import (
+    flatten_tensors,
+    is_binary,
+    reduce_metric,
+    preprocess_metric_inputs,
+)
 
 
 def dice_score(
@@ -19,6 +24,7 @@ def dice_score(
     num_classes: int,
     convert_to_one_hot: bool = True,
     epsilon: float = 0,
+    ignore_index: Optional[int] = None,
     include_background: bool = True,
     reduction: Literal["mean", "min", "max", "none"] = "none",
 ) -> torch.Tensor:
@@ -40,6 +46,8 @@ def dice_score(
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing factor (default = 0).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string): A method to reduce metric scores of multiple classes.
@@ -59,14 +67,16 @@ def dice_score(
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
-    assert prediction.device == target.device
-
-    flattened_prediction, flattened_target = flatten_tensors(
+    preprocess_metric_inputs(
         prediction,
         target,
         num_classes,
         convert_to_one_hot=convert_to_one_hot,
-        include_background=include_background,
+        ignore_index=ignore_index,
+    )
+
+    flattened_prediction, flattened_target = flatten_tensors(
+        prediction, target, include_background=include_background
     )
 
     intersection = (flattened_prediction * flattened_target).sum(dim=1)
@@ -83,6 +93,7 @@ def sensitivity(
     num_classes: int,
     convert_to_one_hot: bool = True,
     epsilon: float = 0,
+    ignore_index: Optional[int] = None,
     include_background: bool = True,
     reduction: Literal["mean", "min", "max", "none"] = "none",
 ) -> torch.Tensor:
@@ -104,6 +115,8 @@ def sensitivity(
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing factor (default = 0).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string): A method to reduce metric scores of multiple classes.
@@ -123,14 +136,16 @@ def sensitivity(
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
-    assert prediction.device == target.device
-
-    flattened_prediction, flattened_target = flatten_tensors(
+    preprocess_metric_inputs(
         prediction,
         target,
         num_classes,
         convert_to_one_hot=convert_to_one_hot,
-        include_background=include_background,
+        ignore_index=ignore_index,
+    )
+
+    flattened_prediction, flattened_target = flatten_tensors(
+        prediction, target, include_background=include_background
     )
 
     true_positives = (flattened_prediction * flattened_target).sum(dim=1)
@@ -149,6 +164,7 @@ def specificity(
     num_classes: int,
     convert_to_one_hot: bool = True,
     epsilon: float = 0,
+    ignore_index: Optional[int] = None,
     include_background: bool = True,
     reduction: Literal["mean", "min", "max", "none"] = "none",
 ) -> torch.Tensor:
@@ -170,6 +186,8 @@ def specificity(
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing factor (default = 0).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string): A method to reduce metric scores of multiple classes.
@@ -189,14 +207,16 @@ def specificity(
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
-    assert prediction.device == target.device
-
-    flattened_prediction, flattened_target = flatten_tensors(
+    preprocess_metric_inputs(
         prediction,
         target,
         num_classes,
         convert_to_one_hot=convert_to_one_hot,
-        include_background=include_background,
+        ignore_index=ignore_index,
+    )
+
+    flattened_prediction, flattened_target = flatten_tensors(
+        prediction, target, include_background=include_background
     )
 
     ones = torch.ones(flattened_prediction.shape, device=prediction.device)
@@ -405,6 +425,7 @@ def hausdorff_distance(
     num_classes: int,
     all_image_locations: Optional[torch.Tensor] = None,
     convert_to_one_hot: bool = True,
+    ignore_index: Optional[int] = None,
     include_background: bool = True,
     normalize: bool = False,
     percentile: float = 0.95,
@@ -424,6 +445,8 @@ def hausdorff_distance(
             this parameter can be used to speed up computation.
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
@@ -450,17 +473,13 @@ def hausdorff_distance(
     # adapted code from
     # https://github.com/PiechaczekMyller/brats/blob/eb9f7eade1066dd12c90f6cef101b74c5e974bfa/brats/functional.py#L135
 
-    assert prediction.device == target.device
-    assert (
-        prediction.shape == target.shape
-    ), "Prediction and target must have the same dimensions."
-    assert (
-        prediction.dim() == 3 or prediction.dim() == 4
-    ), "Prediction and target must have either two or three dimensions."
-
-    if convert_to_one_hot:
-        prediction = one_hot_encode(prediction, num_classes)
-        target = one_hot_encode(target, num_classes)
+    preprocess_metric_inputs(
+        prediction,
+        target,
+        num_classes,
+        convert_to_one_hot=convert_to_one_hot,
+        ignore_index=ignore_index,
+    )
 
     if not include_background:
         # drop the channel of the background class
@@ -488,6 +507,8 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
     num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
     convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
         encoding or not (default = `True`).
+    ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+        Defaults to `None`.
     include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
         calculation (default = `True`).
     reduction (string, optional): A method to reduce metric scores of multiple classes.
@@ -502,6 +523,7 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
         self,
         num_classes: int,
         convert_to_one_hot: bool = True,
+        ignore_index: Optional[bool] = None,
         include_background: bool = True,
         reduction: Literal["mean", "min", "max", "none"] = "none",
     ):
@@ -509,6 +531,7 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
 
         self.num_classes = num_classes
         self.convert_to_one_hot = convert_to_one_hot
+        self.ignore_index = ignore_index
         self.include_background = include_background
         if reduction not in ["mean", "min", "max", "none"]:
             raise ValueError("Invalid reduction method.")
@@ -539,9 +562,33 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
         return flatten_tensors(
             prediction,
             target,
+            include_background=self.include_background,
+        )
+
+    def _preprocess_inputs(
+        self, prediction: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        This method implements three preprocessing steps that are needed for most segmentation metrics:
+
+        1. Validation of input shape and type
+        2. Conversion from label encoding to one-hot encoding if necessary
+        3. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives
+
+        Args:
+            prediction (Tensor): The prediction tensor.
+            target (Tensor): The target tensor.
+
+        Returns:
+            Tuple[Tensor, Tensor]: The preprocessed prediction and target tensors.
+        """
+
+        return preprocess_metric_inputs(
+            prediction,
+            target,
             self.num_classes,
             convert_to_one_hot=self.convert_to_one_hot,
-            include_background=self.include_background,
+            ignore_index=self.ignore_index,
         )
 
 
@@ -555,6 +602,8 @@ class DiceScore(SegmentationMetric):
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string, optional): A method to reduce metric scores of multiple classes.
@@ -570,12 +619,14 @@ class DiceScore(SegmentationMetric):
         num_classes: int,
         convert_to_one_hot: bool = True,
         epsilon: float = 0,
+        ignore_index: Optional[bool] = None,
         include_background: bool = True,
         reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
         super().__init__(
             num_classes,
             convert_to_one_hot=convert_to_one_hot,
+            ignore_index=ignore_index,
             include_background=include_background,
             reduction=reduction,
         )
@@ -601,7 +652,7 @@ class DiceScore(SegmentationMetric):
             - Target: Same shape and type as prediction.
         """
 
-        assert prediction.device == target.device
+        prediction, target = self._preprocess_inputs(prediction, target)
 
         flattened_prediction, flattened_target = self._flatten_tensors(
             prediction, target
@@ -639,6 +690,8 @@ class Sensitivity(SegmentationMetric):
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string, optional): A method to reduce metric scores of multiple classes.
@@ -654,12 +707,14 @@ class Sensitivity(SegmentationMetric):
         num_classes: int,
         convert_to_one_hot: bool = True,
         epsilon: float = 0,
+        ignore_index: Optional[bool] = None,
         include_background: bool = True,
         reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
         super().__init__(
             num_classes,
             convert_to_one_hot=convert_to_one_hot,
+            ignore_index=ignore_index,
             include_background=include_background,
             reduction=reduction,
         )
@@ -685,7 +740,7 @@ class Sensitivity(SegmentationMetric):
             - Target: Same shape and type as prediction.
         """
 
-        assert prediction.device == target.device
+        prediction, target = self._preprocess_inputs(prediction, target)
 
         flattened_prediction, flattened_target = self._flatten_tensors(
             prediction, target
@@ -721,6 +776,8 @@ class Specificity(SegmentationMetric):
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
         epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = 0).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         reduction (string, optional): A method to reduce metric scores of multiple classes (default = `"none"`).
@@ -736,12 +793,14 @@ class Specificity(SegmentationMetric):
         num_classes: int,
         convert_to_one_hot: bool = True,
         epsilon: float = 0,
+        ignore_index: Optional[bool] = None,
         include_background: bool = True,
         reduction: Literal["none", "mean", "min", "max"] = "none",
     ):
         super().__init__(
             num_classes,
             convert_to_one_hot=convert_to_one_hot,
+            ignore_index=ignore_index,
             include_background=include_background,
             reduction=reduction,
         )
@@ -767,7 +826,7 @@ class Specificity(SegmentationMetric):
             - Target: Same shape and type as prediction.
         """
 
-        assert prediction.device == target.device
+        prediction, target = self._preprocess_inputs(prediction, target)
 
         flattened_prediction, flattened_target = self._flatten_tensors(
             prediction, target
@@ -807,6 +866,8 @@ class HausdorffDistance(SegmentationMetric):
         slices_per_image (int): Number of slices per 3d image.
         convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
             encoding or not (default = `True`).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
         normalize (bool, optional): Whether the Hausdorff distance should be normalized by dividing it by the diagonal
@@ -826,6 +887,7 @@ class HausdorffDistance(SegmentationMetric):
         num_classes: int,
         slices_per_image: int,
         convert_to_one_hot: bool = True,
+        ignore_index: Optional[bool] = None,
         include_background: bool = True,
         normalize: bool = False,
         percentile: float = 0.95,
@@ -834,6 +896,7 @@ class HausdorffDistance(SegmentationMetric):
         super().__init__(
             num_classes,
             convert_to_one_hot=convert_to_one_hot,
+            ignore_index=ignore_index,
             include_background=include_background,
             reduction=reduction,
         )
@@ -852,18 +915,7 @@ class HausdorffDistance(SegmentationMetric):
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
-        assert (
-            prediction.shape == target.shape
-        ), "Prediction and target must have the same dimensions."
-        assert prediction.dim() in [
-            2,
-            3,
-            4,
-        ], "Prediction and target must have either two, three or four dimensions."
-
-        if not self.multi_label:
-            prediction = one_hot_encode(prediction, self.num_classes)
-            target = one_hot_encode(target, self.num_classes)
+        prediction, target = self._preprocess_inputs(prediction, target)
 
         self.hausdorff_distance_cached = False
 
@@ -910,6 +962,8 @@ class HausdorffDistance(SegmentationMetric):
             targets,
             self.num_classes,
             convert_to_one_hot=False,
+            ignore_index=None,
+            include_background=self.include_background,
             normalize=self.normalize,
             percentile=self.percentile,
         )

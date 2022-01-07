@@ -1,6 +1,6 @@
 """Utilities for metric and loss computations."""
 
-from typing import Literal, Tuple
+from typing import Literal, Optional, Tuple
 
 import torch
 
@@ -8,68 +8,26 @@ import torch
 def flatten_tensors(
     prediction: torch.Tensor,
     target: torch.Tensor,
-    num_classes: int,
-    convert_to_one_hot: bool = True,
     include_background: bool = True,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     r"""
     Reshapes and flattens prediction and target tensors except for the first dimension (class dimension).
 
     Args:
-        prediction (Tensor): The prediction tensor (either label-encoded, one-hot encoded or multi-hot encoded).
-        target (Tensor): The target tensor (either label-encoded, one-hot encoded or multi-hot encoded).
-        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        prediction (Tensor): The prediction tensor (one-hot encoded or multi-hot encoded).
+        target (Tensor): The target tensor (one-hot encoded or multi-hot encoded).
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
             calculation (default = `True`).
-        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
-            encoding or not (default = `True`).
 
     Returns:
         Tuple[Tensor]: Flattened prediction and target tensors (one-hot or multi-hot encoded).
 
     Shape:
-        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-            and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-            encoding (`C = number of classes`).
+        - Prediction: :math:`(C, X, Y, ...)`, where `C = number of classes` and each value is in :math:`\{0, 1\}`.
         - Target: Must have same shape and type as prediction.
         - Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /
             presence of the respective class (one-hot or multi-hot encoding).
     """
-    assert (
-        prediction.shape == target.shape
-    ), "Prediction and target need to have the same shape."
-    assert (
-        prediction.dtype == torch.int
-    ), "Prediction and target both need to be of integer type."
-
-    if convert_to_one_hot is True:
-        # for single-label segmentation tasks, prediction and target are label encoded
-        # they have the shape (X, Y, ...)
-
-        assert prediction.dim() in [
-            2,
-            3,
-        ], "Prediction and target need to be either two- or three-dimensional if `convert_to_one_hot` is True."
-
-        # convert label encoding into one-hot encoding
-        prediction = one_hot_encode(prediction, num_classes)
-        target = one_hot_encode(target, num_classes)
-
-    else:
-        # for single-label segmentation tasks, prediction and target are one-hot or multi-hot encoded
-        # they have the shape (C, X, Y, ...)
-
-        assert is_binary(
-            prediction
-        ), "Prediction needs to be binary if `convert_to_one_hot` is False."
-        assert is_binary(
-            target
-        ), "Target needs to be binary if `convert_to_one_hot` is False."
-
-        assert prediction.dim() in [
-            3,
-            4,
-        ], "Prediction and target need to be either three- or four-dimensional if `convert_to_one_hot` is False."
 
     if not include_background:
         # drop the channel of the background class
@@ -77,8 +35,8 @@ def flatten_tensors(
         target = target[1:]
 
     # flatten tensors except for the first channel (class dimension)
-    flattened_prediction = prediction.view(num_classes, -1)
-    flattened_target = target.view(num_classes, -1)
+    flattened_prediction = prediction.view(prediction.shape[0], -1)
+    flattened_target = target.view(target.shape[0], -1)
 
     return flattened_prediction.float(), flattened_target.float()
 
@@ -98,7 +56,37 @@ def is_binary(tensor_to_check: torch.Tensor) -> bool:
     )
 
 
-def one_hot_encode(tensor: torch.Tensor, num_classes: int, ignore_index: Optional[int] = None) -> torch.Tensor:
+def map_ignore_index_to_true_negatives(
+    prediction: torch.Tensor, target: torch.Tensor, ignore_index: Optional[int] = None
+) -> torch.Tensor:
+    r"""
+    Maps the tensor's values to true negative predictions in the positions where the target is equal to `ignore_index`.
+
+    Args:
+        prediction (Tensor): A prediction tensor.
+        target (Tensor): A target tensor.
+        ignore_index (int, optional): Label index that should be remapped to true negatives.
+
+    Returns:
+        Tuple[Tensor, Tensor]
+
+    Shape:
+        Prediction: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element is in :math:`[0, 1]`.
+        Target: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element is in :math:`\{0, 1\}`.
+        Output: Same shape as input.
+    """
+
+    if ignore_index is not None:
+        # map ignore_index to true negatives
+        prediction[target == ignore_index] = 0
+        target[target == ignore_index] = 0
+
+    return prediction, target
+
+
+def one_hot_encode(
+    tensor: torch.Tensor, num_classes: int, ignore_index: Optional[int] = None
+) -> torch.Tensor:
     r"""
     Converts a label encoded tensor to a one-hot encoded tensor.
 
@@ -132,6 +120,99 @@ def one_hot_encode(tensor: torch.Tensor, num_classes: int, ignore_index: Optiona
     # this tensor is converted to a tensor of shape (N, C, X, Y, ...)
     return tensor_one_hot.permute(
         (0, tensor_one_hot.ndim - 1, *range(1, tensor_one_hot.ndim - 1))
+    )
+
+
+def validate_metric_inputs(
+    prediction: torch.Tensor, target: torch.Tensor, convert_to_one_hot: bool
+) -> None:
+    """
+    Validates the inputs for segmentation metric computations:
+        - Checks that prediction and target are both on the same device.
+        - Checks that prediction and target have the correct shape and type.
+
+    Args:
+        prediction (Tensor): The prediction tensor to be validated.
+        target (Tensor): The target tensor to be validated.
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and is intended to be converted to
+            one-hot encoding or not (default = `True`).
+
+    Raises:
+        AssertionError: if input tensors violate any of the validation criteria.
+    """
+
+    assert prediction.device == target.device
+
+    assert (
+        prediction.shape == target.shape
+    ), "Prediction and target need to have the same shape."
+    assert (
+        prediction.dtype == torch.int
+    ), "Prediction has to be of integer type."
+    assert (
+        target.dtype == torch.int
+    ), "Target has to be of integer type."
+
+    if convert_to_one_hot is True:
+        # for single-label segmentation tasks, prediction and target are expected be label encoded
+        # they are expected to have the shape (X, Y, ...)
+
+        assert prediction.dim() in [
+            2,
+            3,
+        ], "Prediction and target need to be either two- or three-dimensional if `convert_to_one_hot` is True."
+    else:
+        # for single-label segmentation tasks, prediction and target are expected to be one-hot or multi-hot encoded
+        # they are expected to have the shape (C, X, Y, ...)
+
+        assert is_binary(
+            prediction
+        ), "Prediction needs to be binary if `convert_to_one_hot` is False."
+        assert is_binary(
+            target
+        ), "Target needs to be binary if `convert_to_one_hot` is False."
+
+        assert prediction.dim() in [
+            3,
+            4,
+        ], "Prediction and target need to be either three- or four-dimensional if `convert_to_one_hot` is False."
+
+
+def preprocess_metric_inputs(
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    num_classes: int,
+    convert_to_one_hot: bool = True,
+    ignore_index: Optional[int] = None,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    This method implements preprocessing steps that are needed for most segmentation metrics:
+
+    1. Validation of input shape and type
+    2. Conversion from label encoding to one-hot encoding if necessary
+    3. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives
+
+    Args:
+        prediction (Tensor): The prediction tensor to be preprocessed.
+        target (Tensor): The target tensor to be preprocessed.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
+
+    Returns:
+        Tuple[Tensor, Tensor]: The preprocessed prediction and target tensors.
+    """
+
+    validate_metric_inputs(prediction, target, convert_to_one_hot)
+
+    if convert_to_one_hot:
+        prediction = one_hot_encode(prediction, num_classes, ignore_index=ignore_index)
+        target = one_hot_encode(target, num_classes, ignore_index=ignore_index)
+
+    return map_ignore_index_to_true_negatives(
+        prediction, target, ignore_index=ignore_index
     )
 
 
