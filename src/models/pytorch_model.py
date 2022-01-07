@@ -106,8 +106,8 @@ class PytorchModel(LightningModule, ABC):
         self.stage = stage
 
         metric_kwargs = {
-            "id_to_class_names": self.datamodule.id_to_class_names(),
-            "multi_label": self.datamodule.multi_label(),
+            "id_to_class_names": self.trainer.datamodule.id_to_class_names(),
+            "multi_label": self.trainer.datamodule.multi_label(),
             "reduction": "mean",
         }
 

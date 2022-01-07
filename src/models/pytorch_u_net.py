@@ -43,15 +43,8 @@ class PytorchUNet(PytorchModel):
 
         super().setup(stage)
 
-        if stage == "fit":
-            dataset = self.train_dataloader().dataset
-        elif stage == "validate":
-            dataset = self.val_dataloader().dataset
-        elif stage == "test":
-            dataset = self.test_dataloader().dataset
-
-        multi_label = dataset.multi_label()
-        num_classes = len(dataset.id_to_class_names())
+        multi_label = self.trainer.datamodule.multi_label()
+        num_classes = len(self.trainer.datamodule.id_to_class_names())
 
         self.model = UNet(
             in_channels=self.in_channels,
