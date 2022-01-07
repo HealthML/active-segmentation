@@ -105,19 +105,21 @@ class PytorchModel(LightningModule, ABC):
         """
         self.stage = stage
 
+        metric_kwargs = {
+            "id_to_class_names": self.datamodule.id_to_class_names(),
+            "multi_label": self.datamodule.multi_label(),
+            "reduction": "mean",
+        }
+
         if stage == "fit":
             training_set = self.train_dataloader().dataset
-            id_to_class_names = training_set.id_to_class_names()
-            multi_label = training_set.multi_label()
 
             train_average_metrics = CombinedPerEpochMetric(
                 metrics=self.train_metric_names,
                 confidence_levels=self.train_metric_confidence_levels,
-                id_to_class_names=id_to_class_names,
                 image_ids=training_set.image_ids(),
-                multi_label=multi_label,
-                reduction="mean",
                 slices_per_image=training_set.slices_per_image(),
+                **metric_kwargs,
             )
             self.train_metrics = torch.nn.ModuleList([train_average_metrics])
 
@@ -126,49 +128,39 @@ class PytorchModel(LightningModule, ABC):
             val_average_metrics = CombinedPerEpochMetric(
                 metrics=self.train_metric_names,
                 confidence_levels=self.train_metric_confidence_levels,
-                id_to_class_names=id_to_class_names,
                 image_ids=validation_set.image_ids(),
-                multi_label=multi_label,
-                reduction="mean",
                 slices_per_image=validation_set.slices_per_image(),
+                **metric_kwargs,
             )
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
 
         if stage == "validate":
             validation_set = self.val_dataloader().dataset
-            slices_per_image = validation_set.slices_per_image()
-            id_to_class_names = validation_set.id_to_class_names()
-            multi_label = validation_set.multi_label()
 
             val_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,
                 confidence_levels=self.test_metric_confidence_levels,
-                id_to_class_names=id_to_class_names,
                 image_ids=validation_set.image_ids(),
-                multi_label=multi_label,
-                reduction="mean",
-                slices_per_image=slices_per_image,
+                slices_per_image=validation_set.slices_per_image(),
+                **metric_kwargs,
             )
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
         if stage == "test":
             test_set = self.test_dataloader().dataset
-            slices_per_image = test_set.slices_per_image()
-            id_to_class_names = test_set.id_to_class_names()
-            multi_label = test_set.multi_label()
 
             test_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,
                 confidence_levels=self.test_metric_confidence_levels,
-                id_to_class_names=id_to_class_names,
                 image_ids=test_set.image_ids(),
-                multi_label=multi_label,
-                reduction="mean",
-                slices_per_image=slices_per_image,
+                slices_per_image=test_set.slices_per_image(),
+                **metric_kwargs,
             )
             self.test_metrics = torch.nn.ModuleList([test_average_metrics])
 
         if stage in ["fit", "validate", "test"]:
-            self.loss_module = self.configure_loss(self.loss, multi_label)
+            self.loss_module = self.configure_loss(
+                self.loss, metric_kwargs["multi_label"]
+            )
 
     @abstractmethod
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
