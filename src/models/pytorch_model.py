@@ -295,9 +295,7 @@ class PytorchModel(LightningModule, ABC):
         }
 
         if loss == "cross_entropy":
-            return functional.CrossEntropyLoss(
-                multi_label=multi_label, **loss_kwargs
-            )
+            return functional.CrossEntropyLoss(multi_label=multi_label, **loss_kwargs)
         if loss == "cross_entropy_dice":
             return functional.CrossEntropyDiceLoss(
                 multi_label=multi_label, **loss_kwargs
