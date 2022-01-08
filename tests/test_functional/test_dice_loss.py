@@ -101,6 +101,9 @@ class TestDiceLoss(unittest.TestCase):
                     [expected_loss_first_slice, expected_loss_second_slice]
                 )
 
+        prediction.requires_grad = True
+        target.requires_grad = True
+
         dice_loss = DiceLoss(
             ignore_index=ignore_index,
             include_background=include_background,
@@ -113,11 +116,21 @@ class TestDiceLoss(unittest.TestCase):
             loss.shape == expected_loss.shape, "Returns loss tensor with correct shape."
         )
 
+        test_case_description = (
+            f"ignore_index is {ignore_index}, include_background is {include_background}, reduction "
+            f"is {reduction} and epsilon is {epsilon}"
+        )
+
+        self.assertNotEqual(
+            loss.grad_fn,
+            None,
+            msg=f"Loss is differentiable when {test_case_description}.",
+        )
+
         torch.testing.assert_allclose(
             loss,
             expected_loss,
-            msg=f"Correctly computes loss value when ignore_index is {ignore_index}, include_background is "
-            f"{include_background}, reduction is {reduction} and epsilon is {epsilon}.",
+            msg=f"Correctly computes loss value when {test_case_description}.",
         )
 
     def test_standard_case_multi_label(self) -> None:
