@@ -1272,6 +1272,154 @@ def slice_no_true_negatives_multi_label(
     )
 
 
+def slice_all_true_negatives_single_label(
+    sharp_predictions: bool,
+) -> Tuple[torch.Tensor, torch.Tensor, Dict[int, Dict[str, int]], float, float]:
+    """
+    Creates a faked single-label segmentation slice that contains only true negatives for one class.
+
+    Args:
+        sharp_predictions (bool): Whether the prediction slice should contain sharp predictions or class probabilities.
+            If set to `True`, the prediction slice is label encoded. Otherwise, the prediction slice contains one
+            channel per class.
+
+    Returns:
+        Tuple[Tensor, Tensor, Dict[int, Dict[str, int]], float, float]:
+            - Predicted slice
+            - Target slice
+            - A two-level dictionary containing true positives, false positives, true negatives, false negatives for all
+             classes (on the first level, the class indices are used as dictionary keys, on the second level the keys
+             are `"tp"`, `"fp"`, `"tn"`, and `"fn"`).
+            - Probability used in the fake slices for positive predictions.
+            - Probability used in the fake slices for negative predictions.
+    """
+
+    if sharp_predictions:
+        # fmt: off
+        prediction_slice = torch.Tensor([
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ])
+        # fmt: on
+    else:
+        # fmt: off
+        prediction_slice = torch.Tensor([
+            [
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0]
+            ],
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0]
+            ],
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0]
+            ]
+        ])
+        # fmt: on
+
+    # fmt: off
+    target_slice = torch.Tensor(
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+    )
+    # fmt: on
+
+    cardinalities = {
+        0: {"tp": 9, "fp": 0, "tn": 0, "fn": 0},
+        1: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+        2: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+    }
+
+    return (
+        prediction_slice,
+        target_slice,
+        cardinalities,
+        1.0,
+        0.0,
+    )
+
+
+def slice_all_true_negatives_multi_label(
+    *args,
+) -> Tuple[torch.Tensor, torch.Tensor, Dict[int, Dict[str, int]], float, float]:
+    """
+    Creates a faked multi-label segmentation slice that contains only true negatives.
+
+    Returns:
+        Tuple[Tensor, Tensor, Dict[int, Dict[str, int]], float, float]:
+            - Predicted slice
+            - Target slice
+            - A two-level dictionary containing true positives, false positives, true negatives, false negatives for all
+             classes (on the first level, the class indices are used as dictionary keys, on the second level the keys
+             are `"tp"`, `"fp"`, `"tn"`, and `"fn"`).
+            - Probability used in the fake slices for positive predictions.
+            - Probability used in the fake slices for negative predictions.
+    """
+
+    # fmt: off
+    prediction_slice = torch.Tensor([
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ],
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ],
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+    ])
+    # fmt: on
+
+    # fmt: off
+    target_slice = torch.Tensor([
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ],
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ],
+        [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+    ])
+    # fmt: on
+
+    cardinalities = {
+        0: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+        1: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+        2: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+    }
+
+    return (
+        prediction_slice,
+        target_slice,
+        cardinalities,
+        1.0,
+        0.0,
+    )
+
+
 def standard_distance_slice(
     percentile: float = 0.95,
 ) -> Tuple[torch.Tensor, torch.Tensor, float, float, float]:

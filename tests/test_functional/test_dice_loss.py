@@ -334,6 +334,62 @@ class TestDiceLoss(unittest.TestCase):
                             epsilon=epsilon,
                         )
 
+    def test_all_true_negative(self):
+        """
+        Tests that the dice loss is computed correctly when there are no positives.
+        """
+
+        for test_slice in [
+            tests.utils.slice_all_true_negatives_single_label,
+            tests.utils.slice_all_true_negatives_multi_label,
+        ]:
+            predictions_slice, target_slice, _, _, _ = test_slice(False)
+            prediction = torch.stack([predictions_slice, predictions_slice])
+            target = torch.stack([target_slice, target_slice])
+
+            dice_loss = DiceLoss(epsilon=0, include_background=True, reduction="none")
+            loss = dice_loss(prediction, target)
+
+            self.assertTrue(
+                torch.isnan(loss).any(),
+                "Returns NaN if there are no positives and epsilon is zero.",
+            )
+
+            dice_loss = DiceLoss(epsilon=1, include_background=True, reduction="none")
+            loss = dice_loss(prediction, target)
+
+            self.assertTrue(
+                torch.equal(loss, torch.as_tensor([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])),
+                "Returns 0 if there are no positives and epsilon is greater than zero.",
+            )
+
+            for reduction in ["mean", "sum"]:
+                for include_background in [True, False]:
+                    dice_loss = DiceLoss(
+                        epsilon=0,
+                        include_background=include_background,
+                        reduction=reduction,
+                    )
+                    loss = dice_loss(prediction, target)
+
+                    self.assertTrue(
+                        torch.isnan(loss).all(),
+                        "Returns NaN if there are no positives and epsilon is " "zero.",
+                    )
+
+                    dice_loss = DiceLoss(
+                        epsilon=1,
+                        include_background=include_background,
+                        reduction=reduction,
+                    )
+                    loss = dice_loss(prediction, target)
+
+                    self.assertTrue(
+                        torch.equal(loss, torch.as_tensor(0.0)),
+                        "Returns 0 if there are no positives and "
+                        "epsilon is greater than zero.",
+                    )
+
     def test_ignore_index(self):
         """
         Tests that the dice loss is computed correctly when there are are pixels / voxels to be ignored.
