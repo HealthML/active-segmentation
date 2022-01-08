@@ -439,8 +439,6 @@ class CrossEntropyLoss(SegmentationLoss):
         multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
         ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
             gradient. Defaults to `None`.
-        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -450,10 +448,9 @@ class CrossEntropyLoss(SegmentationLoss):
         self,
         multi_label: bool = False,
         ignore_index: Optional[int] = None,
-        include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
     ):
-        super().__init__(include_background=include_background, reduction=reduction)
+        super().__init__(include_background=True, reduction=reduction)
         self.multi_label = multi_label
         if self.multi_label:
             self.cross_entropy_loss = torch.nn.BCELoss(reduction="none")
@@ -483,11 +480,11 @@ class CrossEntropyLoss(SegmentationLoss):
 
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
 
-        if not self.include_background:
-            prediction = prediction[:, 1:]
-            target = target[:, 1:]
-
-        loss = self.cross_entropy_loss(prediction.float(), target.float())
+        if self.multi_label:
+            target = target.float()
+        else:
+            target = target.long()
+        loss = self.cross_entropy_loss(prediction, target)
 
         if self.multi_label and self.ignore_index is not None:
             # the BCELoss from Pytorch does not provide an `ignore_index` argument
@@ -500,7 +497,7 @@ class CrossEntropyLoss(SegmentationLoss):
             # in order to weight the loss term of each image equally regardless of its size, the loss tensor is averaged
             # over the spatial dimension (and the class dimension in case of multi-label segmentation tasks) before
             # passing it to the reduction function
-            axis_to_reduce = range(1, loss.dim())
+            axis_to_reduce = tuple(range(1, loss.dim()))
             loss = loss.mean(dim=axis_to_reduce)
 
         return self._reduce_loss(loss)
@@ -520,7 +517,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
         ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
             gradient. Defaults to `None`.
         include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-            calculation (default = `True`).
+            Dice loss calculation, but not from the Cross-entropy loss calculation (default = `True`).
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
@@ -541,7 +538,6 @@ class CrossEntropyDiceLoss(SegmentationLoss):
         self.bce_loss = CrossEntropyLoss(
             multi_label=multi_label,
             ignore_index=ignore_index,
-            include_background=include_background,
             reduction=reduction,
         )
         self.dice_loss = DiceLoss(

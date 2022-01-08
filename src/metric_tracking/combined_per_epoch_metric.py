@@ -68,7 +68,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
     ):
         super().__init__()
         self.metrics = metrics
-        self.include_background_in_aggregated_metrics = include_background_in_aggregated_metrics
+        self.include_background_in_aggregated_metrics = (
+            include_background_in_aggregated_metrics
+        )
         self.multi_label = multi_label
         self.confidence_levels = (
             confidence_levels if confidence_levels is not None else [0.5]
@@ -185,7 +187,11 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                 for confidence_level in self.confidence_levels:
                     average_metric = []
                     for class_id, class_name in self.id_to_class_names.items():
-                        if class_id != 0 or self.multi_label or self.include_background_in_aggregated_metrics:
+                        if (
+                            class_id != 0
+                            or self.multi_label
+                            or self.include_background_in_aggregated_metrics
+                        ):
                             per_class_metric = aggregated_metrics[
                                 f"{metric_name}_{class_name}_{confidence_level}"
                             ]
@@ -196,8 +202,14 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             else:
                 average_metric = []
                 for class_id, class_name in self.id_to_class_names.items():
-                    if class_id != 0 or self.multi_label or self.include_background_in_aggregated_metrics:
-                        per_class_metric = aggregated_metrics[f"{metric_name}_{class_name}"]
+                    if (
+                        class_id != 0
+                        or self.multi_label
+                        or self.include_background_in_aggregated_metrics
+                    ):
+                        per_class_metric = aggregated_metrics[
+                            f"{metric_name}_{class_name}"
+                        ]
                         average_metric.append(per_class_metric)
                 aggregated_metrics[
                     f"{self.reduction}_{metric_name}"

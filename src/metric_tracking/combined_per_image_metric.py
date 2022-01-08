@@ -212,9 +212,8 @@ class CombinedPerImageMetric(torchmetrics.Metric):
                 per_class_metrics = metric.compute()
 
                 for class_id, class_name in self.id_to_class_names.items():
-                    if class_id != 0:
-                        metric_results[
-                            f"{metric_name}_{class_name}"
-                        ] = per_class_metrics[class_id]
+                    metric_results[f"{metric_name}_{class_name}"] = per_class_metrics[
+                        class_id
+                    ]
 
         return metric_results

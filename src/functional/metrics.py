@@ -490,8 +490,8 @@ def hausdorff_distance(
 
     for i in range(num_classes):
         per_class_hausdorff_distances[i] = single_class_hausdorff_distance(
-            prediction,
-            target,
+            prediction[i],
+            target[i],
             normalize=normalize,
             percentile=percentile,
             all_image_locations=all_image_locations,

@@ -283,23 +283,28 @@ class PytorchModel(LightningModule, ABC):
 
         loss_kwargs = {
             "ignore_index": -1,
-            "include_background": multi_label,
         }
 
         if loss == "cross_entropy":
             return functional.CrossEntropyLoss(multi_label=multi_label, **loss_kwargs)
         if loss == "cross_entropy_dice":
             return functional.CrossEntropyDiceLoss(
-                multi_label=multi_label, **loss_kwargs
+                multi_label=multi_label, include_background=multi_label, **loss_kwargs
             )
         if loss == "dice":
-            return functional.DiceLoss(**loss_kwargs)
+            return functional.DiceLoss(include_background=multi_label, **loss_kwargs)
         if loss == "general_dice":
-            return functional.GeneralizedDiceLoss(**loss_kwargs)
+            return functional.GeneralizedDiceLoss(
+                include_background=multi_label, **loss_kwargs
+            )
         if loss == "fp":
-            return functional.FalsePositiveLoss(**loss_kwargs)
+            return functional.FalsePositiveLoss(
+                include_background=multi_label, **loss_kwargs
+            )
         if loss == "fp_dice":
-            return functional.FalsePositiveDiceLoss(**loss_kwargs)
+            return functional.FalsePositiveDiceLoss(
+                include_background=multi_label, **loss_kwargs
+            )
         raise ValueError("Invalid loss name.")
 
     def predict(self, batch: torch.Tensor) -> numpy.ndarray:
