@@ -56,32 +56,32 @@ def is_binary(tensor_to_check: torch.Tensor) -> bool:
     )
 
 
-def map_ignore_index_to_true_negatives(
-    prediction: torch.Tensor, target: torch.Tensor, ignore_index: Optional[int] = None
+def mask_tensor(
+    tensor: torch.Tensor, mask: torch.Tensor, ignore_index: Optional[int] = None
 ) -> torch.Tensor:
     r"""
-    Maps the tensor's values to true negative predictions in the positions where the target is equal to `ignore_index`.
+    Zeros the tensor's values in the positions where the mask is equal to `ignore_index`.
 
     Args:
-        prediction (Tensor): A prediction tensor.
-        target (Tensor): A target tensor.
-        ignore_index (int, optional): Label index that should be remapped to true negatives.
+        tensor (Tensor): A tensor in which is to be masked.
+        mask (Tensor): A mask tensor containing the :attr:`ignore_index` at the positions to be masked.
+        ignore_index (int, optional): Label index indicating the positions to be zeroed.
 
     Returns:
-        Tuple[Tensor, Tensor]
+        Tensor: Masked tensor.
 
     Shape:
-        Prediction: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element is in :math:`[0, 1]`.
-        Target: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element is in :math:`\{0, 1\}`.
+        Tensor: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)`.
+        Mask: :math:`(N, 1, X, Y, ...)` / :math:`(N, C, X, Y, ...)` or :math:`(1, X, Y, ...)` / :math:`(C, X, Y, ...)`.
         Output: Same shape as input.
     """
 
     if ignore_index is not None:
         # map ignore_index to true negatives
-        prediction[target == ignore_index] = 0
-        target[target == ignore_index] = 0
+        tensor = tensor.clone()
+        tensor = (mask != ignore_index) * tensor
 
-    return prediction, target
+    return tensor
 
 
 def one_hot_encode(
@@ -218,9 +218,11 @@ def preprocess_metric_inputs(
             target, target.dim(), num_classes, ignore_index=ignore_index
         )
 
-    return map_ignore_index_to_true_negatives(
-        prediction, target, ignore_index=ignore_index
-    )
+    # map values where the target is set to `ignore_index` to zero
+    prediction = mask_tensor(prediction, target, ignore_index=ignore_index)
+    target = mask_tensor(target, target, ignore_index=ignore_index)
+
+    return prediction, target
 
 
 def reduce_metric(

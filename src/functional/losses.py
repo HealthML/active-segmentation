@@ -1,6 +1,6 @@
 """ Module containing segmentation losses """
 import abc
-from typing import Literal, Optional
+from typing import Literal, Optional, Tuple
 
 from monai.losses.dice import (
     DiceLoss as MonaiDiceLoss,
@@ -8,7 +8,7 @@ from monai.losses.dice import (
 )
 import torch
 
-from .utils import one_hot_encode
+from .utils import mask_tensor, one_hot_encode
 
 
 class SegmentationLoss(torch.nn.Module, abc.ABC):
@@ -84,6 +84,55 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
         return tensor.view(*tensor.shape[0:2], -1).float()
 
+    def _preprocess_inputs(
+        self, prediction: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        r"""
+        This method implements preprocessing steps that are needed for most segmentation losses:
+
+        1. Conversion from label encoding to one-hot encoding if necessary
+        2. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives
+
+        Args:
+            prediction (Tensor): The prediction tensor to be preprocessed.
+            target (Tensor): The target tensor to be preprocessed.
+
+        Returns:
+            Tuple[Tensor, Tensor]: The preprocessed prediction and target tensors.
+
+        Shape:
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+                in :math:`[0, 1]`
+            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                or :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding.
+            - Output: :math:`(N, C, X, Y, ...)` for both prediction and target.
+        """
+
+        # during one-hot encoding the ignore index is removed, therefore the original target including the ignore index
+        # is copied
+        target_including_ignore_index = target
+        target = target.clone()
+
+        if prediction.dim() != target.dim():
+            assert prediction.dim() == target.dim() + 1
+            target = one_hot_encode(
+                target,
+                target.dim() - 1,
+                prediction.shape[1],
+                ignore_index=self.ignore_index,
+            )
+            target_including_ignore_index = target_including_ignore_index.unsqueeze(
+                dim=1
+            )
+
+        prediction = mask_tensor(
+            prediction, target_including_ignore_index, self.ignore_index
+        )
+        target = mask_tensor(target, target_including_ignore_index, self.ignore_index)
+
+        return prediction, target
+
 
 class AbstractDiceLoss(SegmentationLoss, abc.ABC):
     r"""
@@ -142,29 +191,10 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
 
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
 
-        if prediction.dim() != target.dim():
-            assert prediction.dim() == target.dim() + 1
-            target_one_hot = one_hot_encode(
-                target,
-                target.dim() - 1,
-                prediction.shape[1],
-                ignore_index=self.ignore_index,
-            )
-            target = target.unsqueeze(dim=1)
-        else:
-            target_one_hot = target.clone()
-            target_one_hot[target == self.ignore_index] = 0
-
-        if self.ignore_index is not None:
-            # map ignore_index to true negatives
-            prediction = prediction.clone()
-            target_one_hot = target_one_hot.clone()
-            mask = target != self.ignore_index
-            prediction = prediction * mask
-            target_one_hot = target_one_hot * mask
+        prediction, target = self._preprocess_inputs(prediction, target)
 
         dice_loss_module = self.get_dice_loss_module()
-        dice_loss = dice_loss_module(prediction, target_one_hot)
+        dice_loss = dice_loss_module(prediction, target)
 
         if self.reduction == "none":
             # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
@@ -346,20 +376,7 @@ class FalsePositiveLoss(SegmentationLoss):
 
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
 
-        if prediction.dim() != target.dim():
-            target = one_hot_encode(
-                target,
-                target.dim() - 1,
-                prediction.shape[1],
-                ignore_index=self.ignore_index,
-            )
-
-        if self.ignore_index is not None:
-            prediction = prediction.clone()
-            target = target.clone()
-            # map ignore_index to true negatives
-            prediction[target == self.ignore_index] = 0
-            target[target == self.ignore_index] = 0
+        prediction, target = self._preprocess_inputs(prediction, target)
 
         if not self.include_background:
             prediction = prediction[:, 1:]
