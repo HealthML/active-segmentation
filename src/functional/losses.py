@@ -143,22 +143,28 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
 
         if prediction.dim() != target.dim():
-            target = one_hot_encode(
+            assert prediction.dim() == target.dim() + 1
+            target_one_hot = one_hot_encode(
                 target,
                 target.dim() - 1,
                 prediction.shape[1],
                 ignore_index=self.ignore_index,
             )
+            target = target.unsqueeze(dim=1)
+        else:
+            target_one_hot = target.clone()
+            target_one_hot[target == self.ignore_index] = 0
 
         if self.ignore_index is not None:
-            prediction = prediction.clone()
-            target = target.clone()
             # map ignore_index to true negatives
-            prediction[target == self.ignore_index] = 0
-            target[target == self.ignore_index] = 0
+            prediction = prediction.clone()
+            target_one_hot = target_one_hot.clone()
+            mask = target != self.ignore_index
+            prediction = prediction * mask
+            target_one_hot = target_one_hot * mask
 
         dice_loss_module = self.get_dice_loss_module()
-        dice_loss = dice_loss_module(prediction, target)
+        dice_loss = dice_loss_module(prediction, target_one_hot)
 
         if self.reduction == "none":
             # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is

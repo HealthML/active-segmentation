@@ -26,6 +26,7 @@ class TestDiceLoss(unittest.TestCase):
             Tuple[torch.Tensor, torch.Tensor, Dict[int, Dict[str, int]], float, float],
         ],
         expected_loss: Optional[torch.Tensor] = None,
+        ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "none",
         epsilon: float = 0.0001,
@@ -101,18 +102,22 @@ class TestDiceLoss(unittest.TestCase):
                 )
 
         dice_loss = DiceLoss(
-            include_background=include_background, reduction=reduction, epsilon=epsilon
+            ignore_index=ignore_index,
+            include_background=include_background,
+            reduction=reduction,
+            epsilon=epsilon,
         )
         loss = dice_loss(prediction, target)
 
         self.assertTrue(
             loss.shape == expected_loss.shape, "Returns loss tensor with correct shape."
         )
+
         torch.testing.assert_allclose(
             loss,
             expected_loss,
-            msg=f"Correctly computes loss value when include_background is {include_background}, reduction is "
-            f"{reduction} and epsilon is {epsilon}.",
+            msg=f"Correctly computes loss value when ignore_index is {ignore_index}, include_background is "
+            f"{include_background}, reduction is {reduction} and epsilon is {epsilon}.",
         )
 
     def test_standard_case_multi_label(self) -> None:
@@ -311,6 +316,33 @@ class TestDiceLoss(unittest.TestCase):
                         self._test_dice_loss(
                             test_slice,
                             test_slice,
+                            include_background=include_background,
+                            reduction=reduction,
+                            epsilon=epsilon,
+                        )
+
+    def test_ignore_index(self):
+        """
+        Tests that the dice loss is computed correctly when there are are pixels / voxels to be ignored.
+        """
+
+        for test_slice_1, test_slice_2 in [
+            (
+                tests.utils.standard_slice_single_label_1,
+                tests.utils.slice_ignore_index_single_label,
+            ),
+            (
+                tests.utils.standard_slice_multi_label_1,
+                tests.utils.slice_ignore_index_multi_label,
+            ),
+        ]:
+            for reduction in ["none", "mean", "sum"]:
+                for include_background in [True, False]:
+                    for epsilon in [0, 1]:
+                        self._test_dice_loss(
+                            test_slice_1,
+                            test_slice_2,
+                            ignore_index=-1,
                             include_background=include_background,
                             reduction=reduction,
                             epsilon=epsilon,
