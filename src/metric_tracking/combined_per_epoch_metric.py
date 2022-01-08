@@ -177,9 +177,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
         aggregated_metrics = {}
 
-        for metric_name in per_image_metrics.keys():
+        for metric_name, metric_value in per_image_metrics.items():
             aggregated_metrics[metric_name] = self._reduce_metric(
-                torch.tensor(per_image_metrics[metric_name])
+                torch.tensor(metric_value)
             )
 
         for metric_name in self.metrics:
