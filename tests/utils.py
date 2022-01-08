@@ -41,6 +41,36 @@ def _expected_dice_score(
     return (2.0 * intersection + epsilon) / (denominator + epsilon)
 
 
+def _expected_dice_loss(
+    tp: int,
+    fp: int,
+    tn: int,
+    fn: int,
+    probability_positive: float,
+    probability_negative: float,
+    epsilon: float,
+) -> float:
+    """
+    Computes the expected Dice loss for a single slice and a single class.
+
+    Args:
+        tp (int): Number of true positives.
+        fp (int): Number of false positives.
+        tn (int): Number of true negatives.
+        fn (int): Number of false negatives.
+        probability_positive (float): Probability used in the fake slices for positive predictions.
+        probability_negative (float): Probability used in the fake slices for negative predictions.
+        epsilon (float): Smoothing term used to avoid divisions by zero.
+
+    Returns:
+        float: Expected Dice loss.
+    """
+
+    return 1.0 - _expected_dice_score(
+        tp, fp, tn, fn, probability_positive, probability_negative, epsilon
+    )
+
+
 def _expected_false_positive_loss(
     tp: int,
     fp: int,
@@ -68,6 +98,7 @@ def _expected_false_positive_loss(
 
     false_positives = fp * probability_positive + tn * probability_negative
     positives = false_positives + tp * probability_positive + fn * probability_negative
+
     return false_positives / (positives + epsilon)
 
 
@@ -104,7 +135,7 @@ def _expected_cross_entropy_loss(
 
 
 def expected_metrics(
-    metric: Literal["dice_score", "fp_loss", "cross_entropy_loss"],
+    metric: Literal["dice_score", "dice_loss", "fp_loss", "cross_entropy_loss"],
     cardinalities: Dict[int, Dict[str, int]],
     probability_positive: float,
     probability_negative: float,
@@ -114,8 +145,8 @@ def expected_metrics(
     Computes expected class-wise metric values for a single slice.
 
     Args:
-        metric (string): Name of the metric to be computed. Must be either `"dice_score"`, `"fp_loss"` or
-            `"cross_entropy_loss"`.
+        metric (string): Name of the metric to be computed. Must be either `"dice_score"`, `"dice_loss"`, `"fp_loss"`
+            or `"cross_entropy_loss"`.
         cardinalities (Dict[int, Dict[str, int]]): A two-level dictionary containing true positives, false positives,
             true negatives, false negatives for all classes (on the first level, the class indices are used as
             dictionary keys, on the second level the keys are `"tp"`, `"fp"`, `"tn"`, and `"fn"`).
@@ -128,6 +159,8 @@ def expected_metrics(
 
     if metric == "dice_score":
         metric_function = _expected_dice_score
+    elif metric == "dice_loss":
+        metric_function = _expected_dice_loss
     elif metric == "fp_loss":
         metric_function = _expected_false_positive_loss
     elif metric == "cross_entropy_loss":
@@ -1260,7 +1293,7 @@ def slice_no_true_negatives_multi_label(
     cardinalities = {
         0: {"tp": 0, "fp": 2, "tn": 3, "fn": 4},
         1: {"tp": 0, "fp": 2, "tn": 2, "fn": 5},
-        2: {"tp": 0, "fp": 5, "tn": 0, "fn": 4},
+        2: {"tp": 0, "fp": 4, "tn": 0, "fn": 5},
     }
 
     return (

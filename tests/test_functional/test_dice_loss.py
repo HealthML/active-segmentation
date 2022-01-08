@@ -1,301 +1,81 @@
 """Tests for the dice loss."""
 
-from typing import Callable, Dict, Literal, Optional, Tuple
 import unittest
+from typing import Literal, Optional
 
-import numpy as np
 import torch
 
 from functional import DiceLoss
 import tests.utils
+from .test_loss import LossTestCase
 
 
-class TestDiceLoss(unittest.TestCase):
+class TestDiceLoss(unittest.TestCase, LossTestCase):
     """
-    Test cases for dice loss.
+    Returns:
+        String: The name of the loss or metric to be tested.
     """
 
-    def _test_dice_loss(
+    def loss_name(self) -> str:
+        return "dice_loss"
+
+    def loss_module(
         self,
-        get_first_slice: Callable[
-            [bool],
-            Tuple[torch.Tensor, torch.Tensor, Dict[int, Dict[str, int]], float, float],
-        ],
-        get_second_slice: Callable[
-            [bool],
-            Tuple[torch.Tensor, torch.Tensor, Dict[int, Dict[str, int]], float, float],
-        ],
-        expected_loss: Optional[torch.Tensor] = None,
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "none",
         epsilon: float = 0.0001,
-    ) -> None:
+        **kwargs
+    ) -> torch.nn.Module:
         """
-        Helper function that calculates the dice loss with the given settings for the given predictions and compares it
-        with an expected value.
-
         Args:
-            get_first_slice: Getter function that returns prediction, target and expected metrics for the first slice.
-            get_second_slice: Getter function that returns prediction, target and expected metrics for the second slice.
-            reduction (string, optional): Reduction parameter of dice loss.
-            epsilon (float, optional): Epsilon parameter of dice loss.
-            expected_loss (Tensor, optional): Expected loss value.
+            ignore_index (bool, optional): `ignore_index` parameter of the loss.
+            include_background (bool, optional): `include_background` parameter of the loss.
+            reduction (string, optional): `reduction` parameter of the loss.
+            epsilon (float, optional): `epsilon` parameter of the loss.
+
+        Returns:
+            torch.nn.Module: The loss module to be tested.
         """
 
-        # pylint: disable-msg=too-many-locals
-
-        (
-            predictions_first_slice,
-            target_first_slice,
-            cardinalities_first_slice,
-            probability_positive_first_slice,
-            probability_negative_first_slice,
-        ) = get_first_slice(False)
-        (
-            predictions_second_slice,
-            target_second_slice,
-            cardinalities_second_slice,
-            probability_positive_second_slice,
-            probability_negative_second_slice,
-        ) = get_second_slice(False)
-
-        prediction = torch.stack([predictions_first_slice, predictions_second_slice])
-        target = torch.stack([target_first_slice, target_second_slice])
-
-        if expected_loss is None:
-
-            expected_dice_scores_first_slice = tests.utils.expected_metrics(
-                "dice_score",
-                cardinalities_first_slice,
-                probability_positive_first_slice,
-                probability_negative_first_slice,
-                epsilon,
-            )
-
-            expected_dice_scores_second_slice = tests.utils.expected_metrics(
-                "dice_score",
-                cardinalities_second_slice,
-                probability_positive_second_slice,
-                probability_negative_second_slice,
-                epsilon,
-            )
-
-            expected_loss_first_slice = 1 - expected_dice_scores_first_slice
-            expected_loss_second_slice = 1 - expected_dice_scores_second_slice
-
-            if not include_background:
-                expected_loss_first_slice = expected_loss_first_slice[1:]
-                expected_loss_second_slice = expected_loss_second_slice[1:]
-
-            expected_losses = np.array(
-                [*expected_loss_first_slice, *expected_loss_second_slice]
-            )
-
-            if reduction == "mean":
-                expected_loss = torch.as_tensor(expected_losses.mean())
-            elif reduction == "sum":
-                expected_loss = torch.as_tensor(expected_losses.sum())
-            else:
-                expected_loss = torch.Tensor(
-                    [expected_loss_first_slice, expected_loss_second_slice]
-                )
-
-        prediction.requires_grad = True
-        target.requires_grad = True
-
-        dice_loss = DiceLoss(
+        return DiceLoss(
             ignore_index=ignore_index,
             include_background=include_background,
             reduction=reduction,
             epsilon=epsilon,
         )
-        loss = dice_loss(prediction, target)
-
-        self.assertTrue(
-            loss.shape == expected_loss.shape, "Returns loss tensor with correct shape."
-        )
-
-        test_case_description = (
-            f"ignore_index is {ignore_index}, include_background is {include_background}, reduction "
-            f"is {reduction} and epsilon is {epsilon}"
-        )
-
-        self.assertNotEqual(
-            loss.grad_fn,
-            None,
-            msg=f"Loss is differentiable when {test_case_description}.",
-        )
-
-        torch.testing.assert_allclose(
-            loss,
-            expected_loss,
-            msg=f"Correctly computes loss value when {test_case_description}.",
-        )
-
-    def test_standard_case_multi_label(self) -> None:
-        """
-        Tests that the dice loss is computed correctly tasks when there are both true and false predictions.
-        """
-
-        for test_slice_1, test_slice_2 in [
-            (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.standard_slice_single_label_2,
-            ),
-            (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.standard_slice_multi_label_2,
-            ),
-        ]:
-            for reduction in ["none", "mean", "sum"]:
-                for include_background in [True, False]:
-                    for epsilon in [0, 1]:
-                        self._test_dice_loss(
-                            test_slice_1,
-                            test_slice_2,
-                            include_background=include_background,
-                            reduction=reduction,
-                            epsilon=epsilon,
-                        )
-
-    def test_all_true(self):
-        """
-        Tests that the dice loss is computed correctly when all predictions are correct.
-        """
-
-        for test_slice in [
-            tests.utils.slice_all_true_single_label,
-            tests.utils.slice_all_true_multi_label,
-        ]:
-
-            for epsilon in [0, 1]:
-                self._test_dice_loss(
-                    test_slice,
-                    test_slice,
-                    reduction="none",
-                    epsilon=epsilon,
-                    expected_loss=torch.Tensor([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
-                )
-
-                self._test_dice_loss(
-                    test_slice,
-                    test_slice,
-                    reduction="none",
-                    include_background=False,
-                    epsilon=epsilon,
-                    expected_loss=torch.Tensor([[0.0, 0.0], [0.0, 0.0]]),
-                )
-
-                for reduction in ["mean", "sum"]:
-                    for include_background in [True, False]:
-                        self._test_dice_loss(
-                            test_slice,
-                            test_slice,
-                            include_background=include_background,
-                            reduction=reduction,
-                            epsilon=epsilon,
-                            expected_loss=torch.as_tensor(0.0),
-                        )
-
-    def test_all_false(self):
-        """
-        Tests that the dice loss is computed correctly when all predictions are wrong.
-        """
-
-        for test_slice in [
-            tests.utils.slice_all_false_single_label,
-            tests.utils.slice_all_false_multi_label,
-        ]:
-
-            self._test_dice_loss(
-                test_slice,
-                test_slice,
-                reduction="none",
-                epsilon=0,
-                expected_loss=torch.Tensor([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
-            )
-            self._test_dice_loss(
-                test_slice,
-                test_slice,
-                reduction="none",
-                include_background=False,
-                epsilon=0,
-                expected_loss=torch.Tensor([[1.0, 1.0], [1.0, 1.0]]),
-            )
-            self._test_dice_loss(
-                test_slice,
-                test_slice,
-                epsilon=0,
-                reduction="mean",
-                expected_loss=torch.as_tensor(1.0),
-            )
-            self._test_dice_loss(
-                test_slice,
-                test_slice,
-                epsilon=0,
-                reduction="mean",
-                include_background=False,
-                expected_loss=torch.as_tensor(1.0),
-            )
-            self._test_dice_loss(
-                test_slice,
-                test_slice,
-                reduction="sum",
-                epsilon=0,
-                expected_loss=torch.as_tensor(6.0),
-            )
-            self._test_dice_loss(
-                test_slice,
-                test_slice,
-                reduction="sum",
-                epsilon=0,
-                include_background=False,
-                expected_loss=torch.as_tensor(4.0),
-            )
-
-            for reduction in ["none", "mean", "sum"]:
-                for include_background in [True, False]:
-                    self._test_dice_loss(
-                        test_slice,
-                        test_slice,
-                        include_background=include_background,
-                        reduction=reduction,
-                        epsilon=1,
-                    )
 
     def test_no_true_positives(self):
         """
-        Tests that the dice loss is computed correctly when there are no true
-        positives.
+        Tests that the dice loss is computed correctly when there are no true positives.
         """
 
         for test_slice in [
             tests.utils.slice_no_true_positives_single_label,
             tests.utils.slice_no_true_positives_multi_label,
         ]:
-            self._test_dice_loss(
+            self._test_loss(
                 test_slice,
                 test_slice,
                 reduction="none",
                 epsilon=0,
                 expected_loss=torch.Tensor([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
             )
-            self._test_dice_loss(
+            self._test_loss(
                 test_slice,
                 test_slice,
                 reduction="mean",
                 epsilon=0,
                 expected_loss=torch.as_tensor(1.0),
             )
-            self._test_dice_loss(
+            self._test_loss(
                 test_slice,
                 test_slice,
                 reduction="sum",
                 epsilon=0,
                 expected_loss=torch.as_tensor(6.0),
             )
-            self._test_dice_loss(
+            self._test_loss(
                 test_slice,
                 test_slice,
                 include_background=False,
@@ -306,33 +86,13 @@ class TestDiceLoss(unittest.TestCase):
 
             for reduction in ["none", "mean", "sum"]:
                 for include_background in [True, False]:
-                    self._test_dice_loss(
+                    self._test_loss(
                         test_slice,
                         test_slice,
                         include_background=include_background,
                         reduction=reduction,
                         epsilon=1,
                     )
-
-    def test_no_true_negatives(self):
-        """
-        Tests that the dice loss is computed correctly when there are no true negatives.
-        """
-
-        for test_slice in [
-            tests.utils.slice_no_true_negatives_single_label,
-            tests.utils.slice_no_true_negatives_multi_label,
-        ]:
-            for reduction in ["none", "mean", "sum"]:
-                for include_background in [True, False]:
-                    for epsilon in [0, 1]:
-                        self._test_dice_loss(
-                            test_slice,
-                            test_slice,
-                            include_background=include_background,
-                            reduction=reduction,
-                            epsilon=epsilon,
-                        )
 
     def test_all_true_negative(self):
         """
@@ -389,30 +149,3 @@ class TestDiceLoss(unittest.TestCase):
                         "Returns 0 if there are no positives and "
                         "epsilon is greater than zero.",
                     )
-
-    def test_ignore_index(self):
-        """
-        Tests that the dice loss is computed correctly when there are are pixels / voxels to be ignored.
-        """
-
-        for test_slice_1, test_slice_2 in [
-            (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.slice_ignore_index_single_label,
-            ),
-            (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.slice_ignore_index_multi_label,
-            ),
-        ]:
-            for reduction in ["none", "mean", "sum"]:
-                for include_background in [True, False]:
-                    for epsilon in [0, 1]:
-                        self._test_dice_loss(
-                            test_slice_1,
-                            test_slice_2,
-                            ignore_index=-1,
-                            include_background=include_background,
-                            reduction=reduction,
-                            epsilon=epsilon,
-                        )
