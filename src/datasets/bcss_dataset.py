@@ -8,8 +8,6 @@ import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
-from datasets import BraTSDataset
-
 
 class BCSSDataset(IterableDataset):
     """
@@ -17,7 +15,7 @@ class BCSSDataset(IterableDataset):
     Detailed description can be found either here: https://github.com/PathologyDataScience/BCSS
     or here: https://bcsegmentation.grand-challenge.org
         Args:
-            image_paths(List[Path]): List with all images to load, can be obtained by BCSSDataModule.discover_paths.
+            image_paths (List[Path]): List with all images to load, can be obtained by BCSSDataModule.discover_paths.
             annotation_paths (List[Path]): List with all annotations to load,
                 can be obtained by BCSSDataModule.discover_paths.
             target_label (int, optional): The label to use for learning. Following labels are in the annonations:
@@ -43,28 +41,66 @@ class BCSSDataset(IterableDataset):
                 angioinvasion	19
                 dcis	20
                 other	21
+            is_unlabeled (bool, optional): Wether the dataset is used as "unlabeled" for the active learning loop.
             shuffle (bool, optional): Whether the data should be shuffled.
+            dim (int, optional): Dimension of the dataset.
             image_shape (tuple, optional): The shape to size the image and set the dimension.
     """
     # pylint: disable=too-many-instance-attributes,abstract-method
+
+    @staticmethod
+    def __ensure_channel_dim(img: torch.Tensor, dim: int) -> torch.Tensor:
+        """Ensures the correct dimensionality of the image"""
+        return img if len(img.shape) == dim + 1 else torch.unsqueeze(img, 0)
+
+    def __align_axis(self, img: torch.Tensor):
+        """Align the axes of the image based on the dimension"""
+        if self.dim == 2:
+            img = np.expand_dims(img, axis=0)
+        else:
+            img = np.moveaxis(img, 2, 0)
+        return img
+
+    @staticmethod
+    def normalize(img: np.ndarray) -> np.ndarray:
+        """
+        Normalizes an image by
+            1. Dividing by the maximum value
+            2. Subtracting the mean, zeros will be ignored while calculating the mean
+            3. Dividing by the negative minimum value
+        Args:
+            img: The input image that should be normalized.
+        Returns:
+            Normalized image with background values normalized to -1
+        """
+        tmp = img / np.max(img)
+        # ignore zero values for mean calculation because background dominates
+        tmp = tmp - np.mean(tmp[tmp > 0])
+        # make normalize original zero values to -1
+        return tmp / (-np.min(tmp))
 
     def __init__(
         self,
         image_paths: List[Path],
         annotation_paths: List[Path],
         target_label: int = 1,
+        is_unlabeled: bool = False,
         shuffle: bool = True,
-        image_shape: tuple = (240, 240, 3),
+        dim: int = 2,
+        image_shape: tuple = (240, 240),
     ) -> None:
 
         self.image_paths = image_paths
         self.annotation_paths = annotation_paths
         self.target_label = target_label
+        self.dim = dim
         self.image_shape = image_shape
 
         self.num_images = len(self.image_paths)
         self.num_masks = len(self.annotation_paths)
         assert self.num_images == self.num_masks
+
+        self.is_unlabeled = is_unlabeled
 
         self._current_image = None
         self._current_mask = None
@@ -97,13 +133,14 @@ class BCSSDataset(IterableDataset):
     ) -> np.ndarray:
         """Loads one image in memory."""
         img = Image.open(filepath).resize((self.image_shape[0], self.image_shape[1]))
-        if self.image_shape[2] == 1:
+        if self.dim == 2:
             img = ImageOps.grayscale(img)
         img = np.asarray(img)
         if norm:
-            img = BraTSDataset.normalize(img=img)
+            img = BCSSDataset.normalize(img=img)
         if is_mask:
             img = self.__restrict_on_target_class(img=img)
+        img = self.__align_axis(img)
         return img
 
     def __restrict_on_target_class(self, img: np.ndarray) -> np.ndarray:
@@ -140,7 +177,7 @@ class BCSSDataset(IterableDataset):
             self.end_index = min(self.start_index + per_worker, self.end_index)
         return self
 
-    def __next__(self) -> Tuple[torch.Tensor, torch.Tensor, str]:
+    def __next__(self) -> Union[Tuple[torch.Tensor, torch.Tensor, str], Tuple[torch.Tensor, str]]:
         """One iteration yields a tuple of image, annotation, case id"""
         if self.current_index >= self.end_index:
             raise StopIteration
@@ -152,9 +189,22 @@ class BCSSDataset(IterableDataset):
         x = torch.from_numpy(self._current_image)
         y = torch.from_numpy(self._current_mask)
 
+        if self.is_unlabeled:
+            return BCSSDataset.__ensure_channel_dim(x, self.dim), case_id
+
         self.current_index += 1
-        return torch.unsqueeze(x, 0), torch.unsqueeze(y, 0), case_id
+        return BCSSDataset.__ensure_channel_dim(x, self.dim), BCSSDataset.__ensure_channel_dim(y, self.dim), case_id
 
     def __len__(self) -> int:
         """Returns the length of the dataset."""
         return self.num_images
+
+    def slices_per_image(self):
+        return [
+            1 if self.dim == 2 else 3 for image_idx in self.indices
+        ]
+
+    def image_ids(self):
+        return [
+            self.get_case_id(filepath=path) for path in self.image_paths
+        ]
