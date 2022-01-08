@@ -85,13 +85,14 @@ def map_ignore_index_to_true_negatives(
 
 
 def one_hot_encode(
-    tensor: torch.Tensor, num_classes: int, ignore_index: Optional[int] = None
+    tensor: torch.Tensor, dim: int, num_classes: int, ignore_index: Optional[int] = None
 ) -> torch.Tensor:
     r"""
     Converts a label encoded tensor to a one-hot encoded tensor.
 
     Args:
         tensor (Tensor): Label encoded tensor that is to be converted to one-hot encoding.
+        dim (int): Dimensionality of the input. Either 2 or 3.
         num_classes (int): Number of classes (excluding the class labeled with :attr:`ignore_label`).
         ignore_index (int, optional): Class value for which no one-hot encoded channel should be created in the output.
 
@@ -99,28 +100,34 @@ def one_hot_encode(
         Tensor: One-hot encoded tensor.
 
     Shape:
-        - Tensor: :math:`(N, X, Y, ...)` where each element represents a class index of integer type and `N = batch
-            size`.
-        - Output: :math:`(N, C, X, Y, ...)` where each element represent a binary class label and :math:`C` is the
-            number of classes (excluding the ignored class labeled with :attr:`ignore_label`).
+        - Tensor: :math:`(N, X, Y, ...)` or :math:`(X, Y, ...)` where each element represents a class index of integer
+            type and `N = batch size`.
+        - Output: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element represent a binary class label
+            and :math:`C` is the number of classes (excluding the ignored class labeled with :attr:`ignore_label`).
     """
+
+    tensor = tensor.clone()
 
     if ignore_index is not None:
         # shift labels since `torch.nn.functional.one_hot` only accepts positive labels
         tensor[tensor == ignore_index] = -1
         tensor += 1
+        num_classes += 1
 
-    tensor_one_hot = torch.nn.functional.one_hot(tensor.long(), num_classes + 1)
+    tensor_one_hot = torch.nn.functional.one_hot(tensor.long(), num_classes).int()
 
     if ignore_index is not None:
         # drop ignored channel
         tensor_one_hot = tensor_one_hot[..., 1:]
 
-    # one_hot outputs a tensor of shape (N, X, Y, ..., C)
-    # this tensor is converted to a tensor of shape (N, C, X, Y, ...)
-    return tensor_one_hot.permute(
-        (0, tensor_one_hot.ndim - 1, *range(1, tensor_one_hot.ndim - 1))
-    )
+    # one_hot outputs a tensor of shape (N, X, Y, ..., C) or (X, Y, ..., C)
+    # this tensor is converted to a tensor of shape (N, C, X, Y, ...) or (C, X, Y, ...)
+    if tensor.dim() == dim + 1:
+        # tensor has a batch dimension
+        return torch.moveaxis(tensor_one_hot, tensor_one_hot.ndim - 1, 1)
+
+    # tensor has no batch dimension
+    return torch.moveaxis(tensor_one_hot, tensor_one_hot.ndim - 1, 0)
 
 
 def validate_metric_inputs(
@@ -204,8 +211,12 @@ def preprocess_metric_inputs(
     validate_metric_inputs(prediction, target, convert_to_one_hot)
 
     if convert_to_one_hot:
-        prediction = one_hot_encode(prediction, num_classes, ignore_index=ignore_index)
-        target = one_hot_encode(target, num_classes, ignore_index=ignore_index)
+        prediction = one_hot_encode(
+            prediction, prediction.dim(), num_classes, ignore_index=ignore_index
+        )
+        target = one_hot_encode(
+            target, target.dim(), num_classes, ignore_index=ignore_index
+        )
 
     return map_ignore_index_to_true_negatives(
         prediction, target, ignore_index=ignore_index

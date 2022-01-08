@@ -719,10 +719,10 @@ class Sensitivity(SegmentationMetric):
             reduction=reduction,
         )
         self.epsilon = epsilon
-        self.true_positives = torch.tensor(0.0)
-        self.true_positives_false_negatives = torch.tensor(0.0)
-        self.add_state("true_positives", torch.tensor(0.0))
-        self.add_state("true_positives_false_negatives", torch.tensor(0.0))
+        self.true_positives = torch.zeros(num_classes)
+        self.true_positives_false_negatives = torch.zeros(num_classes)
+        self.add_state("true_positives", torch.zeros(num_classes))
+        self.add_state("true_positives_false_negatives", torch.zeros(num_classes))
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
@@ -805,10 +805,10 @@ class Specificity(SegmentationMetric):
             reduction=reduction,
         )
         self.epsilon = epsilon
-        self.true_negatives = torch.tensor(0.0)
-        self.true_negatives_false_positives = torch.tensor(0.0)
-        self.add_state("true_negatives", torch.tensor(0.0))
-        self.add_state("true_negatives_false_positives", torch.tensor(0.0))
+        self.true_negatives = torch.zeros(num_classes)
+        self.true_negatives_false_positives = torch.zeros(num_classes)
+        self.add_state("true_negatives", torch.zeros(num_classes))
+        self.add_state("true_negatives_false_positives", torch.zeros(num_classes))
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
@@ -904,10 +904,10 @@ class HausdorffDistance(SegmentationMetric):
         self.percentile = percentile
         self.predictions = []
         self.targets = []
-        self.hausdorff_distance = torch.tensor(0.0)
         self.add_state("predictions", [])
         self.add_state("targets", [])
-        self.add_state("hausdorff_distance", torch.tensor(0.0))
+        self.hausdorff_distance = torch.zeros(num_classes)
+        self.add_state("hausdorff_distance", torch.zeros(num_classes))
         self.all_image_locations = None
         self.hausdorff_distance_cached = False
         self.slices_per_image = slices_per_image
@@ -925,10 +925,7 @@ class HausdorffDistance(SegmentationMetric):
         self.predictions.append(prediction)
         self.targets.append(target)
 
-        if self.multi_label:
-            added_slices = 1 if prediction.dim() == 3 else prediction.shape[1]
-        else:
-            added_slices = 1 if prediction.dim() == 2 else prediction.shape[0]
+        added_slices = 1 if prediction.dim() == 3 else prediction.shape[1]
         self.number_of_slices += added_slices
 
         if self.number_of_slices == self.slices_per_image:

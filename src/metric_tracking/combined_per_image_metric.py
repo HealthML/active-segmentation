@@ -115,28 +115,28 @@ class CombinedPerImageMetric(torchmetrics.Metric):
                 self.num_classes,
                 convert_to_one_hot=not self.multi_label,
                 epsilon=0,
-                include_background=self.multi_label,
+                ignore_index=-1,
             )
         if metric == "sensitivity":
             return Sensitivity(
                 self.num_classes,
                 convert_to_one_hot=not self.multi_label,
                 epsilon=0,
-                include_background=self.multi_label,
+                ignore_index=-1,
             )
         if metric == "specificity":
             return Specificity(
                 self.num_classes,
                 convert_to_one_hot=not self.multi_label,
                 epsilon=0,
-                include_background=self.multi_label,
+                ignore_index=-1,
             )
         if metric == "hausdorff95":
             return HausdorffDistance(
                 self.num_classes,
                 slices_per_image,
                 convert_to_one_hot=not self.multi_label,
-                include_background=self.multi_label,
+                ignore_index=-1,
                 normalize=True,
                 percentile=0.95,
             )

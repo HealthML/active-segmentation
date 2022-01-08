@@ -25,6 +25,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         image_ids (Iterable[str]): List of the ids of all images for which the metrics are to be tracked.
         slices_per_image (Union[int, List[int]]): Number of slices per 3d image. If a single integer value is
             provided, it is assumed that all images of the dataset have the same number of slices.
+        include_background_in_aggregated_metrics (bool, optional): if `False`, class channel index 0 (background class)
+            is excluded from the calculation of aggregated metrics. This parameter is used only if `multi_label` is set
+            to `False`. Defaults to `True`.
         multi_label (bool, optional): Determines whether the data is multi-label or not (default = `False`).
         confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics are to be
             tracked separately. This parameter is used only if `multi_label` is set to `True`. Defaults to `[0.5]`.
@@ -58,12 +61,14 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         id_to_class_names: Dict[int, str],
         image_ids: Iterable[str],
         slices_per_image: Union[int, List[int]],
+        include_background_in_aggregated_metrics: bool = False,
         multi_label: bool = False,
         confidence_levels: Optional[Iterable[float]] = None,
         reduction: str = "mean",
     ):
         super().__init__()
         self.metrics = metrics
+        self.include_background_in_aggregated_metrics = include_background_in_aggregated_metrics
         self.multi_label = multi_label
         self.confidence_levels = (
             confidence_levels if confidence_levels is not None else [0.5]
@@ -170,9 +175,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
         aggregated_metrics = {}
 
-        for metric_name, metric_value in per_image_metrics.items():
-            aggregated_metric_name = f"{self.reduction}_{metric_name}"
-            aggregated_metrics[aggregated_metric_name] = self._reduce_metric(
+        for metric_name in per_image_metrics.keys():
+            aggregated_metrics[metric_name] = self._reduce_metric(
                 torch.tensor(per_image_metrics[metric_name])
             )
 
@@ -180,21 +184,23 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             if self.multi_label:
                 for confidence_level in self.confidence_levels:
                     average_metric = []
-                    for class_name in self.id_to_class_names:
-                        per_class_metric = aggregated_metrics[
-                            f"{metric_name}_{class_name}_{confidence_level}"
-                        ]
-                        average_metric.append(per_class_metric)
+                    for class_id, class_name in self.id_to_class_names.items():
+                        if class_id != 0 or self.multi_label or self.include_background_in_aggregated_metrics:
+                            per_class_metric = aggregated_metrics[
+                                f"{metric_name}_{class_name}_{confidence_level}"
+                            ]
+                            average_metric.append(per_class_metric)
                     aggregated_metrics[
-                        f"{metric_name}_{self.reduction}_{confidence_level}"
+                        f"{self.reduction}_{metric_name}_{confidence_level}"
                     ] = self._reduce_metric(torch.Tensor(average_metric))
             else:
                 average_metric = []
-                for class_name in self.id_to_class_names:
-                    per_class_metric = aggregated_metrics[f"{metric_name}_{class_name}"]
-                    average_metric.append(per_class_metric)
+                for class_id, class_name in self.id_to_class_names.items():
+                    if class_id != 0 or self.multi_label or self.include_background_in_aggregated_metrics:
+                        per_class_metric = aggregated_metrics[f"{metric_name}_{class_name}"]
+                        average_metric.append(per_class_metric)
                 aggregated_metrics[
-                    f"{metric_name}_{self.reduction}"
+                    f"{self.reduction}_{metric_name}"
                 ] = self._reduce_metric(torch.Tensor(average_metric))
 
         return aggregated_metrics

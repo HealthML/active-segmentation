@@ -144,10 +144,15 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
 
         if prediction.dim() != target.dim():
             target = one_hot_encode(
-                target, prediction.shape[1], ignore_index=self.ignore_index
+                target,
+                target.dim() - 1,
+                prediction.shape[1],
+                ignore_index=self.ignore_index,
             )
 
         if self.ignore_index is not None:
+            prediction = prediction.clone()
+            target = target.clone()
             # map ignore_index to true negatives
             prediction[target == self.ignore_index] = 0
             target[target == self.ignore_index] = 0
@@ -337,10 +342,15 @@ class FalsePositiveLoss(SegmentationLoss):
 
         if prediction.dim() != target.dim():
             target = one_hot_encode(
-                target, prediction.shape[1], ignore_index=self.ignore_index
+                target,
+                target.dim() - 1,
+                prediction.shape[1],
+                ignore_index=self.ignore_index,
             )
 
         if self.ignore_index is not None:
+            prediction = prediction.clone()
+            target = target.clone()
             # map ignore_index to true negatives
             prediction[target == self.ignore_index] = 0
             target[target == self.ignore_index] = 0
@@ -482,6 +492,7 @@ class CrossEntropyLoss(SegmentationLoss):
         if self.multi_label and self.ignore_index is not None:
             # the BCELoss from Pytorch does not provide an `ignore_index` argument
             # therefore the loss values for the voxels to be ignored have to be set to zero here
+            loss = loss.clone()
             loss[target == self.ignore_index] = 0
 
         if self.reduction == "mean":

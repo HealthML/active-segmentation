@@ -112,7 +112,7 @@ class PytorchUNet(PytorchModel):
         x, y, case_ids = batch
 
         probabilities = self(x)
-        loss = self.loss(probabilities, y)
+        loss = self.loss_module(probabilities, y)
 
         for train_metric in self.get_train_metrics():
             train_metric.update(probabilities, y, case_ids)
@@ -133,7 +133,7 @@ class PytorchUNet(PytorchModel):
 
         probabilities = self(x)
 
-        loss = self.loss(probabilities, y)
+        loss = self.loss_module(probabilities, y)
         if self.stage == "fit":
             self.log("val/loss", loss)  # log validation loss via weights&biases
 
@@ -170,7 +170,7 @@ class PytorchUNet(PytorchModel):
 
         probabilities = self(x)
 
-        loss = self.loss(probabilities, y)
+        loss = self.loss_module(probabilities, y)
         self.log("test/loss", loss)
 
         for test_metric in self.get_test_metrics():
