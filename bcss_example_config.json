@@ -15,7 +15,6 @@
   "dataset_config": {
     "dataset": "bcss",
     "data_dir": "data/BCSS",
-    "cache_size": 10,
     "pin_memory": true
   },
   "wandb_project_name": "active-segmentation-tests",
@@ -24,10 +23,10 @@
   "experiment_name": "test-experiment",
   "experiment_tags": [],
   "batch_size": 16,
-  "epochs": 50,
+  "epochs": 1,
   "num_workers": 1,
   "gpus": 0,
-  "prediction_count": 0,
-  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
+  "prediction_count": 1,
+  "prediction_dir": "output/predictions",
   "early_stopping": false
 }

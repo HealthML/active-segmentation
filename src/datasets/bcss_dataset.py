@@ -44,22 +44,15 @@ class BCSSDataset(IterableDataset):
             is_unlabeled (bool, optional): Wether the dataset is used as "unlabeled" for the active learning loop.
             shuffle (bool, optional): Whether the data should be shuffled.
             dim (int, optional): Dimension of the dataset.
-            image_shape (tuple, optional): The shape to size the image and set the dimension.
+            image_shape (tuple, optional): The shape to size the image.
     """
+
     # pylint: disable=too-many-instance-attributes,abstract-method
 
     @staticmethod
     def __ensure_channel_dim(img: torch.Tensor, dim: int) -> torch.Tensor:
         """Ensures the correct dimensionality of the image"""
         return img if len(img.shape) == dim + 1 else torch.unsqueeze(img, 0)
-
-    def __align_axis(self, img: torch.Tensor):
-        """Align the axes of the image based on the dimension"""
-        if self.dim == 2:
-            img = np.expand_dims(img, axis=0)
-        else:
-            img = np.moveaxis(img, 2, 0)
-        return img
 
     @staticmethod
     def normalize(img: np.ndarray) -> np.ndarray:
@@ -78,6 +71,16 @@ class BCSSDataset(IterableDataset):
         tmp = tmp - np.mean(tmp[tmp > 0])
         # make normalize original zero values to -1
         return tmp / (-np.min(tmp))
+
+    @staticmethod
+    def get_case_id(filepath: Union[str, Path]) -> str:
+        """Gets the case ID for a given filepath."""
+        return Path(filepath).name.split("_")[0]
+
+    @staticmethod
+    def get_institute_name(filepath: Union[str, Path]) -> str:
+        """Gets the name of the institute which donated the image."""
+        return Path(filepath).name.split("-")[1]
 
     def __init__(
         self,
@@ -148,14 +151,16 @@ class BCSSDataset(IterableDataset):
         img[np.where(img != self.target_label)] = 0
         return img
 
-    @staticmethod
-    def get_case_id(filepath: Union[str, Path]) -> str:
-        """Gets the case ID for a given filepath."""
-        return Path(filepath).name.split("_")[0]
+    def __align_axis(self, img: torch.Tensor):
+        """Align the axes of the image based on the dimension"""
+        if self.dim == 2:
+            img = np.expand_dims(img, axis=0)
+        else:
+            img = np.moveaxis(img, 2, 0)
+        return img
 
     def __iter__(self):
         """
-        # TODO(mfr): Is this necessary?
         Returns:
             Iterator: Iterator that yields the whole dataset if a single process is used for data loading
                 or a subset of the dataset if the dataloading is split across multiple worker processes.
@@ -177,7 +182,9 @@ class BCSSDataset(IterableDataset):
             self.end_index = min(self.start_index + per_worker, self.end_index)
         return self
 
-    def __next__(self) -> Union[Tuple[torch.Tensor, torch.Tensor, str], Tuple[torch.Tensor, str]]:
+    def __next__(
+        self,
+    ) -> Union[Tuple[torch.Tensor, torch.Tensor, str], Tuple[torch.Tensor, str]]:
         """One iteration yields a tuple of image, annotation, case id"""
         if self.current_index >= self.end_index:
             raise StopIteration
@@ -193,18 +200,20 @@ class BCSSDataset(IterableDataset):
             return BCSSDataset.__ensure_channel_dim(x, self.dim), case_id
 
         self.current_index += 1
-        return BCSSDataset.__ensure_channel_dim(x, self.dim), BCSSDataset.__ensure_channel_dim(y, self.dim), case_id
+        return (
+            BCSSDataset.__ensure_channel_dim(x, self.dim),
+            BCSSDataset.__ensure_channel_dim(y, self.dim),
+            case_id,
+        )
 
     def __len__(self) -> int:
         """Returns the length of the dataset."""
         return self.num_images
 
-    def slices_per_image(self):
-        return [
-            1 if self.dim == 2 else 3 for image_idx in self.indices
-        ]
+    def slices_per_image(self) -> List[int]:
+        """For each image returns the number of slices"""
+        return [1 if self.dim == 2 else 3] * len(self.indices)
 
-    def image_ids(self):
-        return [
-            self.get_case_id(filepath=path) for path in self.image_paths
-        ]
+    def image_ids(self) -> List[str]:
+        """For each image returns the case ID's"""
+        return [self.get_case_id(filepath=path) for path in self.image_paths]
