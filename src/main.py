@@ -10,7 +10,12 @@ import wandb
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
-from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule, BCSSDataModule
+from datasets import (
+    BraTSDataModule,
+    PascalVOCDataModule,
+    DecathlonDataModule,
+    BCSSDataModule,
+)
 from query_strategies import QueryStrategy, RandomSamplingStrategy
 
 

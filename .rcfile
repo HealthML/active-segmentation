@@ -19,7 +19,7 @@ ignore-imports=no
 
 [DESIGN]
 max-attributes=10
-max-args=8
+max-args=10
 
 [MESSAGES CONTROL]
 disable=

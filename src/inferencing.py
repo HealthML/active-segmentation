@@ -1,11 +1,18 @@
 """ Module containing inferencing logic """
 import os
+import logging
 from typing import Any, Dict, Optional
 import torch
 import numpy as np
 import nibabel as nib
+from PIL import Image
 from models import PytorchModel
-from datasets import BraTSDataModule, DecathlonDataModule, DoublyShuffledNIfTIDataset
+from datasets import (
+    BraTSDataModule,
+    DecathlonDataModule,
+    DoublyShuffledNIfTIDataset,
+    BCSSDataModule,
+)
 
 
 class Inferencer:
@@ -38,9 +45,24 @@ class Inferencer:
         self.dataset_config = dataset_config
 
     def inference(self) -> None:
-        """Run the inferencing."""
+        """Wraps the inference execution for image and scan datasets."""
 
         os.makedirs(self.prediction_dir, exist_ok=True)
+
+        if self.dataset in ["brats", "decathlon"]:
+            self.inference_scan()
+        elif self.dataset in ["bcss"]:
+            self.inference_image()
+        else:
+            logging.error(
+                "Dataset %s has no implemented inference method", self.dataset
+            )
+            raise NotImplementedError(
+                f"Dataset {self.dataset} has no implemented inference method"
+            )
+
+    def inference_scan(self) -> None:
+        """Run the inferencing."""
 
         if self.dataset == "brats":
             self.data_dir = os.path.join(self.data_dir, "val")
@@ -66,7 +88,6 @@ class Inferencer:
             del self.dataset_config["pin_memory"]
         if "task" in self.dataset_config:
             del self.dataset_config["task"]
-
         data = DoublyShuffledNIfTIDataset(
             image_paths=image_paths,
             annotation_paths=annotation_paths,
@@ -100,3 +121,40 @@ class Inferencer:
             path = os.path.join(self.prediction_dir, file_name)
             nib.save(img, path)
             print(f"Predictions stored in path {path}")
+
+    def inference_image(self):
+        """Runs inference for images."""
+        # pylint: disable=protected-access
+        if self.dataset == "bcss":
+            data_module = BCSSDataModule(
+                data_dir=self.data_dir,
+                batch_size=1,
+                num_workers=1,
+            )
+            data = data_module._create_test_set()
+
+        for i, (x, _, case_id) in enumerate(data):
+            if i >= self.prediction_count:
+                break
+            # Add an additional dimension to emulate one batch (1, x, y) -> (1, 1, x, y)
+            x = torch.unsqueeze(x, 0)
+
+            pred = self.model.predict(x)
+            # Remove batch dimension
+            seg = np.squeeze(pred, axis=0)
+
+            seg = (seg >= 0.5) * 255
+            seg = seg.astype("float64")
+            # Repeat dimensions to emulate RGB channels (1, x, y) -> (3, x, y)
+            seg = np.repeat(seg, repeats=3, axis=0)
+
+            original_image = Image.open(data.image_paths[i]).resize(data.image_shape)
+            # Move channel axis to the front for masking (x, y, 3) -> (3, x, y)
+            original_image = np.moveaxis(np.asarray(original_image), 2, 0)
+            image_with_seg = np.ma.masked_array(original_image, seg)
+
+            # Move channel axis to the end for storing on disk (3, x, y) -> (x, y, 3)
+            image = Image.fromarray(np.moveaxis(image_with_seg, 0, 2))
+            output_path = os.path.join(self.prediction_dir, f"{case_id}_PRED.png")
+            image.save(output_path)
+            logging.debug("Prediction for case %s stored in %s.", case_id, output_path)

@@ -72,7 +72,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         self.dim = dim
         self.image_shape = image_shape
         self.val_set_size = val_set_size
-        self.split = dict()
+        self.split = {}
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
