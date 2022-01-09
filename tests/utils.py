@@ -8,7 +8,7 @@ import torch
 # pylint: disable=unused-argument, too-many-lines
 
 
-def _expected_dice_score(
+def expected_dice_score(
     tp: int,
     fp: int,
     tn: int,
@@ -41,7 +41,7 @@ def _expected_dice_score(
     return (2.0 * intersection + epsilon) / (denominator + epsilon)
 
 
-def _expected_dice_loss(
+def expected_dice_loss(
     tp: int,
     fp: int,
     tn: int,
@@ -66,12 +66,72 @@ def _expected_dice_loss(
         float: Expected Dice loss.
     """
 
-    return 1.0 - _expected_dice_score(
+    return 1.0 - expected_dice_score(
         tp, fp, tn, fn, probability_positive, probability_negative, epsilon
     )
 
 
-def _expected_false_positive_loss(
+def expected_generalized_dice_loss(
+    cardinalities: Dict[str, int],
+    probability_positive: float,
+    probability_negative: float,
+    epsilon: float,
+    include_background: bool = True,
+    weight_type: Literal["square", "simple", "uniform"] = "uniform",
+) -> float:
+    """
+    Computes the expected Generalized Dice loss for a single slice.
+
+    Args:
+        cardinalities (Dict[int, Dict[str, int]]): A two-level dictionary containing true positives, false positives,
+            true negatives, false negatives for all classes (on the first level, the class indices are used as
+            dictionary keys, on the second level the keys are `"tp"`, `"fp"`, `"tn"`, and `"fn"`).
+        probability_positive (float): Probability used in the fake slices for positive predictions.
+        probability_negative (float): Probability used in the fake slices for negative predictions.
+        epsilon (float): Smoothing term used to avoid divisions by zero.
+        include_background (bool, optional): `include_background` parameter of the loss.
+        weight_type (string, optional): `weight_type` parameter of the loss.
+
+    Returns:
+        float: Expected Generalized Dice loss.
+    """
+
+    numerator = 0
+    denominator = 0
+
+    class_weights = np.zeros(len(cardinalities.keys()))
+
+    for class_id in cardinalities.keys():
+        tp = cardinalities[class_id]["tp"]
+        fn = cardinalities[class_id]["fn"]
+        if weight_type == "uniform":
+            class_weights[class_id] = 1.0
+        elif weight_type == "simple":
+            class_weights[class_id] = 1.0 / (tp + fn)
+        elif weight_type == "square":
+            class_weights[class_id] = 1.0 / ((tp + fn) ** 2)
+
+    for class_id in cardinalities.keys():
+        if include_background or class_id != 0:
+            tp = cardinalities[class_id]["tp"]
+            fp = cardinalities[class_id]["fp"]
+            tn = cardinalities[class_id]["tn"]
+            fn = cardinalities[class_id]["fn"]
+
+            numerator += class_weights[class_id] * (
+                tp * probability_positive + fn * probability_negative
+            )
+            denominator += class_weights[class_id] * (
+                (tp + fp) * probability_positive
+                + (tn + fn) * probability_negative
+                + tp
+                + fn
+            )
+
+    return 1 - (2 * numerator + epsilon) / (denominator + epsilon)
+
+
+def expected_false_positive_loss(
     tp: int,
     fp: int,
     tn: int,
@@ -102,7 +162,7 @@ def _expected_false_positive_loss(
     return false_positives / (positives + epsilon)
 
 
-def _expected_cross_entropy_loss(
+def expected_cross_entropy_loss(
     tp: int,
     fp: int,
     tn: int,
@@ -157,14 +217,23 @@ def expected_metrics(
         numpy.ndarray: List of expected class-wise metric values.
     """
 
+    if metric == "generalized_dice_loss":
+        return np.array(
+            [
+                expected_generalized_dice_loss(
+                    cardinalities, probability_positive, probability_negative, epsilon
+                )
+            ]
+        )
+
     if metric == "dice_score":
-        metric_function = _expected_dice_score
+        metric_function = expected_dice_score
     elif metric == "dice_loss":
-        metric_function = _expected_dice_loss
+        metric_function = expected_dice_loss
     elif metric == "fp_loss":
-        metric_function = _expected_false_positive_loss
+        metric_function = expected_false_positive_loss
     elif metric == "cross_entropy_loss":
-        metric_function = _expected_cross_entropy_loss
+        metric_function = expected_cross_entropy_loss
     else:
         raise ValueError(f"Invalid metric name: {metric}")
 

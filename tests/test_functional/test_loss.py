@@ -57,6 +57,7 @@ class LossTestCase(abc.ABC):
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "none",
         epsilon: float = 0.0001,
+        **kwargs,
     ) -> None:
         """
         Helper function that calculates the loss with the given settings for the given predictions and compares it
@@ -70,6 +71,7 @@ class LossTestCase(abc.ABC):
             reduction (string, optional): `reduction` parameter of the loss.
             epsilon (float, optional): `epsilon` parameter of the loss.
             expected_loss (Tensor, optional): Expected loss value.
+            kwargs: Further, loss-specific parameters.
         """
 
         # pylint: disable-msg=too-many-locals, no-member
@@ -135,11 +137,13 @@ class LossTestCase(abc.ABC):
             include_background=include_background,
             reduction=reduction,
             epsilon=epsilon,
+            **kwargs,
         )
         loss = loss_module(prediction, target)
 
         self.assertTrue(
-            loss.shape == expected_loss.shape, "Returns loss tensor with correct shape."
+            loss.shape == expected_loss.shape,
+            f"Returns loss tensor with correct shape if reduction is {reduction}.",
         )
 
         test_case_description = (
@@ -159,7 +163,7 @@ class LossTestCase(abc.ABC):
             msg=f"Correctly computes loss value when {test_case_description}.",
         )
 
-    def test_standard_case_multi_label(self) -> None:
+    def test_standard_case(self) -> None:
         """
         Tests that the loss is computed correctly tasks when there are both true and false predictions.
         """

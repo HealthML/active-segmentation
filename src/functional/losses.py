@@ -58,8 +58,6 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
-        assert loss.dim() == 1 or loss.dim() == 2
-
         # aggregate loss values for all class channels and the entire batch
         if self.reduction == "mean":
             return loss.mean()
@@ -274,8 +272,8 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
 
     It is formulated as:
 
-        :math:`GDL = 1 - \frac{1}{N \cdot L} \cdot \sum_{n=1}^N 2 \cdot \sum_{l=1}^L w_l \cdot \frac{\sum_{i} r_{nli}
-            p_{nli} + \epsilon}{\sum_{n=1}^N \sum_{l=1}^L w_l \cdot \sum_{i} (r_{nli} + p_{nli}) + \epsilon}` where
+        :math:`GDL = \frac{1}{N} \cdot \sum_{n=1}^N (1 - 2 \frac{\sum_{l=1}^L w_l \cdot \sum_{i} r_{nli} p_{nli} +
+            \epsilon}{\sum_{l=1}^L w_l \cdot \sum_{i} (r_{nli} + p_{nli}) + \epsilon})` where
             :math:`N` is the batch size, :math:`L` is the number of classes, :math:`w_l` is a class weight,
             :math:`r_{nli}` are the ground-truth labels for class :math:`l` in the :math:`i`-th voxel of the
             :math:`n`-th image. Analogously, :math:`p` is the predicted probability for class :math:`l` in the
