@@ -14,19 +14,19 @@
   },
   "dataset_config": {
     "dataset": "bcss",
-    "data_dir": "data/BCSS",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data/BCSS",
     "pin_memory": true
   },
   "wandb_project_name": "active-segmentation-tests",
-  "checkpoint_dir": "output",
+  "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
   "strategy": "base",
-  "experiment_name": "test-experiment",
+  "experiment_name": "bcss-run01-100epochs",
   "experiment_tags": [],
   "batch_size": 16,
-  "epochs": 1,
-  "num_workers": 1,
-  "gpus": 0,
-  "prediction_count": 1,
-  "prediction_dir": "output/predictions",
+  "epochs": 100,
+  "num_workers": 8,
+  "gpus": 1,
+  "prediction_count": 5,
+  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
   "early_stopping": false
 }

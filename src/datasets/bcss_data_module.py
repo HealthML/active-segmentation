@@ -1,8 +1,10 @@
 """Module containing the data module for the BCSS dataset"""
+import shutil
 from typing import Tuple, List, Optional, Any
 from pathlib import Path
 import os
 
+from fire import Fire
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 
@@ -78,7 +80,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         """TBD"""
         raise NotImplementedError
 
-    def _get_train_and_val_paths(self):
+    def _get_train_and_val_paths(self) -> None:
         """Discovers the directory and splits into a train and a test dataset"""
         image_paths, annotation_paths = BCSSDataModule.discover_paths(
             image_dir=os.path.join(self.data_dir, "train_val", "images"),
@@ -170,3 +172,48 @@ class BCSSDataModule(ActiveLearningDataModule):
         unlabeled_set = self._create_training_set()
         unlabeled_set.is_unlabeled = True
         return unlabeled_set
+
+
+def copy_test_set_to_separate_folder(source_dir: str, target_dir: str) -> None:
+    """
+    Reproduces the test set used in the baseline implementation of the challenge, by copying the scans of the
+    respective institution into a separate folder.
+    Args:
+        source_dir (str): Directory where all the downloaded images and masks are stored.
+        target_dir (str): Directory where to store the test data.
+    """
+
+    test_set_institutes = ["OL", "LL", "E2", "EW", "GM", "S3"]
+    image_paths = list(Path(source_dir, "images").glob("*.png"))
+    annotation_paths = list(Path(source_dir, "masks").glob("*.png"))
+    test_image_paths = [
+        path for path in image_paths if path.name.split("-")[1] in test_set_institutes
+    ]
+    test_annotation_paths = [
+        path
+        for path in annotation_paths
+        if path.name.split("-")[1] in test_set_institutes
+    ]
+    for image_path, mask_path in zip(test_image_paths, test_annotation_paths):
+        shutil.move(
+            image_path.as_posix(), os.path.join(target_dir, "images", image_path.name)
+        )
+        print(
+            f"Moved {image_path.as_posix()} -> {os.path.join(target_dir, 'images', image_path.name)}"
+        )
+        shutil.move(
+            mask_path.as_posix(), os.path.join(target_dir, "masks", mask_path.name)
+        )
+        print(
+            f"Moved {mask_path.as_posix()} -> {os.path.join(target_dir, 'masks', mask_path.name)}"
+        )
+    print(
+        f"Validation: Number of images in {target_dir}: {len(list(Path(target_dir, 'images').glob('*.png')))}"
+    )
+    print(
+        f"Validation: Number of masks in {target_dir}: {len(list(Path(target_dir, 'masks').glob('*.png')))}"
+    )
+
+
+if __name__ == "__main__":
+    Fire(copy_test_set_to_separate_folder)

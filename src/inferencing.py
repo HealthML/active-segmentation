@@ -157,4 +157,4 @@ class Inferencer:
             image = Image.fromarray(np.moveaxis(image_with_seg, 0, 2))
             output_path = os.path.join(self.prediction_dir, f"{case_id}_PRED.png")
             image.save(output_path)
-            logging.debug("Prediction for case %s stored in %s.", case_id, output_path)
+            logging.info("Prediction for case %s stored in %s.", case_id, output_path)

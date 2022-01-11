@@ -151,7 +151,7 @@ class BCSSDataset(IterableDataset):
         img[np.where(img != self.target_label)] = 0
         return img
 
-    def __align_axis(self, img: torch.Tensor):
+    def __align_axis(self, img: torch.Tensor) -> torch.Tensor:
         """Align the axes of the image based on the dimension"""
         if self.dim == 2:
             img = np.expand_dims(img, axis=0)
