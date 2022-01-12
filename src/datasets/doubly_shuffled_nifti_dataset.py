@@ -96,7 +96,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         random_state: int,
     ) -> Tuple[List[np.array]]:
         """
-        Generates a split between initial training set and initially unlabeled set for active laerning.
+        Generates a split between initial training set and initially unlabeled set for active learning.
         Args:
             filepaths (List[str]): The file paths to the Nifti files.
             dim (int): The dimensionality of the dataset. (2 or 3.)
