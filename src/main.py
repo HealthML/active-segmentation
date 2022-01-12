@@ -62,6 +62,13 @@ def create_data_module(
             data_dir,
             batch_size,
             num_workers,
+            active_learning_mode=active_learning_config.get(
+                "active_learning_mode", False
+            ),
+            initial_training_set_size=active_learning_config.get(
+                "initial_training_set_size", 10
+            ),
+            random_state=random_state,
             **dataset_config,
         )
     else:

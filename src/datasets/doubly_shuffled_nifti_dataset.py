@@ -3,7 +3,6 @@ from functools import reduce
 from typing import Any, Callable, Iterable, List, Optional, Tuple
 import math
 from multiprocessing import Manager
-import os
 import random
 from sklearn.model_selection import train_test_split
 
@@ -221,21 +220,6 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         return img if len(img.shape) == dim + 1 else torch.unsqueeze(img, 0)
 
     @staticmethod
-    def __get_case_id(filepath: str) -> str:
-        """
-        Retrieves case ID from the file path of an image.
-
-        Args:
-            filepath (str): Path of the image file whose case ID is to be retrieved.
-
-        Returns:
-            str: Case ID.
-        """
-
-        # retrieve folder name from path
-        return os.path.split(os.path.split(filepath)[0])[1]
-
-    @staticmethod
     def __arange_image_slice_indices(
         filepaths: List[str],
         dim: int = 2,
@@ -310,6 +294,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         target_transform: Optional[Callable[[Any], torch.Tensor]] = None,
         dim: int = 2,
         slice_indices: Optional[List[np.array]] = None,
+        case_id_prefix: str = "train",
     ):
 
         self.image_paths = image_paths
@@ -343,6 +328,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         self.dim = dim
 
+        self.case_id_prefix = case_id_prefix
+
         self.image_slice_indices = (
             DoublyShuffledNIfTIDataset.__arange_image_slice_indices(
                 filepaths=self.image_paths,
@@ -356,6 +343,12 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         self.start_index = 0
         self.end_index = self.__len__()
         self.current_index = 0
+
+    def __get_case_id(self, image_index: int):
+        return f"{self.case_id_prefix}_{image_index}"
+
+    def __get_image_index(self, case_id: str):
+        return int(case_id.replace(f"{self.case_id_prefix}_", ""))
 
     def __iter__(self):
         """
@@ -421,9 +414,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         if image_index != self._current_image_index:
             self.__load_image_and_mask(image_index)
 
-        case_id = self.__get_case_id(
-            filepath=self.image_paths[self._current_image_index]
-        )
+        case_id = self.__get_case_id(self._current_image_index)
 
         if self.dim == 2:
             slice_index = image_slice_index[1]
@@ -459,9 +450,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     def __len__(self) -> int:
         return len(self.image_slice_indices)
 
-    def add_image(
-        self, image_path: str, annotation_path: str, slice_index: int = 0
-    ) -> None:
+    def add_image(self, case_id: str, slice_index: int = 0) -> None:
         """
         Adds an image to this dataset.
         Args:
@@ -472,16 +461,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             None. Raises ValueError if image already exists.
         """
 
-        if image_path not in self.image_paths:
-            raise ValueError(
-                "All image paths which can become part of the dataset need to be passed at initialization."
-            )
-        if annotation_path not in self.annotation_paths:
-            raise ValueError(
-                "All annotation paths which can become part of the dataset need to be passed at initialization."
-            )
-
-        image_index = self.image_paths.index(image_path)
+        image_index = self.__get_image_index(case_id)
         new_image_slice_index = (image_index, slice_index)
 
         if new_image_slice_index not in self.image_slice_indices:
@@ -492,9 +472,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         else:
             raise ValueError("Slice of image already belongs to this dataset.")
 
-    def remove_image(
-        self, image_path: str, annotation_path: str, slice_index: int = 0
-    ) -> None:
+    def remove_image(self, case_id: str, slice_index: int = 0) -> None:
         """
         Removes an image from this dataset.
         Args:
@@ -505,15 +483,12 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             None. Raises ValueError if image already exists.
         """
 
-        if image_path in self.image_paths and annotation_path in self.annotation_paths:
-            image_index = self.image_paths.index(image_path)
-            image_slice_index_to_remove = (image_index, slice_index)
-            if image_slice_index_to_remove in self.image_slice_indices:
-                self.image_slice_indices.remove((image_index, slice_index))
-            else:
-                raise ValueError("Slice of image does not belong to this dataset.")
+        image_index = image_index = self.__get_image_index(case_id)
+        image_slice_index_to_remove = (image_index, slice_index)
+        if image_slice_index_to_remove in self.image_slice_indices:
+            self.image_slice_indices.remove((image_index, slice_index))
         else:
-            raise ValueError("Image does not belong to this dataset.")
+            raise ValueError("Slice of image does not belong to this dataset.")
 
     def __image_indices(self) -> Iterable[str]:
         return reduce(
@@ -523,10 +498,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         )
 
     def image_ids(self) -> Iterable[str]:
-        return [
-            DoublyShuffledNIfTIDataset.__get_case_id(self.image_paths[image_idx])
-            for image_idx in self.__image_indices()
-        ]
+        return [self.__get_case_id(image_idx) for image_idx in self.__image_indices()]
 
     def slices_per_image(self, **kwargs) -> List[int]:
         return [
