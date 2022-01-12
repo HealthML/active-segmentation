@@ -103,6 +103,7 @@ class ActiveLearningPipeline:
         if self.active_learning_mode:
             # run pipeline
             for iteration in range(0, self.iterations):
+                # skip labeling in the first iteration because the model hasn't trained yet
                 if iteration != 0:
                     # query batch selection
                     items_to_label = self.strategy.select_items_to_label(
