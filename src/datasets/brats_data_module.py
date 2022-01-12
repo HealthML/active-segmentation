@@ -3,7 +3,6 @@ import os
 import random
 from typing import Any, List, Optional, Tuple
 
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 from .data_module import ActiveLearningDataModule
@@ -127,17 +126,30 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.cache_size = cache_size
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
-        self.random_state = random_state
+
+        if self.active_learning_mode:
+            (
+                self.initial_training_samples,
+                self.initial_unlabeled_samples,
+            ) = DoublyShuffledNIfTIDataset.generate_active_learning_split(
+                BraTSDataModule.discover_paths(os.path.join(self.data_folder, "train"))[
+                    0
+                ],
+                dim,
+                initial_training_set_size,
+                random_state,
+            )
+        else:
+            self.initial_training_samples = None
+            self.initial_unlabeled_samples = None
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
         if self.dim == 2:
             # create list of files as tuple of image id and slice index
-            image_slice_ids = [
-                (case_id.split("-")[0], case_id.split("-")[1]) for case_id in ids
-            ]
-            ids = [image_id for image_id, slice_index in image_slice_ids]
+            image_slice_ids = [tuple(case_id.split("-")) for case_id in ids]
+            ids = [image_id for image_id, _ in image_slice_ids]
 
         if self._training_set is not None and self._unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
@@ -173,15 +185,6 @@ class BraTSDataModule(ActiveLearningDataModule):
             os.path.join(self.data_folder, "train")
         )
 
-        if self.active_learning_mode:
-            # initialize the training set with randomly selected samples
-            (train_image_paths, _, train_annotation_paths, _) = train_test_split(
-                train_image_paths,
-                train_annotation_paths,
-                train_size=self.initial_training_set_size,
-                random_state=self.random_state,
-            )
-
         return DoublyShuffledNIfTIDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,
@@ -190,6 +193,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             shuffle=self.shuffle,
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
+            slice_indices=self.initial_training_samples,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -236,28 +240,16 @@ class BraTSDataModule(ActiveLearningDataModule):
                 os.path.join(self.data_folder, "train")
             )
 
-            # use all images that are not in initial training set
-            (
-                _,
-                initial_unlabeled_image_paths,
-                _,
-                initial_unlabeled_annotation_paths,
-            ) = train_test_split(
-                train_image_paths,
-                train_annotation_paths,
-                train_size=self.initial_training_set_size,
-                random_state=self.random_state,
-            )
-
             return DoublyShuffledNIfTIDataset(
-                image_paths=initial_unlabeled_image_paths,
-                annotation_paths=initial_unlabeled_annotation_paths,
+                image_paths=train_image_paths,
+                annotation_paths=train_annotation_paths,
                 dim=self.dim,
                 cache_size=self.cache_size,
                 is_unlabeled=True,
                 shuffle=self.shuffle,
                 mask_join_non_zero=self.mask_join_non_zero,
                 mask_filter_values=self.mask_filter_values,
+                slice_indices=self.initial_unlabeled_samples,
             )
 
         # unlabeled set is empty
