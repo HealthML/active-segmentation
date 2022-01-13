@@ -483,7 +483,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             None. Raises ValueError if image already exists.
         """
 
-        image_index = image_index = self.__get_image_index(case_id)
+        image_index = self.__get_image_index(case_id)
         image_slice_index_to_remove = (image_index, slice_index)
         if image_slice_index_to_remove in self.image_slice_indices:
             self.image_slice_indices.remove((image_index, slice_index))
