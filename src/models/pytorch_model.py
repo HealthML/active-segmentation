@@ -94,7 +94,7 @@ class PytorchModel(LightningModule, ABC):
         self.test_metrics = torch.nn.ModuleList([])
 
         self.stage = None
-        self.epochsCounter = 0
+        self.epochs_counter = 0
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -325,12 +325,12 @@ class PytorchModel(LightningModule, ABC):
                 self.log_dict(
                     {
                         f"train/{metric_name}": metric_value,
-                        "train/epochsCounter": self.epochsCounter,
+                        "train/epochs_counter": self.epochs_counter,
                     }
                 )
             train_metric.reset()
 
-        self.epochsCounter += 1
+        self.epochs_counter += 1
 
     def validation_epoch_end(self, outputs: Any):
         """

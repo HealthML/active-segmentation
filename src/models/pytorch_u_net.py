@@ -99,7 +99,7 @@ class PytorchUNet(PytorchModel):
             train_metric.update(probabilities, y, case_ids)
 
         self.logger.log_metrics(
-            {"train/loss": loss, "train/epochsCounter": self.epochsCounter}
+            {"train/loss": loss, "train/epochs_counter": self.epochs_counter}
         )
         return loss
 
