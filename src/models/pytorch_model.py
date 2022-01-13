@@ -286,7 +286,7 @@ class PytorchModel(LightningModule, ABC):
 
         self.eval()
         with torch.no_grad():
-            return self(batch).cpu().numpy()
+            return self(batch)
 
     def get_train_metrics(self) -> Iterable[torchmetrics.Metric]:
         """

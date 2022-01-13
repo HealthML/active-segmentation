@@ -11,7 +11,7 @@ from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule
-from query_strategies import QueryStrategy, RandomSamplingStrategy
+from query_strategies import RandomSamplingStrategy, UncertaintySamplingStrategy
 
 
 def create_data_module(
@@ -109,7 +109,7 @@ def run_active_learning_pipeline(
     Args:
         architecture (string): Name of the desired model architecture. E.g. 'u_net'.
         dataset (string): Name of the dataset. E.g. 'brats'
-        strategy (string): Name of the query strategy. E.g. 'base'
+        strategy (string): Name of the query strategy. E.g. 'random'
         experiment_name (string): Name of the experiment.
         batch_size (int, optional): Size of training examples passed in one training step.
         checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
@@ -220,12 +220,12 @@ def create_query_strategy(strategy: str):
     """
     Initialises the chosen query strategy
     Args:
-        strategy (str): Name of the query strategy. E.g. 'base'
+        strategy (str): Name of the query strategy. E.g. 'random'
     """
-    if strategy == "base":
-        return QueryStrategy()
     if strategy == "random":
         return RandomSamplingStrategy()
+    if strategy == "uncertainty":
+        return UncertaintySamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 

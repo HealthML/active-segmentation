@@ -85,7 +85,7 @@ class Inferencer:
                 if self.model_dim == 2
                 else torch.unsqueeze(x, 0)
             )
-            pred = self.model.predict(x)
+            pred = self.model.predict(x).cpu().numpy()
             seg = np.squeeze(np.swapaxes(pred, 0, 1) if self.model_dim == 2 else pred)
 
             seg = (seg >= 0.5) * 255
