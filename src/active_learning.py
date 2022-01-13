@@ -114,6 +114,7 @@ class ActiveLearningPipeline:
 
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
+                self.logger.log_metrics({"train/al_loop_iterations": iteration})
 
                 # don't reset the model trainer in the last iteration
                 if iteration != self.iterations - 1:
