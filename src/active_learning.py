@@ -102,13 +102,15 @@ class ActiveLearningPipeline:
 
         if self.active_learning_mode:
             # run pipeline
-            for _ in range(0, self.iterations):
-                # query batch selection
-                items_to_label = self.strategy.select_items_to_label(
-                    self.model, self.data_module, self.items_to_label
-                )
-                # label batch
-                self.data_module.label_items(items_to_label)
+            for iteration in range(0, self.iterations):
+                # skip labeling in the first iteration because the model hasn't trained yet
+                if iteration != 0:
+                    # query batch selection
+                    items_to_label = self.strategy.select_items_to_label(
+                        self.model, self.data_module, self.items_to_label
+                    )
+                    # label batch
+                    self.data_module.label_items(items_to_label)
 
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)

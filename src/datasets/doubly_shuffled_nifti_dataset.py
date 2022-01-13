@@ -5,6 +5,7 @@ import math
 from multiprocessing import Manager
 import os
 import random
+from sklearn.model_selection import train_test_split
 
 import nibabel as nib
 import numpy as np
@@ -20,8 +21,10 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     This datset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.
 
     Args:
-        image_paths (List[str]): List with the paths to the images.
-        annotation_paths (List[str]): List with the paths to the annotations.
+        image_paths (List[str]): List with the paths to the images. Has to contain paths of all images which can ever
+            become part of the dataset.
+        annotation_paths (List[str]): List with the paths to the annotations. Has to contain paths of all images which
+            can ever become part of the dataset.
         cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.
             Defaults to zero.
         mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
@@ -83,6 +86,82 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             DoublyShuffledNIfTIDataset.__read_image(filepath).shape[2]
             if dim == 2
             else 1
+        )
+
+    @staticmethod
+    def generate_active_learning_split(
+        filepaths: List[str],
+        dim: int,
+        initial_training_set_size: int,
+        random_state: int,
+    ) -> Tuple[List[np.array]]:
+        """
+        Generates a split between initial training set and initially unlabeled set for active learning.
+        Args:
+            filepaths (List[str]): The file paths to the Nifti files.
+            dim (int): The dimensionality of the dataset. (2 or 3.)
+            initial_training_set_size (int): The number of samples in the initial training set.
+            random_state (int): The random state used to generate the split.
+
+        Returns:
+            A tuple of two lists of np.arrays. The lists contain one array per filepath which contains the
+            slice indices of the slices which should be part of the training and unlabeled sets respectively.
+            The lists can be passed as `slice_indices` for initialization of a DoublyShuffledNIfTIDataset.
+        """
+
+        if dim == 3:
+            image_indices = range(len(filepaths))
+            (initial_training_samples, initial_unlabeled_samples,) = train_test_split(
+                image_indices,
+                train_size=initial_training_set_size,
+                random_state=random_state,
+            )
+            return (
+                [
+                    np.array([0] if image_index in initial_training_samples else [])
+                    for image_index in range(len(filepaths))
+                ],
+                [
+                    np.array([0] if image_index in initial_unlabeled_samples else [])
+                    for image_index in range(len(filepaths))
+                ],
+            )
+
+        all_samples = [
+            [image_index, slice_index]
+            for image_index, filepath in enumerate(filepaths)
+            for slice_index in range(
+                DoublyShuffledNIfTIDataset.__read_slice_count(filepath, dim=dim)
+            )
+        ]
+
+        (initial_training_samples, initial_unlabeled_samples) = train_test_split(
+            all_samples,
+            train_size=initial_training_set_size,
+            random_state=random_state,
+        )
+
+        return (
+            [
+                np.array(
+                    [
+                        slice_index
+                        for image_index, slice_index in initial_training_samples
+                        if image_index == image_id
+                    ]
+                )
+                for image_id in range(len(filepaths))
+            ],
+            [
+                np.array(
+                    [
+                        slice_index
+                        for image_index, slice_index in initial_unlabeled_samples
+                        if image_index == image_id
+                    ]
+                )
+                for image_id in range(len(filepaths))
+            ],
         )
 
     @staticmethod
@@ -394,9 +473,13 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         """
 
         if image_path not in self.image_paths:
-            self.image_paths.append(image_path)
+            raise ValueError(
+                "All image paths which can become part of the dataset need to be passed at initialization."
+            )
         if annotation_path not in self.annotation_paths:
-            self.annotation_paths.append(annotation_path)
+            raise ValueError(
+                "All annotation paths which can become part of the dataset need to be passed at initialization."
+            )
 
         image_index = self.image_paths.index(image_path)
         new_image_slice_index = (image_index, slice_index)
@@ -427,13 +510,6 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             image_slice_index_to_remove = (image_index, slice_index)
             if image_slice_index_to_remove in self.image_slice_indices:
                 self.image_slice_indices.remove((image_index, slice_index))
-
-                # remove image_path from image_paths if this was the last slice for this image
-                if image_index not in [
-                    index for (index, _) in self.image_slice_indices
-                ]:
-                    self.image_paths.remove(image_path)
-                    self.annotation_paths.remove(annotation_path)
             else:
                 raise ValueError("Slice of image does not belong to this dataset.")
         else:
