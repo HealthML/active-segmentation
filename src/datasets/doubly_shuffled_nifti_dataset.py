@@ -469,6 +469,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             self.image_slice_indices = self.image_slice_indices + [
                 new_image_slice_index
             ]
+            self.end_index = self.__len__()
         else:
             raise ValueError("Slice of image already belongs to this dataset.")
 
@@ -487,6 +488,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         image_slice_index_to_remove = (image_index, slice_index)
         if image_slice_index_to_remove in self.image_slice_indices:
             self.image_slice_indices.remove((image_index, slice_index))
+            self.end_index = self.__len__()
         else:
             raise ValueError("Slice of image does not belong to this dataset.")
 
