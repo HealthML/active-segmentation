@@ -3,6 +3,8 @@ from typing import List, Tuple, Union
 from pathlib import Path
 import math
 
+from multiprocessing import Manager
+
 from PIL import Image, ImageOps
 import numpy as np
 import torch
@@ -18,7 +20,7 @@ class BCSSDataset(IterableDataset):
             image_paths (List[Path]): List with all images to load, can be obtained by BCSSDataModule.discover_paths.
             annotation_paths (List[Path]): List with all annotations to load,
                 can be obtained by BCSSDataModule.discover_paths.
-            target_label (int, optional): The label to use for learning. Following labels are in the annonations:
+            target_label (int, optional): The label to use for learning. Following labels are in the annotations:
                 outside_roi	0
                 tumor	1
                 stroma	2
@@ -41,18 +43,12 @@ class BCSSDataset(IterableDataset):
                 angioinvasion	19
                 dcis	20
                 other	21
-            is_unlabeled (bool, optional): Wether the dataset is used as "unlabeled" for the active learning loop.
+            is_unlabeled (bool, optional): Whether the dataset is used as "unlabeled" for the active learning loop.
             shuffle (bool, optional): Whether the data should be shuffled.
-            dim (int, optional): Dimension of the dataset.
-            image_shape (tuple, optional): The shape to size the image.
+            channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
     """
 
     # pylint: disable=too-many-instance-attributes,abstract-method
-
-    @staticmethod
-    def __ensure_channel_dim(img: torch.Tensor, dim: int) -> torch.Tensor:
-        """Ensures the correct dimensionality of the image"""
-        return img if len(img.shape) == dim + 1 else torch.unsqueeze(img, 0)
 
     @staticmethod
     def normalize(img: np.ndarray) -> np.ndarray:
@@ -63,6 +59,7 @@ class BCSSDataset(IterableDataset):
             3. Dividing by the negative minimum value
         Args:
             img: The input image that should be normalized.
+
         Returns:
             Normalized image with background values normalized to -1
         """
@@ -71,6 +68,15 @@ class BCSSDataset(IterableDataset):
         tmp = tmp - np.mean(tmp[tmp > 0])
         # make normalize original zero values to -1
         return tmp / (-np.min(tmp))
+
+    @staticmethod
+    def __align_axis(img: np.ndarray) -> np.ndarray:
+        """Align the axes of the image based on the dimension"""
+        if len(img.shape) == 2:
+            img = np.expand_dims(img, axis=0)
+        if img.shape[2] == 3:
+            img = np.moveaxis(img, 2, 0)
+        return img
 
     @staticmethod
     def get_case_id(filepath: Union[str, Path]) -> str:
@@ -86,18 +92,30 @@ class BCSSDataset(IterableDataset):
         self,
         image_paths: List[Path],
         annotation_paths: List[Path],
+        cache_size: int = 0,
         target_label: int = 1,
         is_unlabeled: bool = False,
         shuffle: bool = True,
-        dim: int = 2,
-        image_shape: tuple = (240, 240),
+        channels: int = 3,
+        image_shape: tuple = (300, 300),
     ) -> None:
 
         self.image_paths = image_paths
         self.annotation_paths = annotation_paths
         self.target_label = target_label
-        self.dim = dim
+        self.channels = channels
         self.image_shape = image_shape
+        self.cache_size = cache_size
+
+        manager = Manager()
+
+        # since the PyTorch dataloader uses multiple processes for data loading (if num_workers > 0),
+        # a shared dict is used to share the cache between all processes have to use
+        # see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py and
+        # https://discuss.pytorch.org/t/reuse-of-dataloader-worker-process-and-caching-in-dataloader/30620/14
+        # for more information
+        self.image_cache = manager.dict()
+        self.mask_cache = manager.dict()
 
         self.num_images = len(self.image_paths)
         self.num_masks = len(self.annotation_paths)
@@ -119,24 +137,37 @@ class BCSSDataset(IterableDataset):
 
     def __load_image_and_mask(self, index: int) -> None:
         """Loads images and annotations into _current_image and _current_mask variables."""
+
         self._current_image_index = index
-        self._current_image = self.__load_image_as_array(
-            filepath=self.image_paths[self._current_image_index].as_posix(),
-            norm=True,
-            is_mask=False,
-        )
-        self._current_mask = self.__load_image_as_array(
-            filepath=self.annotation_paths[self._current_image_index].as_posix(),
-            norm=False,
-            is_mask=True,
-        )
+        # check if image and mask are in cache
+        if index in self.image_cache and index in self.mask_cache:
+            self._current_image = self.image_cache[index]
+            self._current_mask = self.mask_cache[index]
+        # read image and mask from disk otherwise
+        else:
+            self._current_image = self.__load_image_as_array(
+                filepath=self.image_paths[self._current_image_index].as_posix(),
+                norm=True,
+                is_mask=False,
+            )
+            self._current_mask = self.__load_image_as_array(
+                filepath=self.annotation_paths[self._current_image_index].as_posix(),
+                norm=False,
+                is_mask=True,
+            )
+        # cache image and mask if there is still space in cache
+        if len(self.image_cache.keys()) < self.cache_size:
+            self.image_cache[index] = self._current_image
+            self.mask_cache[index] = self._current_mask
 
     def __load_image_as_array(
         self, filepath: str, norm: bool = True, is_mask: bool = False
     ) -> np.ndarray:
         """Loads one image in memory."""
-        img = Image.open(filepath).resize((self.image_shape[0], self.image_shape[1]))
-        if self.dim == 2:
+        img = Image.open(
+            filepath
+        )  # .resize((self.image_shape[0], self.image_shape[1]))
+        if self.channels == 2:
             img = ImageOps.grayscale(img)
         img = np.asarray(img)
         if norm:
@@ -149,14 +180,6 @@ class BCSSDataset(IterableDataset):
     def __restrict_on_target_class(self, img: np.ndarray) -> np.ndarray:
         """Only keeps set target class and sets rest of the image to background with value 0."""
         img[np.where(img != self.target_label)] = 0
-        return img
-
-    def __align_axis(self, img: torch.Tensor) -> torch.Tensor:
-        """Align the axes of the image based on the dimension"""
-        if self.dim == 2:
-            img = np.expand_dims(img, axis=0)
-        else:
-            img = np.moveaxis(img, 2, 0)
         return img
 
     def __iter__(self):
@@ -197,14 +220,10 @@ class BCSSDataset(IterableDataset):
         y = torch.from_numpy(self._current_mask)
 
         if self.is_unlabeled:
-            return BCSSDataset.__ensure_channel_dim(x, self.dim), case_id
+            return x, case_id
 
         self.current_index += 1
-        return (
-            BCSSDataset.__ensure_channel_dim(x, self.dim),
-            BCSSDataset.__ensure_channel_dim(y, self.dim),
-            case_id,
-        )
+        return x, y, case_id
 
     def __len__(self) -> int:
         """Returns the length of the dataset."""
@@ -212,7 +231,7 @@ class BCSSDataset(IterableDataset):
 
     def slices_per_image(self) -> List[int]:
         """For each image returns the number of slices"""
-        return [1 if self.dim == 2 else 3] * len(self.indices)
+        return [1] * len(self.indices)
 
     def image_ids(self) -> List[str]:
         """For each image returns the case ID's"""

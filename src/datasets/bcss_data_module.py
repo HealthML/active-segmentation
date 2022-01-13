@@ -1,6 +1,6 @@
 """Module containing the data module for the BCSS dataset"""
 import shutil
-from typing import Tuple, List, Optional, Any
+from typing import Tuple, List, Optional, Any, Callable
 from pathlib import Path
 import os
 
@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from datasets.data_module import ActiveLearningDataModule
 from datasets.bcss_dataset import BCSSDataset
+from datasets.collate import batch_padding_collate_fn
 
 
 class BCSSDataModule(ActiveLearningDataModule):
@@ -23,9 +24,9 @@ class BCSSDataModule(ActiveLearningDataModule):
             (default = 0).
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle (bool, optional): Flag if the data should be shuffled.
-        dim (int, optional): Dimension of the dataset.
-        image_shape (tuple, optional): The shape to size the image.
+        channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
         val_set_size (float, optional): The size of the validation set, e.g. 0.3.
+        stratify (bool, optional): The option to stratify the train val split by the institutes.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -49,6 +50,16 @@ class BCSSDataModule(ActiveLearningDataModule):
         ]
         return image_paths, annotation_paths
 
+    @staticmethod
+    def build_stratification_labels(image_paths: List[Path]) -> List[str]:
+        """Build a list with class labels used for a stratified split"""
+        institute_names = [BCSSDataset.get_institute_name(path) for path in image_paths]
+        stratify = [
+            name if institute_names.count(name) > 1 else "OTHER"
+            for name in institute_names
+        ]
+        return stratify
+
     def __init__(
         self,
         data_dir: str,
@@ -56,9 +67,10 @@ class BCSSDataModule(ActiveLearningDataModule):
         num_workers: int,
         pin_memory: bool = True,
         shuffle: bool = True,
-        dim: int = 2,
-        image_shape: tuple = (240, 240),
+        cache_size: int = 0,
+        channels: int = 3,
         val_set_size: float = 0.3,
+        stratify: bool = True,
         **kwargs,
     ):
 
@@ -71,14 +83,20 @@ class BCSSDataModule(ActiveLearningDataModule):
             **kwargs,
         )
         self.data_dir = self.data_dir
-        self.dim = dim
-        self.image_shape = image_shape
+        self.channels = channels
+        self.cache_size = cache_size
         self.val_set_size = val_set_size
+        self.stratify = stratify
         self.split = {}
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
         raise NotImplementedError
+
+    def _get_collate_fn(self) -> Optional[Callable[[List[Any]], Any]]:
+        """Returns the batchwise padding collate function."""
+
+        return batch_padding_collate_fn
 
     def _get_train_and_val_paths(self) -> None:
         """Discovers the directory and splits into a train and a test dataset"""
@@ -86,9 +104,15 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_dir=os.path.join(self.data_dir, "train_val", "images"),
             mask_dir=os.path.join(self.data_dir, "train_val", "masks"),
         )
+        stratify = (
+            BCSSDataModule.build_stratification_labels(image_paths=image_paths)
+            if self.stratify
+            else None
+        )
         self._split_train_val(
             image_paths=image_paths,
             annotation_paths=annotation_paths,
+            stratify=stratify,
         )
 
     def _split_train_val(
@@ -119,8 +143,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_paths=self.split["train_image_paths"],
             annotation_paths=self.split["train_annotation_paths"],
             shuffle=self.shuffle,
-            dim=self.dim,
-            image_shape=self.image_shape,
+            channels=self.channels,
+            cache_size=self.cache_size,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -137,6 +161,7 @@ class BCSSDataModule(ActiveLearningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
+                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -148,8 +173,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_paths=self.split["val_image_paths"],
             annotation_paths=self.split["val_annotation_paths"],
             shuffle=self.shuffle,
-            dim=self.dim,
-            image_shape=self.image_shape,
+            channels=self.channels,
+            cache_size=self.cache_size,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -162,8 +187,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_paths=test_image_paths,
             annotation_paths=test_annotation_paths,
             shuffle=False,
-            dim=self.dim,
-            image_shape=self.image_shape,
+            channels=self.channels,
+            cache_size=self.cache_size,
         )
 
     def _create_unlabeled_set(self) -> Optional[Dataset]:
@@ -172,6 +197,10 @@ class BCSSDataModule(ActiveLearningDataModule):
         unlabeled_set = self._create_training_set()
         unlabeled_set.is_unlabeled = True
         return unlabeled_set
+
+    def data_channels(self) -> int:
+        """Returns the number of channels"""
+        return self.channels
 
 
 def copy_test_set_to_separate_folder(source_dir: str, target_dir: str) -> None:

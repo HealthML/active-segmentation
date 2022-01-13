@@ -148,7 +148,9 @@ class Inferencer:
             # Repeat dimensions to emulate RGB channels (1, x, y) -> (3, x, y)
             seg = np.repeat(seg, repeats=3, axis=0)
 
-            original_image = Image.open(data.image_paths[i]).resize(data.image_shape)
+            original_image = Image.open(
+                data.image_paths[i]
+            )  # .resize(data.image_shape)
             # Move channel axis to the front for masking (x, y, 3) -> (3, x, y)
             original_image = np.moveaxis(np.asarray(original_image), 2, 0)
             image_with_seg = np.ma.masked_array(original_image, seg)

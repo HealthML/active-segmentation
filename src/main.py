@@ -77,6 +77,7 @@ def create_data_module(
             **dataset_config,
         )
     elif dataset == "bcss":
+        dataset_config.pop("dim")
         data_module = BCSSDataModule(
             data_dir=data_dir,
             batch_size=batch_size,
