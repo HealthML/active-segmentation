@@ -294,6 +294,7 @@
                     <span class="c1"># label batch</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">)</span>
 
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">({</span><span class="s2">&quot;train/al_loop_iterations&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">})</span>
                 <span class="c1"># train model on labeled batch</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
 

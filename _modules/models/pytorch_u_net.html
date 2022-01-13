@@ -280,7 +280,9 @@
         <span class="k">for</span> <span class="n">train_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_train_metrics</span><span class="p">():</span>
             <span class="n">train_metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train/loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>  <span class="c1"># log train loss via weights&amp;biases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;train/loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">&quot;train/epochs_counter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs_counter</span><span class="p">}</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">loss</span></div>
 
 <div class="viewcode-block" id="PytorchUNet.validation_step"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.validation_step">[docs]</a>    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
