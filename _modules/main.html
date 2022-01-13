@@ -244,6 +244,13 @@
             <span class="n">data_dir</span><span class="p">,</span>
             <span class="n">batch_size</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="p">,</span>
+            <span class="n">active_learning_mode</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s2">&quot;active_learning_mode&quot;</span><span class="p">,</span> <span class="kc">False</span>
+            <span class="p">),</span>
+            <span class="n">initial_training_set_size</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s2">&quot;initial_training_set_size&quot;</span><span class="p">,</span> <span class="mi">10</span>
+            <span class="p">),</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
             <span class="o">**</span><span class="n">dataset_config</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

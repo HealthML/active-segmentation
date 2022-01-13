@@ -313,7 +313,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">stage</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;validate&quot;</span><span class="p">]:</span>
-            <span class="n">slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
+            <span class="n">slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
 
             <span class="n">val_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
                 <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
@@ -325,7 +325,7 @@
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="n">slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
+            <span class="n">slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
 
             <span class="n">test_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
                 <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
