@@ -94,6 +94,7 @@ class PytorchModel(LightningModule, ABC):
         self.test_metrics = torch.nn.ModuleList([])
 
         self.stage = None
+        self.epochs_counter = 0
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -318,12 +319,18 @@ class PytorchModel(LightningModule, ABC):
         Args:
             outputs: List of return values of all training steps of the current training epoch.
         """
-
         for train_metric in self.train_metrics:
             train_metrics = train_metric.compute()
             for metric_name, metric_value in train_metrics.items():
-                self.log(f"train/{metric_name}", metric_value)
+                self.log_dict(
+                    {
+                        f"train/{metric_name}": metric_value,
+                        "train/epochs_counter": self.epochs_counter,
+                    }
+                )
             train_metric.reset()
+
+        self.epochs_counter += 1
 
     def validation_epoch_end(self, outputs: Any):
         """

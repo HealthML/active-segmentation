@@ -112,6 +112,7 @@ class ActiveLearningPipeline:
                     # label batch
                     self.data_module.label_items(items_to_label)
 
+                self.logger.log_metrics({"train/al_loop_iterations": iteration})
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
 
