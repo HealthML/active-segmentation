@@ -477,7 +477,8 @@ class CrossEntropyLoss(SegmentationLoss):
             self.cross_entropy_loss = torch.nn.BCELoss(reduction="none")
         else:
             self.cross_entropy_loss = torch.nn.NLLLoss(
-                ignore_index=ignore_index, reduction="none"
+                ignore_index=ignore_index if ignore_index is not None else -100,
+                reduction="none",
             )
 
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
@@ -504,14 +505,17 @@ class CrossEntropyLoss(SegmentationLoss):
         if self.multi_label:
             target = target.float()
         else:
+            # the Pytorch NLLLoss expect the inputs to be the output of a LogSoftmax layer
+            # since this loss expects the output of a Softmax layer as input, the log is taken here
+            prediction = torch.log(prediction)
             target = target.long()
+
         loss = self.cross_entropy_loss(prediction, target)
 
         if self.multi_label and self.ignore_index is not None:
-            # the BCELoss from Pytorch does not provide an `ignore_index` argument
+            # the BCELoss from Pytorch xdoes not provide an `ignore_index` argument
             # therefore the loss values for the voxels to be ignored have to be set to zero here
-            loss = loss.clone()
-            loss[target == self.ignore_index] = 0
+            loss = mask_tensor(loss, target, self.ignore_index)
 
         if self.reduction == "mean":
             # the images in one batch can have different sizes and thus the padding size can differ
