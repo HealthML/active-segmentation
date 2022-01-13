@@ -284,13 +284,15 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span><span class="p">:</span>
             <span class="c1"># run pipeline</span>
-            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="p">):</span>
-                <span class="c1"># query batch selection</span>
-                <span class="n">items_to_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">select_items_to_label</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">items_to_label</span>
-                <span class="p">)</span>
-                <span class="c1"># label batch</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="p">):</span>
+                <span class="c1"># skip labeling in the first iteration because the model hasn&#39;t trained yet</span>
+                <span class="k">if</span> <span class="n">iteration</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># query batch selection</span>
+                    <span class="n">items_to_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">select_items_to_label</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">items_to_label</span>
+                    <span class="p">)</span>
+                    <span class="c1"># label batch</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">)</span>
 
                 <span class="c1"># train model on labeled batch</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
