@@ -49,6 +49,9 @@ To be able to import the modules from the repository, run:
 python3 -m pip install -e .
 ```
 
+## Setting up using conda
+`conda env create -f environment.yaml`
+
 ## Additional Setup Steps
 
 Install and log into Weights and Biases:
