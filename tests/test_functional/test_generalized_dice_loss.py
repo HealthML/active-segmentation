@@ -126,7 +126,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                 expected_loss = torch.as_tensor(expected_losses.sum())
             else:
                 expected_loss = torch.Tensor(
-                    [[expected_loss_first_slice], [expected_loss_second_slice]]
+                    [expected_loss_first_slice, expected_loss_second_slice]
                 )
 
         # this test currently does not pass
@@ -212,7 +212,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                             reduction="none",
                             include_background=include_background,
                             epsilon=epsilon,
-                            expected_loss=torch.Tensor([[0.0], [0.0]]),
+                            expected_loss=torch.Tensor([0.0, 0.0]),
                         )
 
                     for reduction in ["mean", "sum"]:
@@ -243,7 +243,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                     weight_type="uniform",
                     reduction="none",
                     epsilon=0,
-                    expected_loss=torch.Tensor([[1.0], [1.0]]),
+                    expected_loss=torch.Tensor([1.0, 1.0]),
                 )
 
                 self._test_loss(
@@ -295,7 +295,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                     weight_type="uniform",
                     reduction="none",
                     epsilon=0,
-                    expected_loss=torch.Tensor([[1.0], [1.0]]),
+                    expected_loss=torch.Tensor([1.0, 1.0]),
                 )
 
                 self._test_loss(
@@ -369,7 +369,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                 loss = generalized_dice_loss(prediction, target)
 
                 self.assertTrue(
-                    torch.equal(loss, torch.as_tensor([[0.0], [0.0]])),
+                    torch.equal(loss, torch.as_tensor([0.0, 0.0])),
                     "Returns 0 if there are no positives and epsilon is greater than zero.",
                 )
 

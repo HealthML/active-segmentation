@@ -194,11 +194,6 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
         dice_loss_module = self.get_dice_loss_module()
         dice_loss = dice_loss_module(prediction, target)
 
-        if self.reduction == "none":
-            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
-            # set to "none"
-            # since the spatial dimensions only contain a single element, they are squeezed here
-            dice_loss = dice_loss.reshape((dice_loss.shape[0], dice_loss.shape[1]))
         return dice_loss
 
 
@@ -261,6 +256,16 @@ class DiceLoss(AbstractDiceLoss):
 
         return self.dice_loss
 
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        dice_loss = super().forward(prediction, target)
+        if self.reduction == "none":
+            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
+            # set to "none"
+            # since the spatial dimensions only contain a single element, they are squeezed here
+            dice_loss = dice_loss.reshape((dice_loss.shape[0], dice_loss.shape[1]))
+
+        return dice_loss
+
 
 class GeneralizedDiceLoss(AbstractDiceLoss):
     r"""
@@ -322,6 +327,16 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
         """
 
         return self.generalized_dice_loss
+
+    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        dice_loss = super().forward(prediction, target)
+        if self.reduction == "none":
+            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
+            # set to "none"
+            # since the class dimension and the spatial dimensions only contain a single element, they are squeezed here
+            dice_loss = dice_loss.reshape(dice_loss.shape[0])
+
+        return dice_loss
 
 
 class FalsePositiveLoss(SegmentationLoss):
