@@ -115,16 +115,18 @@ class ActiveLearningPipeline:
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
 
-                # reset model trainer
-                self.model_trainer = Trainer(
-                    deterministic=True,
-                    profiler="simple",
-                    max_epochs=self.epochs,
-                    logger=self.logger,
-                    gpus=self.gpus,
-                    benchmark=True,
-                    callbacks=self.callbacks,
-                )
+                # don't reset the model trainer in the last iteration
+                if iteration != self.iterations - 1:
+                    # reset model trainer
+                    self.model_trainer = Trainer(
+                        deterministic=True,
+                        profiler="simple",
+                        max_epochs=self.epochs,
+                        logger=self.logger,
+                        gpus=self.gpus,
+                        benchmark=True,
+                        callbacks=self.callbacks,
+                    )
         else:
             # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)

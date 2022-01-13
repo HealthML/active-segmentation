@@ -131,7 +131,7 @@ class PytorchModel(LightningModule, ABC):
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
 
         if stage in ["validate"]:
-            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+            slices_per_image = self.val_dataloader().dataset.slices_per_image()
 
             val_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,
@@ -143,7 +143,7 @@ class PytorchModel(LightningModule, ABC):
             )
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
         if stage == "test":
-            slices_per_image = self.train_dataloader().dataset.slices_per_image()
+            slices_per_image = self.test_dataloader().dataset.slices_per_image()
 
             test_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,

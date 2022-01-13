@@ -74,25 +74,6 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         return image_paths, annotation_paths
 
-    @staticmethod
-    def __case_id_to_filepaths(
-        case_id: str, dir_path: str, modality: str = "flair"
-    ) -> Tuple[str, str]:
-        """
-        Returns the image and annotation file path for a given case ID.
-
-        Args:
-            case_id: Case ID for which the file paths are to be determined.
-            dir_path: directory to where the images are located
-            modality (string, optional): modality of scan.
-
-        Returns:
-            Tuple[str]: Image and annotation path.
-        """
-        image_path = os.path.join(dir_path, case_id, f"{case_id}_{modality}.nii.gz")
-        annotation_path = os.path.join(dir_path, case_id, f"{case_id}_seg.nii.gz")
-        return image_path, annotation_path
-
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -152,16 +133,8 @@ class BraTSDataModule(ActiveLearningDataModule):
             ids = [image_id for image_id, _ in image_slice_ids]
 
         if self._training_set is not None and self._unlabeled_set is not None:
-            labeled_image_and_annotation_paths = [
-                self.__case_id_to_filepaths(
-                    case_id, os.path.join(self.data_folder, "train")
-                )
-                for case_id in ids
-            ]
-            for index, (
-                labeled_image_path,
-                labeled_image_annotation_path,
-            ) in enumerate(labeled_image_and_annotation_paths):
+
+            for index, case_id in enumerate(ids):
                 if self.dim == 2:
                     # additionally pass slice index for dimension 2
                     slice_index = int(image_slice_ids[index][1])
@@ -169,12 +142,8 @@ class BraTSDataModule(ActiveLearningDataModule):
                     # 3D images only have one slice index of 0
                     slice_index = 0
 
-                self._training_set.add_image(
-                    labeled_image_path, labeled_image_annotation_path, slice_index
-                )
-                self._unlabeled_set.remove_image(
-                    labeled_image_path, labeled_image_annotation_path, slice_index
-                )
+                self._training_set.add_image(case_id, slice_index)
+                self._unlabeled_set.remove_image(case_id, slice_index)
 
     def _create_training_set(self) -> Optional[Dataset]:
         """
@@ -226,6 +195,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             cache_size=self.cache_size,
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
+            case_id_prefix="val",
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
