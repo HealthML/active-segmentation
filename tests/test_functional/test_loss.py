@@ -129,6 +129,9 @@ class LossTestCase(abc.ABC):
                     [expected_loss_first_slice, expected_loss_second_slice]
                 )
 
+        prediction = prediction.float()
+        target = target.float()
+
         prediction.requires_grad = True
         target.requires_grad = True
 

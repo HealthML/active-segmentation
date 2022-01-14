@@ -155,6 +155,9 @@ class TestCrossEntropyLoss(unittest.TestCase):
             else:
                 expected_loss = torch.Tensor(expected_cross_entropy_loss)
 
+        prediction = prediction.float()
+        target = target.float()
+
         prediction.requires_grad = True
         target.requires_grad = True
 
@@ -165,9 +168,6 @@ class TestCrossEntropyLoss(unittest.TestCase):
         )
 
         cross_entropy_loss = loss_module(prediction, target)
-
-        print("cross_entropy_loss", cross_entropy_loss)
-        print("expected_loss", expected_loss)
 
         self.assertTrue(
             cross_entropy_loss.shape == expected_loss.shape,
@@ -306,7 +306,6 @@ class TestCrossEntropyLoss(unittest.TestCase):
             ),
         ]:
             for reduction in ["none", "mean", "sum"]:
-                print("test_slice_2", test_slice_2(True))
                 self._test_loss(
                     test_slice_1,
                     test_slice_2,
