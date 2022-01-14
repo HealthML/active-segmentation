@@ -486,7 +486,9 @@ class CrossEntropyLoss(SegmentationLoss):
         ignore_index: Optional[int] = None,
         reduction: Literal["mean", "sum", "none"] = "mean",
     ):
-        super().__init__(include_background=True, reduction=reduction)
+        super().__init__(
+            ignore_index=ignore_index, include_background=True, reduction=reduction
+        )
         self.multi_label = multi_label
         if self.multi_label:
             self.cross_entropy_loss = torch.nn.BCELoss(reduction="none")
@@ -528,7 +530,7 @@ class CrossEntropyLoss(SegmentationLoss):
         loss = self.cross_entropy_loss(prediction, target)
 
         if self.multi_label and self.ignore_index is not None:
-            # the BCELoss from Pytorch xdoes not provide an `ignore_index` argument
+            # the BCELoss from Pytorch does not provide an `ignore_index` argument
             # therefore the loss values for the voxels to be ignored have to be set to zero here
             loss = mask_tensor(loss, target, self.ignore_index)
 
@@ -575,7 +577,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
         super().__init__(
             include_background=include_background, reduction=reduction, epsilon=epsilon
         )
-        self.bce_loss = CrossEntropyLoss(
+        self.cross_entropy_loss = CrossEntropyLoss(
             multi_label=multi_label,
             ignore_index=ignore_index,
             reduction=reduction,
@@ -606,4 +608,6 @@ class CrossEntropyDiceLoss(SegmentationLoss):
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
-        return self.bce_loss(prediction, target) + self.dice_loss(prediction, target)
+        return self.cross_entropy_loss(prediction, target) + self.dice_loss(
+            prediction, target
+        )

@@ -12,8 +12,7 @@ import tests.utils
 
 class TestCrossEntropyLoss(unittest.TestCase):
     """
-    Returns:
-        String: The name of the loss or metric to be tested.
+    Test cases for cross-entropy loss.
     """
 
     @staticmethod
@@ -139,21 +138,20 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         if expected_loss is None:
             if multi_label:
-                expected_cross_entropy_loss = self._expected_binary_cross_entropy_loss(
+                expected_loss = self._expected_binary_cross_entropy_loss(
                     prediction, target
                 )
-
             else:
-                expected_cross_entropy_loss = self._expected_cross_entropy_loss(
-                    prediction, target
-                )
+                expected_loss = self._expected_cross_entropy_loss(prediction, target)
 
+            expected_loss = torch.from_numpy(expected_loss)
+
+            if ignore_index is not None:
+                expected_loss = expected_loss * (target != ignore_index)
             if reduction == "mean":
-                expected_loss = torch.as_tensor(expected_cross_entropy_loss.mean())
+                expected_loss = expected_loss.mean()
             elif reduction == "sum":
-                expected_loss = torch.as_tensor(expected_cross_entropy_loss.sum())
-            else:
-                expected_loss = torch.Tensor(expected_cross_entropy_loss)
+                expected_loss = expected_loss.sum()
 
         prediction = prediction.float()
         target = target.float()
