@@ -556,9 +556,7 @@ class TestSensitivity(unittest.TestCase):
                                 )
                             else:
                                 self.assertTrue(
-                                    torch.all(
-                                        torch.isnan(sensitivity_from_function)[1:]
-                                    ),
+                                    torch.isnan(sensitivity_from_function)[-1],
                                     f"Functional implementation correctly computes sensitivity for {task_type} tasks "
                                     f"when there are only TN and {test_case_description}.",
                                 )
@@ -587,7 +585,7 @@ class TestSensitivity(unittest.TestCase):
                                 )
                             else:
                                 self.assertTrue(
-                                    torch.all(torch.isnan(sensitivity_from_module)[1:]),
+                                    torch.isnan(sensitivity_from_function)[-1],
                                     f"Module-based implementation correctly computes sensitivity when there are only TN"
                                     f" and {test_case_description}.",
                                 )

@@ -213,6 +213,7 @@ def specificity(
         num_classes,
         convert_to_one_hot=convert_to_one_hot,
         ignore_index=ignore_index,
+        ignore_value=1,
     )
 
     flattened_prediction, flattened_target = flatten_tensors(
@@ -511,6 +512,8 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
         Defaults to `None`.
     include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
         calculation (default = `True`).
+    ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to
+        `ignore_index`. Defaults to 0.
     reduction (string, optional): A method to reduce metric scores of multiple classes.
 
         - ``"none"``: no reduction will be applied (default)
@@ -524,6 +527,7 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
         num_classes: int,
         convert_to_one_hot: bool = True,
         ignore_index: Optional[bool] = None,
+        ignore_value: float = 0,
         include_background: bool = True,
         reduction: Literal["mean", "min", "max", "none"] = "none",
     ):
@@ -532,6 +536,7 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
         self.num_classes = num_classes
         self.convert_to_one_hot = convert_to_one_hot
         self.ignore_index = ignore_index
+        self.ignore_value = ignore_value
         self.include_background = include_background
         if reduction not in ["mean", "min", "max", "none"]:
             raise ValueError("Invalid reduction method.")
@@ -573,7 +578,7 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
 
         1. Validation of input shape and type
         2. Conversion from label encoding to one-hot encoding if necessary
-        3. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives
+        3. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives or true positives
 
         Args:
             prediction (Tensor): The prediction tensor.
@@ -589,6 +594,7 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
             self.num_classes,
             convert_to_one_hot=self.convert_to_one_hot,
             ignore_index=self.ignore_index,
+            ignore_value=self.ignore_value,
         )
 
 
@@ -803,6 +809,7 @@ class Specificity(SegmentationMetric):
             num_classes,
             convert_to_one_hot=convert_to_one_hot,
             ignore_index=ignore_index,
+            ignore_value=1,
             include_background=include_background,
             reduction=reduction,
         )

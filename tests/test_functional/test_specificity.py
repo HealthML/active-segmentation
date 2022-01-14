@@ -1,4 +1,4 @@
-"""Tests for the Dice score metric"""
+"""Tests for the specificity metric"""
 
 from typing import Dict, Literal
 
@@ -7,21 +7,21 @@ import unittest
 import torch
 
 from functional import (
-    DiceScore,
-    dice_score,
+    Specificity,
+    specificity,
 )
 import tests.utils
 
 
-class TestDiceScore(unittest.TestCase):
+class TestSpecificity(unittest.TestCase):
     """
-    Test cases for Dice score.
+    Test cases for specificity.
     """
 
     # pylint: disable = too-many-locals, too-many-nested-blocks
 
     @staticmethod
-    def _expected_dice_score(
+    def _expected_specificity(
         cardinalities: Dict[int, Dict[str, int]],
         probability_positive: float,
         probability_negative: float,
@@ -30,7 +30,7 @@ class TestDiceScore(unittest.TestCase):
         reduction: Literal["none", "mean", "min", "max"],
     ) -> torch.Tensor:
         """
-        Computes expected Dice scores for a single slice.
+        Computes expected specificity for a single slice.
 
         Args:
             cardinalities (Dict[int, Dict[str, int]]): A two-level dictionary containing true positives, false
@@ -40,19 +40,19 @@ class TestDiceScore(unittest.TestCase):
             probability_negative (float): Probability used in the fake slices for negative predictions.
             epsilon (float): Smoothing term used to avoid divisions by zero.
             include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from
-                the calculation of the Dice score (default = `True`).
-            reduction (string): A method to reduce Dice scores of multiple classes.
+                the calculation of the specificity (default = `True`).
+            reduction (string): A method to reduce specificity values of multiple classes.
                 - ``"none"``: no reduction will be applied (default)
                 - ``"mean"``: takes the mean
                 - ``"min"``: takes the minimum
                 - ``"max"``: takes the maximum
 
         Returns:
-            torch.Tensor: Expected Dice scores.
+            torch.Tensor: Expected specificity values.
         """
 
-        expected_dice_score = tests.utils.expected_metrics(
-            "dice_score",
+        expected_specificity = tests.utils.expected_metrics(
+            "specificity",
             cardinalities,
             probability_positive,
             probability_negative,
@@ -60,20 +60,20 @@ class TestDiceScore(unittest.TestCase):
         )
 
         if not include_background:
-            expected_dice_score = expected_dice_score[1:]
+            expected_specificity = expected_specificity[1:]
 
         if reduction == "min":
-            expected_dice_score = expected_dice_score.min()
+            expected_specificity = expected_specificity.min()
         if reduction == "max":
-            expected_dice_score = expected_dice_score.max()
+            expected_specificity = expected_specificity.max()
         if reduction == "mean":
-            expected_dice_score = expected_dice_score.mean()
+            expected_specificity = expected_specificity.mean()
 
-        return torch.as_tensor(expected_dice_score).float()
+        return torch.as_tensor(expected_specificity).float()
 
     def test_standard_case(self):
         """
-        Tests that the Dice score is computed correctly when there are both true and false predictions.
+        Tests that the specificity is computed correctly when there are both true and false predictions.
         """
 
         for test_slice, convert_to_one_hot in [
@@ -98,7 +98,7 @@ class TestDiceScore(unittest.TestCase):
             for reduction in ["none", "mean", "min", "max"]:
                 for include_background in [True, False]:
                     for epsilon in [0, 1]:
-                        expected_dice_score = self._expected_dice_score(
+                        expected_specificity = self._expected_specificity(
                             cardinalities,
                             probability_positive,
                             probability_negative,
@@ -117,7 +117,7 @@ class TestDiceScore(unittest.TestCase):
                             f"{include_background} and epsilon is {epsilon}"
                         )
 
-                        score_from_function = dice_score(
+                        specificity_from_function = specificity(
                             prediction,
                             target,
                             len(cardinalities),
@@ -127,40 +127,43 @@ class TestDiceScore(unittest.TestCase):
                             reduction=reduction,
                         )
 
-                        self.assertTrue(
-                            torch.equal(score_from_function, expected_dice_score),
-                            f"Functional implementation correctly computes Dice score for {task_type} tasks when there "
-                            f"are TP, FP and FN and {test_case_description}.",
+                        torch.testing.assert_allclose(
+                            specificity_from_function,
+                            expected_specificity,
+                            msg=f"Functional implementation correctly computes specificity for {task_type} tasks when "
+                            f"there are TP, FP and FN and {test_case_description}.",
                         )
 
-                        dice_score_module = DiceScore(
+                        specificity_module = Specificity(
                             len(cardinalities),
                             convert_to_one_hot=convert_to_one_hot,
                             epsilon=epsilon,
                             include_background=include_background,
                             reduction=reduction,
                         )
-                        score_from_module = dice_score_module(prediction, target)
+                        specificity_from_module = specificity_module(prediction, target)
 
-                        self.assertTrue(
-                            torch.equal(score_from_module, expected_dice_score),
-                            f"Module-based implementation correctly computes Dice score for {task_type} tasks when "
-                            f"there are TP, FP and FN and {test_case_description}.",
+                        torch.testing.assert_allclose(
+                            specificity_from_module,
+                            expected_specificity,
+                            msg=f"Module-based implementation correctly computes specificity for {task_type} tasks when"
+                            f" there are TP, FP and FN and {test_case_description}.",
                         )
 
-                        dice_score_module.reset()
-                        dice_score_module.update(prediction, target)
-                        score_from_module_compute = dice_score_module.compute()
+                        specificity_module.reset()
+                        specificity_module.update(prediction, target)
+                        specificity_from_module_compute = specificity_module.compute()
 
-                        self.assertTrue(
-                            torch.equal(score_from_module_compute, expected_dice_score),
-                            "Compute method of module-based implementation returns correct Dice score for {task_type} "
-                            "tasks when there are TP, FP and FN and {test_case_description}.",
+                        torch.testing.assert_allclose(
+                            specificity_from_module_compute,
+                            expected_specificity,
+                            msg="Compute method of module-based implementation returns correct specificity for "
+                            "{task_type} tasks when there are TP, FP and FN and {test_case_description}.",
                         )
 
     def test_all_true(self):
         """
-        Tests that the Dice score is computed correctly when all predictions are correct.
+        Tests that the specificity is computed correctly when all predictions are correct.
         """
 
         for test_slice, convert_to_one_hot in [
@@ -196,7 +199,7 @@ class TestDiceScore(unittest.TestCase):
                             f"{include_background} and epsilon is {epsilon}"
                         )
 
-                        score_from_function = dice_score(
+                        specificity_from_function = specificity(
                             prediction,
                             target,
                             len(cardinalities),
@@ -207,37 +210,39 @@ class TestDiceScore(unittest.TestCase):
                         )
 
                         if reduction == "none":
-                            expected_dice_score = (
+                            expected_specificity = (
                                 torch.ones(3)
                                 if include_background is True
                                 else torch.ones(2)
                             )
                         else:
-                            expected_dice_score = torch.tensor(1.0)
+                            expected_specificity = torch.tensor(1.0)
 
                         self.assertTrue(
-                            torch.equal(score_from_function, expected_dice_score),
-                            f"Functional implementation correctly computes Dice score for {task_type} tasks when there"
+                            torch.equal(
+                                specificity_from_function, expected_specificity
+                            ),
+                            f"Functional implementation correctly computes specificity for {task_type} tasks when there"
                             f" are no prediction errors and {test_case_description}.",
                         )
 
-                        dice_score_module = DiceScore(
+                        specificity_module = Specificity(
                             len(cardinalities),
                             convert_to_one_hot=convert_to_one_hot,
                             epsilon=epsilon,
                             include_background=include_background,
                             reduction=reduction,
                         )
-                        score_from_module = dice_score_module(prediction, target)
+                        specificity_from_module = specificity_module(prediction, target)
                         self.assertTrue(
-                            torch.equal(score_from_module, expected_dice_score),
-                            f"Module-based implementation correctly computes Dice score for {task_type} when there are"
+                            torch.equal(specificity_from_module, expected_specificity),
+                            f"Module-based implementation correctly computes specificity for {task_type} when there are"
                             f" no prediction errors {test_case_description}.",
                         )
 
     def test_all_false(self):
         """
-        Tests that the Dice score is computed correctly when all predictions are wrong.
+        Tests that the specificity is computed correctly when all predictions are wrong.
         """
 
         for test_slice, convert_to_one_hot in [
@@ -273,7 +278,7 @@ class TestDiceScore(unittest.TestCase):
                             f"{include_background} and epsilon is {epsilon}"
                         )
 
-                        score_from_function = dice_score(
+                        specificity_from_function = specificity(
                             prediction,
                             target,
                             len(cardinalities),
@@ -283,17 +288,17 @@ class TestDiceScore(unittest.TestCase):
                             reduction=reduction,
                         )
 
-                        if epsilon == 0:
+                        if epsilon == 0 and convert_to_one_hot is False:
                             if reduction == "none":
-                                expected_dice_score = (
+                                expected_specificity = (
                                     torch.zeros(3)
                                     if include_background is True
                                     else torch.zeros(2)
                                 )
                             else:
-                                expected_dice_score = torch.tensor(0.0)
+                                expected_specificity = torch.tensor(0.0)
                         else:
-                            expected_dice_score = self._expected_dice_score(
+                            expected_specificity = self._expected_specificity(
                                 cardinalities,
                                 probability_positive,
                                 probability_negative,
@@ -303,28 +308,30 @@ class TestDiceScore(unittest.TestCase):
                             )
 
                         self.assertTrue(
-                            torch.equal(score_from_function, expected_dice_score),
-                            f"Functional implementation correctly computes Dice score for {task_type} tasks when all "
+                            torch.equal(
+                                specificity_from_function, expected_specificity
+                            ),
+                            f"Functional implementation correctly computes specificity for {task_type} tasks when all "
                             f"predictions are wrong and {test_case_description}.",
                         )
 
-                        dice_score_module = DiceScore(
+                        specificity_module = Specificity(
                             len(cardinalities),
                             convert_to_one_hot=convert_to_one_hot,
                             epsilon=epsilon,
                             include_background=include_background,
                             reduction=reduction,
                         )
-                        score_from_module = dice_score_module(prediction, target)
+                        specificity_from_module = specificity_module(prediction, target)
                         self.assertTrue(
-                            torch.equal(score_from_module, expected_dice_score),
-                            f"Module-based implementation correctly computes Dice score for {task_type} when all "
+                            torch.equal(specificity_from_module, expected_specificity),
+                            f"Module-based implementation correctly computes specificity for {task_type} when all "
                             f"predictions are wrong and {test_case_description}.",
                         )
 
     def test_no_true_positives(self):
         """
-        Tests that the Dice score is computed correctly when there are no true positives.
+        Tests that the specificity is computed correctly when there are no true positives.
         """
 
         for test_slice, convert_to_one_hot in [
@@ -349,97 +356,7 @@ class TestDiceScore(unittest.TestCase):
             for reduction in ["none", "mean", "min", "max"]:
                 for include_background in [True, False]:
                     for epsilon in [0, 1]:
-
-                        task_type = (
-                            "single-label"
-                            if convert_to_one_hot is True
-                            else "multi-label"
-                        )
-                        test_case_description = (
-                            f"reduction is '{reduction}', include_background is "
-                            f"{include_background} and epsilon is {epsilon}"
-                        )
-
-                        score_from_function = dice_score(
-                            prediction,
-                            target,
-                            len(cardinalities),
-                            convert_to_one_hot=convert_to_one_hot,
-                            epsilon=epsilon,
-                            include_background=include_background,
-                            reduction=reduction,
-                        )
-
-                        if epsilon == 0:
-                            if reduction == "none":
-                                expected_dice_score = (
-                                    torch.zeros(3)
-                                    if include_background is True
-                                    else torch.zeros(2)
-                                )
-                            else:
-                                expected_dice_score = torch.tensor(0.0)
-                        else:
-                            expected_dice_score = self._expected_dice_score(
-                                cardinalities,
-                                probability_positive,
-                                probability_negative,
-                                epsilon,
-                                include_background,
-                                reduction,
-                            )
-
-                        torch.testing.assert_allclose(
-                            score_from_function,
-                            expected_dice_score,
-                            msg=f"Functional implementation correctly computes Dice score for {task_type} tasks when "
-                            f"there are no TP and {test_case_description}.",
-                        )
-
-                        dice_score_module = DiceScore(
-                            len(cardinalities),
-                            convert_to_one_hot=convert_to_one_hot,
-                            epsilon=epsilon,
-                            include_background=include_background,
-                            reduction=reduction,
-                        )
-                        score_from_module = dice_score_module(prediction, target)
-
-                        torch.testing.assert_allclose(
-                            score_from_module,
-                            expected_dice_score,
-                            msg=f"Module-based implementation correctly computes Dice score for {task_type} tasks when "
-                            f"there are no TP and {test_case_description}.",
-                        )
-
-    def test_no_true_negatives(self):
-        """
-        Tests that the Dice score is computed correctly when there are no true negatives.
-        """
-
-        for test_slice, convert_to_one_hot in [
-            (
-                tests.utils.slice_no_true_negatives_single_label,
-                True,
-            ),
-            (
-                tests.utils.slice_no_true_negatives_multi_label,
-                False,
-            ),
-        ]:
-
-            (
-                prediction,
-                target,
-                cardinalities,
-                probability_positive,
-                probability_negative,
-            ) = test_slice(True)
-
-            for reduction in ["none", "mean", "min", "max"]:
-                for include_background in [True, False]:
-                    for epsilon in [0, 1]:
-                        expected_dice_score = self._expected_dice_score(
+                        expected_specificity = self._expected_specificity(
                             cardinalities,
                             probability_positive,
                             probability_negative,
@@ -458,7 +375,7 @@ class TestDiceScore(unittest.TestCase):
                             f"{include_background} and epsilon is {epsilon}"
                         )
 
-                        score_from_function = dice_score(
+                        specificity_from_function = specificity(
                             prediction,
                             target,
                             len(cardinalities),
@@ -469,40 +386,130 @@ class TestDiceScore(unittest.TestCase):
                         )
 
                         torch.testing.assert_allclose(
-                            score_from_function,
-                            expected_dice_score,
-                            msg=f"Functional implementation correctly computes Dice score for {task_type} tasks when "
-                            f"there are no TN and {test_case_description}.",
+                            specificity_from_function,
+                            expected_specificity,
+                            msg=f"Functional implementation correctly computes specificity for {task_type} tasks when "
+                            f"there are no TP and {test_case_description}.",
                         )
 
-                        dice_score_module = DiceScore(
+                        specificity_module = Specificity(
                             len(cardinalities),
                             convert_to_one_hot=convert_to_one_hot,
                             epsilon=epsilon,
                             include_background=include_background,
                             reduction=reduction,
                         )
-                        score_from_module = dice_score_module(prediction, target)
+                        specificity_from_module = specificity_module(prediction, target)
 
                         torch.testing.assert_allclose(
-                            score_from_module,
-                            expected_dice_score,
-                            msg=f"Module-based implementation correctly computes Dice score for {task_type} tasks when "
-                            f"there are no TN and {test_case_description}.",
+                            specificity_from_module,
+                            expected_specificity,
+                            msg=f"Module-based implementation correctly computes specificity for {task_type} tasks when"
+                            f" there are no TP and {test_case_description}.",
                         )
 
-    def test_all_true_negatives(self):
+    def test_no_true_negatives(self):
         """
-        Tests that the dice score is computed correctly when there are only true negatives.
+        Tests that the specificity is computed correctly when there are no true negatives.
         """
 
         for test_slice, convert_to_one_hot in [
             (
+                tests.utils.slice_no_true_negatives_single_label,
+                True,
+            ),
+            (
+                tests.utils.slice_no_true_negatives_multi_label,
+                False,
+            ),
+        ]:
+            (
+                prediction,
+                target,
+                cardinalities,
+                probability_positive,
+                probability_negative,
+            ) = test_slice(True)
+
+            for reduction in ["none", "mean", "min", "max"]:
+                for include_background in [True, False]:
+                    for epsilon in [0, 1]:
+
+                        task_type = (
+                            "single-label"
+                            if convert_to_one_hot is True
+                            else "multi-label"
+                        )
+                        test_case_description = (
+                            f"reduction is '{reduction}', include_background is "
+                            f"{include_background} and epsilon is {epsilon}"
+                        )
+
+                        specificity_from_function = specificity(
+                            prediction,
+                            target,
+                            len(cardinalities),
+                            convert_to_one_hot=convert_to_one_hot,
+                            epsilon=epsilon,
+                            include_background=include_background,
+                            reduction=reduction,
+                        )
+
+                        if epsilon == 0 and convert_to_one_hot is False:
+                            if reduction == "none":
+                                expected_specificity = (
+                                    torch.zeros(3)
+                                    if include_background is True
+                                    else torch.zeros(2)
+                                )
+                            else:
+                                expected_specificity = torch.tensor(0.0)
+                        else:
+                            expected_specificity = self._expected_specificity(
+                                cardinalities,
+                                probability_positive,
+                                probability_negative,
+                                epsilon,
+                                include_background,
+                                reduction,
+                            )
+
+                        torch.testing.assert_allclose(
+                            specificity_from_function,
+                            expected_specificity,
+                            msg=f"Functional implementation correctly computes specificity for {task_type} tasks when "
+                            f"there are no TN and {test_case_description}.",
+                        )
+
+                        specificity_module = Specificity(
+                            len(cardinalities),
+                            convert_to_one_hot=convert_to_one_hot,
+                            epsilon=epsilon,
+                            include_background=include_background,
+                            reduction=reduction,
+                        )
+                        specificity_from_module = specificity_module(prediction, target)
+
+                        torch.testing.assert_allclose(
+                            specificity_from_module,
+                            expected_specificity,
+                            msg=f"Module-based implementation correctly computes specificity for {task_type} tasks when"
+                            f" there are no TN and {test_case_description}.",
+                        )
+
+    def test_all_true_positives(self):
+        """
+        Tests that the specificity is computed correctly when there are only true positives.
+        """
+
+        for test_slice, convert_to_one_hot in [
+            (
+                # this slice contains only true positives for one class
                 tests.utils.slice_all_true_negatives_single_label,
                 True,
             ),
             (
-                tests.utils.slice_all_true_negatives_multi_label,
+                tests.utils.slice_all_true_positives_multi_label,
                 False,
             ),
         ]:
@@ -529,7 +536,7 @@ class TestDiceScore(unittest.TestCase):
                             f"{include_background} and epsilon is {epsilon}"
                         )
 
-                        score_from_function = dice_score(
+                        specificity_from_function = specificity(
                             prediction,
                             target,
                             len(cardinalities),
@@ -539,58 +546,64 @@ class TestDiceScore(unittest.TestCase):
                             reduction=reduction,
                         )
 
+                        print("specificity_from_function", specificity_from_function)
+
                         if epsilon == 0:
                             if convert_to_one_hot is False or reduction != "none":
                                 self.assertTrue(
-                                    torch.all(torch.isnan(score_from_function)),
-                                    f"Functional implementation correctly computes Dice score for {task_type} tasks "
-                                    f"when there are only TN and {test_case_description}.",
+                                    torch.all(torch.isnan(specificity_from_function)),
+                                    f"Functional implementation correctly computes specificity for {task_type} tasks "
+                                    f"when there are only TP and {test_case_description}.",
                                 )
                             else:
                                 self.assertTrue(
-                                    torch.isnan(score_from_function)[-1],
-                                    f"Functional implementation correctly computes Dice score for {task_type} tasks "
-                                    f"when there are only TN and {test_case_description}.",
+                                    torch.isnan(specificity_from_function)[
+                                        1 if include_background else 0
+                                    ],
+                                    f"Functional implementation correctly computes specificity for {task_type} tasks "
+                                    f"when there are only TP and {test_case_description}.",
                                 )
                         else:
                             self.assertTrue(
-                                torch.all(score_from_function == 1.0),
-                                f"Functional implementation correctly computes Dice score for {task_type} tasks when "
-                                f" there are only TN and {test_case_description}.",
+                                torch.all(specificity_from_function == 1.0),
+                                f"Functional implementation correctly computes specificity for {task_type} tasks when "
+                                f" there are only TP and {test_case_description}.",
                             )
 
-                        dice_score_module = DiceScore(
+                        specificity_module = Specificity(
                             len(cardinalities),
                             convert_to_one_hot=convert_to_one_hot,
                             epsilon=epsilon,
                             include_background=include_background,
                             reduction=reduction,
                         )
-                        score_from_module = dice_score_module(prediction, target)
+                        specificity_from_module = specificity_module(prediction, target)
 
                         if epsilon == 0:
                             if convert_to_one_hot is False or reduction != "none":
                                 self.assertTrue(
-                                    torch.all(torch.isnan(score_from_module)),
-                                    f"Module-based implementation correctly computes Dice score for {task_type} tasks "
-                                    f"when there are only TN and {test_case_description}.",
+                                    torch.all(torch.isnan(specificity_from_module)),
+                                    f"Module-based implementation correctly computes specificity for {task_type} tasks "
+                                    f"when there are only TP and {test_case_description}.",
                                 )
                             else:
                                 self.assertTrue(
-                                    torch.isnan(score_from_function)[-1],
-                                    f"Module-based implementation correctly computes dice score when there are only TN "
-                                    f"and {test_case_description}.",
+                                    torch.isnan(specificity_from_module)[
+                                        1 if include_background else 0
+                                    ],
+                                    f"Module-based implementation correctly computes specificity when there are only TP"
+                                    f" and {test_case_description}.",
                                 )
                         else:
                             self.assertTrue(
-                                torch.all(score_from_module == 1.0),
-                                f"Module-based implementation correctly computes smoothed dice score when there are "
-                                f"only TN and {test_case_description}.",
+                                torch.all(specificity_from_module == 1.0),
+                                f"Module-based implementation correctly computes smoothed specificity when there are "
+                                f"only TP and {test_case_description}.",
                             )
 
     def test_3d(self):
         """
-        Tests that the Dice score is computed correctly when the inputs are three-dimensional.
+        Tests that the specificity is computed correctly when the inputs are three-dimensional.
         """
 
         for test_slice_1, test_slice_2, convert_to_one_hot in [
@@ -644,7 +657,7 @@ class TestDiceScore(unittest.TestCase):
             for reduction in ["none", "mean", "min", "max"]:
                 for include_background in [True, False]:
                     for epsilon in [0, 1]:
-                        expected_dice_score = self._expected_dice_score(
+                        expected_specificity = self._expected_specificity(
                             cardinalities,
                             probability_positive_1,
                             probability_negative_1,
@@ -663,7 +676,7 @@ class TestDiceScore(unittest.TestCase):
                             f"{include_background} and epsilon is {epsilon}"
                         )
 
-                        score_from_function = dice_score(
+                        specificity_from_function = specificity(
                             prediction,
                             target,
                             len(cardinalities),
@@ -674,31 +687,31 @@ class TestDiceScore(unittest.TestCase):
                         )
 
                         torch.testing.assert_allclose(
-                            score_from_function,
-                            expected_dice_score,
-                            msg=f"Functional implementation correctly computes Dice score for {task_type} tasks when "
+                            specificity_from_function,
+                            expected_specificity,
+                            msg=f"Functional implementation correctly computes specificity for {task_type} tasks when "
                             f"the inputs are three-dimensional and {test_case_description}.",
                         )
 
-                        dice_score_module = DiceScore(
+                        specificity_module = Specificity(
                             len(cardinalities),
                             convert_to_one_hot=convert_to_one_hot,
                             epsilon=epsilon,
                             include_background=include_background,
                             reduction=reduction,
                         )
-                        score_from_module = dice_score_module(prediction, target)
+                        specificity_from_module = specificity_module(prediction, target)
 
                         torch.testing.assert_allclose(
-                            score_from_module,
-                            expected_dice_score,
-                            msg=f"Module-based implementation correctly computes Dice score for {task_type} tasks when "
-                            f"the inputs are three-dimensional and {test_case_description}.",
+                            specificity_from_module,
+                            expected_specificity,
+                            msg=f"Module-based implementation correctly computes specificity for {task_type} tasks when"
+                            f" the inputs are three-dimensional and {test_case_description}.",
                         )
 
     def test_ignore_index(self):
         """
-        Tests that the Dice score is computed correctly when there are pixels / voxels to be ignored.
+        Tests that the specificity is computed correctly when there are pixels / voxels to be ignored.
         """
 
         for test_slice, convert_to_one_hot in [
@@ -723,7 +736,7 @@ class TestDiceScore(unittest.TestCase):
             for reduction in ["none", "mean", "min", "max"]:
                 for include_background in [True, False]:
                     for epsilon in [0, 1]:
-                        expected_dice_score = self._expected_dice_score(
+                        expected_specificity = self._expected_specificity(
                             cardinalities,
                             probability_positive,
                             probability_negative,
@@ -742,7 +755,7 @@ class TestDiceScore(unittest.TestCase):
                             f"{include_background} and epsilon is {epsilon}"
                         )
 
-                        score_from_function = dice_score(
+                        specificity_from_function = specificity(
                             prediction,
                             target,
                             len(cardinalities),
@@ -753,13 +766,14 @@ class TestDiceScore(unittest.TestCase):
                             reduction=reduction,
                         )
 
-                        self.assertTrue(
-                            torch.equal(score_from_function, expected_dice_score),
-                            f"Functional implementation correctly computes Dice score for {task_type} tasks when there "
-                            f"are pixels / voxels to be ignored and {test_case_description}.",
+                        torch.testing.assert_allclose(
+                            specificity_from_function,
+                            expected_specificity,
+                            msg=f"Functional implementation correctly computes specificity for {task_type} tasks when "
+                            f"there are pixels / voxels to be ignored and {test_case_description}.",
                         )
 
-                        dice_score_module = DiceScore(
+                        specificity_module = Specificity(
                             len(cardinalities),
                             convert_to_one_hot=convert_to_one_hot,
                             ignore_index=-1,
@@ -767,10 +781,11 @@ class TestDiceScore(unittest.TestCase):
                             epsilon=epsilon,
                             reduction=reduction,
                         )
-                        score_from_module = dice_score_module(prediction, target)
+                        specificity_from_module = specificity_module(prediction, target)
 
-                        self.assertTrue(
-                            torch.equal(score_from_module, expected_dice_score),
-                            f"Module-based implementation correctly computes Dice score for {task_type} tasks when "
-                            f"there are pixels / voxels to be ignored and {test_case_description}.",
+                        torch.testing.assert_allclose(
+                            specificity_from_module,
+                            expected_specificity,
+                            msg=f"Module-based implementation correctly computes specificity for {task_type} tasks when"
+                            f" there are pixels / voxels to be ignored and {test_case_description}.",
                         )

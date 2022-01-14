@@ -69,6 +69,34 @@ def expected_sensitivity(
     return (tp + epsilon) / (tp + fn + epsilon)
 
 
+def expected_specificity(
+    tp: int,
+    fp: int,
+    tn: int,
+    fn: int,
+    probability_positive: float,
+    probability_negative: float,
+    epsilon: float,
+) -> float:
+    """
+    Computes the expected specificity for a single slice and a single class.
+
+    Args:
+        tp (int): Number of true positives.
+        fp (int): Number of false positives.
+        tn (int): Number of true negatives.
+        fn (int): Number of false negatives.
+        probability_positive (float): Probability used in the fake slices for positive predictions.
+        probability_negative (float): Probability used in the fake slices for negative predictions.
+        epsilon (float): Smoothing term used to avoid divisions by zero.
+
+    Returns:
+        float: Expected specificity.
+    """
+
+    return (tn + epsilon) / (tn + fp + epsilon)
+
+
 def expected_dice_loss(
     tp: int,
     fp: int,
@@ -264,6 +292,8 @@ def expected_metrics(
         metric_function = expected_cross_entropy_loss
     elif metric == "sensitivity":
         metric_function = expected_sensitivity
+    elif metric == "specificity":
+        metric_function = expected_specificity
     else:
         raise ValueError(f"Invalid metric name: {metric}")
 
@@ -1335,7 +1365,7 @@ def slice_no_true_negatives_multi_label(
     *args,
 ) -> Tuple[torch.Tensor, torch.Tensor, Dict[int, Dict[str, int]], float, float]:
     """
-    Creates a faked multi-label segmentation slice that contains no true positives.
+    Creates a faked multi-label segmentation slice that contains no true negatives.
 
     Returns:
         Tuple[Tensor, Tensor, Dict[int, Dict[str, int]], float, float]:
@@ -1351,34 +1381,14 @@ def slice_no_true_negatives_multi_label(
     # fmt: off
     prediction_slice = torch.IntTensor([
         [
-            [0, 0, 0],
-            [0, 0, 1],
-            [0, 1, 0]
-        ],
-        [
-            [1, 0, 0],
-            [0, 0, 0],
-            [0, 0, 1]
-        ],
-        [
-            [1, 0, 0],
-            [1, 1, 0],
-            [0, 0, 1]
-        ]
-    ])
-    # fmt: on
-
-    # fmt: off
-    target_slice = torch.IntTensor([
-        [
-            [1, 1, 0],
-            [1, 1, 0],
-            [0, 0, 0]
-        ],
-        [
-            [0, 0, 1],
             [1, 1, 1],
-            [1, 0, 0]
+            [1, 1, 0],
+            [1, 0, 1]
+        ],
+        [
+            [0, 1, 1],
+            [1, 1, 1],
+            [1, 1, 0]
         ],
         [
             [0, 1, 1],
@@ -1388,10 +1398,30 @@ def slice_no_true_negatives_multi_label(
     ])
     # fmt: on
 
+    # fmt: off
+    target_slice = torch.IntTensor([
+        [
+            [0, 0, 1],
+            [0, 0, 1],
+            [1, 1, 1]
+        ],
+        [
+            [1, 1, 0],
+            [0, 0, 0],
+            [0, 1, 1]
+        ],
+        [
+            [1, 0, 0],
+            [1, 1, 0],
+            [0, 0, 1]
+        ]
+    ])
+    # fmt: on
+
     cardinalities = {
-        0: {"tp": 0, "fp": 2, "tn": 3, "fn": 4},
-        1: {"tp": 0, "fp": 2, "tn": 2, "fn": 5},
-        2: {"tp": 0, "fp": 4, "tn": 0, "fn": 5},
+        0: {"tp": 3, "fp": 4, "tn": 0, "fn": 2},
+        1: {"tp": 2, "fp": 5, "tn": 0, "fn": 2},
+        2: {"tp": 0, "fp": 5, "tn": 0, "fn": 4},
     }
 
     return (
@@ -1428,23 +1458,23 @@ def slice_all_true_negatives_single_label(
     if sharp_predictions:
         # fmt: off
         prediction_slice = torch.IntTensor([
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
         ])
         # fmt: on
     else:
         # fmt: off
         prediction_slice = torch.Tensor([
             [
-                [1.0, 1.0, 1.0],
-                [1.0, 1.0, 1.0],
-                [1.0, 1.0, 1.0]
-            ],
-            [
                 [0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0],
                 [0.0, 0.0, 0.0]
+            ],
+            [
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0]
             ],
             [
                 [0.0, 0.0, 0.0],
@@ -1457,16 +1487,16 @@ def slice_all_true_negatives_single_label(
     # fmt: off
     target_slice = torch.IntTensor(
         [
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
         ]
     )
     # fmt: on
 
     cardinalities = {
-        0: {"tp": 9, "fp": 0, "tn": 0, "fn": 0},
-        1: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+        0: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+        1: {"tp": 9, "fp": 0, "tn": 0, "fn": 0},
         2: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
     }
 
@@ -1540,6 +1570,78 @@ def slice_all_true_negatives_multi_label(
         0: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
         1: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
         2: {"tp": 0, "fp": 0, "tn": 9, "fn": 0},
+    }
+
+    return (
+        prediction_slice,
+        target_slice,
+        cardinalities,
+        1.0,
+        0.0,
+    )
+
+
+def slice_all_true_positives_multi_label(
+    *args,
+) -> Tuple[torch.Tensor, torch.Tensor, Dict[int, Dict[str, int]], float, float]:
+    """
+    Creates a faked multi-label segmentation slice that contains only true positives.
+
+    Returns:
+        Tuple[Tensor, Tensor, Dict[int, Dict[str, int]], float, float]:
+            - Predicted slice
+            - Target slice
+            - A two-level dictionary containing true positives, false positives, true negatives, false negatives for all
+             classes (on the first level, the class indices are used as dictionary keys, on the second level the keys
+             are `"tp"`, `"fp"`, `"tn"`, and `"fn"`).
+            - Probability used in the fake slices for positive predictions.
+            - Probability used in the fake slices for negative predictions.
+    """
+
+    # fmt: off
+    prediction_slice = torch.IntTensor([
+        [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ],
+        [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ],
+        [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ]
+    ])
+    # fmt: on
+
+    # fmt: off
+    target_slice = torch.IntTensor([
+        [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ],
+        [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ],
+        [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ]
+    ])
+    # fmt: on
+
+    cardinalities = {
+        0: {"tp": 9, "fp": 0, "tn": 0, "fn": 0},
+        1: {"tp": 9, "fp": 0, "tn": 0, "fn": 0},
+        2: {"tp": 9, "fp": 0, "tn": 0, "fn": 0},
     }
 
     return (
