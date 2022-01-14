@@ -67,7 +67,7 @@ def dice_score(
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
-    preprocess_metric_inputs(
+    prediction, target = preprocess_metric_inputs(
         prediction,
         target,
         num_classes,
@@ -136,7 +136,7 @@ def sensitivity(
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
-    preprocess_metric_inputs(
+    prediction, target = preprocess_metric_inputs(
         prediction,
         target,
         num_classes,
@@ -207,7 +207,7 @@ def specificity(
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
 
-    preprocess_metric_inputs(
+    prediction, target = preprocess_metric_inputs(
         prediction,
         target,
         num_classes,
@@ -631,6 +631,7 @@ class DiceScore(SegmentationMetric):
             reduction=reduction,
         )
         self.epsilon = epsilon
+        num_classes = num_classes if self.include_background else num_classes - 1
         self.numerator = torch.zeros(num_classes)
         self.denominator = torch.zeros(num_classes)
         self.add_state("numerator", torch.zeros(num_classes))
@@ -719,6 +720,7 @@ class Sensitivity(SegmentationMetric):
             reduction=reduction,
         )
         self.epsilon = epsilon
+        num_classes = num_classes if self.include_background else num_classes - 1
         self.true_positives = torch.zeros(num_classes)
         self.true_positives_false_negatives = torch.zeros(num_classes)
         self.add_state("true_positives", torch.zeros(num_classes))
@@ -805,6 +807,7 @@ class Specificity(SegmentationMetric):
             reduction=reduction,
         )
         self.epsilon = epsilon
+        num_classes = num_classes if self.include_background else num_classes - 1
         self.true_negatives = torch.zeros(num_classes)
         self.true_negatives_false_positives = torch.zeros(num_classes)
         self.add_state("true_negatives", torch.zeros(num_classes))

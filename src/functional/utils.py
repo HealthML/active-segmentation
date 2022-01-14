@@ -35,8 +35,8 @@ def flatten_tensors(
         target = target[1:]
 
     # flatten tensors except for the first channel (class dimension)
-    flattened_prediction = prediction.view(prediction.shape[0], -1)
-    flattened_target = target.view(target.shape[0], -1)
+    flattened_prediction = prediction.contiguous().view(prediction.shape[0], -1)
+    flattened_target = target.contiguous().view(target.shape[0], -1)
 
     return flattened_prediction.float(), flattened_target.float()
 
@@ -172,7 +172,7 @@ def validate_metric_inputs(
             prediction
         ), "Prediction needs to be binary if `convert_to_one_hot` is False."
         assert is_binary(
-            target
+            target * (target >= 0)  # target excluding ignore index
         ), "Target needs to be binary if `convert_to_one_hot` is False."
 
         assert prediction.dim() in [
@@ -210,6 +210,11 @@ def preprocess_metric_inputs(
 
     validate_metric_inputs(prediction, target, convert_to_one_hot)
 
+    # during one-hot encoding the ignore index is removed, therefore the original target including the ignore index
+    # is copied
+    target_including_ignore_index = target
+    target = target.clone()
+
     if convert_to_one_hot:
         prediction = one_hot_encode(
             prediction, prediction.dim(), num_classes, ignore_index=ignore_index
@@ -219,8 +224,14 @@ def preprocess_metric_inputs(
         )
 
     # map values where the target is set to `ignore_index` to zero
-    prediction = mask_tensor(prediction, target, ignore_index=ignore_index)
-    target = mask_tensor(target, target, ignore_index=ignore_index)
+
+    prediction = mask_tensor(
+        prediction, target_including_ignore_index, ignore_index=ignore_index
+    )
+
+    target = mask_tensor(
+        target, target_including_ignore_index, ignore_index=ignore_index
+    )
 
     return prediction, target
 

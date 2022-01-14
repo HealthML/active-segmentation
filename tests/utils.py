@@ -276,7 +276,7 @@ def standard_slice_single_label_1(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [0, 0, 0],
             [1, 2, 0],
             [1, 2, 2]
@@ -304,13 +304,12 @@ def standard_slice_single_label_1(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [0, 0, 0],
             [1, 1, 1],
             [2, 2, 0]
-        ]
-    )
+        ])
     # fmt: on
 
     cardinalities = {
@@ -355,7 +354,7 @@ def standard_slice_single_label_2(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [0, 0, 0],
             [2, 2, 1],
             [1, 2, 2]
@@ -383,7 +382,7 @@ def standard_slice_single_label_2(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [2, 0, 1],
             [2, 1, 1],
@@ -434,7 +433,7 @@ def slice_ignore_index_single_label(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [0, 0, 0],
             [1, 2, 0],
             [1, 2, 2]
@@ -462,7 +461,7 @@ def slice_ignore_index_single_label(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [-1, 0, 1],
             [2, 1, -1],
@@ -511,7 +510,7 @@ def standard_slice_multi_label_1(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [
                 [1, 1, 1],
                 [1, 1, 0],
@@ -551,7 +550,7 @@ def standard_slice_multi_label_1(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [1, 1, 1],
             [0, 0, 1],
@@ -610,7 +609,7 @@ def standard_slice_multi_label_2(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [
                 [1, 1, 0],
                 [0, 0, 0],
@@ -650,7 +649,7 @@ def standard_slice_multi_label_2(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [1, 1, 0],
             [1, 1, 0],
@@ -711,7 +710,7 @@ def slice_ignore_index_multi_label(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [
                 [1, 1, 1],
                 [1, 1, 0],
@@ -751,7 +750,7 @@ def slice_ignore_index_multi_label(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [-1, 1, 1],
             [-1, 0, 1],
@@ -812,7 +811,7 @@ def slice_all_true_single_label(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [0, 0, 1],
             [2, 1, 0],
             [2, 2, 1]
@@ -840,7 +839,7 @@ def slice_all_true_single_label(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [0, 0, 1],
             [2, 1, 0],
@@ -882,7 +881,7 @@ def slice_all_true_multi_label(
     """
 
     # fmt: off
-    prediction_slice = torch.Tensor([
+    prediction_slice = torch.IntTensor([
         [
             [1, 1, 0],
             [1, 1, 0],
@@ -902,7 +901,7 @@ def slice_all_true_multi_label(
     # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [1, 1, 0],
             [1, 1, 0],
@@ -960,7 +959,7 @@ def slice_all_false_single_label(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [0, 1, 1],
             [2, 0, 1],
             [2, 2, 0]
@@ -988,7 +987,7 @@ def slice_all_false_single_label(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [1, 2, 2],
             [0, 1, 2],
@@ -1030,7 +1029,7 @@ def slice_all_false_multi_label(
     """
 
     # fmt: off
-    prediction_slice = torch.Tensor([
+    prediction_slice = torch.IntTensor([
         [
             [0, 0, 1],
             [0, 0, 1],
@@ -1050,7 +1049,7 @@ def slice_all_false_multi_label(
     # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [1, 1, 0],
             [1, 1, 0],
@@ -1108,7 +1107,7 @@ def slice_no_true_positives_single_label(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [1, 1, 0],
             [0, 0, 0],
             [1, 2, 2]
@@ -1136,7 +1135,7 @@ def slice_no_true_positives_single_label(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [2, 0, 1],
             [2, 1, 1],
@@ -1178,7 +1177,7 @@ def slice_no_true_positives_multi_label(
     """
 
     # fmt: off
-    prediction_slice = torch.Tensor([
+    prediction_slice = torch.IntTensor([
         [
             [0, 0, 1],
             [0, 0, 0],
@@ -1198,7 +1197,7 @@ def slice_no_true_positives_multi_label(
     # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [1, 1, 0],
             [1, 1, 0],
@@ -1256,7 +1255,7 @@ def slice_no_true_negatives_single_label(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [1, 1, 1],
             [1, 1, 1],
             [1, 1, 0]
@@ -1279,7 +1278,7 @@ def slice_no_true_negatives_single_label(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [1, 0, 0],
             [0, 1, 0],
@@ -1320,7 +1319,7 @@ def slice_no_true_negatives_multi_label(
     """
 
     # fmt: off
-    prediction_slice = torch.Tensor([
+    prediction_slice = torch.IntTensor([
         [
             [0, 0, 0],
             [0, 0, 1],
@@ -1340,7 +1339,7 @@ def slice_no_true_negatives_multi_label(
     # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [1, 1, 0],
             [1, 1, 0],
@@ -1398,7 +1397,7 @@ def slice_all_true_negatives_single_label(
 
     if sharp_predictions:
         # fmt: off
-        prediction_slice = torch.Tensor([
+        prediction_slice = torch.IntTensor([
             [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0]
@@ -1426,7 +1425,7 @@ def slice_all_true_negatives_single_label(
         # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor(
+    target_slice = torch.IntTensor(
         [
             [0, 0, 0],
             [0, 0, 0],
@@ -1468,7 +1467,7 @@ def slice_all_true_negatives_multi_label(
     """
 
     # fmt: off
-    prediction_slice = torch.Tensor([
+    prediction_slice = torch.IntTensor([
         [
             [0, 0, 0],
             [0, 0, 0],
@@ -1488,7 +1487,7 @@ def slice_all_true_negatives_multi_label(
     # fmt: on
 
     # fmt: off
-    target_slice = torch.Tensor([
+    target_slice = torch.IntTensor([
         [
             [0, 0, 0],
             [0, 0, 0],
