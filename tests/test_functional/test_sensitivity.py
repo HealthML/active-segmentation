@@ -417,7 +417,7 @@ class TestSensitivity(unittest.TestCase):
                             sensitivity_from_module,
                             expected_sensitivity,
                             msg=f"Module-based implementation correctly computes sensitivity for {task_type} tasks when"
-                                f" there are no TP and {test_case_description}.",
+                            f" there are no TP and {test_case_description}.",
                         )
 
     def test_no_true_negatives(self):
@@ -767,7 +767,7 @@ class TestSensitivity(unittest.TestCase):
                             sensitivity_from_function,
                             expected_sensitivity,
                             msg=f"Functional implementation correctly computes sensitivity for {task_type} tasks when "
-                                f"there are pixels / voxels to be ignored and {test_case_description}.",
+                            f"there are pixels / voxels to be ignored and {test_case_description}.",
                         )
 
                         sensitivity_module = Sensitivity(
@@ -784,5 +784,5 @@ class TestSensitivity(unittest.TestCase):
                             sensitivity_from_module,
                             expected_sensitivity,
                             msg=f"Module-based implementation correctly computes sensitivity for {task_type} tasks when"
-                                f" there are pixels / voxels to be ignored and {test_case_description}.",
+                            f" there are pixels / voxels to be ignored and {test_case_description}.",
                         )
