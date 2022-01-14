@@ -41,6 +41,34 @@ def expected_dice_score(
     return (2.0 * intersection + epsilon) / (denominator + epsilon)
 
 
+def expected_sensitivity(
+    tp: int,
+    fp: int,
+    tn: int,
+    fn: int,
+    probability_positive: float,
+    probability_negative: float,
+    epsilon: float,
+) -> float:
+    """
+    Computes the expected sensitivity for a single slice and a single class.
+
+    Args:
+        tp (int): Number of true positives.
+        fp (int): Number of false positives.
+        tn (int): Number of true negatives.
+        fn (int): Number of false negatives.
+        probability_positive (float): Probability used in the fake slices for positive predictions.
+        probability_negative (float): Probability used in the fake slices for negative predictions.
+        epsilon (float): Smoothing term used to avoid divisions by zero.
+
+    Returns:
+        float: Expected sensitivity.
+    """
+
+    return (tp + epsilon) / (tp + fn + epsilon)
+
+
 def expected_dice_loss(
     tp: int,
     fp: int,
@@ -234,6 +262,8 @@ def expected_metrics(
         metric_function = expected_false_positive_loss
     elif metric == "cross_entropy_loss":
         metric_function = expected_cross_entropy_loss
+    elif metric == "sensitivity":
+        metric_function = expected_sensitivity
     else:
         raise ValueError(f"Invalid metric name: {metric}")
 
