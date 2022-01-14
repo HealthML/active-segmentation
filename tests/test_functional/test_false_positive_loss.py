@@ -12,11 +12,14 @@ from .test_loss import LossTestCase
 
 class TestFalsePositiveLoss(unittest.TestCase, LossTestCase):
     """
-    Returns:
-        String: The name of the loss or metric to be tested.
+    Test cases for false positive loss.
     """
 
     def loss_name(self) -> str:
+        """
+        Returns:
+            String: The name of the loss or metric to be tested.
+        """
         return "fp_loss"
 
     def loss_module(

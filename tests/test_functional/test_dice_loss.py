@@ -12,11 +12,15 @@ from .test_loss import LossTestCase
 
 class TestDiceLoss(unittest.TestCase, LossTestCase):
     """
-    Returns:
-        String: The name of the loss or metric to be tested.
+    Test cases for Dice loss.
     """
 
     def loss_name(self) -> str:
+        """
+        Returns:
+            String: The name of the loss or metric to be tested.
+        """
+
         return "dice_loss"
 
     def loss_module(

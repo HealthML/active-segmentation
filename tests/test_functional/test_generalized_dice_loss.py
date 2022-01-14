@@ -12,8 +12,7 @@ import tests.utils
 
 class TestGeneralizedDiceLoss(unittest.TestCase):
     """
-    Returns:
-        String: The name of the loss or metric to be tested.
+    Test cases for generalized dice loss.
     """
 
     @staticmethod
