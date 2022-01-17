@@ -7,7 +7,8 @@ import unittest
 import torch
 
 from functional import HausdorffDistance, hausdorff_distance
-import tests.utils
+import tests.utils.test_data_cardinality_metrics as standard_test_data
+import tests.utils.test_data_distance_metrics as test_data
 
 
 class TestHausdorffDistance(unittest.TestCase):
@@ -123,8 +124,8 @@ class TestHausdorffDistance(unittest.TestCase):
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (tests.utils.standard_distance_slice_single_label, True),
-                (tests.utils.standard_distance_slice_multi_label, False),
+                (test_data.standard_distance_slice_single_label, True),
+                (test_data.standard_distance_slice_multi_label, False),
             ]:
 
                 (
@@ -154,8 +155,8 @@ class TestHausdorffDistance(unittest.TestCase):
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (tests.utils.slice_all_true_single_label, True),
-                (tests.utils.slice_all_true_multi_label, False),
+                (standard_test_data.slice_all_true_single_label, True),
+                (standard_test_data.slice_all_true_multi_label, False),
             ]:
 
                 (
@@ -184,8 +185,8 @@ class TestHausdorffDistance(unittest.TestCase):
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (tests.utils.distance_slice_all_false_single_label, True),
-                (tests.utils.distance_slice_all_false_multi_label, False),
+                (test_data.distance_slice_all_false_single_label, True),
+                (test_data.distance_slice_all_false_multi_label, False),
             ]:
 
                 (
@@ -216,8 +217,8 @@ class TestHausdorffDistance(unittest.TestCase):
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (tests.utils.distance_slice_subset_single_label, True),
-                (tests.utils.distance_slice_subset_multi_label, False),
+                (test_data.distance_slice_subset_single_label, True),
+                (test_data.distance_slice_subset_multi_label, False),
             ]:
 
                 (
@@ -247,8 +248,8 @@ class TestHausdorffDistance(unittest.TestCase):
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (tests.utils.slice_all_true_negatives_single_label, True),
-                (tests.utils.slice_all_true_negatives_multi_label, False),
+                (standard_test_data.slice_all_true_negatives_single_label, True),
+                (standard_test_data.slice_all_true_negatives_multi_label, False),
             ]:
 
                 (
@@ -328,8 +329,8 @@ class TestHausdorffDistance(unittest.TestCase):
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (tests.utils.distance_slice_3d_single_label, True),
-                (tests.utils.distance_slice_3d_multi_label, False),
+                (test_data.distance_slice_3d_single_label, True),
+                (test_data.distance_slice_3d_multi_label, False),
             ]:
                 (
                     prediction,
@@ -360,8 +361,8 @@ class TestHausdorffDistance(unittest.TestCase):
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (tests.utils.distance_slice_3d_single_label, True),
-                (tests.utils.distance_slice_3d_multi_label, False),
+                (test_data.distance_slice_3d_single_label, True),
+                (test_data.distance_slice_3d_multi_label, False),
             ]:
                 (
                     prediction,

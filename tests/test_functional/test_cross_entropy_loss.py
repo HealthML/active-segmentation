@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from functional import CrossEntropyLoss
-import tests.utils
+import tests.utils.test_data_cardinality_metrics as test_data
 
 
 class TestCrossEntropyLoss(unittest.TestCase):
@@ -195,13 +195,13 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         for test_slice_1, test_slice_2, multi_label in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.standard_slice_single_label_2,
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
                 False,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.standard_slice_multi_label_2,
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
                 True,
             ),
         ]:
@@ -219,8 +219,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
         """
 
         for test_slice, multi_label in [
-            (tests.utils.slice_all_true_single_label, False),
-            (tests.utils.slice_all_true_multi_label, True),
+            (test_data.slice_all_true_single_label, False),
+            (test_data.slice_all_true_multi_label, True),
         ]:
 
             if multi_label:
@@ -251,8 +251,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
         """
 
         for test_slice, multi_label in [
-            (tests.utils.slice_all_false_single_label, False),
-            (tests.utils.slice_all_false_multi_label, True),
+            (test_data.slice_all_false_single_label, False),
+            (test_data.slice_all_false_multi_label, True),
         ]:
             if multi_label:
                 # PyTorch's BCELoss implementation clamps the loss values to [0, 100]
@@ -293,13 +293,13 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         for test_slice_1, test_slice_2, multi_label in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.slice_ignore_index_single_label,
+                test_data.standard_slice_single_label_1,
+                test_data.slice_ignore_index_single_label,
                 False,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.slice_ignore_index_multi_label,
+                test_data.standard_slice_multi_label_1,
+                test_data.slice_ignore_index_multi_label,
                 True,
             ),
         ]:
@@ -318,8 +318,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
         """
 
         for test_slice, multi_label in [
-            (tests.utils.slice_all_true_negatives_single_label, False),
-            (tests.utils.slice_all_true_negatives_multi_label, True),
+            (test_data.slice_all_true_negatives_single_label, False),
+            (test_data.slice_all_true_negatives_multi_label, True),
         ]:
             self._test_loss(
                 test_slice,

@@ -8,6 +8,7 @@ import torch
 
 from functional import GeneralizedDiceLoss
 import tests.utils
+import tests.utils.test_data_cardinality_metrics as test_data
 
 
 class TestGeneralizedDiceLoss(unittest.TestCase):
@@ -171,12 +172,12 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
 
         for test_slice_1, test_slice_2 in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.standard_slice_single_label_2,
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.standard_slice_multi_label_2,
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
             ),
         ]:
             for weight_type in ["square", "simple", "uniform"]:
@@ -198,8 +199,8 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
         """
 
         for test_slice in [
-            tests.utils.slice_all_true_single_label,
-            tests.utils.slice_all_true_multi_label,
+            test_data.slice_all_true_single_label,
+            test_data.slice_all_true_multi_label,
         ]:
             for weight_type in ["square", "simple", "uniform"]:
                 for include_background in [True, False]:
@@ -231,8 +232,8 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
         """
 
         for test_slice in [
-            tests.utils.slice_all_false_single_label,
-            tests.utils.slice_all_false_multi_label,
+            test_data.slice_all_false_single_label,
+            test_data.slice_all_false_multi_label,
         ]:
             for include_background in [True, False]:
                 self._test_loss(
@@ -283,8 +284,8 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
         """
 
         for test_slice in [
-            tests.utils.slice_no_true_positives_single_label,
-            tests.utils.slice_no_true_positives_multi_label,
+            test_data.slice_no_true_positives_single_label,
+            test_data.slice_no_true_positives_multi_label,
         ]:
             for include_background in [True, False]:
                 self._test_loss(
@@ -342,7 +343,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                     _,
                     _,
                     _,
-                ) = tests.utils.slice_all_true_negatives_multi_label(False)
+                ) = test_data.slice_all_true_negatives_multi_label(False)
                 prediction = torch.stack([predictions_slice, predictions_slice])
                 target = torch.stack([target_slice, target_slice])
 
@@ -406,12 +407,12 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
 
         for test_slice_1, test_slice_2 in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.slice_ignore_index_single_label,
+                test_data.standard_slice_single_label_1,
+                test_data.slice_ignore_index_single_label,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.slice_ignore_index_multi_label,
+                test_data.standard_slice_multi_label_1,
+                test_data.slice_ignore_index_multi_label,
             ),
         ]:
             for weight_type in ["square", "simple", "uniform"]:

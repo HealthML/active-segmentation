@@ -11,6 +11,7 @@ from functional import (
     sensitivity,
 )
 import tests.utils
+import tests.utils.test_data_cardinality_metrics as test_data
 
 
 class TestSensitivity(unittest.TestCase):
@@ -78,11 +79,11 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice, convert_to_one_hot in [
             (
-                tests.utils.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_1,
                 True,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_1,
                 False,
             ),
         ]:
@@ -168,11 +169,11 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice, convert_to_one_hot in [
             (
-                tests.utils.slice_all_true_single_label,
+                test_data.slice_all_true_single_label,
                 True,
             ),
             (
-                tests.utils.slice_all_true_multi_label,
+                test_data.slice_all_true_multi_label,
                 False,
             ),
         ]:
@@ -247,11 +248,11 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice, convert_to_one_hot in [
             (
-                tests.utils.slice_all_false_single_label,
+                test_data.slice_all_false_single_label,
                 True,
             ),
             (
-                tests.utils.slice_all_false_multi_label,
+                test_data.slice_all_false_multi_label,
                 False,
             ),
         ]:
@@ -337,11 +338,11 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice, convert_to_one_hot in [
             (
-                tests.utils.slice_no_true_positives_single_label,
+                test_data.slice_no_true_positives_single_label,
                 True,
             ),
             (
-                tests.utils.slice_no_true_positives_multi_label,
+                test_data.slice_no_true_positives_multi_label,
                 False,
             ),
         ]:
@@ -427,11 +428,11 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice, convert_to_one_hot in [
             (
-                tests.utils.slice_no_true_negatives_single_label,
+                test_data.slice_no_true_negatives_single_label,
                 True,
             ),
             (
-                tests.utils.slice_no_true_negatives_multi_label,
+                test_data.slice_no_true_negatives_multi_label,
                 False,
             ),
         ]:
@@ -506,11 +507,11 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice, convert_to_one_hot in [
             (
-                tests.utils.slice_all_true_negatives_single_label,
+                test_data.slice_all_true_negatives_single_label,
                 True,
             ),
             (
-                tests.utils.slice_all_true_negatives_multi_label,
+                test_data.slice_all_true_negatives_multi_label,
                 False,
             ),
         ]:
@@ -603,13 +604,13 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice_1, test_slice_2, convert_to_one_hot in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.standard_slice_single_label_2,
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
                 True,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.standard_slice_multi_label_2,
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
                 False,
             ),
         ]:
@@ -711,11 +712,11 @@ class TestSensitivity(unittest.TestCase):
 
         for test_slice, convert_to_one_hot in [
             (
-                tests.utils.slice_ignore_index_single_label,
+                test_data.slice_ignore_index_single_label,
                 True,
             ),
             (
-                tests.utils.slice_ignore_index_multi_label,
+                test_data.slice_ignore_index_multi_label,
                 False,
             ),
         ]:
