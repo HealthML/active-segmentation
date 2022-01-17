@@ -17,6 +17,8 @@ from .utils import (
     preprocess_metric_inputs,
 )
 
+# pylint: disable=too-many-lines
+
 
 def dice_score(
     prediction: torch.Tensor,
@@ -303,7 +305,7 @@ def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
             3, stride=1, padding=0, dilation=1, return_indices=False, ceil_mode=False
         )
     elif input_image.dim() == 3:
-        max_pooling = torch.nn.MaxPool2d(
+        max_pooling = torch.nn.MaxPool3d(
             3, stride=1, padding=0, dilation=1, return_indices=False, ceil_mode=False
         )
 
@@ -313,14 +315,21 @@ def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
     )
 
     # pad image with ones to maintain the input's dimensions
-    inverted_input_padded = torch.nn.functional.pad(
-        inverted_input, (1, 1, 1, 1), "constant", 1
-    )
+    if input_image.dim() == 2:
+        inverted_input_padded = torch.nn.functional.pad(
+            inverted_input, (1, 1, 1, 1), "constant", 1
+        )
+    else:
+        inverted_input_padded = torch.nn.functional.pad(
+            inverted_input, (1, 1, 1, 1, 1, 1), "constant", 1
+        )
+    # create class and batch dimension as this is required by the max pooling module
+    inverted_input_padded = inverted_input_padded.unsqueeze(dim=0).unsqueeze(dim=0)
 
     # apply the max pooling and invert the result
     return torch.ones(input_image.shape, device=input_image.device) - max_pooling(
         inverted_input_padded
-    )
+    ).squeeze(dim=0).squeeze(dim=0)
 
 
 # pylint: disable=too-many-locals
@@ -412,7 +421,7 @@ def single_class_hausdorff_distance(
 
     if normalize:
         maximum_distance = torch.norm(
-            torch.tensor(list(prediction.shape), dtype=torch.float)
+            torch.tensor(list(prediction.shape), dtype=torch.float) - 1
         )
         distances = distances / maximum_distance
 
@@ -474,7 +483,7 @@ def hausdorff_distance(
     # adapted code from
     # https://github.com/PiechaczekMyller/brats/blob/eb9f7eade1066dd12c90f6cef101b74c5e974bfa/brats/functional.py#L135
 
-    preprocess_metric_inputs(
+    prediction, target = preprocess_metric_inputs(
         prediction,
         target,
         num_classes,
@@ -483,6 +492,7 @@ def hausdorff_distance(
     )
 
     if not include_background:
+        num_classes = num_classes - 1
         # drop the channel of the background class
         prediction = prediction[1:]
         target = target[1:]
@@ -925,6 +935,20 @@ class HausdorffDistance(SegmentationMetric):
 
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+        r"""
+        Updates metric using the provided prediction.
+
+        Args:
+            prediction (Tensor): The prediction tensor.
+            target (Tensor): The target tensor.
+
+        Shape:
+            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding (`C = number of classes`).
+            - Target: Same shape and type as prediction.
+        """
+
         prediction, target = self._preprocess_inputs(prediction, target)
 
         self.hausdorff_distance_cached = False
