@@ -588,10 +588,10 @@ class TestHausdorffDistance(unittest.TestCase):
                             (
                                 prediction,
                                 target,
-                                expected_hausdorff_dists,
                                 _,
                                 _,
-                                maximum_distance,
+                                _,
+                                _,
                             ) = test_slice(percentile=percentile)
 
                             hausdorff_distance_module = HausdorffDistance(
