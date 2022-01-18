@@ -568,3 +568,81 @@ class TestHausdorffDistance(unittest.TestCase):
                                 f" tasks when the slices of a 3d image are scattered across multiple batches with "
                                 f"different padding sizes and {test_case_description}.",
                             )
+
+    def test_reset(self):
+        """
+        Tests that the metric is reset correctly.
+        """
+
+        for percentile in [0.5, 0.95, 1.0]:
+
+            for test_slice, convert_to_one_hot in [
+                (test_data.standard_distance_slice_single_label, True),
+                (test_data.standard_distance_slice_multi_label, False),
+            ]:
+
+                for include_background in [True, False]:
+                    for reduction in ["none", "mean", "min", "max"]:
+                        for normalize in [True, False]:
+
+                            (
+                                prediction,
+                                target,
+                                expected_hausdorff_dists,
+                                _,
+                                _,
+                                maximum_distance,
+                            ) = test_slice(percentile=percentile)
+
+                            hausdorff_distance_module = HausdorffDistance(
+                                num_classes=3,
+                                slices_per_image=4,
+                                convert_to_one_hot=convert_to_one_hot,
+                                include_background=include_background,
+                                ignore_index=-1,
+                                normalize=normalize,
+                                percentile=percentile,
+                                reduction=reduction,
+                            )
+
+                            initial_state = {
+                                "all_image_locations": hausdorff_distance_module.all_image_locations,
+                                "hausdorff_distance_cached": hausdorff_distance_module.hausdorff_distance_cached,
+                                "number_of_slices": hausdorff_distance_module.number_of_slices,
+                            }
+
+                            hausdorff_distance_module.update(prediction, target)
+
+                            updated_state = {
+                                "all_image_locations": hausdorff_distance_module.all_image_locations,
+                                "hausdorff_distance_cached": hausdorff_distance_module.hausdorff_distance_cached,
+                                "number_of_slices": hausdorff_distance_module.number_of_slices,
+                            }
+
+                            is_not_same = [
+                                value != updated_state[attribute]
+                                for attribute, value in initial_state.items()
+                            ]
+
+                            self.assertTrue(
+                                any(is_not_same),
+                                "Hausdorff distance module changes its state when calling the update method",
+                            )
+
+                            hausdorff_distance_module.reset()
+
+                            reset_state = {
+                                "all_image_locations": hausdorff_distance_module.all_image_locations,
+                                "hausdorff_distance_cached": hausdorff_distance_module.hausdorff_distance_cached,
+                                "number_of_slices": hausdorff_distance_module.number_of_slices,
+                            }
+
+                            is_same = [
+                                value == reset_state[attribute]
+                                for attribute, value in initial_state.items()
+                            ]
+
+                            self.assertTrue(
+                                all(is_same),
+                                "Hausdorff distance module resets its state when calling the reset method",
+                            )
