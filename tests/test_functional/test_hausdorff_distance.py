@@ -1,7 +1,7 @@
 """Tests for the Hausdorff distance metric"""
 
 import math
-from typing import Optional
+from typing import Dict, Optional
 import unittest
 
 import torch
@@ -16,18 +16,19 @@ class TestHausdorffDistance(unittest.TestCase):
     Test cases for Hausdorff distance.
     """
 
-    # pylint: disable=too-many-locals,too-many-nested-blocks,too-many-branches
+    # pylint: disable=too-many-locals,too-many-nested-blocks,too-many-branches,too-many-arguments
 
     @staticmethod
     def _test_hausdorff_distance(
         prediction: torch.Tensor,
         target: torch.Tensor,
-        expected_distances: torch.Tensor,
+        expected_distances: Dict[int, float],
         maximum_distance: float,
         convert_to_one_hot: bool,
         ignore_index: Optional[int] = None,
         message: str = "",
         percentile: float = 0.95,
+        slices_per_image: Optional[int] = None,
     ) -> None:
         """
         Helper function that calculates the Hausdorff distances for the given predictions and compares it with the
@@ -36,7 +37,7 @@ class TestHausdorffDistance(unittest.TestCase):
         Args:
             prediction (Tensor): Predicted segmentation mask.
             target (Tensor): Target segmentation mask.
-            expected_distances (Tensor): Expected per-class Hausdorff distances.
+            expected_distances (Dict[int, float]): Expected per-class Hausdorff distances.
             maximum_distance (float): Maximum distance to be used for normalization of expected Hausdorff distances.
             convert_to_one_hot (bool): Determines if data is label encoded and needs to be converted to one-hot
                 encoding or not.
@@ -44,6 +45,7 @@ class TestHausdorffDistance(unittest.TestCase):
                 metric. Defaults to `None`.
             message (string, optional): Description of the test case.
             percentile (float): Percentile for which the Hausdorff distance is to be tested.
+            slices_per_image (int, optional): `slices_per_image` parameter of the Hausdorff distance module.
         """
 
         for include_background in [True, False]:
@@ -93,14 +95,15 @@ class TestHausdorffDistance(unittest.TestCase):
                         f"when {message} and {test_case_description}.",
                     )
 
-                    if prediction.dim() == 2:
-                        slices_per_image = 1
-                    else:
-                        slices_per_image = (
-                            prediction.shape[0]
-                            if convert_to_one_hot
-                            else prediction.shape[1]
-                        )
+                    if slices_per_image is None:
+                        if prediction.dim() == 2:
+                            slices_per_image = 1
+                        else:
+                            slices_per_image = (
+                                prediction.shape[0]
+                                if convert_to_one_hot
+                                else prediction.shape[1]
+                            )
 
                     hausdorff_distance_module = HausdorffDistance(
                         num_classes=3,
@@ -438,11 +441,12 @@ class TestHausdorffDistance(unittest.TestCase):
         """
         Tests that the Hausdorff distance is computed correctly when there are pixels / voxels to be ignored.
         """
+
         for percentile in [0.5, 0.95, 1.0]:
 
             for test_slice, convert_to_one_hot in [
-                (test_data.distance_slice_ignore_index_single_label_1, True),
-                (test_data.distance_slice_ignore_index_multi_label_1, False),
+                (test_data.distance_slice_ignore_index_single_label_2, True),
+                (test_data.distance_slice_ignore_index_multi_label_2, False),
             ]:
                 (
                     prediction,
@@ -462,4 +466,105 @@ class TestHausdorffDistance(unittest.TestCase):
                     ignore_index=-1,
                     message="there are pixels / voxels to be ignored",
                     percentile=percentile,
+                    slices_per_image=2,
                 )
+
+    def test_different_padding_per_slice(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when slices from different batches have different
+        padding sizes.
+        """
+
+        for percentile in [0.5, 0.95, 1.0]:
+
+            for test_slice_1, test_slice_2, convert_to_one_hot, expected_distances in [
+                (
+                    test_data.distance_slice_ignore_index_single_label_1,
+                    test_data.distance_slice_ignore_index_single_label_2,
+                    True,
+                    test_data.expected_distances_slice_ignore_index_single_label_1_2,
+                ),
+                (
+                    test_data.distance_slice_ignore_index_multi_label_1,
+                    test_data.distance_slice_ignore_index_multi_label_2,
+                    False,
+                    test_data.expected_distances_slice_ignore_index_multi_label_1_2,
+                ),
+            ]:
+                (
+                    prediction_1,
+                    target_1,
+                    _,
+                    _,
+                    _,
+                    _,
+                ) = test_slice_1(percentile=percentile)
+
+                (
+                    prediction_2,
+                    target_2,
+                    _,
+                    _,
+                    _,
+                    _,
+                ) = test_slice_2(percentile=percentile)
+
+                expected_distances, _, _, maximum_distance = expected_distances(
+                    percentile
+                )
+
+                for include_background in [True, False]:
+                    for reduction in ["none", "mean", "min", "max"]:
+                        for normalize in [True, False]:
+
+                            expected_distance = torch.tensor(
+                                list(expected_distances.values())
+                            ).float()
+
+                            if not include_background:
+                                expected_distance = expected_distance[1:]
+                            if reduction == "mean":
+                                expected_distance = expected_distance.mean()
+                            elif reduction == "min":
+                                expected_distance = expected_distance.min()
+                            elif reduction == "max":
+                                expected_distance = expected_distance.max()
+                            if normalize:
+                                expected_distance = expected_distance / torch.sqrt(
+                                    torch.as_tensor(maximum_distance)
+                                )
+
+                            hausdorff_distance_module = HausdorffDistance(
+                                num_classes=3,
+                                slices_per_image=4,
+                                convert_to_one_hot=convert_to_one_hot,
+                                include_background=include_background,
+                                ignore_index=-1,
+                                normalize=normalize,
+                                percentile=percentile,
+                                reduction=reduction,
+                            )
+
+                            hausdorff_distance_module.update(prediction_1, target_1)
+                            hausdorff_distance_module.update(prediction_2, target_2)
+
+                            hausdorff_distance_from_module = (
+                                hausdorff_distance_module.compute()
+                            )
+
+                            task_type = (
+                                "single-label" if convert_to_one_hot else "multi-label"
+                            )
+
+                            test_case_description = (
+                                f"include_background is {include_background}, normalize is {normalize}, "
+                                f"percentile is {percentile} and reduction is {reduction}"
+                            )
+
+                            torch.testing.assert_allclose(
+                                hausdorff_distance_from_module,
+                                expected_distance,
+                                msg=f"Module-based implementation correctly computes Hausdorff distance for {task_type}"
+                                f" tasks when the slices of a 3d image are scattered across multiple batches with "
+                                f"different padding sizes and {test_case_description}.",
+                            )

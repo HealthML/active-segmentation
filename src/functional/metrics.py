@@ -937,6 +937,16 @@ class HausdorffDistance(SegmentationMetric):
         self.slices_per_image = slices_per_image
         self.number_of_slices = 0
 
+    def reset(self) -> None:
+        """
+        Resets the metric state.
+        """
+
+        super().reset()
+        self.all_image_locations = None
+        self.hausdorff_distance_cached = False
+        self.number_of_slices = 0
+
     # pylint: disable=arguments-differ
     def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
         r"""

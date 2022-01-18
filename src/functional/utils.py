@@ -210,7 +210,7 @@ def remove_padding(
 
     for dim in [0, 1]:
         is_padding = (first_slice == ignore_index).all(dim=dim)
-        all_indices = torch.arange(first_slice.shape[dim])
+        all_indices = torch.arange(len(is_padding))
         indices_to_keep = torch.masked_select(all_indices, ~is_padding)
 
         target = target.index_select(-2 + dim, indices_to_keep)

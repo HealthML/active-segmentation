@@ -1021,9 +1021,9 @@ def distance_slice_ignore_index_single_label_2(
             [-1, -1, -1, -1, -1],
         ],
         [
-            [1,   2,  0, -1, -1],
-            [1,   2,  0, -1, -1],
-            [0,   2,  2, -1, -1],
+            [0,   0,  2, -1, -1],
+            [0,   1,  2, -1, -1],
+            [2,   1,  1, -1, -1],
             [-1, -1, -1, -1, -1],
             [-1, -1, -1, -1, -1],
             [-1, -1, -1, -1, -1],
@@ -1040,14 +1040,14 @@ def distance_slice_ignore_index_single_label_2(
     # fmt: on
 
     dists_prediction_target = {
-        0: [0, 1, 1],
-        1: [0, np.sqrt(2), 1, 1, 0, 0, 1, np.sqrt(2)],
-        2: [0, 0, 1, 1, 1, 1, 0],
+        0: [1, np.sqrt(2), np.sqrt(2)],
+        1: [0, 1, 1, 1, 0, np.sqrt(2), 1, 1],
+        2: [0, 0, 1, 1, 0, 1, 1],
     }
     dist_target_prediction = {
-        0: [np.sqrt(2), np.sqrt(2), 2, 1, 0],
-        1: [0, 1, 0, 0, 1],
-        2: [0, 0, 1, 1, 1, 0, 1, np.sqrt(2)],
+        0: [np.sqrt(2), np.sqrt(2), 2, 2, 1],
+        1: [0, 1, 0, 1, 1, 1],
+        2: [0, 0, 1, 1, 0, 1, 1],
     }
 
     maximum_distance = 9
@@ -1165,8 +1165,8 @@ def distance_slice_ignore_index_multi_label_1(
             ],
             [
                 [0, 0, 0, 0],
-                [0, 1, 1, 0],
-                [0, 1, 1, 0],
+                [0, 0, 0, 0],
+                [1, 1, 1, 0],
                 [0, 0, 0, 0],
             ],
             [
@@ -1257,15 +1257,15 @@ def distance_slice_ignore_index_multi_label_1(
                 [-1, -1, -1, -1],
             ],
             [
+                [1,   0,  0, -1],
                 [0,   0,  0, -1],
-                [1,   1,  1, -1],
-                [1,   1,  1, -1],
+                [0,   0,  0, -1],
                 [-1, -1, -1, -1],
             ],
             [
                 [0,   0,  0, -1],
                 [0,   0,  0, -1],
-                [1,   1,  0, -1],
+                [0,   0,  0, -1],
                 [-1, -1, -1, -1],
             ],
             [
@@ -1286,13 +1286,13 @@ def distance_slice_ignore_index_multi_label_1(
 
     dists_prediction_target = {
         0: [0, 1, 0, 1, np.sqrt(2), 1, 1, 0, 0],
-        1: [0, 0, 0, 0, 0, 1, 0, 0, 0],
-        2: [1, 1, 0, 0, 1, 1, 0, 1],
+        1: [0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        2: [1, 2, np.sqrt(2), np.sqrt(5), np.sqrt(5), np.sqrt(6), np.sqrt(9)],
     }
     dist_target_prediction = {
         0: [0, 1, 0, 1, 0, 1, 0, 1],
-        1: [1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        2: [1, 0, 0, np.sqrt(2), 1, 1, 1, 0],
+        1: [1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+        2: [1],
     }
 
     maximum_distance = 9
@@ -1477,11 +1477,13 @@ def distance_slice_ignore_index_multi_label_2(
                 [0,   1,  1, -1, -1],
                 [0,   0,  0, -1, -1],
                 [0,   0,  0, -1, -1],
-                [-1, -1, -1, -1  -1],
+                [-1, -1, -1, -1, -1],
                 [-1, -1, -1, -1, -1],
                 [-1, -1, -1, -1, -1],
             ],
             [
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
                 [-1, -1, -1, -1, -1],
                 [-1, -1, -1, -1, -1],
                 [-1, -1, -1, -1, -1],
@@ -1493,7 +1495,7 @@ def distance_slice_ignore_index_multi_label_2(
 
     dists_prediction_target = {
         0: [1, 0, 0, np.sqrt(2), 1, 1, 0, 0, 1],
-        1: [0, 1, np.sqrt(2), 1, 0, 0, 1],
+        1: [0, 1, 1, 1, 0, 0, 1],
         2: [0, 0, 0, 1, 0],
     }
     dist_target_prediction = {
@@ -1507,6 +1509,119 @@ def distance_slice_ignore_index_multi_label_2(
     return (
         prediction_slice,
         target_slice,
+        *_expected_hausdorff_distances(
+            dists_prediction_target, dist_target_prediction, percentile
+        ),
+        maximum_distance,
+    )
+
+
+def expected_distances_slice_ignore_index_single_label_1_2(
+    percentile: float = 0.95,
+) -> Tuple[Dict[int, float], Dict[int, float], Dict[int, float], float]:
+    """
+    Computes expected per-class Hausdorff distances for the case that the slices returned by
+    `distance_slice_ignore_index_single_label_1` and `distance_slice_ignore_index_single_label_2` are stacked.
+
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
+    Returns:
+        Tuple: Dictionary with per-class symmetric Hausdorff distances, dictionary with per-class Hausdorff distances
+            between prediction and target, dictionary with per-class Hausdorff distances between target and prediction,
+            and maximum possible Hausdorff distance for the returned slice size.
+    """
+
+    dists_prediction_target = {
+        0: [0, 0, 0, 1, 1, 1, 0, 1, np.sqrt(2), np.sqrt(2)],
+        1: [0, 1, 0, 1, np.sqrt(2), 1, 0, 1, 1, 1, 0, np.sqrt(2), 1, 1],
+        2: [np.sqrt(2), 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1],
+    }
+    dist_target_prediction = {
+        0: [0, 0, 1, 0, 1, 0, 1, np.sqrt(2), 2, 2, 1],
+        1: [0, 1, 0, np.sqrt(2), 1, 1, 0, 1, 0, 1, 1, 1],
+        2: [1, np.sqrt(2), 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1],
+    }
+
+    maximum_distance = 17
+
+    return (
+        *_expected_hausdorff_distances(
+            dists_prediction_target, dist_target_prediction, percentile
+        ),
+        maximum_distance,
+    )
+
+
+def expected_distances_slice_ignore_index_multi_label_1_2(
+    percentile: float = 0.95,
+) -> Tuple[Dict[int, float], Dict[int, float], Dict[int, float], float]:
+    """
+    Computes expected per-class Hausdorff distances for the case that the slices returned by
+    `distance_slice_ignore_index_multi_label_1` and `distance_slice_ignore_index_multi_label_2` are stacked.
+
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
+    Returns:
+        Tuple: Dictionary with per-class symmetric Hausdorff distances, dictionary with per-class Hausdorff distances
+            between prediction and target, dictionary with per-class Hausdorff distances between target and prediction,
+            and maximum possible Hausdorff distance for the returned slice size.
+    """
+
+    dists_prediction_target = {
+        0: [0, 1, 0, 1, np.sqrt(2), 1, 1, 0, 0, 1, 0, 0, np.sqrt(2), 1, 1, 0, 0, 1],
+        1: [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+        ],
+        2: [1, 2, np.sqrt(2), 2, np.sqrt(2), 1, 1, 0, 0, 0, 1, 0],
+    }
+    dist_target_prediction = {
+        0: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
+        1: [
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+        ],
+        2: [1, 0, 0, 1, 0, 1, 0, 1],
+    }
+
+    maximum_distance = 17
+
+    return (
         *_expected_hausdorff_distances(
             dists_prediction_target, dist_target_prediction, percentile
         ),
