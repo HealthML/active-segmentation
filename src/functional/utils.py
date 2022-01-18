@@ -157,8 +157,21 @@ def validate_metric_inputs(
     assert (
         prediction.shape == target.shape
     ), "Prediction and target need to have the same shape."
-    assert prediction.dtype == torch.int, "Prediction has to be of integer type."
-    assert target.dtype == torch.int, "Target has to be of integer type."
+
+    assert prediction.dtype in [
+        torch.int,
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+    ], "Prediction has to be of integer type."
+    assert target.dtype in [
+        torch.int,
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+    ], "Target has to be of integer type."
 
     if convert_to_one_hot is True:
         # for single-label segmentation tasks, prediction and target are expected be label encoded
