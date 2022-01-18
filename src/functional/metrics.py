@@ -14,6 +14,7 @@ from .utils import (
     flatten_tensors,
     is_binary,
     reduce_metric,
+    remove_padding,
     preprocess_metric_inputs,
 )
 
@@ -483,6 +484,9 @@ def hausdorff_distance(
     # adapted code from
     # https://github.com/PiechaczekMyller/brats/blob/eb9f7eade1066dd12c90f6cef101b74c5e974bfa/brats/functional.py#L135
 
+    prediction, target = remove_padding(
+        prediction, target, ignore_index, convert_to_one_hot
+    )
     prediction, target = preprocess_metric_inputs(
         prediction,
         target,
@@ -949,6 +953,9 @@ class HausdorffDistance(SegmentationMetric):
             - Target: Same shape and type as prediction.
         """
 
+        prediction, target = remove_padding(
+            prediction, target, self.ignore_index, self.convert_to_one_hot
+        )
         prediction, target = self._preprocess_inputs(prediction, target)
 
         self.hausdorff_distance_cached = False

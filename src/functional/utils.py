@@ -1,6 +1,6 @@
 """Utilities for metric and loss computations."""
 
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 import torch
 
@@ -132,6 +132,98 @@ def one_hot_encode(
 
     # tensor has no batch dimension
     return torch.moveaxis(tensor_one_hot, tensor_one_hot.ndim - 1, 0)
+
+
+def remove_padding(
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    ignore_index: Union[int, None],
+    is_label_encoded: bool,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    r"""
+    Removes padding from prediction and target tensor. For this purpose, the areas where the target tensor is
+    equal to :attr:`ignore_index` are removed from both tensors. It is assumed that whole rows or columns are padded
+    always.
+
+    Args:
+        prediction (Tensor): A prediction tensor (label-encoded, one-hot encoded, or multi-hot encoded).
+        target (Tensor): A target tensor (with same encoding as prediction tensor).
+        ignore_index (int): Specifies the target value that is used as label for padded areas.
+        is_label_encoded (bool): Whether the input data are label encoded or one-hot / multi-hot encoded.
+
+    Returns:
+        Tuple[Tensor, Tensor]: Prediction and target tensors without padding areas.
+
+    Shape:
+        - Prediction: :math:`(X, Y, ...)` in case of label encoding and :math:`(C, X, Y, ...)`, in case of one-hot
+            or multi-hot encoding (`C = number of classes`).
+        - Target: Same shape as prediction.
+        - Output: :math:`(X - P_x, Y - P_y, ...)` in case of label encoding and :math:`(C, X - P_x, Y - P_y, ...)`,
+            in case of one-hot or multi-hot encoding (`C = number of classes`, `P_x = padding width on x-axis`).
+    """
+
+    if ignore_index is None:
+        return prediction, target
+
+    assert (
+        prediction.shape == target.shape
+    ), "Prediction and target must have the same shape"
+
+    if is_label_encoded:
+        first_spatial_dim = 0
+        dimensionality = target.dim()
+    else:
+        first_spatial_dim = 1
+        dimensionality = target.dim() - 1
+
+    # for 3d images, first slices that only contain padding are removed
+    if dimensionality == 3:
+        is_padding = (
+            target == ignore_index if is_label_encoded else target[0] == ignore_index
+        )
+
+        if not is_label_encoded:
+            assert torch.equal(
+                (target[0] == ignore_index).int() * len(target),
+                (target == ignore_index).sum(dim=0).int(),
+            ), "All class channels have the same padding size"
+
+        is_padding_slice = is_padding.flatten(start_dim=-2).all(dim=-1)
+
+        all_indices = torch.arange(is_padding.shape[0])
+        indices_to_keep = torch.masked_select(all_indices, ~is_padding_slice)
+
+        target = target.index_select(first_spatial_dim, indices_to_keep)
+        prediction = prediction.index_select(first_spatial_dim, indices_to_keep)
+
+    # afterwards single padded rows and columns are removed
+
+    # the first 2d slice is selected and it is assumed that all other slices have the same padding size
+    all_target_slices = target.view(-1, *target.shape[-2:])
+    first_slice = all_target_slices[0]
+
+    if target.dim() > 2:
+        assert torch.equal(
+            (first_slice == ignore_index).int() * len(all_target_slices),
+            (all_target_slices == ignore_index).sum(dim=0).int(),
+        ), "All slices have the same padding size."
+
+    for dim in [0, 1]:
+        is_padding = (first_slice == ignore_index).all(dim=dim)
+        all_indices = torch.arange(first_slice.shape[dim])
+        indices_to_keep = torch.masked_select(all_indices, ~is_padding)
+
+        target = target.index_select(-2 + dim, indices_to_keep)
+        prediction = prediction.index_select(-2 + dim, indices_to_keep)
+
+    assert (
+        prediction != ignore_index
+    ).all(), "Prediction does not contain padded areas after padding removal."
+    assert (
+        target != ignore_index
+    ).all(), "Target does not contain padded areas after padding removal."
+
+    return prediction, target
 
 
 def validate_metric_inputs(

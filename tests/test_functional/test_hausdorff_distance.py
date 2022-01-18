@@ -93,11 +93,18 @@ class TestHausdorffDistance(unittest.TestCase):
                         f"when {message} and {test_case_description}.",
                     )
 
+                    if prediction.dim() == 2:
+                        slices_per_image = 1
+                    else:
+                        slices_per_image = (
+                            prediction.shape[0]
+                            if convert_to_one_hot
+                            else prediction.shape[1]
+                        )
+
                     hausdorff_distance_module = HausdorffDistance(
                         num_classes=3,
-                        slices_per_image=1
-                        if prediction.ndim == 2
-                        else prediction.shape[0],
+                        slices_per_image=slices_per_image,
                         convert_to_one_hot=convert_to_one_hot,
                         include_background=include_background,
                         ignore_index=ignore_index,
@@ -292,9 +299,7 @@ class TestHausdorffDistance(unittest.TestCase):
 
                             hausdorff_distance_module = HausdorffDistance(
                                 num_classes=3,
-                                slices_per_image=1
-                                if prediction.ndim == 2
-                                else prediction.shape[0],
+                                slices_per_image=1,
                                 convert_to_one_hot=convert_to_one_hot,
                                 include_background=include_background,
                                 ignore_index=None,
@@ -396,9 +401,7 @@ class TestHausdorffDistance(unittest.TestCase):
 
                             hausdorff_distance_module = HausdorffDistance(
                                 num_classes=3,
-                                slices_per_image=1
-                                if prediction.ndim == 2
-                                else prediction.shape[0],
+                                slices_per_image=3,
                                 convert_to_one_hot=convert_to_one_hot,
                                 include_background=include_background,
                                 ignore_index=None,
@@ -430,3 +433,33 @@ class TestHausdorffDistance(unittest.TestCase):
                                 "predictions are 3-dimensional scans whose slices are scattered across multiple "
                                 "batches.",
                             )
+
+    def test_ignore_index(self):
+        """
+        Tests that the Hausdorff distance is computed correctly when there are pixels / voxels to be ignored.
+        """
+        for percentile in [0.5, 0.95, 1.0]:
+
+            for test_slice, convert_to_one_hot in [
+                (test_data.distance_slice_ignore_index_single_label_1, True),
+                (test_data.distance_slice_ignore_index_multi_label_1, False),
+            ]:
+                (
+                    prediction,
+                    target,
+                    expected_hausdorff_dists,
+                    _,
+                    _,
+                    maximum_distance,
+                ) = test_slice(percentile=percentile)
+
+                self._test_hausdorff_distance(
+                    prediction,
+                    target,
+                    expected_hausdorff_dists,
+                    maximum_distance,
+                    convert_to_one_hot=convert_to_one_hot,
+                    ignore_index=-1,
+                    message="there are pixels / voxels to be ignored",
+                    percentile=percentile,
+                )

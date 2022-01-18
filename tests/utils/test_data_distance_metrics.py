@@ -5,6 +5,8 @@ from typing import Dict, List, Tuple
 import numpy as np
 import torch
 
+# pylint: disable=too-many-lines
+
 
 def _expected_hausdorff_distances(
     dists_prediction_target: Dict[int, List[float]],
@@ -835,6 +837,672 @@ def distance_slice_3d_multi_label(
     }
 
     maximum_distance = 22
+
+    return (
+        prediction_slice,
+        target_slice,
+        *_expected_hausdorff_distances(
+            dists_prediction_target, dist_target_prediction, percentile
+        ),
+        maximum_distance,
+    )
+
+
+def distance_slice_ignore_index_single_label_1(
+    percentile: float = 0.95,
+) -> Tuple[
+    torch.Tensor,
+    torch.Tensor,
+    Dict[int, float],
+    Dict[int, float],
+    Dict[int, float],
+    float,
+]:
+    """
+    Creates a faked single-label segmentation slice that contains true, false and ignored predictions.
+
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
+    Returns:
+        Tuple: Predicted slice, target slice, dictionary with per-class symmetric Hausdorff distances, dictionary with
+            per-class Hausdorff distances between prediction and target, dictionary with per-class Hausdorff distances
+            between target and prediction, and maximum possible Hausdorff distance for the returned slice size.
+    """
+
+    # fmt: off
+    prediction_slice = torch.IntTensor([
+        [
+            [1, 0, 1, 0],
+            [0, 1, 0, 1],
+            [1, 0, 1, 0],
+            [0, 1, 0, 1],
+        ],
+        [
+            [0, 0, 2, 2],
+            [0, 1, 2, 2],
+            [0, 1, 1, 2],
+            [1, 1, 1, 0],
+        ],
+        [
+            [0, 0, 2, 2],
+            [0, 1, 2, 2],
+            [2, 1, 1, 2],
+            [1, 0, 0, 2],
+        ],
+        [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ],
+        [
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+        ]
+    ])
+
+    target_slice = torch.IntTensor([
+        [
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+        ],
+        [
+            [0,   0,  0, -1],
+            [0,   1,  1, -1],
+            [2,   2,  1, -1],
+            [-1, -1, -1, -1],
+        ],
+        [
+            [1,   1,  1, -1],
+            [0,   2,  2, -1],
+            [0,   2,  2, -1],
+            [-1, -1, -1, -1],
+        ],
+        [
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+        ],
+        [
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+            [-1, -1, -1, -1],
+        ]
+    ])
+    # fmt: on
+
+    dists_prediction_target = {
+        0: [0, 0, 0, 1, 1, 1, 0],
+        1: [0, 1, 0, 1, np.sqrt(2), 1],
+        2: [np.sqrt(2), 1, 1, 0, 1],
+    }
+    dist_target_prediction = {
+        0: [0, 0, 1, 0, 1, 0],
+        1: [0, 1, 0, np.sqrt(2), 1, np.sqrt(2)],
+        2: [1, np.sqrt(2), 1, 0, 1, 1],
+    }
+
+    maximum_distance = 9
+
+    return (
+        prediction_slice,
+        target_slice,
+        *_expected_hausdorff_distances(
+            dists_prediction_target, dist_target_prediction, percentile
+        ),
+        maximum_distance,
+    )
+
+
+def distance_slice_ignore_index_single_label_2(
+    percentile: float = 0.95,
+) -> Tuple[
+    torch.Tensor,
+    torch.Tensor,
+    Dict[int, float],
+    Dict[int, float],
+    Dict[int, float],
+    float,
+]:
+    """
+    Creates a faked single-label segmentation slice that contains true, false and ignored predictions.
+
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
+    Returns:
+        Tuple: Predicted slice, target slice, dictionary with per-class symmetric Hausdorff distances, dictionary with
+            per-class Hausdorff distances between prediction and target, dictionary with per-class Hausdorff distances
+            between target and prediction, and maximum possible Hausdorff distance for the returned slice size.
+    """
+
+    # fmt: off
+    prediction_slice = torch.IntTensor([
+        [
+            [2, 2, 1, 0, 0],
+            [2, 1, 1, 0, 0],
+            [2, 1, 1, 1, 1],
+            [0, 0, 1, 0, 1],
+            [1, 2, 1, 2, 1],
+            [2, 2, 1, 2, 1],
+        ],
+        [
+            [1, 1, 2, 1, 1],
+            [2, 2, 1, 1, 0],
+            [0, 0, 0, 0, 0],
+            [1, 2, 0, 1, 2],
+            [1, 2, 0, 1, 2],
+            [1, 2, 0, 1, 2],
+        ],
+        [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ],
+    ])
+
+    target_slice = torch.IntTensor([
+        [
+            [2,   2,  1, -1, -1],
+            [0,   2,  0, -1, -1],
+            [1,   2,  1, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+        ],
+        [
+            [1,   2,  0, -1, -1],
+            [1,   2,  0, -1, -1],
+            [0,   2,  2, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+        ],
+        [
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1],
+        ]
+    ])
+    # fmt: on
+
+    dists_prediction_target = {
+        0: [0, 1, 1],
+        1: [0, np.sqrt(2), 1, 1, 0, 0, 1, np.sqrt(2)],
+        2: [0, 0, 1, 1, 1, 1, 0],
+    }
+    dist_target_prediction = {
+        0: [np.sqrt(2), np.sqrt(2), 2, 1, 0],
+        1: [0, 1, 0, 0, 1],
+        2: [0, 0, 1, 1, 1, 0, 1, np.sqrt(2)],
+    }
+
+    maximum_distance = 9
+
+    return (
+        prediction_slice,
+        target_slice,
+        *_expected_hausdorff_distances(
+            dists_prediction_target, dist_target_prediction, percentile
+        ),
+        maximum_distance,
+    )
+
+
+def distance_slice_ignore_index_multi_label_1(
+    percentile: float = 0.95,
+) -> Tuple[
+    torch.Tensor,
+    torch.Tensor,
+    Dict[int, float],
+    Dict[int, float],
+    Dict[int, float],
+    float,
+]:
+    """
+    Creates a faked multi-label segmentation slice that contains true, false and ignored predictions.
+
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
+    Returns:
+        Tuple: Predicted slice, target slice, dictionary with per-class symmetric Hausdorff distances, dictionary with
+            per-class Hausdorff distances between prediction and target, dictionary with per-class Hausdorff distances
+            between target and prediction, and maximum possible Hausdorff distance for the returned slice size.
+    """
+
+    # fmt: off
+    prediction_slice = torch.IntTensor([
+        [
+            [
+                [1, 0, 1, 0],
+                [0, 1, 0, 1],
+                [1, 0, 1, 0],
+                [0, 1, 0, 1],
+            ],
+            [
+                [0, 0, 0, 0],
+                [1, 0, 1, 0],
+                [1, 0, 1, 1],
+                [0, 1, 0, 0],
+            ],
+            [
+                [1, 0, 1, 0],
+                [1, 1, 0, 0],
+                [0, 1, 0, 0],
+                [0, 1, 0, 0],
+            ],
+            [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+            ],
+        ],
+        [
+            [
+                [1, 0, 1, 0],
+                [0, 1, 0, 1],
+                [1, 0, 1, 0],
+                [0, 1, 0, 1],
+            ],
+            [
+                [0, 0, 1, 1],
+                [1, 1, 1, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+            ],
+            [
+                [0, 0, 1, 1],
+                [1, 1, 0, 0],
+                [1, 1, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+            ],
+        ],
+        [
+            [
+                [1, 0, 1, 0],
+                [0, 1, 0, 1],
+                [1, 0, 1, 0],
+                [0, 1, 0, 1],
+            ],
+            [
+                [0, 1, 1, 1],
+                [0, 1, 1, 1],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [
+                [0, 0, 0, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [0, 0, 0, 0],
+            ],
+            [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            [
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+            ],
+        ]
+    ])
+
+    target_slice = torch.IntTensor([
+        [
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [0,   0,  0, -1],
+                [1,   1,  0, -1],
+                [1,   1,  0, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [0,   0,  0, -1],
+                [0,   1,  1, -1],
+                [0,   1,  1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+        ],
+        [
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [1,   1,  1, -1],
+                [1,   1,  1, -1],
+                [0,   1,  1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [1,   0,  0, -1],
+                [1,   1,  0, -1],
+                [0,   1,  0, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+        ],
+        [
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [0,   0,  0, -1],
+                [1,   1,  1, -1],
+                [1,   1,  1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [0,   0,  0, -1],
+                [0,   0,  0, -1],
+                [1,   1,  0, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+                [-1, -1, -1, -1],
+            ],
+        ]
+    ])
+    # fmt: on
+
+    dists_prediction_target = {
+        0: [0, 1, 0, 1, np.sqrt(2), 1, 1, 0, 0],
+        1: [0, 0, 0, 0, 0, 1, 0, 0, 0],
+        2: [1, 1, 0, 0, 1, 1, 0, 1],
+    }
+    dist_target_prediction = {
+        0: [0, 1, 0, 1, 0, 1, 0, 1],
+        1: [1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        2: [1, 0, 0, np.sqrt(2), 1, 1, 1, 0],
+    }
+
+    maximum_distance = 9
+
+    return (
+        prediction_slice,
+        target_slice,
+        *_expected_hausdorff_distances(
+            dists_prediction_target, dist_target_prediction, percentile
+        ),
+        maximum_distance,
+    )
+
+
+def distance_slice_ignore_index_multi_label_2(
+    percentile: float = 0.95,
+) -> Tuple[
+    torch.Tensor,
+    torch.Tensor,
+    Dict[int, float],
+    Dict[int, float],
+    Dict[int, float],
+    float,
+]:
+    """
+    Creates a faked multi-label segmentation slice that contains true, false and ignored predictions.
+
+    Args:
+        percentile (float, optional): Percentile for which the expected Hausdorff distances are to be calculated.
+
+    Returns:
+        Tuple: Predicted slice, target slice, dictionary with per-class symmetric Hausdorff distances, dictionary with
+            per-class Hausdorff distances between prediction and target, dictionary with per-class Hausdorff distances
+            between target and prediction, and maximum possible Hausdorff distance for the returned slice size.
+    """
+
+    # fmt: off
+    prediction_slice = torch.IntTensor([
+        [
+            [
+                [1, 1, 0, 0, 1],
+                [0, 1, 0, 0, 1],
+                [1, 0, 1, 1, 0],
+                [0, 1, 0, 0, 1],
+                [0, 1, 1, 1, 1],
+                [0, 0, 1, 0, 1],
+            ],
+            [
+                [0, 0, 1, 0, 0],
+                [1, 1, 0, 0, 0],
+                [0, 0, 1, 0, 1],
+                [0, 1, 0, 0, 1],
+                [0, 0, 0, 1, 1],
+                [0, 1, 1, 0, 1],
+            ],
+            [
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+            ],
+        ],
+        [
+            [
+                [0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0],
+                [0, 1, 0, 0, 0],
+                [0, 1, 0, 0, 1],
+                [1, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1],
+            ],
+            [
+                [0, 1, 0, 1, 0],
+                [1, 1, 0, 0, 1],
+                [0, 1, 0, 0, 1],
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 1],
+                [0, 1, 0, 1, 0],
+            ],
+            [
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+            ],
+        ],
+        [
+            [
+                [0, 1, 0, 1, 0],
+                [0, 1, 0, 1, 1],
+                [0, 1, 0, 0, 0],
+                [0, 0, 0, 0, 1],
+                [0, 1, 1, 0, 1],
+                [0, 1, 1, 0, 1],
+            ],
+            [
+                [1, 1, 0, 0, 1],
+                [0, 0, 0, 0, 1],
+                [0, 0, 0, 0, 1],
+                [0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1],
+            ],
+            [
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+            ],
+        ]
+    ])
+
+    target_slice = torch.IntTensor([
+        [
+            [
+                [0,   1,  1, -1, -1],
+                [0,   1,  1, -1, -1],
+                [0,   0,  0, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+            [
+                [0,   0,  0, -1, -1],
+                [1,   1,  1, -1, -1],
+                [0,   0,  0, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+        ],
+        [
+            [
+                [1,   1,  0, -1, -1],
+                [1,   0,  0, -1, -1],
+                [0,   0,  1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+            [
+                [1,   0,  0, -1, -1],
+                [1,   1,  1, -1, -1],
+                [0,   0,  0, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+        ],
+        [
+            [
+                [0,   1,  0, -1, -1],
+                [0,   1,  1, -1, -1],
+                [0,   1,  1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+            [
+                [0,   1,  1, -1, -1],
+                [0,   0,  0, -1, -1],
+                [0,   0,  0, -1, -1],
+                [-1, -1, -1, -1  -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+            [
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+                [-1, -1, -1, -1, -1],
+            ],
+        ]
+    ])
+    # fmt: on
+
+    dists_prediction_target = {
+        0: [1, 0, 0, np.sqrt(2), 1, 1, 0, 0, 1],
+        1: [0, 1, np.sqrt(2), 1, 0, 0, 1],
+        2: [0, 0, 0, 1, 0],
+    }
+    dist_target_prediction = {
+        0: [0, 1, 0, 1, 0, 0, 1],
+        1: [1, 1, 0, 1, 1, 0, 0, 1],
+        2: [0, 0, 1, 0, 1, 0, 1],
+    }
+
+    maximum_distance = 9
 
     return (
         prediction_slice,
