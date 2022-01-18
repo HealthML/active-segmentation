@@ -46,6 +46,7 @@ class BCSSDataset(IterableDataset):
             is_unlabeled (bool, optional): Whether the dataset is used as "unlabeled" for the active learning loop.
             shuffle (bool, optional): Whether the data should be shuffled.
             channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
+            image_shape (tuple, optional): Shape of the image.
     """
 
     # pylint: disable=too-many-instance-attributes,abstract-method
@@ -104,7 +105,7 @@ class BCSSDataset(IterableDataset):
         self.annotation_paths = annotation_paths
         self.target_label = target_label
         self.channels = channels
-        self.image_shape = image_shape
+        self.image_shape = tuple(image_shape)
         self.cache_size = cache_size
 
         manager = Manager()
@@ -164,9 +165,7 @@ class BCSSDataset(IterableDataset):
         self, filepath: str, norm: bool = True, is_mask: bool = False
     ) -> np.ndarray:
         """Loads one image in memory."""
-        img = Image.open(
-            filepath
-        )  # .resize((self.image_shape[0], self.image_shape[1]))
+        img = Image.open(filepath).resize((self.image_shape[0], self.image_shape[1]))
         if self.channels == 2:
             img = ImageOps.grayscale(img)
         img = np.asarray(img)

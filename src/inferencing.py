@@ -130,6 +130,7 @@ class Inferencer:
                 data_dir=self.data_dir,
                 batch_size=1,
                 num_workers=1,
+                image_shape=self.dataset_config["image_shape"],
             )
             data = data_module._create_test_set()
 
@@ -148,9 +149,7 @@ class Inferencer:
             # Repeat dimensions to emulate RGB channels (1, x, y) -> (3, x, y)
             seg = np.repeat(seg, repeats=3, axis=0)
 
-            original_image = Image.open(
-                data.image_paths[i]
-            )  # .resize(data.image_shape)
+            original_image = Image.open(data.image_paths[i]).resize(data.image_shape)
             # Move channel axis to the front for masking (x, y, 3) -> (3, x, y)
             original_image = np.moveaxis(np.asarray(original_image), 2, 0)
             image_with_seg = np.ma.masked_array(original_image, seg)
@@ -159,4 +158,4 @@ class Inferencer:
             image = Image.fromarray(np.moveaxis(image_with_seg, 0, 2))
             output_path = os.path.join(self.prediction_dir, f"{case_id}_PRED.png")
             image.save(output_path)
-            logging.info("Prediction for case %s stored in %s.", case_id, output_path)
+            print(f"Prediction for case {case_id} stored in {output_path}.")

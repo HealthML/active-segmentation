@@ -1,6 +1,6 @@
 """Module containing the data module for the BCSS dataset"""
 import shutil
-from typing import Tuple, List, Optional, Any, Callable
+from typing import Tuple, List, Optional, Any
 from pathlib import Path
 import os
 
@@ -10,7 +10,6 @@ from torch.utils.data import Dataset, DataLoader
 
 from datasets.data_module import ActiveLearningDataModule
 from datasets.bcss_dataset import BCSSDataset
-from datasets.collate import batch_padding_collate_fn
 
 
 class BCSSDataModule(ActiveLearningDataModule):
@@ -25,6 +24,8 @@ class BCSSDataModule(ActiveLearningDataModule):
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle (bool, optional): Flag if the data should be shuffled.
         channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
+        image_shape (tuple, optional): Shape of the image.
+        target_label (int, optional): The label to use for learning. Details are in BCSSDataset.
         val_set_size (float, optional): The size of the validation set, e.g. 0.3.
         stratify (bool, optional): The option to stratify the train val split by the institutes.
         **kwargs: Further, dataset specific parameters.
@@ -60,6 +61,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         ]
         return stratify
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         data_dir: str,
@@ -69,6 +71,8 @@ class BCSSDataModule(ActiveLearningDataModule):
         shuffle: bool = True,
         cache_size: int = 0,
         channels: int = 3,
+        image_shape: tuple = (300, 300),
+        target_label: int = 1,
         val_set_size: float = 0.3,
         stratify: bool = True,
         **kwargs,
@@ -84,6 +88,8 @@ class BCSSDataModule(ActiveLearningDataModule):
         )
         self.data_dir = self.data_dir
         self.channels = channels
+        self.image_shape = tuple(image_shape)
+        self.target_label = target_label
         self.cache_size = cache_size
         self.val_set_size = val_set_size
         self.stratify = stratify
@@ -92,11 +98,6 @@ class BCSSDataModule(ActiveLearningDataModule):
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """TBD"""
         raise NotImplementedError
-
-    def _get_collate_fn(self) -> Optional[Callable[[List[Any]], Any]]:
-        """Returns the batchwise padding collate function."""
-
-        return batch_padding_collate_fn
 
     def _get_train_and_val_paths(self) -> None:
         """Discovers the directory and splits into a train and a test dataset"""
@@ -144,6 +145,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             annotation_paths=self.split["train_annotation_paths"],
             shuffle=self.shuffle,
             channels=self.channels,
+            image_shape=self.image_shape,
+            target_label=self.target_label,
             cache_size=self.cache_size,
         )
 
@@ -161,7 +164,6 @@ class BCSSDataModule(ActiveLearningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
-                collate_fn=self._get_collate_fn(),
             )
         return None
 
@@ -174,6 +176,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             annotation_paths=self.split["val_annotation_paths"],
             shuffle=self.shuffle,
             channels=self.channels,
+            image_shape=self.image_shape,
+            target_label=self.target_label,
             cache_size=self.cache_size,
         )
 
@@ -188,6 +192,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             annotation_paths=test_annotation_paths,
             shuffle=False,
             channels=self.channels,
+            image_shape=self.image_shape,
+            target_label=self.target_label,
             cache_size=self.cache_size,
         )
 
