@@ -73,6 +73,9 @@ class Inferencer:
             **self.dataset_config,
         )
 
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.model.to(device)
+
         for i, (x, _, _) in enumerate(data):
             # For 2d case:
             # Switching axes to predict for single slices.
@@ -85,7 +88,7 @@ class Inferencer:
                 if self.model_dim == 2
                 else torch.unsqueeze(x, 0)
             )
-            pred = self.model.predict(x).cpu().numpy()
+            pred = self.model.predict(x.to(device)).cpu().numpy()
             seg = np.squeeze(np.swapaxes(pred, 0, 1) if self.model_dim == 2 else pred)
 
             seg = (seg >= 0.5) * 255

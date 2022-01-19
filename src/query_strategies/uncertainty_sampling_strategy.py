@@ -1,7 +1,8 @@
 """ Module for uncertainty sampling strategy """
-import torch
-import numpy as np
+import math
 from typing import List, Union
+
+import torch
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
@@ -14,6 +15,7 @@ class UncertaintySamplingStrategy(QueryStrategy):
     Class for selecting items via a random sampling strategy
     """
 
+    # pylint: disable=too-many-locals
     def select_items_to_label(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
@@ -34,41 +36,43 @@ class UncertaintySamplingStrategy(QueryStrategy):
         """
         # randomly select ids to query
 
-        if type(models) is List[PytorchModel]:
+        if isinstance(models, List):
             raise ValueError(
                 "Uncertainty sampling is only implemented for one model. You passed a list."
             )
 
-        selected_ids = []
-        selected_items = 0
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        models.to(device)
 
-        # Sum of the distance of all predictions compared to 0.5
-        uncertainties = [
-            (
-                torch.sum(
-                    torch.abs(
-                        0.5
-                        - models.predict(
-                            torch.swapaxes(x, 0, 1)
-                            if models.dim == 2
-                            else torch.unsqueeze(x, 0)
-                        ).flatten()
-                    )
-                ),
-                ids[0],
-            )
-            for x, ids in data_module.unlabeled_dataloader()
-        ]
+        batch_size = 128
+        data_items = len(data_module.unlabeled_dataloader())
+        batches = math.ceil(data_items / batch_size)
 
-        print("uncertainties: ", uncertainties)
-        print("first uncertainty: ", uncertainties[0])
-        print("first uncertainty shape: ", uncertainties[0][0].shape)
+        uncertainties = []
+        data_index = -1
+        data = iter(data_module.unlabeled_dataloader())
+        with torch.no_grad():
+            for _ in range(batches):
+                batch = []
+                for _ in range(batch_size):
+                    data_index += 1
+                    if data_index < data_items:
+                        batch.append(next(data))
+
+                x = torch.cat([x for [x, _] in batch], dim=1)
+
+                batch_stack = (
+                    torch.swapaxes(x, 0, 1)
+                    if models.dim == 2
+                    else torch.unsqueeze(x, 0)
+                )
+                batch_pred = models.predict(batch_stack.to(device))
+                uncert = torch.sum(torch.abs(0.5 - batch_pred), (1, 2, 3)).cpu().numpy()
+
+                for i, (_, case_id) in enumerate(batch):
+                    uncertainties.append((uncert[i], case_id[0]))
 
         uncertainties.sort(key=lambda y: y[0], reverse=True)
 
-        print("highest uncertainty: ", uncertainties[0:items_to_label])
-
         selected_ids = [id for (_, id) in uncertainties[0:items_to_label]]
-        print("selected_ids: ", selected_ids)
-
         return selected_ids
