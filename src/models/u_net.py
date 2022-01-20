@@ -97,7 +97,8 @@ class UNet(nn.Module):
         self.conv = Conv(in_channels=features, out_channels=out_channels, kernel_size=1)
 
         self.prediction_layer = (
-            torch.nn.Sigmoid() if multi_label else torch.nn.Softmax()
+            # ToDo: check 
+            torch.nn.Sigmoid() if multi_label else torch.nn.Softmax(dim=-1 * (dim+1))
         )
 
     def forward(self, x):
@@ -135,7 +136,11 @@ class UNet(nn.Module):
             dec = torch.cat((dec, encodings[level]), dim=1)
             dec = self.decoders[level](dec)
 
-        return self.prediction_layer(self.conv(dec))
+        decoded = self.conv(dec)
+
+        print("decoded", decoded.shape)
+
+        return self.prediction_layer(decoded)
 
     @staticmethod
     def _block(in_channels: int, features: int, name: str, dim: int):
