@@ -97,8 +97,7 @@ class UNet(nn.Module):
         self.conv = Conv(in_channels=features, out_channels=out_channels, kernel_size=1)
 
         self.prediction_layer = (
-            # ToDo: check 
-            torch.nn.Sigmoid() if multi_label else torch.nn.Softmax(dim=-1 * (dim+1))
+            torch.nn.Sigmoid() if multi_label else torch.nn.Softmax(dim=-1 * (dim + 1))
         )
 
     def forward(self, x):
