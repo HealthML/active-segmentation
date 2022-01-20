@@ -72,7 +72,7 @@ class UncertaintySamplingStrategy(QueryStrategy):
                 for i, (_, case_id) in enumerate(batch):
                     uncertainties.append((uncert[i], case_id[0]))
 
-        uncertainties.sort(key=lambda y: y[0], reverse=True)
+        uncertainties.sort(key=lambda y: y[0])
 
         selected_ids = [id for (_, id) in uncertainties[0:items_to_label]]
         return selected_ids
