@@ -26,7 +26,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
         image_shape (tuple, optional): Shape of the image.
         target_label (int, optional): The label to use for learning. Details are in BCSSDataset.
-        val_set_size (float, optional): The size of the validation set, e.g. 0.3.
+        val_set_size (float, optional): The size of the validation set (default = 0.3).
         stratify (bool, optional): The option to stratify the train val split by the institutes.
         **kwargs: Further, dataset specific parameters.
     """
