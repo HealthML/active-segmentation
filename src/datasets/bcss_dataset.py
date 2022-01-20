@@ -128,13 +128,13 @@ class BCSSDataset(IterableDataset):
         self._current_mask = None
         self._current_image_index = None
 
-        self.start_index = 0
-        self.end_index = self.num_images
-        self.current_index = 0
-
-        self.indices = np.arange(self.num_images)
+        self.indices = list(np.arange(self.num_images))
         if shuffle:
             np.random.shuffle(self.indices)
+
+        self.start_index = 0
+        self.end_index = self.__len__()
+        self.current_index = 0
 
     def __load_image_and_mask(self, index: int) -> None:
         """Loads images and annotations into _current_image and _current_mask variables."""
@@ -208,7 +208,7 @@ class BCSSDataset(IterableDataset):
         self,
     ) -> Union[Tuple[torch.Tensor, torch.Tensor, str], Tuple[torch.Tensor, str]]:
         """One iteration yields a tuple of image, annotation, case id"""
-        if self.current_index >= self.end_index:
+        if self.current_index >= self.__len__():
             raise StopIteration
 
         index = self.indices[self.current_index]
@@ -217,16 +217,59 @@ class BCSSDataset(IterableDataset):
         self.__load_image_and_mask(index=index)
         x = torch.from_numpy(self._current_image)
         y = torch.from_numpy(self._current_mask)
+        self.current_index += 1
 
         if self.is_unlabeled:
             return x, case_id
 
-        self.current_index += 1
         return x, y, case_id
 
     def __len__(self) -> int:
         """Returns the length of the dataset."""
-        return self.num_images
+        return len(self.indices)
+
+    def add_image(self, image_path: Path, annotation_path: Path) -> None:
+        """
+        Adds an image to this dataset.
+        Args:
+            image_path: Path of the image to be added.
+            annotation_path: Path of the annotation of the image to be added.
+
+        Returns:
+            None. Raises ValueError if image already exists.
+        """
+
+        if image_path not in self.image_paths:
+            self.image_paths.append(image_path)
+        if annotation_path not in self.annotation_paths:
+            self.annotation_paths.append(annotation_path)
+
+        image_index = self.image_paths.index(image_path)
+
+        if image_index not in self.indices:
+            # add new image index to existing ones
+            self.indices.append(image_index)
+        else:
+            raise ValueError("The image already belongs to this dataset.")
+
+    def remove_image(self, image_path: Path, annotation_path: Path) -> None:
+        """
+        Removes an image from this dataset.
+        Args:
+            image_path: Path of the image to be removed.
+            annotation_path: Path of the annotation of the image to be removed.
+
+        Returns:
+            None. Raises ValueError if image already exists.
+        """
+
+        if image_path in self.image_paths and annotation_path in self.annotation_paths:
+            self.image_paths.remove(image_path)
+            self.annotation_paths.remove(annotation_path)
+            self.num_images -= 1
+            self.indices = list(np.arange(self.num_images))
+        else:
+            raise ValueError("Image does not belong to this dataset.")
 
     def slices_per_image(self) -> List[int]:
         """For each image returns the number of slices"""

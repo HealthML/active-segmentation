@@ -18,8 +18,9 @@ ignore-docstrings=yes
 ignore-imports=no
 
 [DESIGN]
-max-attributes=10
+max-attributes=12
 max-args=10
+max-locals=20
 
 [MESSAGES CONTROL]
 disable=

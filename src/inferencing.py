@@ -146,6 +146,8 @@ class Inferencer:
 
             seg = (seg >= 0.5) * 255
             seg = seg.astype("float64")
+            seg_img = Image.fromarray(np.squeeze(seg, axis=0))
+            seg_img.save(os.path.join(self.prediction_dir, f"{case_id}_SEG_ONLY.png"))
             # Repeat dimensions to emulate RGB channels (1, x, y) -> (3, x, y)
             seg = np.repeat(seg, repeats=3, axis=0)
 
