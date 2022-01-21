@@ -32,135 +32,159 @@ class TestCombinedPerEpochMetric(unittest.TestCase):
                 True,
             ),
         ]:
-            (
-                prediction_1,
-                target_1,
-                cardinalities_1,
-                probability_positive_1,
-                probability_negative_1,
-            ) = test_slice_1(True)
+            for sharp_prediction in [True, False]:
+                (
+                    prediction_1,
+                    target_1,
+                    cardinalities_1,
+                    _,
+                    _,
+                ) = test_slice_1(sharp_prediction)
 
-            (
-                prediction_2,
-                target_2,
-                cardinalities_2,
-                probability_positive_2,
-                probability_negative_2,
-            ) = test_slice_2(True)
+                (
+                    prediction_2,
+                    target_2,
+                    cardinalities_2,
+                    _,
+                    _,
+                ) = test_slice_2(sharp_prediction)
 
-            image_ids = ["1", "2"]
+                image_ids = ["1", "2"]
 
-            expected_dice_score_1 = tests.utils.expected_metrics(
-                "dice_score",
-                cardinalities_1,
-                probability_positive_1,
-                probability_negative_1,
-                epsilon=0,
-            )
-            expected_dice_score_1 = torch.from_numpy(expected_dice_score_1)
+                expected_dice_score_1 = tests.utils.expected_metrics(
+                    "dice_score",
+                    cardinalities_1,
+                    probability_positive=1.0,
+                    probability_negative=0.0,
+                    epsilon=0,
+                )
+                expected_dice_score_1 = torch.from_numpy(expected_dice_score_1)
 
-            expected_dice_score_2 = tests.utils.expected_metrics(
-                "dice_score",
-                cardinalities_2,
-                probability_positive_2,
-                probability_negative_2,
-                epsilon=0,
-            )
-            expected_dice_score_2 = torch.from_numpy(expected_dice_score_2)
+                expected_dice_score_2 = tests.utils.expected_metrics(
+                    "dice_score",
+                    cardinalities_2,
+                    probability_positive=1.0,
+                    probability_negative=0.0,
+                    epsilon=0,
+                )
+                expected_dice_score_2 = torch.from_numpy(expected_dice_score_2)
 
-            prediction_batch = torch.stack([prediction_1, prediction_2])
-            target_batch = torch.stack([target_1, target_2])
+                prediction_batch = torch.stack([prediction_1, prediction_2])
+                target_batch = torch.stack([target_1, target_2])
 
-            metrics = ["dice_score", "sensitivity", "specificity", "hausdorff95"]
-            confidence_levels = [0.2, 0.5, 0.8]
+                metrics = ["dice_score", "sensitivity", "specificity", "hausdorff95"]
+                confidence_levels = [0.2, 0.5, 0.8]
 
-            for include_background_in_reduced_metrics in [True, False]:
-                for reduction in ["mean", "min", "max"]:
-                    per_epoch_metrics_module = CombinedPerEpochMetric(
-                        metrics,
-                        {
-                            0: "first_test_class",
-                            1: "second_test_class",
-                            2: "third_test_class",
-                        },
-                        image_ids,
-                        slices_per_image=1,
-                        include_background_in_reduced_metrics=include_background_in_reduced_metrics,
-                        multi_label=multi_label,
-                        confidence_levels=confidence_levels,
-                        reduction_across_classes=reduction,
-                        reduction_across_images="mean"
-                    )
-
-                    if include_background_in_reduced_metrics or multi_label:
-                        expected_reduced_dice_score = torch.stack(
-                            [expected_dice_score_1, expected_dice_score_2]
-                        )
-                    else:
-                        expected_reduced_dice_score = torch.stack(
-                            [expected_dice_score_1[1:], expected_dice_score_2[1:]]
+                for include_background_in_reduced_metrics in [True, False]:
+                    for reduction in ["mean", "min", "max"]:
+                        per_epoch_metrics_module = CombinedPerEpochMetric(
+                            metrics,
+                            {
+                                0: "first_test_class",
+                                1: "second_test_class",
+                                2: "third_test_class",
+                            },
+                            image_ids,
+                            slices_per_image=1,
+                            include_background_in_reduced_metrics=include_background_in_reduced_metrics,
+                            multi_label=multi_label,
+                            confidence_levels=confidence_levels,
+                            reduction_across_classes=reduction,
+                            reduction_across_images="mean",
                         )
 
-                    expected_reduced_dice_score = expected_reduced_dice_score.mean(
-                        dim=0
-                    )
-
-                    if reduction == "mean":
-                        expected_reduced_dice_score = expected_reduced_dice_score.mean()
-                    elif reduction == "min":
-                        expected_reduced_dice_score = expected_reduced_dice_score.min()
-                    elif reduction == "max":
-                        expected_reduced_dice_score = expected_reduced_dice_score.max()
-
-                    per_epoch_metrics_module.update(
-                        prediction_batch, target_batch, image_ids
-                    )
-
-                    per_epoch_metrics = per_epoch_metrics_module.compute()
-
-                    if multi_label:
-                        num_classes = 3
-                        self.assertEqual(
-                            len(per_epoch_metrics.keys()),
-                            len(confidence_levels) * len(metrics) * (num_classes + 1),
-                            "The returned metrics object contains one entry per class, metric and confidence level and "
-                            "one entry per metric and confidence level for the metrics aggregated over all classes.",
-                        )
-
-                        self.assertEqual(
-                            per_epoch_metrics["dice_score_first_test_class_0.5"],
-                            torch.stack(
-                                [expected_dice_score_1[0], expected_dice_score_2[0]]
+                        if include_background_in_reduced_metrics or multi_label:
+                            expected_reduced_dice_score = torch.stack(
+                                [expected_dice_score_1, expected_dice_score_2]
                             )
-                            .float()
-                            .mean(),
-                            "The returned metrics object contains the mean of the per-image metrics.",
-                        )
-
-                        torch.testing.assert_allclose(
-                            per_epoch_metrics[f"{reduction}_dice_score_0.5"],
-                            expected_reduced_dice_score,
-                            msg=f"For multi-label tasks, the returned metrics object contains the {reduction} of the "
-                            "per-class metrics.",
-                        )
-                    else:
-                        self.assertEqual(
-                            per_epoch_metrics["dice_score_first_test_class"],
-                            torch.stack(
-                                [expected_dice_score_1[0], expected_dice_score_2[0]]
+                        else:
+                            expected_reduced_dice_score = torch.stack(
+                                [expected_dice_score_1[1:], expected_dice_score_2[1:]]
                             )
-                            .float()
-                            .mean(),
-                            "For single-label tasks, the returned metrics object contains the mean of the per-image"
-                            " metrics.",
+
+                        expected_reduced_dice_score = expected_reduced_dice_score.mean(
+                            dim=0
                         )
 
-                        torch.testing.assert_allclose(
-                            per_epoch_metrics[f"{reduction}_dice_score"],
-                            expected_reduced_dice_score,
-                            msg=f"For single-label tasks, the returned metrics object contains the {reduction} of the "
-                            "per-image metrics.",
+                        if reduction == "mean":
+                            expected_reduced_dice_score = (
+                                expected_reduced_dice_score.mean()
+                            )
+                        elif reduction == "min":
+                            expected_reduced_dice_score = (
+                                expected_reduced_dice_score.min()
+                            )
+                        elif reduction == "max":
+                            expected_reduced_dice_score = (
+                                expected_reduced_dice_score.max()
+                            )
+
+                        per_epoch_metrics_module.update(
+                            prediction_batch, target_batch, image_ids
                         )
+
+                        per_epoch_metrics = per_epoch_metrics_module.compute()
+
+                        if multi_label:
+                            num_classes = 3
+                            self.assertEqual(
+                                len(per_epoch_metrics.keys()),
+                                len(confidence_levels)
+                                * len(metrics)
+                                * (num_classes + 1),
+                                "The returned metrics object contains one entry per class, metric and confidence level "
+                                "and one entry per metric and confidence level for the metrics aggregated over all "
+                                "classes.",
+                            )
+
+                            print(
+                                "expected",
+                                torch.stack(
+                                    [expected_dice_score_1[0], expected_dice_score_2[0]]
+                                ),
+                            )
+
+                            self.assertEqual(
+                                per_epoch_metrics["dice_score_first_test_class_0.5"],
+                                torch.stack(
+                                    [expected_dice_score_1[0], expected_dice_score_2[0]]
+                                )
+                                .float()
+                                .mean(),
+                                "The returned metrics object contains the mean of the per-image metrics.",
+                            )
+
+                            torch.testing.assert_allclose(
+                                per_epoch_metrics[f"{reduction}_dice_score_0.5"],
+                                expected_reduced_dice_score,
+                                msg=f"For multi-label tasks, the returned metrics object contains the {reduction} of "
+                                f"the per-class metrics.",
+                            )
+                        else:
+                            print(
+                                "expected",
+                                torch.stack(
+                                    [expected_dice_score_1[0], expected_dice_score_2[0]]
+                                ),
+                            )
+
+                            self.assertEqual(
+                                per_epoch_metrics["dice_score_first_test_class"],
+                                torch.stack(
+                                    [expected_dice_score_1[0], expected_dice_score_2[0]]
+                                )
+                                .float()
+                                .mean(),
+                                "For single-label tasks, the returned metrics object contains the mean of the per-image"
+                                " metrics.",
+                            )
+
+                            torch.testing.assert_allclose(
+                                per_epoch_metrics[f"{reduction}_dice_score"],
+                                expected_reduced_dice_score,
+                                msg=f"For single-label tasks, the returned metrics object contains the {reduction} of "
+                                f"the per-image metrics.",
+                            )
 
     def test_attribute_passing(self):
         """Tests that the relevant attributes are correctly passed to the per-image metrics."""
