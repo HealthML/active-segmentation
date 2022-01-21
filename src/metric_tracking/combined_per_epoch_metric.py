@@ -58,7 +58,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         - Image_ids: :math:`(N)`, where `N = batch size`.
     """
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments, too-many-instance-attributes
     def __init__(
         self,
         metrics: Iterable[MetricName],
@@ -160,7 +160,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             self._metrics_per_image[image_id].update(prediction[idx], target[idx])
             self.metrics_to_compute.add(image_id)
 
-    def _reduce_metric(self, metric: torch.Tensor, reduction: str) -> torch.Tensor:
+    @staticmethod
+    def _reduce_metric(metric: torch.Tensor, reduction: str) -> torch.Tensor:
         """
         Aggregates metric values.
 
