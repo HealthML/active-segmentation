@@ -108,7 +108,8 @@ class PytorchModel(LightningModule, ABC):
         metric_kwargs = {
             "id_to_class_names": self.trainer.datamodule.id_to_class_names(),
             "multi_label": self.trainer.datamodule.multi_label(),
-            "reduction": "mean",
+            "reduction_across_classes": "mean",
+            "reduction_across_images": "mean",
         }
 
         if stage == "fit":

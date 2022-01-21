@@ -31,8 +31,12 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         multi_label (bool, optional): Determines whether the data is multi-label or not (default = `False`).
         confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics are to be
             tracked separately. This parameter is used only if `multi_label` is set to `True`. Defaults to `[0.5]`.
-       reduction (string, optional):  Reduction function that is to be used to aggregate the metric values of all
-            classes, must be either "mean", "max", "min" or "none". Defaults to `"mean"`.
+       reduction_across_classes (string, optional):  Reduction function that is to be used to aggregate the metric
+            values of all classes in order to obtain one global metric value, must be either "mean", "max", "min" or
+            "none". Defaults to `"mean"`.
+       reduction_across_images (string, optional):  Reduction function that is to be used to aggregate the metric
+            values of all images in order to obtain the per-class metric value, must be either "mean", "max", "min" or
+            "none". Defaults to `"mean"`.
     Note:
         If `multi_label` is `False`, the `prediction` tensor is expected to be either the output of the final softmax
         layer of a segmentation model or a label-encoded, sharp prediction. In the first case, the prediction tensor
@@ -64,7 +68,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         include_background_in_reduced_metrics: bool = False,
         multi_label: bool = False,
         confidence_levels: Optional[Iterable[float]] = None,
-        reduction: str = "mean",
+        reduction_across_classes: str = "mean",
+        reduction_across_images: str = "mean",
     ):
         super().__init__()
         self.metrics = metrics
@@ -95,10 +100,20 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         )
         self.metrics_to_compute = set()
 
-        if reduction not in ["mean", "max", "min", "none"]:
+        if (
+            reduction_across_classes
+            not in [
+                "mean",
+                "max",
+                "min",
+                "none",
+            ]
+            or reduction_across_images not in ["mean", "max", "min", "none"]
+        ):
             raise ValueError("Invalid reduction method.")
 
-        self.reduction = reduction
+        self.reduction_across_classes = reduction_across_classes
+        self.reduction_across_images = reduction_across_images
 
     def reset(self) -> None:
         """
@@ -145,22 +160,24 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             self._metrics_per_image[image_id].update(prediction[idx], target[idx])
             self.metrics_to_compute.add(image_id)
 
-    def _reduce_metric(self, metric: torch.Tensor) -> torch.Tensor:
+    def _reduce_metric(self, metric: torch.Tensor, reduction: str) -> torch.Tensor:
         """
         Aggregates metric values.
 
         Args:
             metric (Tensor): Metric to be aggregated.
+            reduction (string):  Reduction function that is to be used to aggregate the metric values, must be either
+                "mean", "max", "min" or "none".
 
         Returns:
             Tensor: Aggregated metric.
         """
 
-        if self.reduction == "mean":
+        if reduction == "mean":
             return metric.mean()
-        if self.reduction == "max":
+        if reduction == "max":
             return metric.max()
-        if self.reduction == "min":
+        if reduction == "min":
             return metric.min()
         return metric
 
@@ -184,7 +201,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         for image_id in self.metrics_to_compute:
             metrics = self._metrics_per_image[image_id].compute()
             for metric_name, metric_value in metrics.items():
-                if self.reduction == "none":
+                if self.reduction_across_images == "none":
                     per_image_metrics[f"{metric_name}_{image_id}"] = metric_value
                 else:
                     if metric_name not in per_image_metrics:
@@ -192,14 +209,16 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                     per_image_metrics[metric_name].append(metric_value)
         self.metrics_to_compute = set()
 
-        if self.reduction == "none":
+        if self.reduction_across_images == "none":
             return per_image_metrics
 
         # compute mean metrics over all images
         aggregated_metrics = {}
 
         for metric_name, metric_value in per_image_metrics.items():
-            aggregated_metrics[metric_name] = torch.tensor(metric_value).mean()
+            aggregated_metrics[metric_name] = self._reduce_metric(
+                torch.tensor(metric_value), self.reduction_across_images
+            )
 
         for metric_name in self.metrics:
             if self.multi_label:
@@ -216,8 +235,10 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                             ]
                             per_class_metrics.append(per_class_metric)
                     aggregated_metrics[
-                        f"{self.reduction}_{metric_name}_{confidence_level}"
-                    ] = self._reduce_metric(torch.Tensor(per_class_metrics))
+                        f"{self.reduction_across_classes}_{metric_name}_{confidence_level}"
+                    ] = self._reduce_metric(
+                        torch.Tensor(per_class_metrics), self.reduction_across_classes
+                    )
             else:
                 per_class_metrics = []
                 for class_id, class_name in self.id_to_class_names.items():
@@ -231,7 +252,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                         ]
                         per_class_metrics.append(per_class_metric)
                 aggregated_metrics[
-                    f"{self.reduction}_{metric_name}"
-                ] = self._reduce_metric(torch.Tensor(per_class_metrics))
+                    f"{self.reduction_across_classes}_{metric_name}"
+                ] = self._reduce_metric(
+                    torch.Tensor(per_class_metrics), self.reduction_across_classes
+                )
 
         return aggregated_metrics

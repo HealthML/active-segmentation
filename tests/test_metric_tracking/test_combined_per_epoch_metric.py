@@ -88,7 +88,8 @@ class TestCombinedPerEpochMetric(unittest.TestCase):
                         include_background_in_reduced_metrics=include_background_in_reduced_metrics,
                         multi_label=multi_label,
                         confidence_levels=confidence_levels,
-                        reduction=reduction,
+                        reduction_across_classes=reduction,
+                        reduction_across_images="mean"
                     )
 
                     if include_background_in_reduced_metrics or multi_label:
