@@ -167,7 +167,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             Dict[int, str]: A mapping of class indices to descriptive class names.
         """
 
-        with DecathlonDataModule.__open_dataset_file(self.data_dir) as dataset_file:
+        with DecathlonDataModule.__open_dataset_file(self.data_folder) as dataset_file:
             dataset_info = json.load(dataset_file)
             labels = dataset_info["labels"]
 
