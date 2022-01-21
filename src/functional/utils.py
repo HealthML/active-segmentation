@@ -1,6 +1,6 @@
 """Utilities for metric and loss computations."""
 
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 import torch
 
@@ -35,8 +35,8 @@ def flatten_tensors(
         target = target[1:]
 
     # flatten tensors except for the first channel (class dimension)
-    flattened_prediction = prediction.view(prediction.shape[0], -1)
-    flattened_target = target.view(target.shape[0], -1)
+    flattened_prediction = prediction.contiguous().view(prediction.shape[0], -1)
+    flattened_target = target.contiguous().view(target.shape[0], -1)
 
     return flattened_prediction.float(), flattened_target.float()
 
@@ -57,15 +57,19 @@ def is_binary(tensor_to_check: torch.Tensor) -> bool:
 
 
 def mask_tensor(
-    tensor: torch.Tensor, mask: torch.Tensor, ignore_index: Optional[int] = None
+    tensor: torch.Tensor,
+    mask: torch.Tensor,
+    ignore_index: Optional[int] = None,
+    mask_value: float = 0,
 ) -> torch.Tensor:
     r"""
-    Zeros the tensor's values in the positions where the mask is equal to `ignore_index`.
+    Replaces the tensor's values in the positions where the mask is equal to `ignore_index` with `mask_value`.
 
     Args:
         tensor (Tensor): A tensor in which is to be masked.
         mask (Tensor): A mask tensor containing the :attr:`ignore_index` at the positions to be masked.
-        ignore_index (int, optional): Label index indicating the positions to be zeroed.
+        ignore_index (int, optional): Label index indicating the positions to be masked.
+        mask_value (float, optional): Value that should be inserted at the masked positions. Defaults to 0.
 
     Returns:
         Tensor: Masked tensor.
@@ -77,9 +81,9 @@ def mask_tensor(
     """
 
     if ignore_index is not None:
-        # map ignore_index to true negatives
+        # set positions where tensor is equal to ignore_index to mask_value
         tensor = tensor.clone()
-        tensor = (mask != ignore_index) * tensor
+        tensor = (mask != ignore_index) * tensor + (mask == ignore_index) * mask_value
 
     return tensor
 
@@ -130,6 +134,98 @@ def one_hot_encode(
     return torch.moveaxis(tensor_one_hot, tensor_one_hot.ndim - 1, 0)
 
 
+def remove_padding(
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    ignore_index: Union[int, None],
+    is_label_encoded: bool,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    r"""
+    Removes padding from prediction and target tensor. For this purpose, the areas where the target tensor is
+    equal to :attr:`ignore_index` are removed from both tensors. It is assumed that whole rows or columns are padded
+    always.
+
+    Args:
+        prediction (Tensor): A prediction tensor (label-encoded, one-hot encoded, or multi-hot encoded).
+        target (Tensor): A target tensor (with same encoding as prediction tensor).
+        ignore_index (int): Specifies the target value that is used as label for padded areas.
+        is_label_encoded (bool): Whether the input data are label encoded or one-hot / multi-hot encoded.
+
+    Returns:
+        Tuple[Tensor, Tensor]: Prediction and target tensors without padding areas.
+
+    Shape:
+        - Prediction: :math:`(X, Y, ...)` in case of label encoding and :math:`(C, X, Y, ...)`, in case of one-hot
+            or multi-hot encoding (`C = number of classes`).
+        - Target: Same shape as prediction.
+        - Output: :math:`(X - P_x, Y - P_y, ...)` in case of label encoding and :math:`(C, X - P_x, Y - P_y, ...)`,
+            in case of one-hot or multi-hot encoding (`C = number of classes`, `P_x = padding width on x-axis`).
+    """
+
+    if ignore_index is None:
+        return prediction, target
+
+    assert (
+        prediction.shape == target.shape
+    ), "Prediction and target must have the same shape"
+
+    if is_label_encoded:
+        first_spatial_dim = 0
+        dimensionality = target.dim()
+    else:
+        first_spatial_dim = 1
+        dimensionality = target.dim() - 1
+
+    # for 3d images, first slices that only contain padding are removed
+    if dimensionality == 3:
+        is_padding = (
+            target == ignore_index if is_label_encoded else target[0] == ignore_index
+        )
+
+        if not is_label_encoded:
+            assert torch.equal(
+                (target[0] == ignore_index).int() * len(target),
+                (target == ignore_index).sum(dim=0).int(),
+            ), "All class channels have the same padding size"
+
+        is_padding_slice = is_padding.flatten(start_dim=-2).all(dim=-1)
+
+        all_indices = torch.arange(is_padding.shape[0])
+        indices_to_keep = torch.masked_select(all_indices, ~is_padding_slice)
+
+        target = target.index_select(first_spatial_dim, indices_to_keep)
+        prediction = prediction.index_select(first_spatial_dim, indices_to_keep)
+
+    # afterwards single padded rows and columns are removed
+
+    # the first 2d slice is selected and it is assumed that all other slices have the same padding size
+    all_target_slices = target.view(-1, *target.shape[-2:])
+    first_slice = all_target_slices[0]
+
+    if target.dim() > 2:
+        assert torch.equal(
+            (first_slice == ignore_index).int() * len(all_target_slices),
+            (all_target_slices == ignore_index).sum(dim=0).int(),
+        ), "All slices have the same padding size."
+
+    for dim in [0, 1]:
+        is_padding = (first_slice == ignore_index).all(dim=dim)
+        all_indices = torch.arange(len(is_padding))
+        indices_to_keep = torch.masked_select(all_indices, ~is_padding)
+
+        target = target.index_select(-2 + dim, indices_to_keep)
+        prediction = prediction.index_select(-2 + dim, indices_to_keep)
+
+    assert (
+        prediction != ignore_index
+    ).all(), "Prediction does not contain padded areas after padding removal."
+    assert (
+        target != ignore_index
+    ).all(), "Target does not contain padded areas after padding removal."
+
+    return prediction, target
+
+
 def validate_metric_inputs(
     prediction: torch.Tensor, target: torch.Tensor, convert_to_one_hot: bool
 ) -> None:
@@ -153,8 +249,21 @@ def validate_metric_inputs(
     assert (
         prediction.shape == target.shape
     ), "Prediction and target need to have the same shape."
-    assert prediction.dtype == torch.int, "Prediction has to be of integer type."
-    assert target.dtype == torch.int, "Target has to be of integer type."
+
+    assert prediction.dtype in [
+        torch.int,
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+    ], "Prediction has to be of integer type."
+    assert target.dtype in [
+        torch.int,
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+    ], "Target has to be of integer type."
 
     if convert_to_one_hot is True:
         # for single-label segmentation tasks, prediction and target are expected be label encoded
@@ -172,7 +281,7 @@ def validate_metric_inputs(
             prediction
         ), "Prediction needs to be binary if `convert_to_one_hot` is False."
         assert is_binary(
-            target
+            target * (target >= 0)  # target excluding ignore index
         ), "Target needs to be binary if `convert_to_one_hot` is False."
 
         assert prediction.dim() in [
@@ -187,13 +296,14 @@ def preprocess_metric_inputs(
     num_classes: int,
     convert_to_one_hot: bool = True,
     ignore_index: Optional[int] = None,
+    ignore_value: float = 0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     This method implements preprocessing steps that are needed for most segmentation metrics:
 
     1. Validation of input shape and type
     2. Conversion from label encoding to one-hot encoding if necessary
-    3. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives
+    3. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives or true positives
 
     Args:
         prediction (Tensor): The prediction tensor to be preprocessed.
@@ -203,12 +313,19 @@ def preprocess_metric_inputs(
             encoding or not (default = `True`).
         ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
             Defaults to `None`.
+        ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to
+            `ignore_index`. Defaults to 0.
 
     Returns:
         Tuple[Tensor, Tensor]: The preprocessed prediction and target tensors.
     """
 
     validate_metric_inputs(prediction, target, convert_to_one_hot)
+
+    # during one-hot encoding the ignore index is removed, therefore the original target including the ignore index
+    # is copied
+    target_including_ignore_index = target
+    target = target.clone()
 
     if convert_to_one_hot:
         prediction = one_hot_encode(
@@ -219,8 +336,20 @@ def preprocess_metric_inputs(
         )
 
     # map values where the target is set to `ignore_index` to zero
-    prediction = mask_tensor(prediction, target, ignore_index=ignore_index)
-    target = mask_tensor(target, target, ignore_index=ignore_index)
+
+    prediction = mask_tensor(
+        prediction,
+        target_including_ignore_index,
+        ignore_index=ignore_index,
+        mask_value=ignore_value,
+    )
+
+    target = mask_tensor(
+        target,
+        target_including_ignore_index,
+        ignore_index=ignore_index,
+        mask_value=ignore_value,
+    )
 
     return prediction, target
 

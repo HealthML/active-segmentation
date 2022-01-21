@@ -17,10 +17,16 @@
     "data_dir": "/dhc/groups/mpws2021cl1/Data/Decathlon",
     "cache_size": 250,
     "pin_memory": true,
-    "task": "Task09_Spleen"
+    "task": "Task04_Hippocampus"
+  },
+  "active_learning_config": {
+    "active_learning_mode": true,
+    "initial_training_set_size": 32,
+    "iterations": 2,
+    "items_to_label": 32
   },
   "wandb_project_name": "active-segmentation-tests",
-  "strategy": "base",
+  "strategy": "random",
   "experiment_name": "test-experiment",
   "experiment_tags": [],
   "batch_size": 16,

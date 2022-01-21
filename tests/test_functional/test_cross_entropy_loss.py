@@ -7,13 +7,12 @@ import numpy as np
 import torch
 
 from functional import CrossEntropyLoss
-import tests.utils
+import tests.utils.test_data_cardinality_metrics as test_data
 
 
 class TestCrossEntropyLoss(unittest.TestCase):
     """
-    Returns:
-        String: The name of the loss or metric to be tested.
+    Test cases for cross-entropy loss.
     """
 
     @staticmethod
@@ -139,21 +138,23 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         if expected_loss is None:
             if multi_label:
-                expected_cross_entropy_loss = self._expected_binary_cross_entropy_loss(
+                expected_loss = self._expected_binary_cross_entropy_loss(
                     prediction, target
                 )
-
             else:
-                expected_cross_entropy_loss = self._expected_cross_entropy_loss(
-                    prediction, target
-                )
+                expected_loss = self._expected_cross_entropy_loss(prediction, target)
 
+            expected_loss = torch.from_numpy(expected_loss)
+
+            if ignore_index is not None:
+                expected_loss = expected_loss * (target != ignore_index)
             if reduction == "mean":
-                expected_loss = torch.as_tensor(expected_cross_entropy_loss.mean())
+                expected_loss = expected_loss.mean()
             elif reduction == "sum":
-                expected_loss = torch.as_tensor(expected_cross_entropy_loss.sum())
-            else:
-                expected_loss = torch.Tensor(expected_cross_entropy_loss)
+                expected_loss = expected_loss.sum()
+
+        prediction = prediction.float()
+        target = target.float()
 
         prediction.requires_grad = True
         target.requires_grad = True
@@ -165,9 +166,6 @@ class TestCrossEntropyLoss(unittest.TestCase):
         )
 
         cross_entropy_loss = loss_module(prediction, target)
-
-        print("cross_entropy_loss", cross_entropy_loss)
-        print("expected_loss", expected_loss)
 
         self.assertTrue(
             cross_entropy_loss.shape == expected_loss.shape,
@@ -197,13 +195,13 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         for test_slice_1, test_slice_2, multi_label in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.standard_slice_single_label_2,
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
                 False,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.standard_slice_multi_label_2,
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
                 True,
             ),
         ]:
@@ -221,8 +219,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
         """
 
         for test_slice, multi_label in [
-            (tests.utils.slice_all_true_single_label, False),
-            (tests.utils.slice_all_true_multi_label, True),
+            (test_data.slice_all_true_single_label, False),
+            (test_data.slice_all_true_multi_label, True),
         ]:
 
             if multi_label:
@@ -253,8 +251,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
         """
 
         for test_slice, multi_label in [
-            (tests.utils.slice_all_false_single_label, False),
-            (tests.utils.slice_all_false_multi_label, True),
+            (test_data.slice_all_false_single_label, False),
+            (test_data.slice_all_false_multi_label, True),
         ]:
             if multi_label:
                 # PyTorch's BCELoss implementation clamps the loss values to [0, 100]
@@ -295,18 +293,17 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         for test_slice_1, test_slice_2, multi_label in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.slice_ignore_index_single_label,
+                test_data.standard_slice_single_label_1,
+                test_data.slice_ignore_index_single_label,
                 False,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.slice_ignore_index_multi_label,
+                test_data.standard_slice_multi_label_1,
+                test_data.slice_ignore_index_multi_label,
                 True,
             ),
         ]:
             for reduction in ["none", "mean", "sum"]:
-                print("test_slice_2", test_slice_2(True))
                 self._test_loss(
                     test_slice_1,
                     test_slice_2,
@@ -321,8 +318,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
         """
 
         for test_slice, multi_label in [
-            (tests.utils.slice_all_true_negatives_single_label, False),
-            (tests.utils.slice_all_true_negatives_multi_label, True),
+            (test_data.slice_all_true_negatives_single_label, False),
+            (test_data.slice_all_true_negatives_multi_label, True),
         ]:
             self._test_loss(
                 test_slice,

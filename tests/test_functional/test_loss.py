@@ -7,6 +7,7 @@ import numpy as np
 import torch
 
 import tests.utils
+import tests.utils.test_data_cardinality_metrics as test_data
 
 
 class LossTestCase(abc.ABC):
@@ -129,6 +130,9 @@ class LossTestCase(abc.ABC):
                     [expected_loss_first_slice, expected_loss_second_slice]
                 )
 
+        prediction = prediction.float()
+        target = target.float()
+
         prediction.requires_grad = True
         target.requires_grad = True
 
@@ -170,12 +174,12 @@ class LossTestCase(abc.ABC):
 
         for test_slice_1, test_slice_2 in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.standard_slice_single_label_2,
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.standard_slice_multi_label_2,
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
             ),
         ]:
             for reduction in ["none", "mean", "sum"]:
@@ -195,8 +199,8 @@ class LossTestCase(abc.ABC):
         """
 
         for test_slice in [
-            tests.utils.slice_all_true_single_label,
-            tests.utils.slice_all_true_multi_label,
+            test_data.slice_all_true_single_label,
+            test_data.slice_all_true_multi_label,
         ]:
 
             for epsilon in [0, 1]:
@@ -234,8 +238,8 @@ class LossTestCase(abc.ABC):
         """
 
         for test_slice in [
-            tests.utils.slice_all_false_single_label,
-            tests.utils.slice_all_false_multi_label,
+            test_data.slice_all_false_single_label,
+            test_data.slice_all_false_multi_label,
         ]:
 
             self._test_loss(
@@ -300,8 +304,8 @@ class LossTestCase(abc.ABC):
         """
 
         for test_slice in [
-            tests.utils.slice_no_true_negatives_single_label,
-            tests.utils.slice_no_true_negatives_multi_label,
+            test_data.slice_no_true_negatives_single_label,
+            test_data.slice_no_true_negatives_multi_label,
         ]:
             for reduction in ["none", "mean", "sum"]:
                 for include_background in [True, False]:
@@ -321,12 +325,12 @@ class LossTestCase(abc.ABC):
 
         for test_slice_1, test_slice_2 in [
             (
-                tests.utils.standard_slice_single_label_1,
-                tests.utils.slice_ignore_index_single_label,
+                test_data.standard_slice_single_label_1,
+                test_data.slice_ignore_index_single_label,
             ),
             (
-                tests.utils.standard_slice_multi_label_1,
-                tests.utils.slice_ignore_index_multi_label,
+                test_data.standard_slice_multi_label_1,
+                test_data.slice_ignore_index_multi_label,
             ),
         ]:
             for reduction in ["none", "mean", "sum"]:

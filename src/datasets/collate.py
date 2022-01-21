@@ -23,7 +23,8 @@ def batch_padding_collate_fn(
     if isinstance(elem, tuple):
         return tuple(
             (
-                batch_padding_collate_fn(samples, -1 if idx == 1 else 0)
+                # Always pad labels with -1.
+                batch_padding_collate_fn(samples, -1 if idx == 1 else pad_value)
                 for idx, samples in enumerate(zip(*batch))
             )
         )

@@ -7,7 +7,7 @@ generated-members=torch.*
 extension-pkg-allow-list=math
 
 [BASIC]
-good-names=x,y,i,j,tp,fp,tn,fn,to
+good-names=x,y,z,i,j,tp,fp,tn,fn,to
 
 [FORMAT]
 max-line-length=120

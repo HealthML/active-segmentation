@@ -28,9 +28,14 @@ class ActiveLearningPipeline:
         logger: A logger object as defined by Pytorch Lightning.
         lr_scheduler (string, optional): Algorithm used for dynamically updating the
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).
+        items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.
+            (default = 1).
+        iterations (int, optional): iteration times how often the active learning pipeline should be
+        executed (default = 10).
     """
 
-    # pylint: disable=too-few-public-methods,too-many-arguments
+    # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals
     def __init__(
         self,
         data_module: ActiveLearningDataModule,
@@ -39,6 +44,9 @@ class ActiveLearningPipeline:
         epochs: int,
         gpus: int,
         checkpoint_dir: Optional[str] = None,
+        active_learning_mode: bool = False,
+        items_to_label: int = 1,
+        iterations: int = 10,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
@@ -81,21 +89,48 @@ class ActiveLearningPipeline:
         )
         self.strategy = strategy
         self.epochs = epochs
+        self.logger = logger
         self.gpus = gpus
+        self.active_learning_mode = active_learning_mode
+        self.items_to_label = items_to_label
+        self.iterations = iterations
+        self.callbacks = callbacks
 
     def run(self) -> None:
         """Run the pipeline"""
         self.data_module.setup()
 
-        items_to_label = self.strategy.select_items_to_label(
-            self.model,
-            self.data_module.unlabeled_dataloader(),
-            self.data_module.unlabeled_set_size(),
-        )
+        if self.active_learning_mode:
+            # run pipeline
+            for iteration in range(0, self.iterations):
+                # skip labeling in the first iteration because the model hasn't trained yet
+                if iteration != 0:
+                    # query batch selection
+                    items_to_label = self.strategy.select_items_to_label(
+                        self.model, self.data_module, self.items_to_label
+                    )
+                    # label batch
+                    self.data_module.label_items(items_to_label)
 
-        self.data_module.label_items(items_to_label)
+                self.logger.log_metrics({"train/al_loop_iterations": iteration})
+                # train model on labeled batch
+                self.model_trainer.fit(self.model, self.data_module)
 
-        self.model_trainer.fit(self.model, self.data_module)
+                # don't reset the model trainer in the last iteration
+                if iteration != self.iterations - 1:
+                    # reset model trainer
+                    self.model_trainer = Trainer(
+                        deterministic=True,
+                        profiler="simple",
+                        max_epochs=self.epochs,
+                        logger=self.logger,
+                        gpus=self.gpus,
+                        benchmark=True,
+                        callbacks=self.callbacks,
+                    )
+        else:
+            # run regular fit run with all the data if no active learning mode
+            self.model_trainer.fit(self.model, self.data_module)
 
         # compute metrics for the best model on the validation set
         self.model_trainer.validate()

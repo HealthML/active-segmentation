@@ -6,17 +6,21 @@ from typing import Literal, Optional
 import torch
 
 from functional import DiceLoss
-import tests.utils
+import tests.utils.test_data_cardinality_metrics as test_data
 from .test_loss import LossTestCase
 
 
 class TestDiceLoss(unittest.TestCase, LossTestCase):
     """
-    Returns:
-        String: The name of the loss or metric to be tested.
+    Test cases for Dice loss.
     """
 
     def loss_name(self) -> str:
+        """
+        Returns:
+            String: The name of the loss or metric to be tested.
+        """
+
         return "dice_loss"
 
     def loss_module(
@@ -51,8 +55,8 @@ class TestDiceLoss(unittest.TestCase, LossTestCase):
         """
 
         for test_slice in [
-            tests.utils.slice_no_true_positives_single_label,
-            tests.utils.slice_no_true_positives_multi_label,
+            test_data.slice_no_true_positives_single_label,
+            test_data.slice_no_true_positives_multi_label,
         ]:
             self._test_loss(
                 test_slice,
@@ -100,8 +104,8 @@ class TestDiceLoss(unittest.TestCase, LossTestCase):
         """
 
         for test_slice in [
-            tests.utils.slice_all_true_negatives_single_label,
-            tests.utils.slice_all_true_negatives_multi_label,
+            test_data.slice_all_true_negatives_single_label,
+            test_data.slice_all_true_negatives_multi_label,
         ]:
             predictions_slice, target_slice, _, _, _ = test_slice(False)
             prediction = torch.stack([predictions_slice, predictions_slice])
