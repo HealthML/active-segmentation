@@ -52,15 +52,15 @@ class TestCrossEntropyLoss(unittest.TestCase):
             numpy.ndarray: Expected loss per pixel / per voxel.
         """
 
-        prediction = prediction.numpy()
-        target = target.numpy()
+        prediction = prediction.detach().numpy()
+        target = target.detach().numpy()
 
         expected_loss = np.zeros(target.shape)
 
         for class_id in range(prediction.shape[1]):
             expected_loss += (
                 -1
-                * np.log(prediction[:, class_id, :, :])
+                * np.log(prediction[:, class_id])
                 * (target == class_id).astype(np.int)
             )
 
@@ -81,8 +81,8 @@ class TestCrossEntropyLoss(unittest.TestCase):
             numpy.ndarray: Expected loss per pixel / per voxel.
         """
 
-        prediction = prediction.numpy()
-        target = target.numpy()
+        prediction = prediction.detach().numpy()
+        target = target.detach().numpy()
 
         return -1 * (
             np.log(prediction) * target + np.log(1 - prediction) * (1 - target)
@@ -338,4 +338,103 @@ class TestCrossEntropyLoss(unittest.TestCase):
                     multi_label=multi_label,
                     reduction=reduction,
                     expected_loss=torch.as_tensor(0.0),
+                )
+
+    def test_3d(self):
+        """
+        Tests that the loss is computed correctly when the inputs are 3d images.
+        """
+
+        # pylint: disable-msg=too-many-locals
+
+        for test_slice_1, test_slice_2, multi_label in [
+            (
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
+                False,
+            ),
+            (
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
+                True,
+            ),
+        ]:
+
+            (
+                prediction_1,
+                target_1,
+                _,
+                probability_positive_1,
+                probability_negative_1,
+            ) = test_slice_1(False)
+
+            (
+                prediction_2,
+                target_2,
+                _,
+                probability_positive_2,
+                probability_negative_2,
+            ) = test_slice_2(False)
+
+            assert probability_positive_1 == probability_positive_2
+            assert probability_negative_1 == probability_negative_2
+
+            prediction = torch.stack([prediction_1, prediction_2])
+            target = torch.stack([target_1, target_2])
+
+            # ensure that the class channel is the first dimension
+            prediction = prediction.swapaxes(1, 0)
+            target = target.swapaxes(1, 0) if multi_label is True else target
+
+            # create batch dimension
+            prediction = prediction.unsqueeze(dim=0)
+            target = target.unsqueeze(dim=0)
+
+            for reduction in ["none", "mean", "sum"]:
+                if multi_label:
+                    expected_loss = self._expected_binary_cross_entropy_loss(
+                        prediction, target
+                    )
+                else:
+                    expected_loss = self._expected_cross_entropy_loss(
+                        prediction, target
+                    )
+                expected_loss = torch.from_numpy(expected_loss)
+
+                if reduction == "mean":
+                    expected_loss = expected_loss.mean()
+                elif reduction == "sum":
+                    expected_loss = expected_loss.sum()
+
+                prediction = prediction.float()
+                target = target.float()
+
+                prediction.requires_grad = True
+                target.requires_grad = True
+
+                cross_entropy_loss_module = CrossEntropyLoss(
+                    multi_label=multi_label,
+                    ignore_index=None,
+                    reduction=reduction,
+                )
+
+                cross_entropy_loss = cross_entropy_loss_module(prediction, target)
+
+                test_case_description = f"reduction is {reduction}"
+
+                self.assertTrue(
+                    cross_entropy_loss.shape == expected_loss.shape,
+                    f"Returns cross-entropy loss tensor with correct shape when {test_case_description}.",
+                )
+
+                self.assertNotEqual(
+                    cross_entropy_loss.grad_fn,
+                    None,
+                    msg=f"Cross-entropy loss is differentiable when {test_case_description}.",
+                )
+
+                torch.testing.assert_allclose(
+                    cross_entropy_loss,
+                    expected_loss,
+                    msg=f"Correctly computes cross-entropy loss value when {test_case_description}.",
                 )
