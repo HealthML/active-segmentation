@@ -2,6 +2,7 @@
 import os
 import random
 from typing import Any, Dict, List, Optional, Tuple
+
 from torch.utils.data import DataLoader, Dataset
 
 from .data_module import ActiveLearningDataModule
@@ -18,6 +19,10 @@ class BraTSDataModule(ActiveLearningDataModule):
         num_workers (int): Number of workers for DataLoader.
         cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
             (default = 0).
+        active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for
+            conventional model training (default = False).
+        initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is
+            activated.
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle (boolean): Flag if the data should be shuffled.
         dim (int): 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
@@ -25,6 +30,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             (default = True)
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
+        random_state (int): Random constant for shuffling the data
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -40,7 +46,7 @@ class BraTSDataModule(ActiveLearningDataModule):
 
         Args:
             dir_path: directory to discover paths in
-            modality: modality of scan
+            modality (string, optional): modality of scan
             random_samples: the amount of random samples from the data sets
 
         Returns:
@@ -75,11 +81,14 @@ class BraTSDataModule(ActiveLearningDataModule):
         batch_size: int,
         num_workers: int,
         cache_size: int = 0,
+        active_learning_mode: bool = False,
+        initial_training_set_size: int = 1,
         pin_memory: bool = True,
         shuffle: bool = True,
         dim: int = 2,
         mask_join_non_zero: bool = True,
         mask_filter_values: Optional[Tuple[int]] = None,
+        random_state: int = 42,
         **kwargs,
     ):
 
@@ -87,6 +96,8 @@ class BraTSDataModule(ActiveLearningDataModule):
             data_dir,
             batch_size,
             num_workers,
+            active_learning_mode,
+            initial_training_set_size,
             pin_memory=pin_memory,
             shuffle=shuffle,
             **kwargs,
@@ -96,6 +107,22 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.cache_size = cache_size
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
+
+        if self.active_learning_mode:
+            (
+                self.initial_training_samples,
+                self.initial_unlabeled_samples,
+            ) = DoublyShuffledNIfTIDataset.generate_active_learning_split(
+                BraTSDataModule.discover_paths(os.path.join(self.data_folder, "train"))[
+                    0
+                ],
+                dim,
+                initial_training_set_size,
+                random_state,
+            )
+        else:
+            self.initial_training_samples = None
+            self.initial_unlabeled_samples = None
 
     def multi_label(self) -> bool:
         """
@@ -130,12 +157,25 @@ class BraTSDataModule(ActiveLearningDataModule):
         return labels
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
-        """
-        TBD
-        """
+        """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
-        # ToDo: implement labeling logic
-        return None
+        if self.dim == 2:
+            # create list of files as tuple of image id and slice index
+            image_slice_ids = [tuple(case_id.split("-")) for case_id in ids]
+            ids = [image_id for image_id, _ in image_slice_ids]
+
+        if self._training_set is not None and self._unlabeled_set is not None:
+
+            for index, case_id in enumerate(ids):
+                if self.dim == 2:
+                    # additionally pass slice index for dimension 2
+                    slice_index = int(image_slice_ids[index][1])
+                else:
+                    # 3D images only have one slice index of 0
+                    slice_index = 0
+
+                self._training_set.add_image(case_id, slice_index)
+                self._unlabeled_set.remove_image(case_id, slice_index)
 
     def _create_training_set(self) -> Optional[Dataset]:
         """
@@ -145,6 +185,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
             os.path.join(self.data_folder, "train")
         )
+
         return DoublyShuffledNIfTIDataset(
             image_paths=train_image_paths,
             annotation_paths=train_annotation_paths,
@@ -153,6 +194,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             shuffle=self.shuffle,
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
+            slice_indices=self.initial_training_samples,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -185,6 +227,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             cache_size=self.cache_size,
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
+            case_id_prefix="val",
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -193,8 +236,25 @@ class BraTSDataModule(ActiveLearningDataModule):
         return self._create_validation_set()
 
     def _create_unlabeled_set(self) -> Optional[Dataset]:
-        # faked unlabeled set
-        # ToDo: implement unlabeled set
+        """Creates an unlabeled dataset."""
+        if self.active_learning_mode:
+            train_image_paths, train_annotation_paths = BraTSDataModule.discover_paths(
+                os.path.join(self.data_folder, "train")
+            )
+
+            return DoublyShuffledNIfTIDataset(
+                image_paths=train_image_paths,
+                annotation_paths=train_annotation_paths,
+                dim=self.dim,
+                cache_size=self.cache_size,
+                is_unlabeled=True,
+                shuffle=self.shuffle,
+                mask_join_non_zero=self.mask_join_non_zero,
+                mask_filter_values=self.mask_filter_values,
+                slice_indices=self.initial_unlabeled_samples,
+            )
+
+        # unlabeled set is empty
         unlabeled_set = self._create_training_set()
         unlabeled_set.is_unlabeled = True
         return unlabeled_set

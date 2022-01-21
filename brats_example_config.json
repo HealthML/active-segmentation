@@ -14,13 +14,19 @@
   },
   "dataset_config": {
     "dataset": "brats",
-    "data_dir": "/dhc/groups/mpws2021cl1/Data",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data/BraTS",
     "cache_size": 250,
     "pin_memory": true
   },
+  "active_learning_config": {
+    "active_learning_mode": true,
+    "initial_training_set_size": 10,
+    "iterations": 10,
+    "items_to_label": 32
+  },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
-  "strategy": "base",
+  "strategy": "random",
   "experiment_name": "test-experiment",
   "experiment_tags": [],
   "batch_size": 16,
@@ -29,5 +35,6 @@
   "gpus": 1,
   "prediction_count": 5,
   "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
-  "early_stopping": false
+  "early_stopping": false,
+  "random_state": 42
 }

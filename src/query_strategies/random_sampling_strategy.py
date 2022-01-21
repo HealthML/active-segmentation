@@ -1,12 +1,17 @@
-# pylint: disable=all
-from torch.utils.data import DataLoader
+""" Module for random sampling strategy """
 from typing import List, Union
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
+from .query_strategy import QueryStrategy
 
 
-class QueryStrategy:
+# pylint: disable=too-few-public-methods
+class RandomSamplingStrategy(QueryStrategy):
+    """
+    Class for selecting items via a random sampling strategy
+    """
+
     def select_items_to_label(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
@@ -15,26 +20,27 @@ class QueryStrategy:
         **kwargs
     ) -> List[str]:
         """
-        Selects subset of the unlabeled data that should be labeled next.
+        Selects random subset of the unlabeled data that should be labeled next. We are using
+        the shuffling of the dataset for randomisation.
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
-            dataloader: Pytorch dataloader representing the unlabeled dataset.
-            items_to_label: Number of items that should be selected for labeling.
+            data_module (ActiveLearningDataModule): A data module object providing data.
+            items_to_label (int): Number of items that should be selected for labeling.
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
             IDs of the data items to be labeled.
         """
-        # default strategy: select first n data items
-        # this method should be overwritten in derived classes to implement other strategies
+        # randomly select ids to query
 
         selected_ids = []
         selected_items = 0
 
-        for image, image_id in data_module.unlabeled_dataloader():
+        # shuffling of the dataset is used for randomization
+        for _, image_id in data_module.unlabeled_dataloader():
             if selected_items == items_to_label:
                 break
-            selected_ids.append(image_id)
+            selected_ids.append(image_id[0])
             selected_items += 1
 
         return selected_ids

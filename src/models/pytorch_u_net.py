@@ -117,7 +117,9 @@ class PytorchUNet(PytorchModel):
         for train_metric in self.get_train_metrics():
             train_metric.update(probabilities, y, case_ids)
 
-        self.log("train/loss", loss)  # log train loss via weights&biases
+        self.logger.log_metrics(
+            {"train/loss": loss, "train/epochs_counter": self.epochs_counter}
+        )
         return loss
 
     def validation_step(self, batch, batch_idx) -> None:
