@@ -144,7 +144,11 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         """
 
         for idx, image_id in enumerate(image_ids):
-            self._metrics_per_image[image_id].update(prediction[idx], target[idx])
+            dimensionality = prediction[idx].dim() - 1
+            slice_id = int(image_id.split("-")[-1]) if dimensionality == 2 else None
+            self._metrics_per_image[image_id].update(
+                prediction[idx], target[idx], slice_ids=slice_id
+            )
             self.metrics_to_compute.add(image_id)
 
     @staticmethod

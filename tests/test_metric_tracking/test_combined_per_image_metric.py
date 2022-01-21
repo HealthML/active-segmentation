@@ -173,16 +173,11 @@ class TestCombinedPerImageMetric(unittest.TestCase):
                 percentile=0.95
             )
 
-            print("expected_hausdorff_distances", expected_hausdorff_distances)
-            print("maximum_distance", maximum_distance)
-
             expected_hausdorff_distances = {
                 class_name: torch.as_tensor(expected_distance)
                 / torch.sqrt(torch.as_tensor(maximum_distance))
                 for class_name, expected_distance in expected_hausdorff_distances.items()
             }
-
-            print("expected_hausdorff_distances", expected_hausdorff_distances)
 
             metrics_per_image = CombinedPerImageMetric(
                 ["hausdorff95"],
@@ -192,13 +187,10 @@ class TestCombinedPerImageMetric(unittest.TestCase):
                 confidence_levels=confidence_levels,
             )
 
-            metrics_per_image.update(prediction_1, target_1)
-            metrics_per_image.update(prediction_2, target_2)
+            metrics_per_image.update(prediction_1, target_1, [0, 1])
+            metrics_per_image.update(prediction_2, target_2, [2, 3])
 
             computed_metrics = metrics_per_image.compute()
-
-            print("computed_metrics", computed_metrics)
-            print("expected_hausdorff_distances", expected_hausdorff_distances)
 
             for class_id, class_name in id_to_class_mapping.items():
                 if multi_label:
