@@ -137,8 +137,6 @@ class UNet(nn.Module):
 
         decoded = self.conv(dec)
 
-        print("decoded", decoded.shape)
-
         return self.prediction_layer(decoded)
 
     @staticmethod
