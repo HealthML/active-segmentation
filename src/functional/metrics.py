@@ -7,6 +7,7 @@ with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/imp
 import abc
 from typing import Literal, Optional, Tuple
 
+import psutil
 import torch
 import torchmetrics
 
@@ -241,26 +242,44 @@ def _distance_matrix(
     first_point_set: torch.Tensor, second_point_set: torch.Tensor
 ) -> torch.Tensor:
     r"""
-    Computes Euclidean distances between all points in the first tensor and all points in the second tensor.
+    Computes shortest Euclidean distance from all points in the first tensor to any point in the second tensor.
     Args:
         first_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d)
         second_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d).
     Returns:
-        Matrix containing the Euclidean distances between all points in the first tensor and all points.
+        Tensor: Matrix containing the shortest Euclidean distances between all points in the first tensor and any
+        point in the second tensor.
     Shape:
         first_point_set: :math:`(N, D)` where :math:`N` is the number of points in the first set and :math:`D` is the
             dimensionality of the Euclidean space.
         second_point_set: :math:`(M, D)` where :math:`M` is the number of points in the second set and :math:`D` is the
             dimensionality of the Euclidean space.
-        Output: :math:`(N, M)` where :math:`N` is the number of points in the first set and :math:`M` is the number of
-            points in the second set
+        Output: :math:`(N)` where :math:`N` is the number of points in the first set.
     """
 
     if len(first_point_set) == 0:
         return torch.as_tensor(float("nan"), device=first_point_set.device)
 
-    distances = torch.cdist(first_point_set.float(), second_point_set.float())
-    minimum_distances, _ = distances.min(axis=-1)
+    if torch.cuda.is_available():
+        free_memory = torch.cuda.memory_reserved(0) - torch.cuda.memory_allocated(0)
+    else:
+        free_memory = psutil.virtual_memory().available
+
+    second_point_set_memory = (
+        second_point_set.element_size() * second_point_set.nelement()
+    )
+    split_size = int(max(free_memory / second_point_set_memory, 1)) - 5
+
+    minimum_distances = torch.zeros(len(first_point_set), device=first_point_set.device)
+
+    first_point_sets = torch.split(first_point_set, split_size)
+
+    for idx, first_point_set_split in enumerate(first_point_sets):
+        distances = torch.cdist(first_point_set_split, second_point_set.float())
+        minimum_distances_for_current_split, _ = distances.min(axis=-1)
+        start_index = idx * split_size
+        end_index = (idx + 1) * split_size
+        minimum_distances[start_index:end_index] = minimum_distances_for_current_split
 
     return minimum_distances
 
@@ -494,6 +513,9 @@ def hausdorff_distance(
         convert_to_one_hot=convert_to_one_hot,
         ignore_index=ignore_index,
     )
+
+    print("prediction", prediction.shape)
+    print("target", target.shape)
 
     if not include_background:
         num_classes = num_classes - 1
