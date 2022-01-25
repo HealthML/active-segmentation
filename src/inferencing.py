@@ -2,6 +2,7 @@
 import os
 import logging
 from typing import Any, Dict, Optional
+from itertools import islice
 import torch
 import numpy as np
 import nibabel as nib
@@ -134,9 +135,7 @@ class Inferencer:
             )
             data = data_module._create_test_set()
 
-        for i, (x, _, case_id) in enumerate(data):
-            if i >= self.prediction_count:
-                break
+        for i, (x, _, case_id) in enumerate(islice(data, self.prediction_count)):
             # Add an additional dimension to emulate one batch (1, x, y) -> (1, 1, x, y)
             x = torch.unsqueeze(x, 0)
 
@@ -146,14 +145,21 @@ class Inferencer:
 
             seg = (seg >= 0.5) * 255
             seg = seg.astype("float64")
-            seg_img = Image.fromarray(np.squeeze(seg, axis=0))
+
+            original_image = Image.open(data.image_paths[i])
+
+            # Save only the segmentation in original size
+            seg_img = Image.fromarray(np.squeeze(seg, axis=0).astype(np.uint8)).resize(
+                original_image.size
+            )
             seg_img.save(os.path.join(self.prediction_dir, f"{case_id}_SEG_ONLY.png"))
+
             # Repeat dimensions to emulate RGB channels (1, x, y) -> (3, x, y)
             seg = np.repeat(seg, repeats=3, axis=0)
-
-            original_image = Image.open(data.image_paths[i]).resize(data.image_shape)
             # Move channel axis to the front for masking (x, y, 3) -> (3, x, y)
-            original_image = np.moveaxis(np.asarray(original_image), 2, 0)
+            original_image = np.moveaxis(
+                np.asarray(original_image.resize(data.image_shape)), 2, 0
+            )
             image_with_seg = np.ma.masked_array(original_image, seg)
 
             # Move channel axis to the end for storing on disk (3, x, y) -> (x, y, 3)

@@ -129,7 +129,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         if self._training_set is not None and self._unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
                 self._case_id_to_filepaths(
-                    case_id=case_id[0],
+                    case_id=case_id,
                     directory=os.path.join(self.data_dir, "train_val"),
                 )
                 for case_id in ids

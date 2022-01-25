@@ -55,20 +55,16 @@ class BCSSDataset(IterableDataset):
     def normalize(img: np.ndarray) -> np.ndarray:
         """
         Normalizes an image by
-            1. Dividing by the maximum value
-            2. Subtracting the mean, zeros will be ignored while calculating the mean
-            3. Dividing by the negative minimum value
+            1. Dividing by the mean value
+            2. Subtracting the std
         Args:
             img: The input image that should be normalized.
 
         Returns:
             Normalized image with background values normalized to -1
         """
-        tmp = img / np.max(img)
-        # ignore zero values for mean calculation because background dominates
-        tmp = tmp - np.mean(tmp[tmp > 0])
-        # make normalize original zero values to -1
-        return tmp / (-np.min(tmp))
+
+        return (img - np.mean(img)) / np.std(img)
 
     @staticmethod
     def __align_axis(img: np.ndarray) -> np.ndarray:
