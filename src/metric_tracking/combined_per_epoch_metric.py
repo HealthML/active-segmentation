@@ -122,20 +122,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
         for metric in self._metrics_per_image.values():
             metric.reset()
-        self._metrics_per_image = torch.nn.ModuleDict(
-            {
-                image_id: CombinedPerImageMetric(
-                    self.metrics,
-                    self.id_to_class_names,
-                    multi_label=self.multi_label,
-                    slices_per_image=self.slices_per_image[idx]
-                    if isinstance(self.slices_per_image, list)
-                    else self.slices_per_image,
-                    confidence_levels=self.confidence_levels,
-                )
-                for idx, image_id in enumerate(self.image_ids)
-            }
-        )
+
         self.metrics_to_compute = set()
 
         super().reset()
