@@ -1,6 +1,6 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable
+from typing import Iterable, Optional
 
 import torch
 import numpy as np
@@ -23,18 +23,37 @@ class PytorchUNet(PytorchModel):
 
         super().__init__(**kwargs)
 
+        self.num_levels = num_levels
+        self.in_channels = in_channels
         self.dim = dim
 
-        self.model = UNet(
-            in_channels=in_channels,
-            out_channels=1,
-            init_features=32,
-            num_levels=num_levels,
-            dim=dim,
-        )
+        self.model = None
 
     def input_dimensionality(self) -> int:
         return self.dim
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        """
+        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
+            or predict.
+
+        Args:
+            stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
+        """
+
+        super().setup(stage)
+
+        multi_label = self.trainer.datamodule.multi_label()
+        num_classes = len(self.trainer.datamodule.id_to_class_names())
+
+        self.model = UNet(
+            in_channels=self.in_channels,
+            out_channels=num_classes,
+            multi_label=multi_label,
+            init_features=32,
+            num_levels=self.num_levels,
+            dim=self.dim,
+        )
 
     # wrap model interface
     def eval(self) -> None:
@@ -93,7 +112,7 @@ class PytorchUNet(PytorchModel):
         x, y, case_ids = batch
 
         probabilities = self(x)
-        loss = self.loss(probabilities, y)
+        loss = self.loss_module(probabilities, y)
 
         for train_metric in self.get_train_metrics():
             train_metric.update(probabilities, y, case_ids)
@@ -116,7 +135,7 @@ class PytorchUNet(PytorchModel):
 
         probabilities = self(x)
 
-        loss = self.loss(probabilities, y)
+        loss = self.loss_module(probabilities, y)
         if self.stage == "fit":
             self.log("val/loss", loss)  # log validation loss via weights&biases
 
@@ -153,7 +172,7 @@ class PytorchUNet(PytorchModel):
 
         probabilities = self(x)
 
-        loss = self.loss(probabilities, y)
+        loss = self.loss_module(probabilities, y)
         self.log("test/loss", loss)
 
         for test_metric in self.get_test_metrics():

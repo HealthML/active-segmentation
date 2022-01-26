@@ -45,7 +45,7 @@ class PytorchFCNResnet50(PytorchModel):
         x, y = batch
 
         logits = self(x)["out"]
-        loss = self.loss(logits, y)
+        loss = self.loss_module(logits, y)
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):

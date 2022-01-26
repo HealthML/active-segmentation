@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 
 def batch_padding_collate_fn(
-    batch: List[Union[tuple, str, torch.Tensor]]
+    batch: List[Union[tuple, str, torch.Tensor]], pad_value: int = 0
 ) -> torch.Tensor:
     """
     Collates a batch and padds tensors to the same size before stacking them.
@@ -21,7 +21,13 @@ def batch_padding_collate_fn(
     """
     elem = batch[0]
     if isinstance(elem, tuple):
-        return tuple((batch_padding_collate_fn(samples) for samples in zip(*batch)))
+        return tuple(
+            (
+                # Always pad labels with -1.
+                batch_padding_collate_fn(samples, -1 if idx == 1 else pad_value)
+                for idx, samples in enumerate(zip(*batch))
+            )
+        )
     if isinstance(elem, str):
         return batch
 
@@ -38,7 +44,7 @@ def batch_padding_collate_fn(
         for padding in total_paddings
     ]
     batch = [
-        F.pad(item, tuple(pad), "constant", 0)
+        F.pad(item, tuple(pad), "constant", pad_value)
         for item, pad in zip(batch, split_paddings)
     ]
 

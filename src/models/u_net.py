@@ -15,9 +15,12 @@ class UNet(nn.Module):
     and adapted to a flexible number of levels and for optinal 3d mode.
 
     Args:
-        in_channels (int, optional): Number of input channels. Defaults to 3.
-        out_channels (int, optional): Number of output channels (should be equal to the number of classes
-            excluding the background). Defaults to 1.
+        in_channels (int): Number of input channels.
+        out_channels (int): Number of output channels. Should be equal to the number of classes (for
+            multi-label segmentation tasks excluding the background class).
+        multi_label (bool, optional): Whether the model should produce single-label or multi-label outputs. If set to
+            `False`, the model's predictions are computed using a Softmax activation layer. to If set to `True`, sigmoid
+            activation layers are used to compute the model's predicitions. Defaults to False.
         init_features (int, optional): Number of feature channels of the first U-Net block,
             in each down-sampling block, the number of feature channels is doubled. Defaults to 32.
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
@@ -28,8 +31,9 @@ class UNet(nn.Module):
 
     def __init__(
         self,
-        in_channels: int = 3,
-        out_channels: int = 1,
+        in_channels: int,
+        out_channels: int,
+        multi_label: bool = False,
         init_features: int = 32,
         num_levels: int = 4,
         dim: int = 2,
@@ -92,6 +96,10 @@ class UNet(nn.Module):
 
         self.conv = Conv(in_channels=features, out_channels=out_channels, kernel_size=1)
 
+        self.prediction_layer = (
+            torch.nn.Sigmoid() if multi_label else torch.nn.Softmax(dim=-1 * (dim + 1))
+        )
+
     def forward(self, x):
         """
 
@@ -127,7 +135,9 @@ class UNet(nn.Module):
             dec = torch.cat((dec, encodings[level]), dim=1)
             dec = self.decoders[level](dec)
 
-        return torch.sigmoid(self.conv(dec))
+        decoded = self.conv(dec)
+
+        return self.prediction_layer(decoded)
 
     @staticmethod
     def _block(in_channels: int, features: int, name: str, dim: int):

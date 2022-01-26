@@ -3,7 +3,7 @@ from io import TextIOWrapper
 import json
 import os
 import random
-from typing import Any, Callable, List, Literal, Optional, Tuple
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 from torch.utils.data import DataLoader, Dataset
 
 from .collate import batch_padding_collate_fn
@@ -176,6 +176,35 @@ class DecathlonDataModule(ActiveLearningDataModule):
         """Returns the batchwise padding collate function."""
 
         return batch_padding_collate_fn
+
+    def multi_label(self) -> bool:
+        """
+        Returns:
+            bool: Whether the dataset is a multi-label or a single-label dataset.
+        """
+
+        return False
+
+    def id_to_class_names(self) -> Dict[int, str]:
+        """
+        Returns:
+            Dict[int, str]: A mapping of class indices to descriptive class names.
+        """
+
+        with DecathlonDataModule.__open_dataset_file(self.data_folder) as dataset_file:
+            dataset_info = json.load(dataset_file)
+            labels = dataset_info["labels"]
+
+        if self.mask_join_non_zero:
+            return {0: "background", 1: "foreground"}
+
+        if self.mask_filter_values is not None:
+            return {
+                class_id: class_name
+                for class_id, class_name in labels.items()
+                if class_id in self.mask_filter_values or class_id == 0
+            }
+        return labels
 
     def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""

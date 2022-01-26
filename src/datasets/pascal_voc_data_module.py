@@ -1,6 +1,6 @@
 """ Module to load pascal voc data """
 import os
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 import numpy as np
 from torch.utils.data import Dataset, random_split
 from torchvision import transforms
@@ -106,3 +106,9 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         # faked unlabeled set
         # ToDo: implement unlabeled set
         return self._create_training_set()
+
+    def id_to_class_names(self) -> Dict[int, str]:
+        return {}
+
+    def multi_label(self) -> bool:
+        return False
