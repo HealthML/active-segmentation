@@ -213,8 +213,13 @@ def remove_padding(
         all_indices = torch.arange(len(is_padding), device=prediction.device)
         indices_to_keep = torch.masked_select(all_indices, ~is_padding)
 
-        target = target.index_select(-2 + dim, indices_to_keep)
-        prediction = prediction.index_select(-2 + dim, indices_to_keep)
+        # if dim == 0, `is_padding` is reduced over all rows
+        # thus `indices_to_keep` is a tensor that indicates for each column whether it is padding or not
+        # therefore we the selection dim is -1 in this case
+        select_dim = -1 if dim == 0 else -2
+
+        target = target.index_select(select_dim, indices_to_keep)
+        prediction = prediction.index_select(select_dim, indices_to_keep)
 
     assert (
         prediction != ignore_index
