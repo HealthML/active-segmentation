@@ -236,9 +236,35 @@ all values.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.id_to_class_names">
+<span class="sig-name descname"><span class="pre">id_to_class_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.id_to_class_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.id_to_class_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A mapping of class indices to descriptive class names.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[int, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.label_items">
 <span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.label_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves the given samples from the unlabeled dataset to the labeled dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.multi_label">
+<span class="sig-name descname"><span class="pre">multi_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.multi_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.multi_label" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether the dataset is a multi-label or a single-label dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -295,6 +321,19 @@ activated.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.id_to_class_names">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">id_to_class_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.id_to_class_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.id_to_class_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A mapping of class indices to descriptive class names.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[int, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.label_items">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
@@ -303,6 +342,19 @@ activated.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.multi_label">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">multi_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.multi_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.multi_label" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether the dataset is a multi-label or a single-label dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -422,10 +474,20 @@ Further information: <a class="reference external" href="http://host.robots.ox.a
 :param shuffle: Flag if the data should be shuffled.
 :param **kwargs: Further, dataset specific parameters.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule.id_to_class_names">
+<span class="sig-name descname"><span class="pre">id_to_class_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule.id_to_class_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule.id_to_class_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule.label_items">
 <span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule.label_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>TBD</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule.multi_label">
+<span class="sig-name descname"><span class="pre">multi_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule.multi_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule.multi_label" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

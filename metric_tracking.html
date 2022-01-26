@@ -191,41 +191,49 @@
 whose slices may be scattered across different batches.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_epoch_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerEpochMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_to_aggregate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_epoch_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerEpochMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_class_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background_in_reduced_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction_across_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction_across_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
-<p>A metrics class that tracks the metrics of multiple 3D images whose slices may be scattered across
-different batches. Different metrics can be tracked per scan, e.g. dice score and Hausdorff distance, and the
-metrics can also be tracked for different confidence levels. If <cite>reduction</cite> is not <cite>“none”</cite>, the per-scan metrics
-are  aggregated into global per-epoch metric values.</p>
+<p>A metrics class that tracks the metrics of multiple 3D images whose slices may be scattered across different
+batches. Different metrics can be tracked per image, e.g. dice score and Hausdorff distance, and in case of
+multi-label segmentation tasks, the metrics can also be tracked for different confidence levels. If <cite>reduction</cite> is
+not <cite>“none”</cite>, the per-scan metrics are  aggregated into global per-epoch metric values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – A list of metric names to be tracked. Available options: “dice”, “sensitivity”,
-“specificity”, and “hausdorff95”.</p></li>
-<li><p><strong>confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em>) – A list of confidence levels for which the metrics are to be tracked
-separately.</p></li>
+<li><p><strong>metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – A list of metric names to be tracked. Available options: <code class="docutils literal notranslate"><span class="pre">&quot;dice_score&quot;</span></code> |
+<code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;``|</span> <span class="pre">``&quot;specificity&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code>.</p></li>
+<li><p><strong>id_to_class_names</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em>) – A mapping of class indices to descriptive class names.</p></li>
 <li><p><strong>image_ids</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – List of the ids of all images for which the metrics are to be tracked.</p></li>
 <li><p><strong>slices_per_image</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Number of slices per 3d image. If a single integer value is
 provided, it is assumed that all images of the dataset have the same number of slices.</p></li>
-<li><p><strong>metrics_to_aggregate</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A list of metric names from which to calculate an aggregated
-metric. Must be a subset of the metric names passed to the <cite>metrics</cite> parameter. If, for example,
-<cite>metrics_to_aggregate=[“dice”, “hausdorff95”]</cite> and <cite>reduction=”mean”</cite>, the mean of the dice score and the
-Hausdorff distance is calculated and returned as the <cite>aggregated</cite> metric. If <cite>reduction</cite> is <cite>“none”</cite>, this
-parameter will be ignored.</p></li>
-<li><p><strong>reduction</strong> (<em>string</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the metric values of all 3d
-images, must be either “mean”, “max”, “min” or “none”. Default: <cite>“mean”</cite>.</p></li>
+<li><p><strong>include_background_in_reduced_metrics</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class)
+is excluded from the calculation of aggregated metrics. This parameter is used only if <cite>multi_label</cite> is set
+to <cite>False</cite>. Defaults to <cite>True</cite>.</p></li>
+<li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines whether the data is multi-label or not (default = <cite>False</cite>).</p></li>
+<li><p><strong>confidence_levels</strong> – A list of confidence levels for which the metrics are to be
+tracked separately. This parameter is used only if <cite>multi_label</cite> is set to <cite>True</cite>. Defaults to <cite>[0.5]</cite>.</p></li>
 </ul>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In this method, the <cite>prediction</cite> tensor is expected to be the output of the final sigmoid layer of a
-single-class segmentation task.</p>
+<p>If <cite>multi_label</cite> is <cite>False</cite>, the <cite>prediction</cite> tensor is expected to be either the output of the final softmax
+layer of a segmentation model or a label-encoded, sharp prediction. In the first case, the prediction tensor
+must be of floating point type and have the shape <span class="math">\((N, C, X, Y)\)</span> or <span class="math">\((N, C, X, Y, Z)\)</span> where
+<cite>N = batch size</cite> and <cite>C = number of classes</cite>. In the second case, the prediction tensor must be of integer type
+and have the shape <span class="math">\((N, X, Y)\)</span> or <span class="math">\((N, X, Y, Z)\)</span>. The <cite>target</cite> tensor is expected to be
+label-encoded in both cases. Thus, it needs to have the shape <span class="math">\((N, X, Y)\)</span> or <span class="math">\((N, X, Y, Z)\)</span> and be
+of integer type.</p>
+<p>If <cite>multi_label</cite> is <cite>True</cite>, the <cite>prediction</cite> tensor is expected to be either the output of the final sigmoid
+layer of a segmentation model or a sharp prediction. In the first case, the prediction tensors needs to be of
+floating point type and in the second type of integer type. the In both cases the prediction tensor needs to
+have the shape <span class="math">\((N, C, X, Y)\)</span> or <span class="math">\((N, C, X, Y, Z)\)</span>. The target tensor is expected to contain sharp
+predictions and to have the shape <span class="math">\((N, C, X, Y)\)</span> or <span class="math">\((N, C, X, Y, Z)\)</span>.</p>
 </div>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((N, height, width)\)</span>, where <cite>N = batch size</cite>.</p></li>
-<li><p>Target: Must have the same dimensions as the prediction.</p></li>
+<li><p>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite> and <cite>C = number of classes</cite> (see Notes above).</p></li>
+<li><p>Target: <span class="math">\((N, X, Y, ...)\)</span>, or <span class="math">\((N, C, X, Y, ...)\)</span> (see Notes above).</p></li>
 <li><p>Image_ids: <span class="math">\((N)\)</span>, where <cite>N = batch size</cite>.</p></li>
 </ul>
 </dd>
@@ -281,43 +289,55 @@ contains the keys <cite>&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;</c
 <p>Module containing a metrics class for tracking several metrics related to one 3d image</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_image_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerImageMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_image_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerImageMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_class_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
 <p>A metrics class that tracks several metrics related to one 3d image whose slices may be scattered across
-different batches. The metrics can be tracked for different confidence levels.</p>
+different batches. In case of multi-label segmentation tasks, the metrics can be tracked for different confidence
+levels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – A list of metric names to be tracked. Available options: “dice”, “sensitivity”,
-“specificity”, and “hausdorff95”.</p></li>
-<li><p><strong>confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em>) – A list of confidence levels for which the metrics are to be tracked
-separately.</p></li>
+<li><p><strong>metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – A list of metric names to be tracked. Available options: <code class="docutils literal notranslate"><span class="pre">&quot;dice_score&quot;</span></code> |
+<code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;``|</span> <span class="pre">``&quot;specificity&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code>.</p></li>
+<li><p><strong>id_to_class_names</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em>) – A mapping of class indices to descriptive class names.</p></li>
+<li><p><strong>confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – A list of confidence levels for which the metrics are to be
+tracked separately. This parameter is used only if <cite>multi_label</cite> is set to <cite>True</cite>. Defaults to <cite>[0.5]</cite>.</p></li>
+<li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines whether the task is a multi-label segmentation task or not
+(default = <cite>False</cite>).</p></li>
 <li><p><strong>slices_per_image</strong> (<em>int</em>) – Number of slices per 3d image.</p></li>
 </ul>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<dl class="simple">
-<dt>In this method, the <cite>prediction</cite> tensor is expected to be one output slice of the final sigmoid layer of a</dt><dd><p>single-class segmentation task.</p>
-</dd>
-</dl>
+<p>If <cite>multi_label</cite> is <cite>False</cite>, the <cite>prediction</cite> tensor is expected to be either the output of the final softmax
+layer of a segmentation model or a label-encoded, sharp prediction. In the first case, the prediction tensor
+must be of floating point type and have the shape <span class="math">\((C, X, Y)\)</span> or <span class="math">\((C, X, Y, Z)\)</span> where
+<cite>C = number of classes</cite>. In the second case, the prediction tensor must be of integer type and have the shape
+<span class="math">\((X, Y)\)</span> or <span class="math">\((X, Y, Z)\)</span>. The <cite>target</cite> tensor is expected to be label-encoded in both cases. Thus,
+it needs to have the shape <span class="math">\((X, Y)\)</span> or <span class="math">\((X, Y, Z)\)</span> and be of integer type.</p>
+<p>If <cite>multi_label</cite> is <cite>True</cite>, the <cite>prediction</cite> tensor is expected to be either the output of the final sigmoid
+layer of a segmentation model or a sharp prediction. In the first case, the prediction tensors needs to be of
+floating point type and in the second type of integer type. the In both cases the prediction tensor needs to
+have the shape <span class="math">\((C, X, Y)\)</span> or <span class="math">\((C, X, Y, Z)\)</span>. The target tensor is expected to contain sharp
+predictions and to have the shape <span class="math">\((C, X, Y)\)</span> or <span class="math">\((C, X, Y, Z)\)</span>.</p>
 </div>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((height, width)\)</span>.</p></li>
-<li><p>Target: Must have the same dimensions as the prediction.</p></li>
+<li><p>Prediction: <span class="math">\((C, X, Y, ...)\)</span>, where <cite>C = number of classes</cite> (see Notes above).</p></li>
+<li><p>Target: <span class="math">\((X, Y, ...)\)</span>, or <span class="math">\((C, X, Y, ...)\)</span> (see Notes above).</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric.compute">
 <span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.compute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the metrics for the 3d image.</p>
+<dd><p>Computes the metrics for the image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><dl class="simple">
-<dt>Mapping of metric names to metric values.</dt><dd><p>The keys have the form <cite>&lt;metric name&gt;_&lt;confidence_level&gt;</cite>.</p>
+<dt>Mapping of metric names to metric values.</dt><dd><p>The keys have the form <cite>&lt;metric name&gt;_&lt;class_name&gt;_&lt;confidence_level&gt;</cite> for multi-label segmentation
+tasks and <cite>&lt;metric name&gt;_&lt;class_name&gt;</cite> for single-label segmentation tasks.</p>
 </dd>
 </dl>
 </p>

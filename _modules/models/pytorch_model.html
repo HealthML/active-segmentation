@@ -182,7 +182,7 @@
   <h1>Source code for models.pytorch_model</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Base classes to implement models with pytorch &quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torchmetrics</span>
@@ -204,22 +204,27 @@
 <span class="sd">    Base class to implement Pytorch models.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        learning_rate: The step size at each iteration while moving towards a minimum of the loss.</span>
-<span class="sd">        optimizer: Algorithm used to calculate the loss and update the weights. E.g. &#39;adam&#39; or &#39;sgd&#39;.</span>
-<span class="sd">        lr_scheduler: Algorithm used for dynamically updating the learning rate during training.</span>
-<span class="sd">            E.g. &#39;reduceLROnPlateau&#39; or &#39;cosineAnnealingLR&#39;</span>
-<span class="sd">        loss: The measure of performance. E.g. &#39;dice&#39;, &#39;bce&#39;, &#39;fp&#39;</span>
+<span class="sd">        learning_rate (float, optional): The step size at each iteration while moving towards a minimum of the loss.</span>
+<span class="sd">            Defaults to `0.0001`.</span>
+<span class="sd">        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training:</span>
+<span class="sd">            ``&quot;reduceLROnPlateau&quot;`` | ``&quot;cosineAnnealingLR&quot;``. Defaults to using no scheduler.</span>
+<span class="sd">        loss (string, optional): The optimization criterion: ``&quot;cross_entropy&quot;`` | ``&quot;dice&quot;`` |``&quot;cross_entropy_dice&quot;``</span>
+<span class="sd">            | ``&quot;general_dice&quot;`` | ``&quot;fp&quot;`` | ``&quot;fp_dice&quot;``. Defaults to ``&quot;cross_entropy&quot;``.</span>
+<span class="sd">        optimizer (string, optional): Algorithm used to calculate the loss and update the weights: ``&quot;adam&quot;`` |</span>
+<span class="sd">            ``&quot;sgd&quot;``. Defaults to ``&quot;adam&quot;``.</span>
 <span class="sd">        train_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged</span>
-<span class="sd">            in each training and validation epoch of the training loop. Defaults to `[&quot;dice_score&quot;]`.</span>
+<span class="sd">            in each training and validation epoch of the training loop. Available options: ``&quot;dice_score&quot;`` |</span>
+<span class="sd">            ``&quot;sensitivity&quot;`` | ``&quot;specificity&quot;`` | ``&quot;hausdorff95&quot;``. Defaults to `[&quot;dice_score&quot;]`.</span>
 <span class="sd">        train_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics</span>
-<span class="sd">            specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`).</span>
-<span class="sd">            Defaults to `[0.25, 0.5, 0.75]`.</span>
+<span class="sd">            specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`). This</span>
+<span class="sd">            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.</span>
 <span class="sd">        test_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged</span>
-<span class="sd">            in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Defaults to</span>
+<span class="sd">            in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Available options:</span>
+<span class="sd">            ``&quot;dice_score&quot;`` | ``&quot;sensitivity&quot;`` | ``&quot;specificity&quot;`` | ``&quot;hausdorff95&quot;`` Defaults to</span>
 <span class="sd">            `[&quot;dice_score&quot;, &quot;sensitivity&quot;, &quot;specificity&quot;, &quot;hausdorff95&quot;]`.</span>
 <span class="sd">        test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics</span>
-<span class="sd">            specified in the `test_metrics` parameter should be computed in the validation or testing loop. Defaults to</span>
-<span class="sd">            `[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]`.</span>
+<span class="sd">            specified in the `test_metrics` parameter should be computed in the validation or testing loop. This</span>
+<span class="sd">            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.</span>
 <span class="sd">        **kwargs: Further, dataset specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -228,9 +233,18 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0001</span><span class="p">,</span>
-        <span class="n">optimizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;adam&quot;</span><span class="p">,</span>
-        <span class="n">lr_scheduler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dice&quot;</span><span class="p">,</span>
+        <span class="n">lr_scheduler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+            <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;reduceLROnPlateau&quot;</span><span class="p">,</span> <span class="s2">&quot;cosineAnnealingLR&quot;</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
+            <span class="s2">&quot;cross_entropy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cross_entropy_dice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;general_dice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fp_dice&quot;</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cross_entropy&quot;</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;adam&quot;</span><span class="p">,</span> <span class="s2">&quot;sgd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;adam&quot;</span><span class="p">,</span>
         <span class="n">train_metrics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">train_metric_confidence_levels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">test_metrics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -243,24 +257,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="o">=</span> <span class="n">lr_scheduler</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configure_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">train_metric_confidence_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">train_metric_confidence_levels</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_metric_confidence_levels</span> <span class="o">=</span> <span class="n">train_metric_confidence_levels</span>
-
-        <span class="k">if</span> <span class="n">test_metric_confidence_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">test_metric_confidence_levels</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="mf">0.1</span><span class="p">,</span>
-                <span class="mf">0.2</span><span class="p">,</span>
-                <span class="mf">0.3</span><span class="p">,</span>
-                <span class="mf">0.4</span><span class="p">,</span>
-                <span class="mf">0.5</span><span class="p">,</span>
-                <span class="mf">0.6</span><span class="p">,</span>
-                <span class="mf">0.7</span><span class="p">,</span>
-                <span class="mf">0.8</span><span class="p">,</span>
-                <span class="mf">0.9</span><span class="p">,</span>
-            <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_metric_confidence_levels</span> <span class="o">=</span> <span class="n">test_metric_confidence_levels</span>
 
         <span class="k">if</span> <span class="n">train_metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -288,55 +288,63 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">=</span> <span class="n">stage</span>
 
+        <span class="n">metric_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id_to_class_names&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="p">(),</span>
+            <span class="s2">&quot;multi_label&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">multi_label</span><span class="p">(),</span>
+            <span class="s2">&quot;reduction_across_classes&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reduction_across_images&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
         <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
-            <span class="n">train_slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
+            <span class="n">training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
 
             <span class="n">train_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
                 <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_names</span><span class="p">,</span>
                 <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-                <span class="n">metrics_to_aggregate</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">train_slices_per_image</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">training_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">train_average_metrics</span><span class="p">])</span>
 
-            <span class="n">val_slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
+            <span class="n">validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
 
             <span class="n">val_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
                 <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_names</span><span class="p">,</span>
                 <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-                <span class="n">metrics_to_aggregate</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">val_slices_per_image</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="n">stage</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;validate&quot;</span><span class="p">]:</span>
-            <span class="n">slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;validate&quot;</span><span class="p">:</span>
+            <span class="n">validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
 
             <span class="n">val_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
                 <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
                 <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-                <span class="n">metrics_to_aggregate</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">slices_per_image</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="n">slices_per_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">()</span>
+            <span class="n">test_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
 
             <span class="n">test_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
                 <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
                 <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-                <span class="n">metrics_to_aggregate</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">slices_per_image</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">test_average_metrics</span><span class="p">])</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">test_average_metrics</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">stage</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="s2">&quot;validate&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configure_loss</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">metric_kwargs</span><span class="p">[</span><span class="s2">&quot;multi_label&quot;</span><span class="p">]</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.training_step"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.training_step">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -420,12 +428,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="o">==</span> <span class="s2">&quot;reduceLROnPlateau&quot;</span><span class="p">:</span>
             <span class="n">scheduler</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="n">opt</span><span class="p">),</span>
-                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;validation/loss&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;val/loss&quot;</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="o">==</span> <span class="s2">&quot;cosineAnnealingLR&quot;</span><span class="p">:</span>
             <span class="n">scheduler</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="n">CosineAnnealingLR</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">T_max</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span>
-                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;validation/loss&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;val/loss&quot;</span><span class="p">,</span>
             <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -434,26 +442,53 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">opt</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="PytorchModel.configure_loss"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.configure_loss">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">configure_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">functional</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">SegmentationLoss</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">configure_loss</span><span class="p">(</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
+            <span class="s2">&quot;cross_entropy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cross_entropy_dice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;general_dice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fp_dice&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">multi_label</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">functional</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">SegmentationLoss</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Configures the loss.</span>
 <span class="sd">        Args:</span>
-<span class="sd">            loss: name of the loss</span>
+<span class="sd">            loss (string, optional): The optimization criterion: ``&quot;cross_entropy&quot;`` | ``&quot;dice&quot;`` |</span>
+<span class="sd">                ``&quot;cross_entropy_dice&quot;`` | ``&quot;general_dice&quot;`` | ``&quot;fp&quot;`` | ``&quot;fp_dice&quot;``. Defaults to</span>
+<span class="sd">                ``&quot;cross_entropy&quot;``.</span>
+<span class="sd">            multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The loss object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;bce&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">BCELoss</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;bce_dice&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">BCEDiceLoss</span><span class="p">()</span>
+        <span class="n">loss_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;ignore_index&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;cross_entropy&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">(</span><span class="n">multi_label</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span> <span class="o">**</span><span class="n">loss_kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;cross_entropy_dice&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">CrossEntropyDiceLoss</span><span class="p">(</span>
+                <span class="n">multi_label</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span> <span class="n">include_background</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span> <span class="o">**</span><span class="n">loss_kwargs</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;dice&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">DiceLoss</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">DiceLoss</span><span class="p">(</span><span class="n">include_background</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span> <span class="o">**</span><span class="n">loss_kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;general_dice&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">GeneralizedDiceLoss</span><span class="p">(</span>
+                <span class="n">include_background</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span> <span class="o">**</span><span class="n">loss_kwargs</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;fp&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">FalsePositiveLoss</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">FalsePositiveLoss</span><span class="p">(</span>
+                <span class="n">include_background</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span> <span class="o">**</span><span class="n">loss_kwargs</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;fp_dice&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">FalsePositiveDiceLoss</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">functional</span><span class="o">.</span><span class="n">FalsePositiveDiceLoss</span><span class="p">(</span>
+                <span class="n">include_background</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span> <span class="o">**</span><span class="n">loss_kwargs</span>
+            <span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid loss name.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.predict"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>

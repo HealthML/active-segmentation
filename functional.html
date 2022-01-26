@@ -189,133 +189,33 @@
 <span id="losses"></span><h2>losses<a class="headerlink" href="#module-functional.losses" title="Permalink to this headline">¶</a></h2>
 <p>Module containing segmentation losses</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="functional.losses.BCEDiceLoss">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">BCEDiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#BCEDiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.BCEDiceLoss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a></p>
-<p>Implements a loss function that combines the Dice loss with the binary cross-entropy (negative log-likelihood) loss.</p>
+<dt class="sig sig-object py" id="functional.losses.AbstractDiceLoss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">AbstractDiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#AbstractDiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.AbstractDiceLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base class for implementation of Dice loss and Generalized Dice loss.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the loss values of the images of
-one batch, must be either “mean”, “sum” or “none”.</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-5</cite>).</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="functional.losses.BCEDiceLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#BCEDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.BCEDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="functional.losses.AbstractDiceLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#AbstractDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.AbstractDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask with each channel being either a sharp segmentation mask or
-the output of a sigmoid layer.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask with the same number of channels as the prediction.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Combined loss.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tensor</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, and <cite>C = number of classes (excluding
-the background)</cite>.</p></li>
-<li><p>Target: <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in
-<span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <code class="docutils literal notranslate"><span class="pre">'none'</span></code>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="functional.losses.BCEDiceLoss.training">
-<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.BCEDiceLoss.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="functional.losses.BCELoss">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">BCELoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#BCELoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.BCELoss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a></p>
-<p>Wrapper for the PyTorch implementation of BCE loss to ensure uniform reduction behaviour for all losses.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the loss values of the images of
-one batch, must be either “mean”, “sum” or “none”.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="functional.losses.BCELoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#BCELoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.BCELoss.forward" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask with each channel being either a sharp segmentation mask or
-the output of a sigmoid layer.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask with the same number of channels as the prediction.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Binary cross-entropy loss.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tensor</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, and <cite>C = number of classes (excluding
-the background)</cite>.</p></li>
-<li><p>Target: <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in
-<span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <code class="docutils literal notranslate"><span class="pre">'none'</span></code>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="functional.losses.BCELoss.training">
-<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.BCELoss.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="functional.losses.DiceLoss">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">DiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#DiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.DiceLoss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a></p>
-<p>Implementation of Dice loss for segmentation tasks. The Dice loss originally was formulated in:</p>
-<blockquote>
-<div><p>Fausto Milletari, Nassir Navab, and Seyed-Ahmad Ahmadi. V-net: Fully convolutional neural networks for
-volumetric medical image segmentation, 2016.</p>
-</div></blockquote>
-<p>In this implementation an adapted version of the Dice loss is used that includes Laplacian smoothing.
-For a discussion on different dice loss implementations, see <a class="reference external" href="https://github.com/pytorch/pytorch/issues/1249">https://github.com/pytorch/pytorch/issues/1249</a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the loss values of the images of
-one batch, must be either “mean”, “sum” or “none”.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="functional.losses.DiceLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#DiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.DiceLoss.forward" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask with each channel being either a sharp segmentation mask or
-the output of a sigmoid layer.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask with the same number of channels as the prediction.</p></li>
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+encoded.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -327,12 +227,224 @@ the output of a sigmoid layer.</p></li>
 </dl>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, and <cite>C = number of classes (excluding</cite>
-<cite>the background)</cite>.</p></li>
-<li><p>Target: <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in
-<span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <code class="docutils literal notranslate"><span class="pre">'none'</span></code>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>or <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding.</p>
+</dd>
+</dl>
+</li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.losses.AbstractDiceLoss.get_dice_loss_module">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">get_dice_loss_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#AbstractDiceLoss.get_dice_loss_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.AbstractDiceLoss.get_dice_loss_module" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dice loss module.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functional.losses.AbstractDiceLoss.training">
+<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.AbstractDiceLoss.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="functional.losses.CrossEntropyDiceLoss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">CrossEntropyDiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyDiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyDiceLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a></p>
+<p>Implements a loss function that combines the Dice loss with the binary cross-entropy (negative log-likelihood) loss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian epsilon factor.</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the loss values of the images of
+one batch, must be either “mean”, “sum” or “none”.</p></li>
+<li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is multilabel or not (default = <cite>False</cite>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+Dice loss calculation, but not from the Cross-entropy loss calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-5</cite>).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.losses.CrossEntropyDiceLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+encoded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Combined loss.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding.</p>
+</dd>
+</dl>
+</li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functional.losses.CrossEntropyDiceLoss.training">
+<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.CrossEntropyDiceLoss.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="functional.losses.CrossEntropyLoss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">CrossEntropyLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a></p>
+<p>Wrapper for the PyTorch implementation of BCE loss / NLLLoss to ensure uniform reduction behaviour for all losses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is multilabel or not (default = <cite>False</cite>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.losses.CrossEntropyLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</p></li>
+<li><p><strong>encoded.</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Cross-entropy loss.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding.</p>
+</dd>
+</dl>
+</li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functional.losses.CrossEntropyLoss.training">
+<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.CrossEntropyLoss.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="functional.losses.DiceLoss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">DiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#DiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.DiceLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.losses.AbstractDiceLoss" title="functional.losses.AbstractDiceLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.AbstractDiceLoss</span></code></a></p>
+<p>Implementation of the Dice loss for segmentation tasks. The Dice loss for binary segmentation tasks originally was
+formulated in:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1606.04797.pdf">Fausto Milletari, Nassir Navab, and Seyed-Ahmad Ahmadi. V-net: Fully convolutional neural networks for
+volumetric medical image segmentation, 2016</a>.</p>
+</div></blockquote>
+<p>In this implementation an adapted version of the Dice loss is used that a includes an epsilon term :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>epsilon`to
+avoid divisions by zero and does not square the terms in the denominator. Additionally, the loss formulation is
+generalized to multi-class classification tasks by averaging dice losses over the class and batch dimension:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>:math:<a href="#id3"><span class="problematic" id="id4">`</span></a>DL = 1 - frac{1}{N cdot L} cdot sum_{n=1}^N sum_{l=1}^L 2 cdot frac{sum_{i} r_{nli} p_{nli} +</dt><dd><p>epsilon}{sum_{n=1}^N sum_{l=1}^L sum_{i} (r_{nli} + p_{nli}) + epsilon}` where <span class="math">\(N\)</span> is the batch
+size, <span class="math">\(L\)</span> is the number of classes, <span class="math">\(r_{nli}\)</span> are the ground-truth labels for class <span class="math">\(l\)</span> in
+the <span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image. Analogously, <span class="math">\(p\)</span> is the predicted probability for
+class <span class="math">\(l\)</span> in the <span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>This implementation is a wrapper of the Dice loss implementation from the <a class="reference external" href="https://docs.monai.io/en/stable/losses.html#diceloss">MONAI package</a> that adapts the reduction behaviour. It supports both
+single-label and multi-label segmentation tasks. For a discussion on different dice loss implementations, see
+<a class="reference external" href="https://github.com/pytorch/pytorch/issues/1249">https://github.com/pytorch/pytorch/issues/1249</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-5</cite>).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.losses.DiceLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#DiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.DiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.losses.DiceLoss.get_dice_loss_module">
+<span class="sig-name descname"><span class="pre">get_dice_loss_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#DiceLoss.get_dice_loss_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.DiceLoss.get_dice_loss_module" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dice loss module.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Module</p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,15 +458,20 @@ the output of a sigmoid layer.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.losses.FalsePositiveDiceLoss">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">FalsePositiveDiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveDiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveDiceLoss" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">FalsePositiveDiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveDiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveDiceLoss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a></p>
 <p>Implements a loss function that combines the Dice loss with the false positive loss.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the loss values of the images of
-one batch, must be either “mean”, “sum” or “none”.</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-5</cite>).</p></li>
 </ul>
 </dd>
 </dl>
@@ -364,9 +481,9 @@ one batch, must be either “mean”, “sum” or “none”.</p></li>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask with each channel being either a sharp segmentation mask or
-the output of a sigmoid layer.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask with the same number of channels as the prediction.</p></li>
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+encoded.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -378,11 +495,18 @@ the output of a sigmoid layer.</p></li>
 </dl>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, and <cite>C = number of classes (excluding
-the background)</cite>.</p></li>
-<li><p>Target: <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in
-<span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <code class="docutils literal notranslate"><span class="pre">'none'</span></code>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding.</p>
+</dd>
+</dl>
+</li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
 </dl>
@@ -397,15 +521,20 @@ the background)</cite>.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.losses.FalsePositiveLoss">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">FalsePositiveLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveLoss" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">FalsePositiveLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveLoss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#functional.losses.SegmentationLoss" title="functional.losses.SegmentationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.SegmentationLoss</span></code></a></p>
 <p>Implementation of false positive loss.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the loss values of the images of
-one batch, must be either “mean”, “sum” or “none”.</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-5</cite>).</p></li>
 </ul>
 </dd>
 </dl>
@@ -415,9 +544,9 @@ one batch, must be either “mean”, “sum” or “none”.</p></li>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask with each channel being either a sharp segmentation mask or
-the output of a sigmoid layer.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask with the same number of channels as the prediction.</p></li>
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</p></li>
+<li><p><strong>encoded.</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -429,11 +558,18 @@ the output of a sigmoid layer.</p></li>
 </dl>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, and <cite>C = number of classes (excluding
-the background)</cite>.</p></li>
-<li><p>Target: <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in
-<span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <code class="docutils literal notranslate"><span class="pre">'none'</span></code>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding.</p>
+</dd>
+</dl>
+</li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
 </dl>
@@ -447,43 +583,87 @@ the background)</cite>.</p></li>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="functional.losses.GeneralizedDiceLoss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">GeneralizedDiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'square'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#GeneralizedDiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.GeneralizedDiceLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.losses.AbstractDiceLoss" title="functional.losses.AbstractDiceLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.AbstractDiceLoss</span></code></a></p>
+<p>Implementation of Generalized Dice loss for segmentation tasks. The Generalized Dice loss was formulated in:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1707.03237.pdf">Carole H. Sudre, Wenqi Li, Tom Vercauteren, Sebastien Ourselin, and M. Jorge Cardoso: Generalised Dice overlap
+as a deep learning loss function for highly unbalanced segmentations, 2017.</a></p>
+</div></blockquote>
+<p>It is formulated as:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>:math:<a href="#id5"><span class="problematic" id="id6">`</span></a>GDL = frac{1}{N} cdot sum_{n=1}^N (1 - 2 frac{sum_{l=1}^L w_l cdot sum_{i} r_{nli} p_{nli} +</dt><dd><p>epsilon}{sum_{l=1}^L w_l cdot sum_{i} (r_{nli} + p_{nli}) + epsilon})` where
+<span class="math">\(N\)</span> is the batch size, <span class="math">\(L\)</span> is the number of classes, <span class="math">\(w_l\)</span> is a class weight,
+<span class="math">\(r_{nli}\)</span> are the ground-truth labels for class <span class="math">\(l\)</span> in the <span class="math">\(i\)</span>-th voxel of the
+<span class="math">\(n\)</span>-th image. Analogously, <span class="math">\(p\)</span> is the predicted probability for class <span class="math">\(l\)</span> in the
+<span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>This implementation is a wrapper of the Generalized Dice loss implementation from the <a class="reference external" href="https://docs.monai.io/en/stable/losses.html#generalizeddiceloss">MONAI package</a> that adapts the reduction behaviour. It supports
+both single-label and multi-label segmentation tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>weight_type</strong> (<em>string</em><em>, </em><em>optional</em>) – Type of function to transform ground truth volume to a weight factor:
+<cite>“square”</cite> | <cite>“simple”</cite> | <cite>“uniform”</cite>. Defaults to <cite>“square”</cite>.</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-5</cite>).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.losses.GeneralizedDiceLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#GeneralizedDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.GeneralizedDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.losses.GeneralizedDiceLoss.get_dice_loss_module">
+<span class="sig-name descname"><span class="pre">get_dice_loss_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#GeneralizedDiceLoss.get_dice_loss_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.GeneralizedDiceLoss.get_dice_loss_module" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dice loss module.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functional.losses.GeneralizedDiceLoss.training">
+<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.GeneralizedDiceLoss.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="functional.losses.SegmentationLoss">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">SegmentationLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#SegmentationLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.SegmentationLoss" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">SegmentationLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#SegmentationLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.SegmentationLoss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for implementation of segmentation losses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Reduction function that is to be used to aggregate the loss values of the images of
-one batch, must be either “mean”, “sum” or “none”.</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-5</cite>).</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="functional.losses.SegmentationLoss.flatten_tensor">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">flatten_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#SegmentationLoss.flatten_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.SegmentationLoss.flatten_tensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flattens a tensor except for its first two dimensions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>tensor</strong> (<em>Tensor</em>) – The tensor to be flattened.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Flattened view of the input tensor.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tensor</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><p>Tensor: <span class="math">\((N, C, X, Y, ...)\)</span></p></li>
-<li><p>Output: <span class="math">\((N, C, X*Y*...)\)</span></p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="functional.losses.SegmentationLoss.training">
 <span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.SegmentationLoss.training" title="Permalink to this definition">¶</a></dt>
@@ -499,13 +679,30 @@ one batch, must be either “mean”, “sum” or “none”.</p></li>
 with this framework, see <a class="reference external" href="https://torchmetrics.readthedocs.io/en/latest/pages/implement.html">https://torchmetrics.readthedocs.io/en/latest/pages/implement.html</a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.DiceScore">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">DiceScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#DiceScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.DiceScore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">DiceScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#DiceScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.DiceScore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.metrics.SegmentationMetric" title="functional.metrics.SegmentationMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.metrics.SegmentationMetric</span></code></a></p>
 <p>Computes the Dice similarity coefficient (DSC). Can be used for 3D images whose slices are scattered over multiple
 batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>A method to reduce metric scores of multiple classes.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
@@ -520,38 +717,78 @@ batches.</p>
 <dd class="field-even"><p>Tensor</p>
 </dd>
 </dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.metrics.DiceScore.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#DiceScore.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.DiceScore.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Updates metric using the provided prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding (<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.HausdorffDistance">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">HausdorffDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#HausdorffDistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.HausdorffDistance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">HausdorffDistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#HausdorffDistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.HausdorffDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.metrics.SegmentationMetric" title="functional.metrics.SegmentationMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.metrics.SegmentationMetric</span></code></a></p>
 <p>Computes the Hausdorff distance. Can be used for 3D images whose slices are scattered over multiple batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
 <li><p><strong>slices_per_image</strong> (<em>int</em>) – Number of slices per 3d image.</p></li>
-<li><p><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentile for which the Hausdorff distance is to be calculated, must be in
-<span class="math">\(\[0, 1\]\)</span>.</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
 <li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the Hausdorff distance should be normalized by dividing it by the diagonal
 distance.</p></li>
+<li><p><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentile for which the Hausdorff distance is to be calculated, must be in
+<span class="math">\(\[0, 1\]\)</span>.</p></li>
+<li><p><strong>reduction</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>A method to reduce metric scores of multiple classes (default = <cite>“none”</cite>).</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.metrics.HausdorffDistance.compute">
 <span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#HausdorffDistance.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.HausdorffDistance.compute" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Computes the Hausdorf distance over all slices that were registered using the <cite>update</cite> method as the maximum per</dt><dd><p>slice-distance.</p>
-</dd>
-</dl>
+<dd><p>Computes the Hausdorff distance over all slices that were registered using the <cite>update</cite> method as the maximum
+per slice-distance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Hausdorff distance.</p>
@@ -560,23 +797,103 @@ distance.</p></li>
 <dd class="field-even"><p>Tensor</p>
 </dd>
 </dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.metrics.HausdorffDistance.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#HausdorffDistance.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.HausdorffDistance.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets the metric state.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.metrics.HausdorffDistance.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#HausdorffDistance.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.HausdorffDistance.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Updates metric using the provided prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding (<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="functional.metrics.SegmentationMetric">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">SegmentationMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#SegmentationMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.SegmentationMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base class for segmentation metrics.</p>
+<p>Args:
+num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot</p>
+<blockquote>
+<div><p>encoding or not (default = <cite>True</cite>).</p>
+</div></blockquote>
+<dl class="simple">
+<dt>ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.</dt><dd><p>Defaults to <cite>None</cite>.</p>
+</dd>
+<dt>include_background (bool, optional): if <cite>False</cite>, class channel index 0 (background class) is excluded from the</dt><dd><p>calculation (default = <cite>True</cite>).</p>
+</dd>
+<dt>ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to</dt><dd><p><cite>ignore_index</cite>. Defaults to 0.</p>
+</dd>
+</dl>
+<p>reduction (string, optional): A method to reduce metric scores of multiple classes.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.Sensitivity">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Sensitivity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Sensitivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.metrics.SegmentationMetric" title="functional.metrics.SegmentationMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.metrics.SegmentationMetric</span></code></a></p>
 <p>Computes the sensitivity. Can be used for 3D images whose slices are scattered over multiple batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>A method to reduce metric scores of multiple classes.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
@@ -591,23 +908,67 @@ distance.</p></li>
 <dd class="field-even"><p>Tensor</p>
 </dd>
 </dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.metrics.Sensitivity.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Sensitivity.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Sensitivity.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Updates metric using the provided prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding (<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.metrics.Specificity">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Specificity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Specificity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">Specificity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Specificity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.metrics.SegmentationMetric" title="functional.metrics.SegmentationMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.metrics.SegmentationMetric</span></code></a></p>
 <p>Computes the specificity. Can be used for 3D images whose slices are scattered over multiple batches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>smoothing</strong> (<em>int</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>A method to reduce metric scores of multiple classes (default = <cite>“none”</cite>).</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
@@ -622,37 +983,72 @@ distance.</p></li>
 <dd class="field-even"><p>Tensor</p>
 </dd>
 </dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.metrics.Specificity.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#Specificity.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.Specificity.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Updates metric using the provided prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding (<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="functional.metrics.dice_score">
-<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">dice_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#dice_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.dice_score" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">dice_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#dice_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.dice_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the Dice similarity coefficient (DSC) between a predicted segmentation mask and the target mask:</p>
 <blockquote>
 <div><p><span class="math">\(DSC = \frac{2 \cdot TP}{2 \cdot TP + FP + FN}\)</span></p>
 </div></blockquote>
-<p>Using the <cite>smoothing</cite> parameter, Laplacian smoothing can be applied:</p>
+<p>Using the <cite>epsilon</cite> parameter, Laplacian smoothing can be applied:</p>
 <blockquote>
 <div><p><span class="math">\(DSC = \frac{2 \cdot TP + \lambda}{2 \cdot TP + FP + FN + \lambda}\)</span></p>
 </div></blockquote>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In this method, the <cite>prediction</cite> tensor is considered as a segmentation mask of a single 2D or 3D image for a
-given class and thus it aggregates over <span class="math">\(TP\)</span>, <span class="math">\(FP\)</span>, and <span class="math">\(FN\)</span> over all channels and dimensions.</p>
-</div>
+<p>This metric supports both single-label and multi-label segmentation tasks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – The predicted segmentation mask, where each value is in <span class="math">\([0, 1]\)</span>.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – The target segmentation mask, where each value is in <span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p><strong>smoothing</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing factor (default = 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>string</em>) – A method to reduce metric scores of multiple classes.
+- <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)
+- <code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean
+- <code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum
+- <code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -664,10 +1060,14 @@ given class and thus it aggregates over <span class="math">\(TP\)</span>, <span 
 </dl>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: Can have arbitrary dimensions. Typically <span class="math">\((S, height, width)\)</span>, where <cite>S = number of slices</cite>,
-or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
-<li><p>Target: Must have the same dimensions as the prediction.</p></li>
-<li><p>Output: Scalar.</p></li>
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
+(<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
 </dl>
@@ -675,7 +1075,114 @@ or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="functional.metrics.hausdorff_distance">
-<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">hausdorff_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_image_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#hausdorff_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.hausdorff_distance" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">hausdorff_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_image_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#hausdorff_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.hausdorff_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the Hausdorff distance between a predicted segmentation mask and the target mask.</p>
+<p>This metric supports both single-label and multi-label segmentation tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>all_image_locations</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – A pre-computed tensor containing one point for each pixel in the
+prediction representing the pixel’s location in 2d or 3d Euclidean space. Passing a pre-computed tensor to
+this parameter can be used to speed up computation.</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the Hausdorff distance should be normalized by dividing it by the diagonal
+distance.</p></li>
+<li><p><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentile for which the Hausdorff distance is to be calculated, must be in
+<span class="math">\(\[0, 1\]\)</span>.</p></li>
+<li><p><strong>reduction</strong> (<em>string</em>) – A method to reduce metric scores of multiple classes.
+- <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)
+- <code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean
+- <code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum
+- <code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Hausdorff distance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
+(<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.metrics.sensitivity">
+<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.sensitivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the sensitivity from a predicted segmentation mask and the target mask:</p>
+<blockquote>
+<div><p><span class="math">\(Sensitivity = \frac{TP}{TP + FN}\)</span></p>
+</div></blockquote>
+<p>Using the <cite>epsilon</cite> parameter, Laplacian smoothing can be applied:</p>
+<blockquote>
+<div><p><span class="math">\(Sensitivity = \frac{TP + \lambda}{TP + FN + \lambda}\)</span></p>
+</div></blockquote>
+<p>This metric supports both single-label and multi-label segmentation tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing factor (default = 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>string</em>) – A method to reduce metric scores of multiple classes.
+- <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)
+- <code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean
+- <code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum
+- <code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Sensitivity.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
+(<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.metrics.single_class_hausdorff_distance">
+<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">single_class_hausdorff_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_image_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#single_class_hausdorff_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.single_class_hausdorff_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
 .. note:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
@@ -723,69 +1230,35 @@ or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="functional.metrics.sensitivity">
-<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.sensitivity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the sensitivity from a predicted segmentation mask and the target mask:</p>
-<blockquote>
-<div><p><span class="math">\(Sensitivity = \frac{TP}{TP + FN}\)</span></p>
-</div></blockquote>
-<p>Using the <cite>smoothing</cite> parameter, Laplacian smoothing can be applied:</p>
-<blockquote>
-<div><p><span class="math">\(Sensitivity = \frac{TP + \lambda}{TP + FN + \lambda}\)</span></p>
-</div></blockquote>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In this method, the <cite>prediction</cite> tensor is considered as a segmentation mask of a single 2D or 3D image for a
-given class and thus it aggregates over <span class="math">\(TP\)</span>, and <span class="math">\(FN\)</span> over all channels and dimensions.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – The predicted segmentation mask, where each value is in <span class="math">\([0, 1]\)</span>.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – The target segmentation mask, where each value is in <span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p><strong>smoothing</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Sensitivity.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tensor</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: Can have arbitrary dimensions. Typically <span class="math">\((S, height, width)\)</span>, where <cite>S = number of slices</cite>,
-or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
-<li><p>Target: Must have the same dimensions as the prediction.</p></li>
-<li><p>Output: Scalar.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="functional.metrics.specificity">
-<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">specificity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.specificity" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">specificity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.specificity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the specificity from a predicted segmentation mask and the target mask:</p>
 <blockquote>
 <div><p><span class="math">\(Specificity = \frac{TN}{TN + FP}\)</span></p>
 </div></blockquote>
-<p>Using the <cite>smoothing</cite> parameter, Laplacian smoothing can be applied:</p>
+<p>Using the <cite>epsilon</cite> parameter, Laplacian smoothing can be applied:</p>
 <blockquote>
 <div><p><span class="math">\(Specificity = \frac{TN + \lambda}{TN + FP + \lambda}\)</span></p>
 </div></blockquote>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In this method, the <cite>prediction</cite> tensor is considered as a segmentation mask of a single 2D or 3D image for a
-given class and thus it aggregates over <span class="math">\(TP\)</span>, and <span class="math">\(FN\)</span> over all channels and dimensions.</p>
-</div>
+<p>This metric supports both single-label and multi-label segmentation tasks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prediction</strong> (<em>Tensor</em>) – The predicted segmentation mask, where each value is in <span class="math">\([0, 1]\)</span>.</p></li>
-<li><p><strong>target</strong> (<em>Tensor</em>) – The target segmentation mask, where each value is in <span class="math">\(\{0, 1\}\)</span>.</p></li>
-<li><p><strong>smoothing</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing factor.</p></li>
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing factor (default = 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>reduction</strong> (<em>string</em>) – A method to reduce metric scores of multiple classes.
+- <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)
+- <code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean
+- <code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum
+- <code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -797,10 +1270,14 @@ given class and thus it aggregates over <span class="math">\(TP\)</span>, and <s
 </dl>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: Can have arbitrary dimensions. Typically <span class="math">\((S, height, width)\)</span>, where <cite>S = number of slices</cite>,
-or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
-<li><p>Target: Must have the same dimensions as the prediction.</p></li>
-<li><p>Output: Scalar.</p></li>
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
+(<cite>C = number of classes</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: Same shape and type as prediction.</p></li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
 </dl>

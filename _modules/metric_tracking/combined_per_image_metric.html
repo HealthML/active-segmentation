@@ -182,41 +182,68 @@
   <h1>Source code for metric_tracking.combined_per_image_metric</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Module containing a metrics class for tracking several metrics related to one 3d image &quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torchmetrics</span>
 
 <span class="kn">from</span> <span class="nn">functional</span> <span class="kn">import</span> <span class="n">DiceScore</span><span class="p">,</span> <span class="n">Sensitivity</span><span class="p">,</span> <span class="n">Specificity</span><span class="p">,</span> <span class="n">HausdorffDistance</span>
 
 
+<span class="n">MetricName</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dice_score&quot;</span><span class="p">,</span> <span class="s2">&quot;sensitivity&quot;</span><span class="p">,</span> <span class="s2">&quot;specificity&quot;</span><span class="p">,</span> <span class="s2">&quot;hausdorff95&quot;</span><span class="p">]</span>
+
+
 <div class="viewcode-block" id="CombinedPerImageMetric"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric">[docs]</a><span class="k">class</span> <span class="nc">CombinedPerImageMetric</span><span class="p">(</span><span class="n">torchmetrics</span><span class="o">.</span><span class="n">Metric</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A metrics class that tracks several metrics related to one 3d image whose slices may be scattered across</span>
-<span class="sd">    different batches. The metrics can be tracked for different confidence levels.</span>
+<span class="sd">    different batches. In case of multi-label segmentation tasks, the metrics can be tracked for different confidence</span>
+<span class="sd">    levels.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        metrics (Iterable[str]): A list of metric names to be tracked. Available options: &quot;dice&quot;, &quot;sensitivity&quot;,</span>
-<span class="sd">            &quot;specificity&quot;, and &quot;hausdorff95&quot;.</span>
-<span class="sd">        confidence_levels (Iterable[float]): A list of confidence levels for which the metrics are to be tracked</span>
-<span class="sd">            separately.</span>
+<span class="sd">        metrics (Iterable[str]): A list of metric names to be tracked. Available options: ``&quot;dice_score&quot;`` |</span>
+<span class="sd">            ``&quot;sensitivity&quot;``| ``&quot;specificity&quot;``, and ``&quot;hausdorff95&quot;``.</span>
+<span class="sd">        id_to_class_names (Dict[int, str]): A mapping of class indices to descriptive class names.</span>
+<span class="sd">        confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics are to be</span>
+<span class="sd">            tracked separately. This parameter is used only if `multi_label` is set to `True`. Defaults to `[0.5]`.</span>
+<span class="sd">        multi_label (bool, optional): Determines whether the task is a multi-label segmentation task or not</span>
+<span class="sd">            (default = `False`).</span>
 <span class="sd">        slices_per_image (int): Number of slices per 3d image.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        In this method, the `prediction` tensor is expected to be one output slice of the final sigmoid layer of a</span>
-<span class="sd">            single-class segmentation task.</span>
+<span class="sd">        If `multi_label` is `False`, the `prediction` tensor is expected to be either the output of the final softmax</span>
+<span class="sd">        layer of a segmentation model or a label-encoded, sharp prediction. In the first case, the prediction tensor</span>
+<span class="sd">        must be of floating point type and have the shape :math:`(C, X, Y)` or :math:`(C, X, Y, Z)` where</span>
+<span class="sd">        `C = number of classes`. In the second case, the prediction tensor must be of integer type and have the shape</span>
+<span class="sd">        :math:`(X, Y)` or :math:`(X, Y, Z)`. The `target` tensor is expected to be label-encoded in both cases. Thus,</span>
+<span class="sd">        it needs to have the shape :math:`(X, Y)` or :math:`(X, Y, Z)` and be of integer type.</span>
+
+<span class="sd">        If `multi_label` is `True`, the `prediction` tensor is expected to be either the output of the final sigmoid</span>
+<span class="sd">        layer of a segmentation model or a sharp prediction. In the first case, the prediction tensors needs to be of</span>
+<span class="sd">        floating point type and in the second type of integer type. the In both cases the prediction tensor needs to</span>
+<span class="sd">        have the shape :math:`(C, X, Y)` or :math:`(C, X, Y, Z)`. The target tensor is expected to contain sharp</span>
+<span class="sd">        predictions and to have the shape :math:`(C, X, Y)` or :math:`(C, X, Y, Z)`.</span>
 
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: :math:`(height, width)`.</span>
-<span class="sd">        - Target: Must have the same dimensions as the prediction.</span>
+<span class="sd">        - Prediction: :math:`(C, X, Y, ...)`, where `C = number of classes` (see Notes above).</span>
+<span class="sd">        - Target: :math:`(X, Y, ...)`, or :math:`(C, X, Y, ...)` (see Notes above).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">metrics</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">confidence_levels</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MetricName</span><span class="p">],</span>
+        <span class="n">id_to_class_names</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">slices_per_image</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">multi_label</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">confidence_levels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_to_class_names</span> <span class="o">=</span> <span class="n">id_to_class_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_to_class_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span> <span class="o">=</span> <span class="n">multi_label</span>
+
+        <span class="n">confidence_levels</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">confidence_levels</span> <span class="k">if</span> <span class="n">confidence_levels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="c1"># PyTorch does not allow &quot;.&quot; in module names, therefore we first replace them by &quot;,&quot; and later replace them</span>
         <span class="c1"># again by &quot;.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span> <span class="o">=</span> <span class="p">[</span>
@@ -224,47 +251,90 @@
             <span class="k">for</span> <span class="n">confidence_level</span> <span class="ow">in</span> <span class="n">confidence_levels</span>
         <span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">confidence_level_name</span><span class="p">:</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span>
-        <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">confidence_level_name</span><span class="p">:</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span>
+            <span class="p">}</span>
 
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">metrics</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;dice_score&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">DiceScore</span><span class="p">(</span>
-                        <span class="n">smoothing</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">metrics</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_metric</span><span class="p">(</span>
+                        <span class="n">metric</span><span class="p">,</span> <span class="n">slices_per_image</span>
                     <span class="p">)</span>
-                <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;sensitivity&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sensitivity</span><span class="p">(</span>
-                        <span class="n">smoothing</span><span class="o">=</span><span class="mi">0</span>
-                    <span class="p">)</span>
-                <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;specificity&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">Specificity</span><span class="p">(</span>
-                        <span class="n">smoothing</span><span class="o">=</span><span class="mi">0</span>
-                    <span class="p">)</span>
-                <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;hausdorff95&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">HausdorffDistance</span><span class="p">(</span>
-                        <span class="n">slices_per_image</span><span class="o">=</span><span class="n">slices_per_image</span><span class="p">,</span>
-                        <span class="n">percentile</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
-                        <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid metric name: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="c1"># the ModuleDict is required by PyTorch Lightning in order to place the metrics on the correct device</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleDict</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span>
-            <span class="p">)</span>
+                <span class="c1"># the ModuleDict is required by PyTorch Lightning in order to place the metrics on the correct device</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleDict</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">metric</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">slices_per_image</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+            <span class="p">}</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleDict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_metric</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">metric</span><span class="p">:</span> <span class="n">MetricName</span><span class="p">,</span>
+        <span class="n">slices_per_image</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torchmetrics</span><span class="o">.</span><span class="n">Metric</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a metric object of the specified metric type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metric (str): Name of the metric type for which a metric object is to be created. Available options:</span>
+<span class="sd">                ``&quot;dice_score&quot;`` | ``&quot;sensitivity&quot;``| ``&quot;specificity&quot;``, and ``&quot;hausdorff95&quot;``.</span>
+<span class="sd">            slices_per_image (int): Number of slices per 3d image.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            torchmetrics.Metric: A metric object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;dice_score&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DiceScore</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span>
+                <span class="n">convert_to_one_hot</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">,</span>
+                <span class="n">epsilon</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">ignore_index</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;sensitivity&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Sensitivity</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span>
+                <span class="n">convert_to_one_hot</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">,</span>
+                <span class="n">epsilon</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">ignore_index</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;specificity&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Specificity</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span>
+                <span class="n">convert_to_one_hot</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">,</span>
+                <span class="n">epsilon</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">ignore_index</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;hausdorff95&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HausdorffDistance</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span>
+                <span class="n">slices_per_image</span><span class="p">,</span>
+                <span class="n">convert_to_one_hot</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">,</span>
+                <span class="n">ignore_index</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">percentile</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid metric name: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CombinedPerImageMetric.reset"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Resets internal state such that metric ready for new data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">metric</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">metric</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
@@ -283,26 +353,50 @@
 <span class="sd">            target (Tensor): A target slice or a whole 3d image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">for</span> <span class="n">confidence_level</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">sharp_prediction</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">&gt;</span> <span class="n">confidence_level</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">confidence_level</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
 
+                    <span class="n">sharp_prediction</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">&gt;</span> <span class="n">confidence_level</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+
+                    <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sharp_prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">:</span>
+                    <span class="n">sharp_prediction</span> <span class="o">=</span> <span class="n">prediction</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sharp_prediction</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
                 <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sharp_prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CombinedPerImageMetric.compute"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Computes the metrics for the 3d image.</span>
+<span class="sd">        Computes the metrics for the image.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict[string, Tensor]: Mapping of metric names to metric values.</span>
-<span class="sd">                The keys have the form `&lt;metric name&gt;_&lt;confidence_level&gt;`.</span>
+<span class="sd">                The keys have the form `&lt;metric name&gt;_&lt;class_name&gt;_&lt;confidence_level&gt;` for multi-label segmentation</span>
+<span class="sd">                tasks and `&lt;metric name&gt;_&lt;class_name&gt;` for single-label segmentation tasks.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">metric_results</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">metric_results</span><span class="p">[</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">confidence_level_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">per_class_metrics</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+                    <span class="k">for</span> <span class="n">class_id</span><span class="p">,</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">metric_results</span><span class="p">[</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">confidence_level_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">]</span> <span class="o">=</span> <span class="n">per_class_metrics</span><span class="p">[</span><span class="n">class_id</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">per_class_metrics</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+                <span class="k">for</span> <span class="n">class_id</span><span class="p">,</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">metric_results</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_class_metrics</span><span class="p">[</span>
+                        <span class="n">class_id</span>
+                    <span class="p">]</span>
 
         <span class="k">return</span> <span class="n">metric_results</span></div></div>
 </pre></div>

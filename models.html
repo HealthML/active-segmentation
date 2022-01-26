@@ -265,40 +265,52 @@ Details about the Resnet50 architecture: <a class="reference external" href="htt
 <p>Base classes to implement models with pytorch</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.pytorch_model.</span></span><span class="sig-name descname"><span class="pre">PytorchModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'adam'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dice'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_metric_confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_metric_confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.pytorch_model.</span></span><span class="sig-name descname"><span class="pre">PytorchModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cross_entropy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'adam'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_metric_confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_metric_confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.lightning.LightningModule</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class to implement Pytorch models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>learning_rate</strong> – The step size at each iteration while moving towards a minimum of the loss.</p></li>
-<li><p><strong>optimizer</strong> – Algorithm used to calculate the loss and update the weights. E.g. ‘adam’ or ‘sgd’.</p></li>
-<li><p><strong>lr_scheduler</strong> – Algorithm used for dynamically updating the learning rate during training.
-E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p></li>
-<li><p><strong>loss</strong> – The measure of performance. E.g. ‘dice’, ‘bce’, ‘fp’</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – The step size at each iteration while moving towards a minimum of the loss.
+Defaults to <cite>0.0001</cite>.</p></li>
+<li><p><strong>lr_scheduler</strong> (<em>string</em><em>, </em><em>optional</em>) – Algorithm used for dynamically updating the learning rate during training:
+<code class="docutils literal notranslate"><span class="pre">&quot;reduceLROnPlateau&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;cosineAnnealingLR&quot;</span></code>. Defaults to using no scheduler.</p></li>
+<li><p><strong>loss</strong> (<em>string</em><em>, </em><em>optional</em>) – The optimization criterion: <code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;dice&quot;</span></code> <a href="#id1"><span class="problematic" id="id2">|</span></a><code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy_dice&quot;</span></code>
+| <code class="docutils literal notranslate"><span class="pre">&quot;general_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp_dice&quot;</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy&quot;</span></code>.</p></li>
+<li><p><strong>optimizer</strong> (<em>string</em><em>, </em><em>optional</em>) – Algorithm used to calculate the loss and update the weights: <code class="docutils literal notranslate"><span class="pre">&quot;adam&quot;</span></code> |
+<code class="docutils literal notranslate"><span class="pre">&quot;sgd&quot;</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;adam&quot;</span></code>.</p></li>
 <li><p><strong>train_metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A list with the names of the metrics that should be computed and logged
-in each training and validation epoch of the training loop. Defaults to <cite>[“dice_score”]</cite>.</p></li>
+in each training and validation epoch of the training loop. Available options: <code class="docutils literal notranslate"><span class="pre">&quot;dice_score&quot;</span></code> |
+<code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;specificity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code>. Defaults to <cite>[“dice_score”]</cite>.</p></li>
 <li><p><strong>train_metric_confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – A list of confidence levels for which the metrics
-specified in the <cite>train_metrics</cite> parameter should be computed in the training loop (<cite>trainer.fit()</cite>).
-Defaults to <cite>[0.25, 0.5, 0.75]</cite>.</p></li>
+specified in the <cite>train_metrics</cite> parameter should be computed in the training loop (<cite>trainer.fit()</cite>). This
+parameter is used only for mulit-label classification tasks. Defaults to <cite>[0.5]</cite>.</p></li>
 <li><p><strong>test_metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A list with the names of the metrics that should be computed and logged
-in the model validation or testing loop (<cite>trainer.validate()</cite>, <cite>trainer.test()</cite>). Defaults to
+in the model validation or testing loop (<cite>trainer.validate()</cite>, <cite>trainer.test()</cite>). Available options:
+<code class="docutils literal notranslate"><span class="pre">&quot;dice_score&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;specificity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code> Defaults to
 <cite>[“dice_score”, “sensitivity”, “specificity”, “hausdorff95”]</cite>.</p></li>
 <li><p><strong>test_metric_confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – A list of confidence levels for which the metrics
-specified in the <cite>test_metrics</cite> parameter should be computed in the validation or testing loop. Defaults to
-<cite>[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]</cite>.</p></li>
+specified in the <cite>test_metrics</cite> parameter should be computed in the validation or testing loop. This
+parameter is used only for mulit-label classification tasks. Defaults to <cite>[0.5]</cite>.</p></li>
 <li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.configure_loss">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">configure_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.configure_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.configure_loss" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">configure_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.configure_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.configure_loss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Configures the loss.
-:param loss: name of the loss</p>
+:param loss: The optimization criterion: <code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;dice&quot;</span></code> |</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;general_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp_dice&quot;</span></code>. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy&quot;</span></code>.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The loss object.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is multilabel or not (default = <cite>False</cite>).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The loss object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -551,6 +563,20 @@ Details about the architecture: <a class="reference external" href="https://arxi
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet.setup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,</dt><dd><p>or predict.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stage</strong> (<em>string</em><em>, </em><em>optional</em>) – Either ‘fit’, ‘validate’, ‘test’, or ‘predict’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet.test_step">
 <span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet.test_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tests the model on a given batch of input images.</p>
@@ -620,7 +646,7 @@ Details about the architecture: <a class="reference external" href="https://arxi
 <p>U-Net architecture.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.u_net.UNet">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.u_net.</span></span><span class="sig-name descname"><span class="pre">UNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/u_net.html#UNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.u_net.UNet" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.u_net.</span></span><span class="sig-name descname"><span class="pre">UNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/u_net.html#UNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.u_net.UNet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>This U-Net implementation was originally taken from
 <a class="reference external" href="https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py">https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py</a>
@@ -628,9 +654,12 @@ and adapted to a flexible number of levels and for optinal 3d mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>in_channels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of input channels. Defaults to 3.</p></li>
-<li><p><strong>out_channels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of output channels (should be equal to the number of classes
-excluding the background). Defaults to 1.</p></li>
+<li><p><strong>in_channels</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Number of output channels. Should be equal to the number of classes (for
+multi-label segmentation tasks excluding the background class).</p></li>
+<li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the model should produce single-label or multi-label outputs. If set to
+<cite>False</cite>, the model’s predictions are computed using a Softmax activation layer. to If set to <cite>True</cite>, sigmoid
+activation layers are used to compute the model’s predicitions. Defaults to False.</p></li>
 <li><p><strong>init_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of feature channels of the first U-Net block,
 in each down-sampling block, the number of feature channels is doubled. Defaults to 32.</p></li>
 <li><p><strong>num_levels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</p></li>

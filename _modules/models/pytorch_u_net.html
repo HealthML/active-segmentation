@@ -182,7 +182,7 @@
   <h1>Source code for models.pytorch_u_net</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;U-Net architecture wrapped as PytorchModel&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -205,18 +205,37 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span> <span class="o">=</span> <span class="n">num_levels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span> <span class="o">=</span> <span class="n">in_channels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span>
-            <span class="n">in_channels</span><span class="o">=</span><span class="n">in_channels</span><span class="p">,</span>
-            <span class="n">out_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">init_features</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-            <span class="n">num_levels</span><span class="o">=</span><span class="n">num_levels</span><span class="p">,</span>
-            <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="PytorchUNet.input_dimensionality"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.input_dimensionality">[docs]</a>    <span class="k">def</span> <span class="nf">input_dimensionality</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span></div>
+
+<div class="viewcode-block" id="PytorchUNet.setup"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,</span>
+<span class="sd">            or predict.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            stage(string, optional): Either &#39;fit&#39;, &#39;validate&#39;, &#39;test&#39;, or &#39;predict&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span>
+
+        <span class="n">multi_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">multi_label</span><span class="p">()</span>
+        <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span>
+            <span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span><span class="p">,</span>
+            <span class="n">out_channels</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span>
+            <span class="n">multi_label</span><span class="o">=</span><span class="n">multi_label</span><span class="p">,</span>
+            <span class="n">init_features</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+            <span class="n">num_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">,</span>
+            <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
     <span class="c1"># wrap model interface</span>
 <div class="viewcode-block" id="PytorchUNet.eval"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -275,7 +294,7 @@
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
 
         <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">train_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_train_metrics</span><span class="p">():</span>
             <span class="n">train_metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span><span class="p">)</span>
@@ -298,7 +317,7 @@
 
         <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;val/loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>  <span class="c1"># log validation loss via weights&amp;biases</span>
 
@@ -335,7 +354,7 @@
 
         <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;test/loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">test_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_test_metrics</span><span class="p">():</span>

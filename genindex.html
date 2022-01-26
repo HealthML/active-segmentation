@@ -205,6 +205,8 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.losses.AbstractDiceLoss">AbstractDiceLoss (class in functional.losses)</a>
+</li>
       <li>
     active_learning
 
@@ -224,12 +226,6 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="functional.html#functional.losses.BCEDiceLoss">BCEDiceLoss (class in functional.losses)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="functional.html#functional.losses.BCELoss">BCELoss (class in functional.losses)</a>
-</li>
       <li><a href="datasets.html#datasets.brats_data_module.BraTSDataModule">BraTSDataModule (class in datasets.brats_data_module)</a>
 </li>
   </ul></td>
@@ -265,6 +261,10 @@
       <li><a href="main.html#main.create_data_module">create_data_module() (in module main)</a>
 </li>
       <li><a href="main.html#main.create_query_strategy">create_query_strategy() (in module main)</a>
+</li>
+      <li><a href="functional.html#functional.losses.CrossEntropyDiceLoss">CrossEntropyDiceLoss (class in functional.losses)</a>
+</li>
+      <li><a href="functional.html#functional.losses.CrossEntropyLoss">CrossEntropyLoss (class in functional.losses)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -327,18 +327,20 @@
 </li>
       <li><a href="functional.html#functional.losses.FalsePositiveLoss">FalsePositiveLoss (class in functional.losses)</a>
 </li>
-      <li><a href="functional.html#functional.losses.SegmentationLoss.flatten_tensor">flatten_tensor() (functional.losses.SegmentationLoss static method)</a>
-</li>
-      <li><a href="functional.html#functional.losses.BCEDiceLoss.forward">forward() (functional.losses.BCEDiceLoss method)</a>
+      <li><a href="functional.html#functional.losses.AbstractDiceLoss.forward">forward() (functional.losses.AbstractDiceLoss method)</a>
 
       <ul>
-        <li><a href="functional.html#functional.losses.BCELoss.forward">(functional.losses.BCELoss method)</a>
+        <li><a href="functional.html#functional.losses.CrossEntropyDiceLoss.forward">(functional.losses.CrossEntropyDiceLoss method)</a>
+</li>
+        <li><a href="functional.html#functional.losses.CrossEntropyLoss.forward">(functional.losses.CrossEntropyLoss method)</a>
 </li>
         <li><a href="functional.html#functional.losses.DiceLoss.forward">(functional.losses.DiceLoss method)</a>
 </li>
         <li><a href="functional.html#functional.losses.FalsePositiveDiceLoss.forward">(functional.losses.FalsePositiveDiceLoss method)</a>
 </li>
         <li><a href="functional.html#functional.losses.FalsePositiveLoss.forward">(functional.losses.FalsePositiveLoss method)</a>
+</li>
+        <li><a href="functional.html#functional.losses.GeneralizedDiceLoss.forward">(functional.losses.GeneralizedDiceLoss method)</a>
 </li>
         <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.forward">(models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
 </li>
@@ -369,10 +371,20 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="models.html#models.pytorch_model.PytorchModel.get_test_metrics">get_test_metrics() (models.pytorch_model.PytorchModel method)</a>
+      <li><a href="functional.html#functional.losses.GeneralizedDiceLoss">GeneralizedDiceLoss (class in functional.losses)</a>
 </li>
+      <li><a href="functional.html#functional.losses.AbstractDiceLoss.get_dice_loss_module">get_dice_loss_module() (functional.losses.AbstractDiceLoss method)</a>
+
+      <ul>
+        <li><a href="functional.html#functional.losses.DiceLoss.get_dice_loss_module">(functional.losses.DiceLoss method)</a>
+</li>
+        <li><a href="functional.html#functional.losses.GeneralizedDiceLoss.get_dice_loss_module">(functional.losses.GeneralizedDiceLoss method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_test_metrics">get_test_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
       <li><a href="models.html#models.pytorch_model.PytorchModel.get_train_metrics">get_train_metrics() (models.pytorch_model.PytorchModel method)</a>
 </li>
       <li><a href="models.html#models.pytorch_model.PytorchModel.get_val_metrics">get_val_metrics() (models.pytorch_model.PytorchModel method)</a>
@@ -395,10 +407,20 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_data_module.BraTSDataModule.id_to_class_names">id_to_class_names() (datasets.brats_data_module.BraTSDataModule method)</a>
+
+      <ul>
+        <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.id_to_class_names">(datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+        <li><a href="datasets.html#datasets.pascal_voc_data_module.PascalVOCDataModule.id_to_class_names">(datasets.pascal_voc_data_module.PascalVOCDataModule method)</a>
+</li>
+      </ul></li>
       <li><a href="inferencing.html#inferencing.Inferencer.inference">inference() (inferencing.Inferencer method)</a>
 </li>
       <li><a href="inferencing.html#inferencing.Inferencer">Inferencer (class in inferencing)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     inferencing
 
@@ -406,8 +428,6 @@
         <li><a href="inferencing.html#module-inferencing">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.input_dimensionality">input_dimensionality() (models.pytorch_fcn_resnet50.PytorchFCNResnet50 method)</a>
 
       <ul>
@@ -521,6 +541,16 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.brats_data_module.BraTSDataModule.multi_label">multi_label() (datasets.brats_data_module.BraTSDataModule method)</a>
+
+      <ul>
+        <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.multi_label">(datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+        <li><a href="datasets.html#datasets.pascal_voc_data_module.PascalVOCDataModule.multi_label">(datasets.pascal_voc_data_module.PascalVOCDataModule method)</a>
+</li>
+      </ul></li>
+  </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
@@ -577,9 +607,11 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.reset">reset() (metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric method)</a>
+      <li><a href="functional.html#functional.metrics.HausdorffDistance.reset">reset() (functional.metrics.HausdorffDistance method)</a>
 
       <ul>
+        <li><a href="metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.reset">(metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric method)</a>
+</li>
         <li><a href="metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.reset">(metric_tracking.combined_per_image_metric.CombinedPerImageMetric method)</a>
 </li>
       </ul></li>
@@ -599,6 +631,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functional.html#functional.losses.SegmentationLoss">SegmentationLoss (class in functional.losses)</a>
 </li>
+      <li><a href="functional.html#functional.metrics.SegmentationMetric">SegmentationMetric (class in functional.metrics)</a>
+</li>
       <li><a href="query_strategies.html#query_strategies.query_strategy.QueryStrategy.select_items_to_label">select_items_to_label() (query_strategies.query_strategy.QueryStrategy method)</a>
 </li>
       <li><a href="functional.html#functional.metrics.Sensitivity">Sensitivity (class in functional.metrics)</a>
@@ -612,7 +646,11 @@
       <ul>
         <li><a href="models.html#models.pytorch_model.PytorchModel.setup">(models.pytorch_model.PytorchModel method)</a>
 </li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.setup">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
       </ul></li>
+      <li><a href="functional.html#functional.metrics.single_class_hausdorff_distance">single_class_hausdorff_distance() (in module functional.metrics)</a>
+</li>
       <li><a href="functional.html#functional.metrics.Specificity">Specificity (class in functional.metrics)</a>
 </li>
       <li><a href="functional.html#functional.metrics.specificity">specificity() (in module functional.metrics)</a>
@@ -649,16 +687,20 @@
         <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.train_dataloader">(datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
       </ul></li>
-      <li><a href="functional.html#functional.losses.BCEDiceLoss.training">training (functional.losses.BCEDiceLoss attribute)</a>
+      <li><a href="functional.html#functional.losses.AbstractDiceLoss.training">training (functional.losses.AbstractDiceLoss attribute)</a>
 
       <ul>
-        <li><a href="functional.html#functional.losses.BCELoss.training">(functional.losses.BCELoss attribute)</a>
+        <li><a href="functional.html#functional.losses.CrossEntropyDiceLoss.training">(functional.losses.CrossEntropyDiceLoss attribute)</a>
+</li>
+        <li><a href="functional.html#functional.losses.CrossEntropyLoss.training">(functional.losses.CrossEntropyLoss attribute)</a>
 </li>
         <li><a href="functional.html#functional.losses.DiceLoss.training">(functional.losses.DiceLoss attribute)</a>
 </li>
         <li><a href="functional.html#functional.losses.FalsePositiveDiceLoss.training">(functional.losses.FalsePositiveDiceLoss attribute)</a>
 </li>
         <li><a href="functional.html#functional.losses.FalsePositiveLoss.training">(functional.losses.FalsePositiveLoss attribute)</a>
+</li>
+        <li><a href="functional.html#functional.losses.GeneralizedDiceLoss.training">(functional.losses.GeneralizedDiceLoss attribute)</a>
 </li>
         <li><a href="functional.html#functional.losses.SegmentationLoss.training">(functional.losses.SegmentationLoss attribute)</a>
 </li>
