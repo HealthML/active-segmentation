@@ -514,9 +514,6 @@ def hausdorff_distance(
         ignore_index=ignore_index,
     )
 
-    print("prediction", prediction.shape)
-    print("target", target.shape)
-
     if not include_background:
         num_classes = num_classes - 1
         # drop the channel of the background class
