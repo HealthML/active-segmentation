@@ -341,7 +341,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         )
 
         self.start_index = 0
-        self.end_index = self.__len__()
+        self.end_index = self._length()
         self.current_index = 0
 
     def __get_case_id(self, image_index: int):
@@ -449,7 +449,12 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
         )
 
-    def __len__(self) -> int:
+    def _length(self):
+        """
+        Note: The __len__ method must not be overridden since this dataset implements a custom splitting across workers.
+        If __len__ would be overriden, the Pytorch lightning trainer might skip some incomplete batches of some workers.
+        """
+
         return len(self.image_slice_indices)
 
     def add_image(self, case_id: str, slice_index: int = 0) -> None:
@@ -471,7 +476,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             self.image_slice_indices = self.image_slice_indices + [
                 new_image_slice_index
             ]
-            self.end_index = self.__len__()
+            self.end_index = self._length()
         else:
             raise ValueError("Slice of image already belongs to this dataset.")
 
@@ -490,7 +495,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         image_slice_index_to_remove = (image_index, slice_index)
         if image_slice_index_to_remove in self.image_slice_indices:
             self.image_slice_indices.remove((image_index, slice_index))
-            self.end_index = self.__len__()
+            self.end_index = self._length()
         else:
             raise ValueError("Slice of image does not belong to this dataset.")
 

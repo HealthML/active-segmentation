@@ -1071,13 +1071,16 @@ class HausdorffDistance(SegmentationMetric):
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
         """
 
+        if self.hausdorff_distance_cached:
+            assert (
+                self.number_of_slices == 0
+            ), "A cached value for the Hausdorff distance is used even though there were slices added afterwards."
+            return self.hausdorff_distance
+
         assert self.number_of_slices == self.slices_per_image, (
             "The compute method was called on the Hausdorff distance module before all slices of the image were "
             "provided."
         )
-
-        if self.hausdorff_distance_cached:
-            return self.hausdorff_distance
 
         hausdorff_dist = hausdorff_distance(
             self.predictions,
