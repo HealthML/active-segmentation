@@ -19,7 +19,7 @@ class TestUNet(unittest.TestCase):
                 num_classes = 5
 
                 u_net = UNet(
-                    in_channels=1,
+                    in_channels=in_channels,
                     out_channels=num_classes,
                     multi_label=multi_label,
                     init_features=32,
