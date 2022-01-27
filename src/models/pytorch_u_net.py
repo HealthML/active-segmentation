@@ -16,6 +16,12 @@ class PytorchUNet(PytorchModel):
     Args:
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         dim (int, optional): The dimensionality of the U-Net. Defaults to 2.
+        in_channels (int, optional): Number of input channels. Defaults to 1
+        out_channels (int): Number of output channels. Should be equal to the number of classes (for
+            multi-label segmentation tasks excluding the background class). Defaults to 2.
+        multi_label (bool, optional): Whether the model should produce single-label or multi-label outputs. If set to
+            `False`, the model's predictions are computed using a Softmax activation layer. to If set to `True`, sigmoid
+            activation layers are used to compute the model's predicitions. Defaults to False.
         **kwargs: Further, dataset specific parameters.
     """
 
