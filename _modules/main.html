@@ -356,6 +356,8 @@
             <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
             <span class="n">num_levels</span><span class="o">=</span><span class="n">num_levels</span><span class="p">,</span>
             <span class="n">in_channels</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">(),</span>
+            <span class="n">out_channels</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">num_classes</span><span class="p">(),</span>
+            <span class="n">multi_label</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">multi_label</span><span class="p">(),</span>
             <span class="o">**</span><span class="n">model_config</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

@@ -210,8 +210,13 @@ Details about the Resnet50 architecture: <a class="reference external" href="htt
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.input_dimensionality">
-<span class="sig-name descname"><span class="pre">input_dimensionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.input_dimensionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.input_dimensionality" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">input_dimensionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.input_dimensionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.input_dimensionality" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of dimensions this model takes as an input.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.parameters">
@@ -493,7 +498,7 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 <p>U-Net architecture wrapped as PytorchModel</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.pytorch_u_net.</span></span><span class="sig-name descname"><span class="pre">PytorchUNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.pytorch_u_net.</span></span><span class="sig-name descname"><span class="pre">PytorchUNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">models.pytorch_model.PytorchModel</span></code></a></p>
 <p>U-Net architecture wrapped as PytorchModel.
 Details about the architecture: <a class="reference external" href="https://arxiv.org/pdf/1505.04597.pdf">https://arxiv.org/pdf/1505.04597.pdf</a>
@@ -501,7 +506,22 @@ Details about the architecture: <a class="reference external" href="https://arxi
 :type num_levels: int, optional
 :param dim: The dimensionality of the U-Net. Defaults to 2.
 :type dim: int, optional
-:param **kwargs: Further, dataset specific parameters.</p>
+:param in_channels: Number of input channels. Defaults to 1
+:type in_channels: int, optional
+:param out_channels: Number of output channels. Should be equal to the number of classes (for</p>
+<blockquote>
+<div><p>multi-label segmentation tasks excluding the background class). Defaults to 2.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the model should produce single-label or multi-label outputs. If set to
+<cite>False</cite>, the model’s predictions are computed using a Softmax activation layer. to If set to <cite>True</cite>, sigmoid
+activation layers are used to compute the model’s predicitions. Defaults to False.</p></li>
+<li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet.eval">
 <span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet.eval" title="Permalink to this definition">¶</a></dt>
@@ -558,20 +578,6 @@ Details about the architecture: <a class="reference external" href="https://arxi
 <li><p><strong>batch_idx</strong> – Index of the prediction batch.</p></li>
 <li><p><strong>dataloader_idx</strong> – Index of the dataloader.</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet.setup">
-<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet.setup" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,</dt><dd><p>or predict.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stage</strong> (<em>string</em><em>, </em><em>optional</em>) – Either ‘fit’, ‘validate’, ‘test’, or ‘predict’.</p>
 </dd>
 </dl>
 </dd></dl>
