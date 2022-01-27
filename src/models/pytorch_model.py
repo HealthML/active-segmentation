@@ -383,7 +383,12 @@ class PytorchModel(LightningModule, ABC):
         for val_metric in self.val_metrics:
             val_metrics = val_metric.compute()
             for metric_name, metric_value in val_metrics.items():
-                self.log(f"{stage_name}/{metric_name}", metric_value)
+                self.log_dict(
+                    {
+                        f"{stage_name}/{metric_name}": metric_value,
+                        "train/epochs_counter": self.epochs_counter,
+                    }
+                )
             val_metric.reset()
 
     def test_epoch_end(self, outputs: Any) -> None:

@@ -137,7 +137,9 @@ class PytorchUNet(PytorchModel):
 
         loss = self.loss_module(probabilities, y)
         if self.stage == "fit":
-            self.log("val/loss", loss)  # log validation loss via weights&biases
+            self.logger.log_metrics(
+                {"val/loss": loss, "train/epochs_counter": self.epochs_counter}
+            )  # log validation loss via weights&biases
 
         for val_metric in self.get_val_metrics():
             val_metric.update(probabilities, y, case_ids)
