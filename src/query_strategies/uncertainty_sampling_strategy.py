@@ -1,5 +1,4 @@
 """ Module for uncertainty sampling strategy """
-import math
 from typing import List, Union
 
 import torch
@@ -44,33 +43,16 @@ class UncertaintySamplingStrategy(QueryStrategy):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         models.to(device)
 
-        batch_size = 128
-        data_items = len(data_module.unlabeled_dataloader())
-        batches = math.ceil(data_items / batch_size)
-
         uncertainties = []
-        data_index = -1
-        data = iter(data_module.unlabeled_dataloader())
-        with torch.no_grad():
-            for _ in range(batches):
-                batch = []
-                for _ in range(batch_size):
-                    data_index += 1
-                    if data_index < data_items:
-                        batch.append(next(data))
 
-                x = torch.cat([x for [x, _] in batch], dim=1)
+        for images, case_ids in data_module.unlabeled_dataloader():
+            predictions = models.predict(images.to(device))
+            uncertainty = (
+                torch.sum(torch.abs(0.5 - predictions), (1, 2, 3)).cpu().numpy()
+            )
 
-                batch_stack = (
-                    torch.swapaxes(x, 0, 1)
-                    if models.dim == 2
-                    else torch.unsqueeze(x, 0)
-                )
-                batch_pred = models.predict(batch_stack.to(device))
-                uncert = torch.sum(torch.abs(0.5 - batch_pred), (1, 2, 3)).cpu().numpy()
-
-                for i, (_, case_id) in enumerate(batch):
-                    uncertainties.append((uncert[i], case_id[0]))
+            for idx, case_id in enumerate(case_ids):
+                uncertainties.append((uncertainty[idx], case_id))
 
         uncertainties.sort(key=lambda y: y[0])
 

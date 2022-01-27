@@ -23,7 +23,8 @@
     "reset_weights": false,
     "initial_training_set_size": 752,
     "iterations": 100,
-    "items_to_label": 128
+    "items_to_label": 128,
+    "batch_size_unlabeled_set": 128
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",

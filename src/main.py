@@ -51,6 +51,10 @@ def create_data_module(
             active_learning_mode=active_learning_config.get(
                 "active_learning_mode", False
             ),
+            batch_size_unlabeled_set=min(
+                active_learning_config.get("batch_size_unlabeled_set", batch_size),
+                active_learning_config.get("items_to_label", 1),
+            ),
             initial_training_set_size=active_learning_config.get(
                 "initial_training_set_size", 10
             ),
@@ -64,6 +68,10 @@ def create_data_module(
             num_workers,
             active_learning_mode=active_learning_config.get(
                 "active_learning_mode", False
+            ),
+            batch_size_unlabeled_set=min(
+                active_learning_config.get("batch_size_unlabeled_set", batch_size),
+                active_learning_config.get("items_to_label", 1),
             ),
             initial_training_set_size=active_learning_config.get(
                 "initial_training_set_size", 10
