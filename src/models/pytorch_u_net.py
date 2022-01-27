@@ -1,6 +1,6 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable, Optional
+from typing import Iterable
 
 import torch
 import numpy as np

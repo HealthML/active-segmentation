@@ -248,4 +248,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         return 0
 
     def num_classes(self) -> int:
+        """
+        Returns:
+            Number of classes.
+        """
         return len(self.id_to_class_names())
