@@ -2,9 +2,10 @@
 
 from functional.metrics import *
 from functional.losses import (
-    BCELoss,
-    BCEDiceLoss,
+    CrossEntropyLoss,
+    CrossEntropyDiceLoss,
     DiceLoss,
+    GeneralizedDiceLoss,
     FalsePositiveLoss,
     FalsePositiveDiceLoss,
 )

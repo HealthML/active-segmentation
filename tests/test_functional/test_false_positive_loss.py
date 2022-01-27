@@ -1,299 +1,158 @@
-"""Tests for the false positive loss"""
+"""Tests for the false positive loss."""
 
-from typing import Callable, Optional, Tuple
 import unittest
+from typing import Literal, Optional
+
 import torch
 
 from functional import FalsePositiveLoss
-import tests.utils
+import tests.utils.test_data_cardinality_metrics as test_data
+from .test_loss import LossTestCase
 
 
-class TestFalsePositiveLoss(unittest.TestCase):
+class TestFalsePositiveLoss(unittest.TestCase, LossTestCase):
     """
     Test cases for false positive loss.
     """
 
-    def _test_fp_loss(
+    def loss_name(self) -> str:
+        """
+        Returns:
+            String: The name of the loss or metric to be tested.
+        """
+        return "fp_loss"
+
+    def loss_module(
         self,
-        get_first_slice: Callable[
-            [], Tuple[torch.Tensor, torch.Tensor, float, float, float, float]
-        ],
-        get_second_slice: Callable[
-            [], Tuple[torch.Tensor, torch.Tensor, float, float, float, float]
-        ],
-        reduction: Optional[str] = "none",
-        smoothing: float = 1,
-        expected_loss: Optional[torch.Tensor] = None,
-    ) -> None:
+        ignore_index: Optional[int] = None,
+        include_background: bool = True,
+        reduction: Literal["mean", "sum", "none"] = "none",
+        epsilon: float = 0.0001,
+        **kwargs
+    ) -> torch.nn.Module:
         """
-        Helper function that calculates the false positive loss with the given settings for the given predictions and
-        compares it with an expected value.
-
         Args:
-            get_first_slice: Getter function that returns prediction, target and cardinalities for the first slice.
-            get_second_slice: Getter function that returns prediction, target and cardinalities for the second slice.
-            reduction (string, optional): Reduction parameter of false positive loss.
-            smoothing (float, optional): Smoothing parameter of false positive loss.
-            expected_loss (Tensor, optional): Expected loss value.
+            ignore_index (bool, optional): `ignore_index` parameter of the loss.
+            include_background (bool, optional): `include_background` parameter of the loss.
+            reduction (string, optional): `reduction` parameter of the loss.
+            epsilon (float, optional): `epsilon` parameter of the loss.
+
+        Returns:
+            torch.nn.Module: The loss module to be tested.
         """
 
-        # pylint: disable-msg=too-many-locals
-
-        (
-            predictions_first_slice,
-            target_first_slice,
-            tp_first,
-            fp_first,
-            _,
-            _,
-        ) = get_first_slice()
-        (
-            predictions_second_slice,
-            target_second_slice,
-            tp_second,
-            fp_second,
-            _,
-            _,
-        ) = get_second_slice()
-
-        prediction = torch.stack([predictions_first_slice, predictions_second_slice])
-        target = torch.stack([target_first_slice, target_second_slice])
-
-        if expected_loss is None:
-            loss_first_slice = fp_first / (tp_first + fp_first + smoothing)
-            loss_second_slice = fp_second / (tp_second + fp_second + smoothing)
-
-            if reduction == "mean":
-                expected_loss = torch.as_tensor(
-                    (loss_first_slice + loss_second_slice) / 2
-                )
-            elif reduction == "sum":
-                expected_loss = torch.as_tensor(loss_first_slice + loss_second_slice)
-            else:
-                expected_loss = torch.Tensor([[loss_first_slice], [loss_second_slice]])
-
-        fp_loss = FalsePositiveLoss(reduction=reduction, smoothing=smoothing)
-        loss = fp_loss(prediction, target)
-
-        self.assertTrue(
-            loss.shape == expected_loss.shape, "Returns loss tensor with correct shape."
-        )
-        torch.testing.assert_allclose(
-            loss, expected_loss, msg="Correctly computes loss value."
+        return FalsePositiveLoss(
+            ignore_index=ignore_index,
+            include_background=include_background,
+            reduction=reduction,
+            epsilon=epsilon,
         )
 
-    def test_standard_case(self):
+    def test_no_true_positives(self):
         """
-        Tests that the false positive loss is computed correctly when there are both true and false predictions.
+        Tests that the false positive loss is computed correctly when there are no true positives.
         """
 
-        _, _, tp_1, fp_1, _, _ = tests.utils.standard_slice_1()
-        _, _, tp_2, fp_2, _, _ = tests.utils.standard_slice_2()
+        for test_slice in [
+            test_data.slice_no_true_positives_single_label,
+            test_data.slice_no_true_positives_multi_label,
+        ]:
+            self._test_loss(
+                test_slice,
+                test_slice,
+                reduction="none",
+                epsilon=0,
+                expected_loss=torch.Tensor([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]),
+            )
+            self._test_loss(
+                test_slice,
+                test_slice,
+                reduction="mean",
+                epsilon=0,
+                expected_loss=torch.as_tensor(1.0),
+            )
+            self._test_loss(
+                test_slice,
+                test_slice,
+                reduction="sum",
+                epsilon=0,
+                expected_loss=torch.as_tensor(6.0),
+            )
+            self._test_loss(
+                test_slice,
+                test_slice,
+                include_background=False,
+                reduction="sum",
+                epsilon=0,
+                expected_loss=torch.as_tensor(4.0),
+            )
 
-        self._test_fp_loss(
-            tests.utils.standard_slice_1,
-            tests.utils.standard_slice_2,
-            smoothing=0,
-            expected_loss=torch.Tensor(
-                [[fp_1 / (tp_1 + fp_1)], [fp_2 / (tp_2 + fp_2)]]
-            ),
-        )
-        self._test_fp_loss(
-            tests.utils.standard_slice_1,
-            tests.utils.standard_slice_2,
-            smoothing=0,
-            reduction="mean",
-            expected_loss=torch.as_tensor(
-                (fp_1 / (tp_1 + fp_1) + fp_2 / (tp_2 + fp_2)) / 2
-            ),
-        )
-        self._test_fp_loss(
-            tests.utils.standard_slice_1,
-            tests.utils.standard_slice_2,
-            smoothing=0,
-            reduction="sum",
-            expected_loss=torch.as_tensor(fp_1 / (tp_1 + fp_1) + fp_2 / (tp_2 + fp_2)),
-        )
+            for reduction in ["none", "mean", "sum"]:
+                for include_background in [True, False]:
+                    self._test_loss(
+                        test_slice,
+                        test_slice,
+                        include_background=include_background,
+                        reduction=reduction,
+                        epsilon=1,
+                    )
 
-        self._test_fp_loss(
-            tests.utils.standard_slice_1,
-            tests.utils.standard_slice_2,
-            smoothing=1,
-            expected_loss=torch.Tensor(
-                [[fp_1 / (tp_1 + fp_1 + 1)], [fp_2 / (tp_2 + fp_2 + 1)]]
-            ),
-        )
-        self._test_fp_loss(
-            tests.utils.standard_slice_1,
-            tests.utils.standard_slice_2,
-            smoothing=1,
-            reduction="mean",
-            expected_loss=torch.as_tensor(
-                (fp_1 / (tp_1 + fp_1 + 1) + fp_2 / (tp_2 + fp_2 + 1)) / 2
-            ),
-        )
-        self._test_fp_loss(
-            tests.utils.standard_slice_1,
-            tests.utils.standard_slice_2,
-            smoothing=1,
-            reduction="sum",
-            expected_loss=torch.as_tensor(
-                fp_1 / (tp_1 + fp_1 + 1) + fp_2 / (tp_2 + fp_2 + 1)
-            ),
-        )
-
-    def test_no_false_positives(self):
-        """
-        Tests that the false positive loss is computed correctly when there are no false positives.
-        """
-
-        _, _, _, _, _, _ = tests.utils.slice_all_true()
-
-        self._test_fp_loss(
-            tests.utils.slice_all_true,
-            tests.utils.slice_all_true,
-            smoothing=0,
-            expected_loss=torch.Tensor([[0.0], [0.0]]),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_true,
-            tests.utils.slice_all_true,
-            smoothing=0,
-            reduction="mean",
-            expected_loss=torch.as_tensor(0.0),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_true,
-            tests.utils.slice_all_true,
-            smoothing=0,
-            reduction="sum",
-            expected_loss=torch.as_tensor(0.0),
-        )
-
-        self._test_fp_loss(
-            tests.utils.slice_all_true,
-            tests.utils.slice_all_true,
-            smoothing=1,
-            expected_loss=torch.Tensor([[0.0], [0.0]]),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_true,
-            tests.utils.slice_all_true,
-            smoothing=1,
-            reduction="mean",
-            expected_loss=torch.as_tensor(0.0),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_true,
-            tests.utils.slice_all_true,
-            smoothing=1,
-            reduction="sum",
-            expected_loss=torch.as_tensor(0.0),
-        )
-
-    def test_all_false(self):
-        """
-        Tests that the false positive loss is computed correctly when all predictions are wrong.
-        """
-
-        _, _, _, fp, _, _ = tests.utils.slice_all_false()
-
-        self._test_fp_loss(
-            tests.utils.slice_all_false,
-            tests.utils.slice_all_false,
-            smoothing=0,
-            expected_loss=torch.Tensor([[1.0], [1.0]]),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_false,
-            tests.utils.slice_all_false,
-            smoothing=0,
-            reduction="mean",
-            expected_loss=torch.as_tensor(1.0),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_false,
-            tests.utils.slice_all_false,
-            smoothing=0,
-            reduction="sum",
-            expected_loss=torch.as_tensor(2.0),
-        )
-
-        self._test_fp_loss(
-            tests.utils.slice_all_false,
-            tests.utils.slice_all_false,
-            smoothing=1,
-            expected_loss=torch.Tensor([[fp / (fp + 1)], [fp / (fp + 1)]]),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_false,
-            tests.utils.slice_all_false,
-            smoothing=1,
-            reduction="mean",
-            expected_loss=torch.as_tensor(fp / (fp + 1)),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_false,
-            tests.utils.slice_all_false,
-            smoothing=1,
-            reduction="sum",
-            expected_loss=torch.as_tensor(2 * fp / (fp + 1)),
-        )
-
-    def test_no_positives(self):
+    def test_all_true_negative(self):
         """
         Tests that the false positive loss is computed correctly when there are no positives.
         """
 
-        (
-            predictions_first_slice,
-            target_first_slice,
-            _,
-            _,
-            _,
-            _,
-        ) = tests.utils.slice_all_true_negatives()
-        (
-            predictions_second_slice,
-            target_second_slice,
-            _,
-            _,
-            _,
-            _,
-        ) = tests.utils.slice_all_true_negatives()
+        for test_slice in [
+            test_data.slice_all_true_negatives_single_label,
+            test_data.slice_all_true_negatives_multi_label,
+        ]:
+            predictions_slice, target_slice, _, _, _ = test_slice(False)
+            prediction = torch.stack([predictions_slice, predictions_slice])
+            target = torch.stack([target_slice, target_slice])
 
-        prediction = torch.stack([predictions_first_slice, predictions_second_slice])
-        target = torch.stack([target_first_slice, target_second_slice])
+            fp_loss = FalsePositiveLoss(
+                epsilon=0, include_background=True, reduction="none"
+            )
+            loss = fp_loss(prediction, target)
 
-        fp_loss = FalsePositiveLoss(smoothing=0, reduction="none")
-        loss = fp_loss(prediction, target)
-        self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
+            self.assertTrue(
+                torch.isnan(loss).any(),
+                "Returns NaN if there are no positives and epsilon is zero.",
+            )
 
-        fp_loss = FalsePositiveLoss(smoothing=0, reduction="mean")
-        loss = fp_loss(prediction, target)
-        self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
+            fp_loss = FalsePositiveLoss(
+                epsilon=1, include_background=True, reduction="none"
+            )
+            loss = fp_loss(prediction, target)
 
-        fp_loss = FalsePositiveLoss(smoothing=0, reduction="sum")
-        loss = fp_loss(prediction, target)
-        self.assertTrue(torch.isnan(loss).all(), "Correctly computes loss value.")
+            self.assertTrue(
+                torch.equal(loss, torch.as_tensor([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])),
+                "Returns 0 if there are no positives and epsilon is greater than zero.",
+            )
 
-        self._test_fp_loss(
-            tests.utils.slice_all_true_negatives,
-            tests.utils.slice_all_true_negatives,
-            smoothing=1,
-            expected_loss=torch.Tensor([[0.0], [0.0]]),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_true_negatives,
-            tests.utils.slice_all_true_negatives,
-            smoothing=1,
-            reduction="mean",
-            expected_loss=torch.as_tensor(0.0),
-        )
-        self._test_fp_loss(
-            tests.utils.slice_all_true_negatives,
-            tests.utils.slice_all_true_negatives,
-            smoothing=1,
-            reduction="sum",
-            expected_loss=torch.as_tensor(0.0),
-        )
+            for reduction in ["mean", "sum"]:
+                for include_background in [True, False]:
+                    fp_loss = FalsePositiveLoss(
+                        epsilon=0,
+                        include_background=include_background,
+                        reduction=reduction,
+                    )
+                    loss = fp_loss(prediction, target)
+
+                    self.assertTrue(
+                        torch.isnan(loss).all(),
+                        "Returns NaN if there are no positives and epsilon is " "zero.",
+                    )
+
+                    fp_loss = FalsePositiveLoss(
+                        epsilon=1,
+                        include_background=include_background,
+                        reduction=reduction,
+                    )
+                    loss = fp_loss(prediction, target)
+
+                    self.assertTrue(
+                        torch.equal(loss, torch.as_tensor(0.0)),
+                        "Returns 0 if there are no positives and "
+                        "epsilon is greater than zero.",
+                    )

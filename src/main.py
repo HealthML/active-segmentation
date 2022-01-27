@@ -88,7 +88,7 @@ def run_active_learning_pipeline(
     data_dir: str = "./data",
     dataset_config: Optional[Dict[str, Any]] = None,
     model_config: Optional[Dict[str, Any]] = None,
-    model_selection_criterion: Optional[str] = "loss",
+    model_selection_criterion: Optional[str] = "mean_dice_score_0.5",
     active_learning_config: Optional[Dict[str, Any]] = None,
     epochs: int = 50,
     experiment_tags: Optional[Iterable[str]] = None,
@@ -139,6 +139,7 @@ def run_active_learning_pipeline(
         entity="active-segmentation",
         name=experiment_name,
         tags=experiment_tags,
+        log_model="all",
         config=locals().copy(),
     )
 

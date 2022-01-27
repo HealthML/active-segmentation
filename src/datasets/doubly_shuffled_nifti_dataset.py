@@ -423,10 +423,10 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 x = torch.from_numpy(self._current_image[:, slice_index, :, :])
             else:
                 x = torch.from_numpy(self._current_image[slice_index, :, :])
-            y = torch.from_numpy(self._current_mask[slice_index, :, :])
+            y = torch.from_numpy(self._current_mask[slice_index, :, :]).int()
         else:
             x = torch.from_numpy(self._current_image)
-            y = torch.from_numpy(self._current_mask)
+            y = torch.from_numpy(self._current_mask).int()
 
         if self.transform:
             x = self.transform(x)
@@ -443,7 +443,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         return (
             DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim),
-            DoublyShuffledNIfTIDataset.__ensure_channel_dim(y, self.dim),
+            y,
             case_id,
         )
 

@@ -1,7 +1,7 @@
 """ Module containing abstract classes for the data modules"""
 from abc import ABC, abstractmethod
 import warnings
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from pytorch_lightning.core.datamodule import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
 
@@ -88,6 +88,20 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         return None
+
+    @abstractmethod
+    def multi_label(self) -> bool:
+        """
+        Returns:
+            bool: Whether the dataset is a multi-label or a single-label dataset.
+        """
+
+    @abstractmethod
+    def id_to_class_names(self) -> Dict[int, str]:
+        """
+        Returns:
+            Dict[int, str]: A mapping of class indices to descriptive class names.
+        """
 
     @abstractmethod
     def _create_training_set(self) -> Optional[Dataset]:

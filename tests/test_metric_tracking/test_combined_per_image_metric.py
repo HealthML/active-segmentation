@@ -1,12 +1,13 @@
 """Tests for the CombinedPerImageMetric class"""
 
-from typing import List
 import unittest
 
-import numpy as np
 import torch
 
 from metric_tracking import CombinedPerImageMetric
+import tests.utils
+from tests.utils import test_data_cardinality_metrics as test_data
+from tests.utils import test_data_distance_metrics
 
 
 class TestCombinedPerImageMetric(unittest.TestCase):
@@ -14,311 +15,321 @@ class TestCombinedPerImageMetric(unittest.TestCase):
     Tests for the CombinedPerImageMetric class.
     """
 
-    @staticmethod
-    def example_data():
+    # pylint: disable=too-many-branches, too-many-nested-blocks, too-many-locals
+
+    def test_standard_case_cardinality_metrics(self):
         """
-        Creates a faked segmentation example that contains both true and false predictions.
-
-        Returns:
-            Tuple: Predicted slice, target slice, TP, FP, TN, FN for the confidence levels 0.2, 0.5, and 0.8.
-        """
-
-        predicted_probabilities = torch.Tensor(
-            [
-                [
-                    [0.1, 0.2, 0.1],
-                    [0.8, 0.1, 0.7],
-                    [0.9, 0.6, 0.5],
-                ],
-                [
-                    [0.8, 0.6, 0.8],
-                    [0.1, 0.1, 0.3],
-                    [0.1, 0.6, 0.2],
-                ],
-                [
-                    [0.1, 0.3, 0.1],
-                    [0.2, 0.4, 0.2],
-                    [0.3, 0.4, 0.1],
-                ],
-            ]
-        )
-
-        target = torch.Tensor(
-            [
-                [
-                    [1, 1, 1],
-                    [1, 1, 0],
-                    [1, 1, 0],
-                ],
-                [
-                    [1, 1, 0],
-                    [1, 1, 1],
-                    [0, 0, 0],
-                ],
-                [
-                    [0, 0, 0],
-                    [0, 1, 1],
-                    [0, 0, 0],
-                ],
-            ]
-        )
-
-        tp_0_2, fp_0_2, tn_0_2, fn_0_2 = 7, 7, 6, 7
-        tp_0_5, fp_0_5, tn_0_5, fn_0_5 = 5, 3, 10, 9
-        tp_0_8, fp_0_8, tn_0_8, fn_0_8 = 1, 0, 13, 13
-
-        return (
-            predicted_probabilities,
-            target,
-            (tp_0_2, fp_0_2, tn_0_2, fn_0_2),
-            (tp_0_5, fp_0_5, tn_0_5, fn_0_5),
-            (tp_0_8, fp_0_8, tn_0_8, fn_0_8),
-        )
-
-    @staticmethod
-    def _hausdorff_distance(
-        dists_prediction_target: List[float],
-        dists_target_prediction: List[float],
-        percentile: int = 95,
-    ) -> float:
-        r"""
-        Computes expected Hausdorff distance.
-
-        Args:
-            dists_prediction_target: List that contains for each positive prediction pixel the distance to the closest
-                positive target pixel.
-            dists_target_prediction: List that contains for each positive target pixel the distance to the closest
-                positive prediction pixel
-            percentile (float, optional): Percentile for which the Hausdorff distance is to be calculated, must be in
-                :math:`\[0, 100\]`.
-
-        Returns:
-            float: Hausdorff distance.
+        Tests that the CombinedPerImageMetric class correctly computes all cardinality-based metrics for all confidence
+        levels.
         """
 
-        distances = np.hstack((dists_prediction_target, dists_target_prediction))
-        hausdorff_distance = torch.as_tensor(
-            np.percentile(
-                distances,
-                q=percentile,
-            )
-        ).float()
+        id_to_class_mapping = {
+            0: "first_test_class",
+            1: "second_test_class",
+            2: "third_test_class",
+        }
 
-        return hausdorff_distance
-
-    # pylint: disable=too-many-locals
-    def test_standard_case(self):
-        """
-        Tests that the CombinedPerImageMetric class correctly computes all metrics for all confidence levels.
-        """
-
-        (
-            predicted_probabilities,
-            target,
-            cardinalities_0_2,
-            cardinalities_0_5,
-            cardinalities_0_8,
-        ) = self.example_data()
-
-        tp_0_2, fp_0_2, tn_0_2, fn_0_2 = cardinalities_0_2
-        tp_0_5, fp_0_5, tn_0_5, fn_0_5 = cardinalities_0_5
-        tp_0_8, fp_0_8, tn_0_8, fn_0_8 = cardinalities_0_8
-
-        expected_dice_score_0_2 = torch.as_tensor(
-            2 * tp_0_2 / (2 * tp_0_2 + fp_0_2 + fn_0_2)
-        )
-        expected_dice_score_0_5 = torch.as_tensor(
-            2 * tp_0_5 / (2 * tp_0_5 + fp_0_5 + fn_0_5)
-        )
-        expected_dice_score_0_8 = torch.as_tensor(
-            2 * tp_0_8 / (2 * tp_0_8 + fp_0_8 + fn_0_8)
-        )
-
-        expected_sensitivity_0_2 = torch.as_tensor(tp_0_2 / (tp_0_2 + fn_0_2))
-        expected_sensitivity_0_5 = torch.as_tensor(tp_0_5 / (tp_0_5 + fn_0_5))
-        expected_sensitivity_0_8 = torch.as_tensor(tp_0_8 / (tp_0_8 + fn_0_8))
-
-        expected_specificity_0_2 = torch.as_tensor(tn_0_2 / (tn_0_2 + fp_0_2))
-        expected_specificity_0_5 = torch.as_tensor(tn_0_5 / (tn_0_5 + fp_0_5))
-        expected_specificity_0_8 = torch.as_tensor(tn_0_8 / (tn_0_8 + fp_0_8))
-
-        # fmt: off
-        dists_prediction_target_0_2 = [0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, np.sqrt(2), 1]
-        dist_target_prediction_0_2 = [1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1]
-
-        dists_prediction_target_0_5 = [0, 1, 0, 0, 0, 0, 1, 1]
-        dist_target_prediction_0_5 = [1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, np.sqrt(2), np.sqrt(3)]
-
-        dists_prediction_target_0_8 = [0]
-        dist_target_prediction_0_8 = [2, np.sqrt(1 + 4), np.sqrt(4 + 4), 1, np.sqrt(2), 0, 1, np.sqrt(1 + 4),
-                                      np.sqrt(1 + 1 + 4), np.sqrt(2), np.sqrt(3), np.sqrt(1 + 1 + 4),
-                                      np.sqrt(4 + 1 + 1), np.sqrt(4 + 4 + 1)]
-        # fmt: on
-
-        maximum_distance = np.sqrt(9 * 3)
-
-        expected_hausdorff_distance_0_2 = self._hausdorff_distance(
-            dists_prediction_target_0_2, dist_target_prediction_0_2
-        )
-        expected_hausdorff_distance_0_2 /= maximum_distance
-
-        expected_hausdorff_distance_0_5 = self._hausdorff_distance(
-            dists_prediction_target_0_5, dist_target_prediction_0_5
-        )
-        expected_hausdorff_distance_0_5 /= maximum_distance
-
-        expected_hausdorff_distance_0_8 = self._hausdorff_distance(
-            dists_prediction_target_0_8, dist_target_prediction_0_8
-        )
-        expected_hausdorff_distance_0_8 /= maximum_distance
-
-        metrics = ["dice_score", "sensitivity", "specificity", "hausdorff95"]
         confidence_levels = [0.2, 0.5, 0.8]
 
-        metrics_per_image = CombinedPerImageMetric(
-            metrics=metrics,
-            confidence_levels=confidence_levels,
-            slices_per_image=3,
-        )
+        for test_slice_1, test_slice_2, multi_label in [
+            (
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
+                False,
+            ),
+            (
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
+                True,
+            ),
+        ]:
+            for sharp_prediction in [True, False]:
+                (
+                    prediction_1,
+                    target_1,
+                    cardinalities_1,
+                    _,
+                    _,
+                ) = test_slice_1(sharp_prediction)
 
-        for idx in range(predicted_probabilities.shape[0]):
-            metrics_per_image.update(predicted_probabilities[idx], target[idx])
+                (
+                    prediction_2,
+                    target_2,
+                    cardinalities_2,
+                    _,
+                    _,
+                ) = test_slice_2(sharp_prediction)
 
-        computed_metrics = metrics_per_image.compute()
+                cardinalities = {}
 
-        self.assertEqual(
-            len(computed_metrics.keys()),
-            len(confidence_levels) * len(metrics),
-            "The returned metrics object contains one entry per metric and confidence level",
-        )
+                for class_id, cardinality_dict in cardinalities_1.items():
+                    cardinalities[class_id] = {
+                        key: value + cardinalities_2[class_id][key]
+                        for key, value in cardinality_dict.items()
+                    }
 
-        self.assertTrue(
-            torch.equal(computed_metrics["dice_score_0.2"], expected_dice_score_0_2),
-            "The Dice score is computed correctly for confidence level 0.2.",
-        )
+                metrics = ["dice_score", "sensitivity", "specificity"]
 
-        self.assertTrue(
-            torch.equal(computed_metrics["dice_score_0.5"], expected_dice_score_0_5),
-            "The Dice score is computed correctly for confidence level 0.5.",
-        )
+                expected_metrics = {}
 
-        self.assertTrue(
-            torch.equal(computed_metrics["dice_score_0.8"], expected_dice_score_0_8),
-            "The Dice score is computed correctly for confidence level 0.8.",
-        )
+                for metric_name in metrics:
+                    expected_metric_value = tests.utils.expected_metrics(
+                        metric_name,
+                        cardinalities,
+                        probability_positive=1.0,
+                        probability_negative=0.0,
+                        epsilon=0,
+                    )
+                    expected_metrics[metric_name] = torch.from_numpy(
+                        expected_metric_value
+                    ).float()
 
-        self.assertTrue(
-            torch.equal(computed_metrics["sensitivity_0.2"], expected_sensitivity_0_2),
-            "The sensitivity is computed correctly for confidence level 0.2.",
-        )
+                metrics_per_image = CombinedPerImageMetric(
+                    metrics,
+                    id_to_class_mapping,
+                    slices_per_image=2,
+                    multi_label=multi_label,
+                    confidence_levels=confidence_levels,
+                )
 
-        self.assertTrue(
-            torch.equal(computed_metrics["sensitivity_0.5"], expected_sensitivity_0_5),
-            "The sensitivity is computed correctly for confidence level 0.5.",
-        )
+                metrics_per_image.update(prediction_1, target_1)
+                metrics_per_image.update(prediction_2, target_2)
 
-        self.assertTrue(
-            torch.equal(computed_metrics["sensitivity_0.8"], expected_sensitivity_0_8),
-            "The sensitivity is computed correctly for confidence level 0.8.",
-        )
+                computed_metrics = metrics_per_image.compute()
 
-        self.assertTrue(
-            torch.equal(computed_metrics["specificity_0.2"], expected_specificity_0_2),
-            "The specificity is computed correctly for confidence level 0.2.",
-        )
+                for class_id, class_name in id_to_class_mapping.items():
+                    if multi_label:
+                        for confidence_level in confidence_levels:
+                            for metric_name, expected_value in expected_metrics.items():
+                                self.assertTrue(
+                                    torch.equal(
+                                        computed_metrics[
+                                            f"{metric_name}_{class_name}_{confidence_level}"
+                                        ],
+                                        expected_value[class_id],
+                                    ),
+                                    f"The {metric_name} is computed correctly for multi-label tasks for confidence "
+                                    f"level {confidence_level}.",
+                                )
 
-        self.assertTrue(
-            torch.equal(computed_metrics["specificity_0.5"], expected_specificity_0_5),
-            "The specificity is computed correctly for confidence level 0.5.",
-        )
+                    else:
+                        for metric_name, expected_value in expected_metrics.items():
+                            self.assertTrue(
+                                torch.equal(
+                                    computed_metrics[f"{metric_name}_{class_name}"],
+                                    expected_value[class_id],
+                                ),
+                                f"The {metric_name} is computed correctly for single-label tasks.",
+                            )
 
-        self.assertTrue(
-            torch.equal(computed_metrics["specificity_0.8"], expected_specificity_0_8),
-            "The specificity is computed correctly for confidence level 0.8.",
-        )
+    # pylint: disable=no-self-use
+    def test_standard_case_distance_metrics(self):
+        """
+        Tests that the CombinedPerImageMetric class correctly computes all distance-based metrics for all confidence
+        levels.
+        """
 
-        torch.testing.assert_allclose(
-            computed_metrics["hausdorff95_0.2"],
-            expected_hausdorff_distance_0_2,
-            msg="The Hausdorff distance is computed correctly for confidence level 0.2.",
-        )
+        id_to_class_mapping = {
+            0: "first_test_class",
+            1: "second_test_class",
+            2: "third_test_class",
+        }
 
-        torch.testing.assert_allclose(
-            computed_metrics["hausdorff95_0.5"],
-            expected_hausdorff_distance_0_5,
-            msg="The Hausdorff distance is computed correctly for confidence level 0.5.",
-        )
+        confidence_levels = [0.2, 0.5, 0.8]
 
-        torch.testing.assert_allclose(
-            computed_metrics["hausdorff95_0.8"],
-            expected_hausdorff_distance_0_8,
-            msg="The Hausdorff distance is computed correctly for confidence level 0.8.",
-        )
+        for test_slice_1, test_slice_2, multi_label, expected_distances in [
+            (
+                test_data_distance_metrics.distance_slice_ignore_index_single_label_1,
+                test_data_distance_metrics.distance_slice_ignore_index_single_label_2,
+                False,
+                test_data_distance_metrics.expected_distances_slice_ignore_index_single_label_1_2,
+            ),
+            (
+                test_data_distance_metrics.distance_slice_ignore_index_multi_label_1,
+                test_data_distance_metrics.distance_slice_ignore_index_multi_label_2,
+                True,
+                test_data_distance_metrics.expected_distances_slice_ignore_index_multi_label_1_2,
+            ),
+        ]:
+            (
+                prediction_1,
+                target_1,
+                _,
+                _,
+                _,
+                _,
+            ) = test_slice_1(percentile=0.95)
+
+            (
+                prediction_2,
+                target_2,
+                _,
+                _,
+                _,
+                _,
+            ) = test_slice_2(percentile=0.95)
+
+            expected_hausdorff_distances, _, _, maximum_distance = expected_distances(
+                percentile=0.95
+            )
+
+            print("expected_hausdorff_distances", expected_hausdorff_distances)
+            print("maximum_distance", maximum_distance)
+
+            expected_hausdorff_distances = {
+                class_name: torch.as_tensor(expected_distance)
+                / torch.sqrt(torch.as_tensor(maximum_distance))
+                for class_name, expected_distance in expected_hausdorff_distances.items()
+            }
+
+            print("expected_hausdorff_distances", expected_hausdorff_distances)
+
+            metrics_per_image = CombinedPerImageMetric(
+                ["hausdorff95"],
+                id_to_class_mapping,
+                slices_per_image=4,
+                multi_label=multi_label,
+                confidence_levels=confidence_levels,
+            )
+
+            metrics_per_image.update(prediction_1, target_1)
+            metrics_per_image.update(prediction_2, target_2)
+
+            computed_metrics = metrics_per_image.compute()
+
+            print("computed_metrics", computed_metrics)
+            print("expected_hausdorff_distances", expected_hausdorff_distances)
+
+            for class_id, class_name in id_to_class_mapping.items():
+                if multi_label:
+                    for confidence_level in confidence_levels:
+                        torch.testing.assert_allclose(
+                            computed_metrics[
+                                f"hausdorff95_{class_name}_{confidence_level}"
+                            ],
+                            expected_hausdorff_distances[class_id],
+                            msg=f"The Hausdorff distance is computed correctly for multi-label tasks for confidence "
+                            f"level {confidence_level}.",
+                        )
+                else:
+                    torch.testing.assert_allclose(
+                        computed_metrics[f"hausdorff95_{class_name}"],
+                        expected_hausdorff_distances[class_id],
+                        msg="The Hausdorff distance is computed correctly for single-label tasks.",
+                    )
 
     def test_metric_reset(self):
         """
         Tests that the metrics are reset correctly.
         """
 
-        predicted_probabilities = torch.Tensor(
-            [
-                [
-                    [0.1, 0.1],
-                    [0.9, 0.9],
-                ],
-                [
-                    [0.9, 0.9],
-                    [0.9, 0.9],
-                ],
-            ]
-        )
+        for test_slice_1, test_slice_2, multi_label in [
+            (
+                test_data.standard_slice_single_label_1,
+                test_data.slice_all_true_single_label,
+                False,
+            ),
+            (
+                test_data.standard_slice_multi_label_1,
+                test_data.slice_all_true_multi_label,
+                True,
+            ),
+        ]:
+            for sharp_prediction in [True, False]:
+                (
+                    prediction_1,
+                    target_1,
+                    _,
+                    _,
+                    _,
+                ) = test_slice_1(sharp_prediction)
 
-        target = torch.Tensor(
-            [
-                [
-                    [0, 1],
-                    [1, 0],
-                ],
-                [
-                    [1, 1],
-                    [1, 1],
-                ],
-            ]
-        )
+                (
+                    prediction_2,
+                    target_2,
+                    _,
+                    _,
+                    _,
+                ) = test_slice_2(sharp_prediction)
 
-        metrics = ["dice_score", "sensitivity", "specificity", "hausdorff95"]
-        confidence_levels = [0.2, 0.5, 0.8]
+                metrics = ["dice_score", "sensitivity", "specificity", "hausdorff95"]
+                confidence_levels = [0.2, 0.5, 0.8]
 
-        metrics_per_image = CombinedPerImageMetric(
-            metrics=metrics,
-            confidence_levels=confidence_levels,
-            slices_per_image=2,
-        )
+                metrics_per_image = CombinedPerImageMetric(
+                    metrics,
+                    {
+                        0: "first_test_class",
+                        1: "second_test_class",
+                        2: "third_test_class",
+                    },
+                    slices_per_image=1,
+                    multi_label=multi_label,
+                    confidence_levels=confidence_levels,
+                )
 
-        metrics_per_image.update(predicted_probabilities[0], target[0])
-        metrics_per_image.compute()
+                metrics_per_image.update(prediction_1, target_1)
+                metrics_per_image.compute()
 
-        metrics_per_image.reset()
+                metrics_per_image.reset()
 
-        metrics_per_image.update(predicted_probabilities[1], target[1])
-        computed_metrics = metrics_per_image.compute()
+                metrics_per_image.update(prediction_2, target_2)
+                computed_metrics = metrics_per_image.compute()
 
-        for metric in metrics:
-            for confidence_level in confidence_levels:
-                metric_value = computed_metrics[f"{metric}_{confidence_level}"]
+                for metric in metrics:
+                    if multi_label:
+                        for confidence_level in confidence_levels:
+                            metric_value = computed_metrics[
+                                f"{metric}_first_test_class_{confidence_level}"
+                            ]
 
-                if metric in ["dice_score", "sensitivity"]:
-                    self.assertTrue(
-                        torch.equal(torch.as_tensor(1.0), metric_value),
-                        "Functional implementation correctly computes dice score when there are only TN.",
-                    )
-                if metric == "hausdorff95":
-                    self.assertTrue(
-                        torch.equal(torch.as_tensor(0.0), metric_value),
-                        "Functional implementation correctly computes dice score when there are only TN.",
-                    )
-                if metric == "specificity":
-                    self.assertTrue(
-                        torch.isnan(metric_value),
-                        "Functional implementation correctly computes dice score when there are only TN.",
-                    )
+                            if metric in ["dice_score", "sensitivity"]:
+                                self.assertTrue(
+                                    torch.equal(torch.as_tensor(1.0), metric_value),
+                                    "The CombinedPerImageMetric correctly resets the Dice score for multi-label "
+                                    "classification tasks.",
+                                )
+                            if metric == "hausdorff95":
+                                self.assertTrue(
+                                    torch.equal(torch.as_tensor(0.0), metric_value),
+                                    "The CombinedPerImageMetric correctly resets the Hausdorff distance for multi-label"
+                                    " classification tasks.",
+                                )
+                            if metric == "specificity":
+                                self.assertTrue(
+                                    torch.equal(torch.as_tensor(1.0), metric_value),
+                                    "The CombinedPerImageMetric correctly resets the specificity for multi-label "
+                                    "classification tasks.",
+                                )
+                            if metric == "sensitivity":
+                                self.assertTrue(
+                                    torch.equal(torch.as_tensor(1.0), metric_value),
+                                    "The CombinedPerImageMetric correctly resets the sensitivity for multi-label "
+                                    "classification tasks.",
+                                )
+                    else:
+                        metric_value = computed_metrics[f"{metric}_first_test_class"]
+
+                        if metric in ["dice_score", "sensitivity"]:
+                            self.assertTrue(
+                                torch.equal(torch.as_tensor(1.0), metric_value),
+                                "The CombinedPerImageMetric correctly resets the Dice score for single-label "
+                                "classification tasks.",
+                            )
+                        if metric == "hausdorff95":
+                            self.assertTrue(
+                                torch.equal(torch.as_tensor(0.0), metric_value),
+                                "The CombinedPerImageMetric correctly resets the Hausdorff distance for single-label "
+                                "classification tasks.",
+                            )
+                        if metric == "specificity":
+                            self.assertTrue(
+                                torch.equal(torch.as_tensor(1.0), metric_value),
+                                "The CombinedPerImageMetric correctly resets the specificity for single-label "
+                                "classification tasks.",
+                            )
+                        if metric == "sensitivity":
+                            self.assertTrue(
+                                torch.equal(torch.as_tensor(1.0), metric_value),
+                                "The CombinedPerImageMetric correctly resets the sensitivity for single-label "
+                                "classification tasks.",
+                            )
