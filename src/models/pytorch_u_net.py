@@ -19,7 +19,7 @@ class PytorchUNet(PytorchModel):
         **kwargs: Further, dataset specific parameters.
     """
 
-    def __init__(self, num_levels: int = 4, dim: int = 2, in_channels=1, **kwargs):
+    def __init__(self, num_levels: int = 4, dim: int = 2, in_channels=1, out_channels=2, multi_label=False, **kwargs):
 
         super().__init__(**kwargs)
 
@@ -27,33 +27,17 @@ class PytorchUNet(PytorchModel):
         self.in_channels = in_channels
         self.dim = dim
 
-        self.model = None
-
-    def input_dimensionality(self) -> int:
-        return self.dim
-
-    def setup(self, stage: Optional[str] = None) -> None:
-        """
-        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
-            or predict.
-
-        Args:
-            stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
-        """
-
-        super().setup(stage)
-
-        multi_label = self.trainer.datamodule.multi_label()
-        num_classes = len(self.trainer.datamodule.id_to_class_names())
-
         self.model = UNet(
             in_channels=self.in_channels,
-            out_channels=num_classes,
+            out_channels=out_channels,
             multi_label=multi_label,
             init_features=32,
             num_levels=self.num_levels,
             dim=self.dim,
         )
+
+    def input_dimensionality(self) -> int:
+        return self.dim
 
     # wrap model interface
     def eval(self) -> None:

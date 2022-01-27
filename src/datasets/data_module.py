@@ -246,3 +246,6 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         if self._unlabeled_set:
             return len(self._unlabeled_set)
         return 0
+
+    def num_classes(self) -> int:
+        return len(self.id_to_class_names())

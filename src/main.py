@@ -174,6 +174,8 @@ def run_active_learning_pipeline(
             lr_scheduler=lr_scheduler,
             num_levels=num_levels,
             in_channels=data_module.data_channels(),
+            out_channels=data_module.num_classes(),
+            multi_label=data_module.multi_label(),
             **model_config,
         )
     else:
