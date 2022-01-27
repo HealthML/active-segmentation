@@ -1,6 +1,6 @@
 """U-Net architecture wrapped as PytorchModel"""
 
-from typing import Iterable, Optional
+from typing import Iterable
 
 import torch
 import numpy as np
@@ -16,10 +16,24 @@ class PytorchUNet(PytorchModel):
     Args:
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         dim (int, optional): The dimensionality of the U-Net. Defaults to 2.
+        in_channels (int, optional): Number of input channels. Defaults to 1
+        out_channels (int): Number of output channels. Should be equal to the number of classes (for
+            multi-label segmentation tasks excluding the background class). Defaults to 2.
+        multi_label (bool, optional): Whether the model should produce single-label or multi-label outputs. If set to
+            `False`, the model's predictions are computed using a Softmax activation layer. to If set to `True`, sigmoid
+            activation layers are used to compute the model's predicitions. Defaults to False.
         **kwargs: Further, dataset specific parameters.
     """
 
-    def __init__(self, num_levels: int = 4, dim: int = 2, in_channels=1, **kwargs):
+    def __init__(
+        self,
+        num_levels: int = 4,
+        dim: int = 2,
+        in_channels=1,
+        out_channels=2,
+        multi_label=False,
+        **kwargs
+    ):
 
         super().__init__(**kwargs)
 
@@ -27,33 +41,17 @@ class PytorchUNet(PytorchModel):
         self.in_channels = in_channels
         self.dim = dim
 
-        self.model = None
-
-    def input_dimensionality(self) -> int:
-        return self.dim
-
-    def setup(self, stage: Optional[str] = None) -> None:
-        """
-        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
-            or predict.
-
-        Args:
-            stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
-        """
-
-        super().setup(stage)
-
-        multi_label = self.trainer.datamodule.multi_label()
-        num_classes = len(self.trainer.datamodule.id_to_class_names())
-
         self.model = UNet(
             in_channels=self.in_channels,
-            out_channels=num_classes,
+            out_channels=out_channels,
             multi_label=multi_label,
             init_features=32,
             num_levels=self.num_levels,
             dim=self.dim,
         )
+
+    def input_dimensionality(self) -> int:
+        return self.dim
 
     # wrap model interface
     def eval(self) -> None:
