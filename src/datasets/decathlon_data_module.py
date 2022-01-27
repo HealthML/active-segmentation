@@ -19,10 +19,11 @@ class DecathlonDataModule(ActiveLearningDataModule):
         batch_size (int): Batch size.
         num_workers (int): Number of workers for DataLoader.
         task (str, optional): The task from the medical segmentation decathlon.
-        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
-            (default = 0).
         active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for
             conventional model training (default = False).
+        batch_size_unlabeled_set (int, optional): Batch size for the unlabeled set. Defaults ot :attr:`batch_size`.
+        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading
+            (default = 0).
         initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is
             activated.
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
@@ -117,15 +118,16 @@ class DecathlonDataModule(ActiveLearningDataModule):
             # ToDo: Decide how to implement test dataset
             raise ValueError("Test dataset is not implemented for decathlon data yet.")
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
         data_dir: str,
         batch_size: int,
         num_workers: int,
         task: str = "Task06_Lung",
-        cache_size: int = 0,
         active_learning_mode: bool = False,
+        batch_size_unlabeled_set: Optional[int] = None,
+        cache_size: int = 0,
         initial_training_set_size: int = 1,
         pin_memory: bool = True,
         shuffle: bool = True,
@@ -140,8 +142,9 @@ class DecathlonDataModule(ActiveLearningDataModule):
             data_dir,
             batch_size,
             num_workers,
-            active_learning_mode,
-            initial_training_set_size,
+            active_learning_mode=active_learning_mode,
+            batch_size_unlabeled_set=batch_size_unlabeled_set,
+            initial_training_set_size=initial_training_set_size,
             pin_memory=pin_memory,
             shuffle=shuffle,
             **kwargs,
