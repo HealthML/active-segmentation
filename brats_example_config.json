@@ -20,17 +20,18 @@
   },
   "active_learning_config": {
     "active_learning_mode": true,
-    "initial_training_set_size": 10,
-    "iterations": 10,
-    "items_to_label": 32
+    "reset_weights": false,
+    "initial_training_set_size": 752,
+    "iterations": 100,
+    "items_to_label": 128
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
   "strategy": "random",
   "experiment_name": "test-experiment",
   "experiment_tags": [],
-  "batch_size": 16,
-  "epochs": 3,
+  "batch_size": 32,
+  "epochs": 5,
   "num_workers": 8,
   "gpus": 1,
   "prediction_count": 5,

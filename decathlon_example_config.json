@@ -21,17 +21,19 @@
   },
   "active_learning_config": {
     "active_learning_mode": true,
-    "initial_training_set_size": 32,
-    "iterations": 2,
-    "items_to_label": 32
+    "reset_weights": false,
+    "initial_training_set_size": 752,
+    "iterations": 100,
+    "items_to_label": 128
   },
   "wandb_project_name": "active-segmentation-tests",
-  "strategy": "random",
-  "experiment_name": "test-experiment",
+  "strategy": "uncertainty",
+  "experiment_name": "hippocampus-uncertainty-sampling",
   "experiment_tags": [],
-  "batch_size": 16,
-  "epochs": 5,
+  "batch_size": 32,
+  "epochs": 1,
   "num_workers": 8,
   "gpus": 1,
-  "early_stopping": false
+  "early_stopping": false,
+  "random_state": 43
 }

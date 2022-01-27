@@ -33,6 +33,7 @@ class ActiveLearningPipeline:
             (default = 1).
         iterations (int, optional): iteration times how often the active learning pipeline should be
         executed (default = 10).
+        reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run
     """
 
     # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals
@@ -47,6 +48,7 @@ class ActiveLearningPipeline:
         active_learning_mode: bool = False,
         items_to_label: int = 1,
         iterations: int = 10,
+        reset_weights: bool = False,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
@@ -81,7 +83,7 @@ class ActiveLearningPipeline:
         self.model_trainer = Trainer(
             deterministic=True,
             profiler="simple",
-            max_epochs=epochs,
+            max_epochs=epochs * 2,
             logger=logger,
             gpus=gpus,
             benchmark=True,
@@ -94,6 +96,7 @@ class ActiveLearningPipeline:
         self.active_learning_mode = active_learning_mode
         self.items_to_label = items_to_label
         self.iterations = iterations
+        self.reset_weights = reset_weights
         self.callbacks = callbacks
 
     def run(self) -> None:
@@ -128,6 +131,11 @@ class ActiveLearningPipeline:
                         benchmark=True,
                         callbacks=self.callbacks,
                     )
+
+                    if self.reset_weights:
+                        for layer in self.model.children():
+                            if hasattr(layer, "reset_parameters"):
+                                layer.reset_parameters()
         else:
             # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)
