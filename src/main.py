@@ -16,7 +16,11 @@ from datasets import (
     DecathlonDataModule,
     BCSSDataModule,
 )
-from query_strategies import RandomSamplingStrategy, UncertaintySamplingStrategy
+from query_strategies import (
+    RandomSamplingStrategy,
+    UncertaintySamplingStrategy,
+    RepresentativenessSamplingStrategy,
+)
 
 
 def create_data_module(
@@ -287,6 +291,8 @@ def create_query_strategy(strategy: str):
         return RandomSamplingStrategy()
     if strategy == "uncertainty":
         return UncertaintySamplingStrategy()
+    if strategy == "representativeness":
+        return RepresentativenessSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 
@@ -359,9 +365,7 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(
-            **config,
-        )
+        run_active_learning_pipeline(**config,)
 
 
 if __name__ == "__main__":
