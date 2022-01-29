@@ -11,7 +11,11 @@ from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule
-from query_strategies import RandomSamplingStrategy, UncertaintySamplingStrategy
+from query_strategies import (
+    RandomSamplingStrategy,
+    UncertaintySamplingStrategy,
+    RepresentativenessSamplingStrategy,
+)
 
 
 def create_data_module(
@@ -236,6 +240,8 @@ def create_query_strategy(strategy: str):
         return RandomSamplingStrategy()
     if strategy == "uncertainty":
         return UncertaintySamplingStrategy()
+    if strategy == "representativeness":
+        return RepresentativenessSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 
