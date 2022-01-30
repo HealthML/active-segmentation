@@ -107,6 +107,8 @@ class ActiveLearningPipeline:
         """Run the pipeline"""
         self.data_module.setup()
 
+        # pylint: disable=too-many-nested-blocks
+
         if self.active_learning_mode:
             # run pipeline
             for iteration in range(0, self.iterations):
@@ -119,14 +121,16 @@ class ActiveLearningPipeline:
                     # label batch
                     self.data_module.label_items(items_to_label)
 
-                self.logger.log_metrics({"train/al_loop_iterations": iteration})
-
                 # optionally reset weights after fitting on new data
                 if self.reset_weights:
                     self.model.reset_parameters()
+                self.model.iteration = iteration
 
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
+
+                # compute metrics for the best model on the validation set
+                self.model_trainer.validate()
 
                 # don't reset the model trainer in the last iteration
                 if iteration != self.iterations - 1:
@@ -146,5 +150,5 @@ class ActiveLearningPipeline:
             # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)
 
-        # compute metrics for the best model on the validation set
-        self.model_trainer.validate()
+            # compute metrics for the best model on the validation set
+            self.model_trainer.validate()

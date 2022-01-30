@@ -37,6 +37,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
        reduction_across_images (string, optional):  Reduction function that is to be used to aggregate the metric
             values of all images in order to obtain the per-class metric value, must be either "mean", "max", "min" or
             "none". Defaults to `"mean"`.
+        stage (string, optional): Name of the current stage to be used as prefix for the metric names. E.g. `train`,
+            `val` or `test`. Defaults to `None` (no name prefix is used).
     Note:
         If `multi_label` is `False`, the `prediction` tensor is expected to be either the output of the final softmax
         layer of a segmentation model or a label-encoded, sharp prediction. In the first case, the prediction tensor
@@ -70,6 +72,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         confidence_levels: Optional[Iterable[float]] = None,
         reduction_across_classes: str = "mean",
         reduction_across_images: str = "mean",
+        stage: Optional[str] = None,
     ):
         super().__init__()
         self.metrics = metrics
@@ -114,6 +117,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
         self.reduction_across_classes = reduction_across_classes
         self.reduction_across_images = reduction_across_images
+        self.name_prefix = f"{stage}/" if stage is not None else ""
 
     def reset(self) -> None:
         """
@@ -204,7 +208,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         aggregated_metrics = {}
 
         for metric_name, metric_value in per_image_metrics.items():
-            aggregated_metrics[metric_name] = self._reduce_metric(
+            aggregated_metrics[
+                f"{self.name_prefix}{metric_name}"
+            ] = self._reduce_metric(
                 torch.tensor(metric_value), self.reduction_across_images
             )
 
@@ -219,11 +225,11 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                             or self.include_background_in_reduced_metrics
                         ):
                             per_class_metric = aggregated_metrics[
-                                f"{metric_name}_{class_name}_{confidence_level}"
+                                f"{self.name_prefix}{metric_name}_{class_name}_{confidence_level}"
                             ]
                             per_class_metrics.append(per_class_metric)
                     aggregated_metrics[
-                        f"{self.reduction_across_classes}_{metric_name}_{confidence_level}"
+                        f"{self.name_prefix}{self.reduction_across_classes}_{metric_name}_{confidence_level}"
                     ] = self._reduce_metric(
                         torch.Tensor(per_class_metrics), self.reduction_across_classes
                     )
@@ -236,13 +242,52 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                         or self.include_background_in_reduced_metrics
                     ):
                         per_class_metric = aggregated_metrics[
-                            f"{metric_name}_{class_name}"
+                            f"{self.name_prefix}{metric_name}_{class_name}"
                         ]
                         per_class_metrics.append(per_class_metric)
                 aggregated_metrics[
-                    f"{self.reduction_across_classes}_{metric_name}"
+                    f"{self.name_prefix}{self.reduction_across_classes}_{metric_name}"
                 ] = self._reduce_metric(
                     torch.Tensor(per_class_metrics), self.reduction_across_classes
                 )
 
         return aggregated_metrics
+
+    def get_metric_names(self) -> List[str]:
+        """
+        Returns:
+            string: Names of the entries that the dictionary returned by the `compute()` method of this module will
+                    contain.
+        """
+
+        if self.reduction_across_images == "none":
+            metric_names = []
+            for metric in self.metrics:
+                metric_names.extend(
+                    [f"{metric}_{image_id}" for image_id in self.image_ids]
+                )
+        else:
+            metric_names = []
+            for metric in self.metrics:
+                metric_names.extend(
+                    [
+                        f"{self.name_prefix}{metric}_{class_name}"
+                        for class_name in self.id_to_class_names.values()
+                    ]
+                )
+                metric_names.append(
+                    f"{self.name_prefix}{self.reduction_across_classes}_{metric}"
+                )
+
+        if self.multi_label:
+            metric_names_confidence_level = []
+            for confidence_level in self.confidence_levels:
+                metric_names_confidence_level.extend(
+                    [
+                        f"{metric_name}_{confidence_level}"
+                        for metric_name in metric_names
+                    ]
+                )
+            return metric_names_confidence_level
+
+        return metric_names
