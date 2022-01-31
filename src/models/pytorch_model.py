@@ -155,7 +155,7 @@ class PytorchModel(LightningModule, ABC):
         """
 
     @abstractmethod
-    def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:
+    def validation_step(self, batch: torch.Tensor, batch_idx: int) -> float:
         """
         Validates the model on a given batch of model inputs.
         # this method should match the requirements of the pytorch lightning framework.
@@ -163,6 +163,9 @@ class PytorchModel(LightningModule, ABC):
         Args:
             batch: A batch of model inputs.
             batch_idx: Index of the current batch.
+
+        Returns:
+            Validation loss.
         """
 
     def predict_step(
@@ -297,7 +300,9 @@ class PytorchModel(LightningModule, ABC):
         wandb.define_metric("trainer/train_step")
         wandb.define_metric("trainer/val_step")
         wandb.define_metric("train/loss", step_metric="trainer/train_step")
+        wandb.define_metric("train/mean_loss", step_metric="trainer/epoch")
         wandb.define_metric("val/loss", step_metric="trainer/val_step")
+        wandb.define_metric("val/mean_loss", step_metric="trainer/epoch")
 
         metric_kwargs = {
             "id_to_class_names": self.trainer.datamodule.id_to_class_names(),
@@ -336,7 +341,6 @@ class PytorchModel(LightningModule, ABC):
 
             for metrics in [*self.train_metrics, *self.val_metrics]:
                 for metric_name in metrics.get_metric_names():
-                    print("metric_name", metric_name)
                     wandb.define_metric(metric_name, step_metric="trainer/epoch")
 
         if self.stage == "validate":
@@ -410,7 +414,10 @@ class PytorchModel(LightningModule, ABC):
 
         return self.test_metrics
 
-    def training_epoch_end(self, outputs: Any):
+    def training_epoch_end(
+        self,
+        outputs: Union[torch.Tensor, List[torch.Tensor], List[Dict[str, torch.Tensor]]],
+    ) -> None:
         """
         This method is called by the Pytorch Lightning framework at the end of each training epoch.
 
@@ -419,16 +426,30 @@ class PytorchModel(LightningModule, ABC):
         """
         train_metrics = {}
 
+        if isinstance(outputs, torch.Tensor):
+            losses = outputs
+        else:
+            losses = torch.Tensor(
+                [item["loss"] if isinstance(item, dict) else item for item in outputs]
+            )
+
         for train_metric in self.train_metrics:
             train_metrics = {**train_metrics, **train_metric.compute()}
             train_metric.reset()
 
         self.logger.log_metrics(
-            {**train_metrics, "trainer/epoch": self.epochs_counter},
+            {
+                **train_metrics,
+                "trainer/epoch": self.epochs_counter,
+                "train/mean_loss": losses.mean(),
+            },
             step=self.global_step,
         )
 
-    def validation_epoch_end(self, outputs: Any):
+    def validation_epoch_end(
+        self,
+        outputs: Union[torch.Tensor, List[torch.Tensor], List[Dict[str, torch.Tensor]]],
+    ):
         """
         This method is called by the Pytorch Lightning framework at the end of each validation epoch.
 
@@ -442,14 +463,23 @@ class PytorchModel(LightningModule, ABC):
             val_metrics = {**val_metrics, **val_metric.compute()}
             val_metric.reset()
 
-        if self.stage == "fit":
-            # log to trainer to allow model selection
-            self.log_dict(
-                {**val_metrics, "trainer/epoch": self.epochs_counter}, logger=False
+        if isinstance(outputs, torch.Tensor):
+            losses = outputs
+        else:
+            losses = torch.Tensor(
+                [item["loss"] if isinstance(item, dict) else item for item in outputs]
             )
+
+        val_metrics = {**val_metrics, "val/mean_loss": losses.mean()}
+
+        if self.stage == "fit":
+            val_metrics = {**val_metrics, "trainer/epoch": self.epochs_counter}
+
+            # log to trainer to allow model selection
+            self.log_dict(val_metrics, logger=False)
             # log to Weights and Biases
             self.logger.log_metrics(
-                {**val_metrics, "trainer/epoch": self.epochs_counter},
+                val_metrics,
                 step=self.global_step,
             )
         else:

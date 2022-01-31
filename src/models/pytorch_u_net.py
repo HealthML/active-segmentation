@@ -124,13 +124,16 @@ class PytorchUNet(PytorchModel):
         )
         return loss
 
-    def validation_step(self, batch, batch_idx) -> None:
+    def validation_step(self, batch, batch_idx) -> float:
         """
         Validates the model on a given batch of input images.
 
         Args:
             batch (Tensor): Batch of validation images.
             batch_idx: Index of the validation batch.
+
+        Returns:
+            Loss on the validation batch.
         """
 
         x, y, case_ids = batch
@@ -150,6 +153,8 @@ class PytorchUNet(PytorchModel):
 
         for val_metric in self.get_val_metrics():
             val_metric.update(probabilities, y, case_ids)
+
+        return loss
 
     def predict_step(
         self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
