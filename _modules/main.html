@@ -192,7 +192,12 @@
 <span class="kn">from</span> <span class="nn">active_learning</span> <span class="kn">import</span> <span class="n">ActiveLearningPipeline</span>
 <span class="kn">from</span> <span class="nn">inferencing</span> <span class="kn">import</span> <span class="n">Inferencer</span>
 <span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">PytorchFCNResnet50</span><span class="p">,</span> <span class="n">PytorchUNet</span>
-<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">BraTSDataModule</span><span class="p">,</span> <span class="n">PascalVOCDataModule</span><span class="p">,</span> <span class="n">DecathlonDataModule</span>
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BraTSDataModule</span><span class="p">,</span>
+    <span class="n">PascalVOCDataModule</span><span class="p">,</span>
+    <span class="n">DecathlonDataModule</span><span class="p">,</span>
+    <span class="n">BCSSDataModule</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="n">QueryStrategy</span><span class="p">,</span> <span class="n">RandomSamplingStrategy</span>
 
 
@@ -244,6 +249,21 @@
             <span class="n">data_dir</span><span class="p">,</span>
             <span class="n">batch_size</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="p">,</span>
+            <span class="n">active_learning_mode</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s2">&quot;active_learning_mode&quot;</span><span class="p">,</span> <span class="kc">False</span>
+            <span class="p">),</span>
+            <span class="n">initial_training_set_size</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s2">&quot;initial_training_set_size&quot;</span><span class="p">,</span> <span class="mi">10</span>
+            <span class="p">),</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">dataset_config</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">dataset</span> <span class="o">==</span> <span class="s2">&quot;bcss&quot;</span><span class="p">:</span>
+        <span class="n">dataset_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dim&quot;</span><span class="p">)</span>
+        <span class="n">data_module</span> <span class="o">=</span> <span class="n">BCSSDataModule</span><span class="p">(</span>
+            <span class="n">data_dir</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span>
             <span class="n">active_learning_mode</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;active_learning_mode&quot;</span><span class="p">,</span> <span class="kc">False</span>
             <span class="p">),</span>

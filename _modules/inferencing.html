@@ -182,12 +182,20 @@
   <h1>Source code for inferencing</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Module containing inferencing logic &quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nib</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
 <span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">PytorchModel</span>
-<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">BraTSDataModule</span><span class="p">,</span> <span class="n">DecathlonDataModule</span><span class="p">,</span> <span class="n">DoublyShuffledNIfTIDataset</span>
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BraTSDataModule</span><span class="p">,</span>
+    <span class="n">DecathlonDataModule</span><span class="p">,</span>
+    <span class="n">DoublyShuffledNIfTIDataset</span><span class="p">,</span>
+    <span class="n">BCSSDataModule</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="Inferencer"><a class="viewcode-back" href="../inferencing.html#inferencing.Inferencer">[docs]</a><span class="k">class</span> <span class="nc">Inferencer</span><span class="p">:</span>
@@ -220,9 +228,24 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span> <span class="o">=</span> <span class="n">dataset_config</span>
 
 <div class="viewcode-block" id="Inferencer.inference"><a class="viewcode-back" href="../inferencing.html#inferencing.Inferencer.inference">[docs]</a>    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Run the inferencing.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Wraps the inference execution for image and scan datasets.&quot;&quot;&quot;</span>
 
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;brats&quot;</span><span class="p">,</span> <span class="s2">&quot;decathlon&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inference_scan</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bcss&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inference_image</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Dataset </span><span class="si">%s</span><span class="s2"> has no implemented inference method&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Dataset </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="si">}</span><span class="s2"> has no implemented inference method&quot;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Inferencer.inference_scan"><a class="viewcode-back" href="../inferencing.html#inferencing.Inferencer.inference_scan">[docs]</a>    <span class="k">def</span> <span class="nf">inference_scan</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Run the inferencing.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="s2">&quot;brats&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">)</span>
@@ -248,7 +271,6 @@
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">[</span><span class="s2">&quot;pin_memory&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="s2">&quot;task&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">]</span>
-
         <span class="n">data</span> <span class="o">=</span> <span class="n">DoublyShuffledNIfTIDataset</span><span class="p">(</span>
             <span class="n">image_paths</span><span class="o">=</span><span class="n">image_paths</span><span class="p">,</span>
             <span class="n">annotation_paths</span><span class="o">=</span><span class="n">annotation_paths</span><span class="p">,</span>
@@ -281,7 +303,52 @@
             <span class="p">)</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_dir</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
             <span class="n">nib</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Predictions stored in path </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div></div>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Predictions stored in path </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Inferencer.inference_image"><a class="viewcode-back" href="../inferencing.html#inferencing.Inferencer.inference_image">[docs]</a>    <span class="k">def</span> <span class="nf">inference_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs inference for images.&quot;&quot;&quot;</span>
+        <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="s2">&quot;bcss&quot;</span><span class="p">:</span>
+            <span class="n">data_module</span> <span class="o">=</span> <span class="n">BCSSDataModule</span><span class="p">(</span>
+                <span class="n">data_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">num_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">image_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">[</span><span class="s2">&quot;image_shape&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data_module</span><span class="o">.</span><span class="n">_create_test_set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">case_id</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">islice</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_count</span><span class="p">)):</span>
+            <span class="c1"># Add an additional dimension to emulate one batch (1, x, y) -&gt; (1, 1, x, y)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="c1"># Remove batch dimension</span>
+            <span class="n">seg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">seg</span> <span class="o">=</span> <span class="p">(</span><span class="n">seg</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="mi">255</span>
+            <span class="n">seg</span> <span class="o">=</span> <span class="n">seg</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+
+            <span class="n">original_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">image_paths</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="c1"># Save only the segmentation in original size</span>
+            <span class="n">seg_img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">seg</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span>
+                <span class="n">original_image</span><span class="o">.</span><span class="n">size</span>
+            <span class="p">)</span>
+            <span class="n">seg_img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">_SEG_ONLY.png&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Repeat dimensions to emulate RGB channels (1, x, y) -&gt; (3, x, y)</span>
+            <span class="n">seg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">seg</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># Move channel axis to the front for masking (x, y, 3) -&gt; (3, x, y)</span>
+            <span class="n">original_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">original_image</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">image_shape</span><span class="p">)),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">image_with_seg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">original_image</span><span class="p">,</span> <span class="n">seg</span><span class="p">)</span>
+
+            <span class="c1"># Move channel axis to the end for storing on disk (3, x, y) -&gt; (x, y, 3)</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">image_with_seg</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">_PRED.png&quot;</span><span class="p">)</span>
+            <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prediction for case </span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2"> stored in </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
               </article>
