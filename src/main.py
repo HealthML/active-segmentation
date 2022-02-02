@@ -10,7 +10,12 @@ import wandb
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
-from datasets import BraTSDataModule, PascalVOCDataModule, DecathlonDataModule
+from datasets import (
+    BraTSDataModule,
+    PascalVOCDataModule,
+    DecathlonDataModule,
+    BCSSDataModule,
+)
 from query_strategies import RandomSamplingStrategy, UncertaintySamplingStrategy
 
 
@@ -72,6 +77,21 @@ def create_data_module(
             batch_size_unlabeled_set=min(
                 active_learning_config.get("batch_size_unlabeled_set", batch_size),
                 active_learning_config.get("items_to_label", 1),
+            ),
+            initial_training_set_size=active_learning_config.get(
+                "initial_training_set_size", 10
+            ),
+            random_state=random_state,
+            **dataset_config,
+        )
+    elif dataset == "bcss":
+        dataset_config.pop("dim")
+        data_module = BCSSDataModule(
+            data_dir=data_dir,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            active_learning_mode=active_learning_config.get(
+                "active_learning_mode", False
             ),
             initial_training_set_size=active_learning_config.get(
                 "initial_training_set_size", 10
@@ -182,6 +202,8 @@ def run_active_learning_pipeline(
             lr_scheduler=lr_scheduler,
             num_levels=num_levels,
             in_channels=data_module.data_channels(),
+            out_channels=data_module.num_classes(),
+            multi_label=data_module.multi_label(),
             **model_config,
         )
     else:
