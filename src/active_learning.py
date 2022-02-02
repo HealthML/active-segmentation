@@ -30,6 +30,7 @@ class ActiveLearningPipeline:
         lr_scheduler (string, optional): Algorithm used for dynamically updating the
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).
+        initial_epochs (int, optional): Number of epochs the initial model should be trained. Defaults to `epochs`.
         items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.
             (default = 1).
         iterations (int, optional): iteration times how often the active learning pipeline should be
@@ -49,6 +50,7 @@ class ActiveLearningPipeline:
         gpus: int,
         checkpoint_dir: Optional[str] = None,
         active_learning_mode: bool = False,
+        initial_epochs: Optional[int] = None,
         items_to_label: int = 1,
         iterations: int = 10,
         reset_weights: bool = False,
@@ -72,6 +74,7 @@ class ActiveLearningPipeline:
         self.active_learning_mode = active_learning_mode
         self.checkpoint_dir = checkpoint_dir
         self.early_stopping = early_stopping
+        self.initial_epochs = initial_epochs if initial_epochs is not None else epochs
         self.items_to_label = items_to_label
         self.iterations = iterations
         self.lr_scheduler = lr_scheduler
@@ -86,7 +89,7 @@ class ActiveLearningPipeline:
         # pylint: disable=too-many-nested-blocks
 
         if self.active_learning_mode:
-            self.model_trainer = self.setup_trainer(iteration=0)
+            self.model_trainer = self.setup_trainer(self.initial_epochs, iteration=0)
             # run pipeline
             for iteration in range(0, self.iterations):
                 # skip labeling in the first iteration because the model hasn't trained yet
@@ -118,21 +121,24 @@ class ActiveLearningPipeline:
                 # don't reset the model trainer in the last iteration
                 if iteration != self.iterations - 1:
                     # reset model trainer
-                    self.model_trainer = self.setup_trainer(iteration=iteration + 1)
+                    self.model_trainer = self.setup_trainer(
+                        self.epochs, iteration=iteration + 1
+                    )
 
         else:
-            self.model_trainer = self.setup_trainer()
+            self.model_trainer = self.setup_trainer(self.epochs)
             # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)
 
             # compute metrics for the best model on the validation set
             self.model_trainer.validate(ckpt_path="best")
 
-    def setup_trainer(self, iteration: Optional[int] = None) -> Trainer:
+    def setup_trainer(self, epochs: int, iteration: Optional[int] = None) -> Trainer:
         """
         Initializes a new Pytorch Lightning trainer object.
 
         Args:
+            epochs (int): Number of training epochs.
             iteration (Optional[int], optional): Current active learning iteration. Defaults to None.
 
         Returns:
@@ -171,7 +177,7 @@ class ActiveLearningPipeline:
         return Trainer(
             deterministic=True,
             profiler="simple",
-            max_epochs=self.epochs + iteration * self.epochs_increase_per_query,
+            max_epochs=epochs + iteration * self.epochs_increase_per_query,
             logger=self.logger,
             log_every_n_steps=20,
             gpus=self.gpus,

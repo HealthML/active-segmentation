@@ -206,6 +206,7 @@ def run_active_learning_pipeline(
         gpus,
         checkpoint_dir,
         active_learning_mode=active_learning_config.get("active_learning_mode", False),
+        initial_epochs=active_learning_config.get("initial_epochs", epochs),
         items_to_label=active_learning_config.get("items_to_label", 1),
         iterations=active_learning_config.get("iterations", 10),
         reset_weights=active_learning_config.get("reset_weights", False),
@@ -358,9 +359,7 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(
-            **config,
-        )
+        run_active_learning_pipeline(**config,)
 
 
 if __name__ == "__main__":
