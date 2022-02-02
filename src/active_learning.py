@@ -1,5 +1,6 @@
 """ Module containing the active learning pipeline """
 
+import os
 from typing import Iterable, Optional, Union
 
 from pytorch_lightning import Trainer
@@ -60,48 +61,23 @@ class ActiveLearningPipeline:
 
         self.data_module = data_module
         self.model = model
+        self.model_trainer = None
         # log gradients, parameter histogram and model topology
         logger.watch(self.model, log="all")
 
-        callbacks = []
-        if lr_scheduler is not None:
-            callbacks.append(LearningRateMonitor(logging_interval="step"))
-        if early_stopping:
-            callbacks.append(EarlyStopping("validation/loss"))
-
-        monitoring_mode = "min" if "loss" in model_selection_criterion else "max"
-
-        self.checkpoint_callback = ModelCheckpoint(
-            dirpath=checkpoint_dir,
-            filename="best_model_epoch_{epoch}",
-            auto_insert_metric_name=False,
-            monitor=f"val/{model_selection_criterion}",
-            mode=monitoring_mode,
-            save_last=True,
-            every_n_epochs=1,
-            save_on_train_epoch_end=False,
-        )
-        callbacks.append(self.checkpoint_callback)
-
-        self.model_trainer = Trainer(
-            deterministic=True,
-            profiler="simple",
-            max_epochs=epochs * 2,
-            logger=logger,
-            gpus=gpus,
-            benchmark=True,
-            callbacks=callbacks,
-        )
         self.strategy = strategy
         self.epochs = epochs
         self.logger = logger
         self.gpus = gpus
         self.active_learning_mode = active_learning_mode
+        self.checkpoint_dir = checkpoint_dir
+        self.early_stopping = early_stopping
         self.items_to_label = items_to_label
         self.iterations = iterations
+        self.lr_scheduler = lr_scheduler
+        self.model_selection_criterion = model_selection_criterion
         self.reset_weights = reset_weights
         self.epochs_increase_per_query = epochs_increase_per_query
-        self.callbacks = callbacks
 
     def run(self) -> None:
         """Run the pipeline"""
@@ -110,6 +86,7 @@ class ActiveLearningPipeline:
         # pylint: disable=too-many-nested-blocks
 
         if self.active_learning_mode:
+            self.model_trainer = self.setup_trainer(iteration=0)
             # run pipeline
             for iteration in range(0, self.iterations):
                 # skip labeling in the first iteration because the model hasn't trained yet
@@ -124,31 +101,81 @@ class ActiveLearningPipeline:
                 # optionally reset weights after fitting on new data
                 if self.reset_weights:
                     self.model.reset_parameters()
+
+                if iteration != 0:
+                    self.model.start_step = self.model.global_step + 1
+                    self.model.start_epoch = self.model.current_epoch + 1
                 self.model.iteration = iteration
 
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
 
                 # compute metrics for the best model on the validation set
-                self.model_trainer.validate()
+                self.model_trainer.validate(
+                    ckpt_path="best", dataloaders=self.data_module
+                )
 
                 # don't reset the model trainer in the last iteration
                 if iteration != self.iterations - 1:
                     # reset model trainer
-                    self.model_trainer = Trainer(
-                        deterministic=True,
-                        profiler="simple",
-                        max_epochs=self.epochs
-                        + iteration * self.epochs_increase_per_query,
-                        logger=self.logger,
-                        gpus=self.gpus,
-                        benchmark=True,
-                        callbacks=self.callbacks,
-                    )
+                    self.model_trainer = self.setup_trainer(iteration=iteration + 1)
 
         else:
+            self.model_trainer = self.setup_trainer()
             # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)
 
             # compute metrics for the best model on the validation set
-            self.model_trainer.validate()
+            self.model_trainer.validate(ckpt_path="best")
+
+    def setup_trainer(self, iteration: Optional[int] = None) -> Trainer:
+        """
+        Initializes a new Pytorch Lightning trainer object.
+
+        Args:
+            iteration (Optional[int], optional): Current active learning iteration. Defaults to None.
+
+        Returns:
+            pytorch_lightning.Trainer: A trainer object.
+        """
+
+        callbacks = []
+        if self.lr_scheduler is not None:
+            callbacks.append(LearningRateMonitor(logging_interval="step"))
+        if self.early_stopping:
+            callbacks.append(EarlyStopping("validation/loss"))
+
+        monitoring_mode = "min" if "loss" in self.model_selection_criterion else "max"
+
+        if iteration is not None:
+            checkpoint_dir = os.path.join(self.checkpoint_dir, str(iteration))
+        else:
+            checkpoint_dir = self.checkpoint_dir
+
+        num_sanity_val_steps = 2 if iteration is None or iteration == 0 else 0
+
+        checkpoint_callback = ModelCheckpoint(
+            dirpath=checkpoint_dir,
+            filename="best_model_epoch_{epoch}",
+            auto_insert_metric_name=False,
+            monitor=f"val/{self.model_selection_criterion}",
+            mode=monitoring_mode,
+            save_last=True,
+            every_n_epochs=1,
+            every_n_train_steps=0,
+            save_on_train_epoch_end=False,
+        )
+
+        callbacks.append(checkpoint_callback)
+
+        return Trainer(
+            deterministic=True,
+            profiler="simple",
+            max_epochs=self.epochs + iteration * self.epochs_increase_per_query,
+            logger=self.logger,
+            log_every_n_steps=20,
+            gpus=self.gpus,
+            benchmark=True,
+            callbacks=callbacks,
+            num_sanity_val_steps=num_sanity_val_steps,
+        )

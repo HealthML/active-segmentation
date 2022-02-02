@@ -119,8 +119,7 @@ class PytorchUNet(PytorchModel):
             train_metric.update(probabilities, y, case_ids)
 
         self.logger.log_metrics(
-            {"train/loss": loss, "trainer/train_step": self.train_step_counter},
-            step=self.global_step,
+            {"train/loss": loss}, step=self.global_step,
         )
         return loss
 
@@ -141,15 +140,10 @@ class PytorchUNet(PytorchModel):
         probabilities = self(x)
 
         loss = self.loss_module(probabilities, y)
+
         if self.stage == "fit":
             # log to trainer for model selection
-            self.log("val/loss", loss, logger=False)
-
-            # log to Weights and Biases
-            self.logger.log_metrics(
-                {"val/loss": loss, "trainer/val_step": self.val_step_counter},
-                step=self.global_step,
-            )
+            self.log("val/loss", loss, logger=False, on_epoch=True, on_step=False)
 
         for val_metric in self.get_val_metrics():
             val_metric.update(probabilities, y, case_ids)

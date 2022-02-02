@@ -95,9 +95,9 @@ class PytorchModel(LightningModule, ABC):
         self.test_metrics = torch.nn.ModuleList([])
 
         self.stage = None
-        self.epochs_counter = 0
-        self.train_step_counter = 0
-        self.val_step_counter = 0
+        self.start_global_step = 0
+        self.start_epoch = 0
+        self.iteration = 0
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -118,27 +118,11 @@ class PytorchModel(LightningModule, ABC):
 
     @property
     def global_step(self) -> int:
-        return self.train_step_counter + self.val_step_counter
+        return self.start_global_step + super().global_step
 
-    # pylint: disable=unused-argument
-    def on_train_batch_end(self, *args) -> None:
-        """
-        Called in the training loop after processing each batch.
-        See https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html#on-train-batch-end
-        """
-
-        self.train_step_counter += 1
-
-    def on_validation_batch_end(self, *args) -> None:
-        """
-        Called in the validation loop after processing each batch.
-        See https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html#on-validation-batch-end
-        Args:
-            batch: A batch of model inputs.
-            batch_idx: Index of the current batch.
-        """
-
-        self.val_step_counter += 1
+    @property
+    def current_epoch(self) -> int:
+        return self.start_epoch + super().current_epoch
 
     @abstractmethod
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
@@ -297,11 +281,9 @@ class PytorchModel(LightningModule, ABC):
         # see https://docs.wandb.ai/guides/track/log#customize-axes-and-summaries-with-define_metric
         wandb.define_metric("trainer/epoch")
         wandb.define_metric("trainer/iteration")
-        wandb.define_metric("trainer/train_step")
-        wandb.define_metric("trainer/val_step")
-        wandb.define_metric("train/loss", step_metric="trainer/train_step")
+        wandb.define_metric("trainer/global_step")
+        wandb.define_metric("train/loss", step_metric="trainer/global_step")
         wandb.define_metric("train/mean_loss", step_metric="trainer/epoch")
-        wandb.define_metric("val/loss", step_metric="trainer/val_step")
         wandb.define_metric("val/mean_loss", step_metric="trainer/epoch")
 
         metric_kwargs = {
@@ -312,10 +294,7 @@ class PytorchModel(LightningModule, ABC):
         }
 
         if self.stage == "fit":
-            wandb.define_metric("train/loss", step_metric="trainer/train_step")
-            wandb.define_metric("val/loss", step_metric="trainer/val_step")
-
-            training_set = self.train_dataloader().dataset
+            training_set = self.trainer.datamodule.train_dataloader().dataset
 
             train_average_metrics = CombinedPerEpochMetric(
                 metrics=self.train_metric_names,
@@ -327,7 +306,7 @@ class PytorchModel(LightningModule, ABC):
             )
             self.train_metrics = torch.nn.ModuleList([train_average_metrics])
 
-            validation_set = self.val_dataloader().dataset
+            validation_set = self.trainer.datamodule.val_dataloader().dataset
 
             val_average_metrics = CombinedPerEpochMetric(
                 metrics=self.train_metric_names,
@@ -344,7 +323,7 @@ class PytorchModel(LightningModule, ABC):
                     wandb.define_metric(metric_name, step_metric="trainer/epoch")
 
         if self.stage == "validate":
-            validation_set = self.val_dataloader().dataset
+            validation_set = self.trainer.datamodule.val_dataloader().dataset
 
             val_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,
@@ -360,7 +339,7 @@ class PytorchModel(LightningModule, ABC):
                 for metric_name in metrics.get_metric_names():
                     wandb.define_metric(metric_name, step_metric="trainer/iteration")
         if self.stage == "test":
-            test_set = self.test_dataloader().dataset
+            test_set = self.trainer.datamodule.test_dataloader().dataset
 
             test_average_metrics = CombinedPerEpochMetric(
                 metrics=self.test_metric_names,
@@ -426,6 +405,7 @@ class PytorchModel(LightningModule, ABC):
         """
         train_metrics = {}
 
+        # collect loss values
         if isinstance(outputs, torch.Tensor):
             losses = outputs
         else:
@@ -463,6 +443,7 @@ class PytorchModel(LightningModule, ABC):
             val_metrics = {**val_metrics, **val_metric.compute()}
             val_metric.reset()
 
+        # collect loss values
         if isinstance(outputs, torch.Tensor):
             losses = outputs
         else:
@@ -477,18 +458,18 @@ class PytorchModel(LightningModule, ABC):
 
             # log to trainer to allow model selection
             self.log_dict(val_metrics, logger=False)
-            # log to Weights and Biases
-            self.logger.log_metrics(
-                val_metrics,
-                step=self.global_step,
-            )
+
+            if not self.trainer.sanity_checking:
+                # log to Weights and Biases
+                self.logger.log_metrics(
+                    {**val_metrics, "trainer/epoch": self.current_epoch},
+                    step=self.global_step,
+                )
         else:
             self.logger.log_metrics(
                 {**val_metrics, "trainer/iteration": self.iteration},
                 step=self.global_step,
             )
-
-        self.epochs_counter += 1
 
     def test_epoch_end(self, outputs: Any) -> None:
         """
