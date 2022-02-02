@@ -34,6 +34,8 @@ class ActiveLearningPipeline:
         iterations (int, optional): iteration times how often the active learning pipeline should be
         executed (default = 10).
         reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run
+        epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for
+            the increased training dataset size (default = 0).
     """
 
     # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals
@@ -49,6 +51,7 @@ class ActiveLearningPipeline:
         items_to_label: int = 1,
         iterations: int = 10,
         reset_weights: bool = False,
+        epochs_increase_per_query: int = 0,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
@@ -97,6 +100,7 @@ class ActiveLearningPipeline:
         self.items_to_label = items_to_label
         self.iterations = iterations
         self.reset_weights = reset_weights
+        self.epochs_increase_per_query = epochs_increase_per_query
         self.callbacks = callbacks
 
     def run(self) -> None:
@@ -125,7 +129,8 @@ class ActiveLearningPipeline:
                     self.model_trainer = Trainer(
                         deterministic=True,
                         profiler="simple",
-                        max_epochs=self.epochs,
+                        max_epochs=self.epochs
+                        + iteration * self.epochs_increase_per_query,
                         logger=self.logger,
                         gpus=self.gpus,
                         benchmark=True,

@@ -227,6 +227,9 @@ def run_active_learning_pipeline(
         items_to_label=active_learning_config.get("items_to_label", 1),
         iterations=active_learning_config.get("iterations", 10),
         reset_weights=active_learning_config.get("reset_weights", False),
+        epochs_increase_per_query=active_learning_config.get(
+            "epochs_increase_per_query", 0
+        ),
         logger=wandb_logger,
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,
