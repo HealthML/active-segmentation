@@ -72,6 +72,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         confidence_levels: Optional[Iterable[float]] = None,
         reduction_across_classes: str = "mean",
         reduction_across_images: str = "mean",
+        ignore_nan_in_reduction: bool = False,
         stage: Optional[str] = None,
     ):
         super().__init__()
@@ -103,21 +104,18 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         )
         self.metrics_to_compute = set()
 
-        if (
-            reduction_across_classes
-            not in [
-                "mean",
-                "max",
-                "min",
-                "none",
-            ]
-            or reduction_across_images not in ["mean", "max", "min", "none"]
-        ):
+        if reduction_across_classes not in [
+            "mean",
+            "max",
+            "min",
+            "none",
+        ] or reduction_across_images not in ["mean", "max", "min", "none"]:
             raise ValueError("Invalid reduction method.")
 
         self.reduction_across_classes = reduction_across_classes
         self.reduction_across_images = reduction_across_images
         self.name_prefix = f"{stage}/" if stage is not None else ""
+        self.ignore_nan_in_reduction = ignore_nan_in_reduction
 
     def reset(self) -> None:
         """
@@ -133,10 +131,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
     # pylint: disable=arguments-differ
     def update(
-        self,
-        prediction: torch.Tensor,
-        target: torch.Tensor,
-        image_ids: Iterable[str],
+        self, prediction: torch.Tensor, target: torch.Tensor, image_ids: Iterable[str],
     ) -> None:
         """
         Takes the prediction and target of a given batch and updates the metrics accordingly.
@@ -152,7 +147,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             self.metrics_to_compute.add(image_id)
 
     @staticmethod
-    def _reduce_metric(metric: torch.Tensor, reduction: str) -> torch.Tensor:
+    def _reduce_metric(
+        metric: torch.Tensor, reduction: str, ignore_nan: bool = False
+    ) -> torch.Tensor:
         """
         Aggregates metric values.
 
@@ -164,6 +161,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         Returns:
             Tensor: Aggregated metric.
         """
+
+        if ignore_nan:
+            metric = torch.masked_select(metric, ~metric.isnan())
 
         if reduction == "mean":
             return metric.mean()
@@ -211,7 +211,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
             aggregated_metrics[
                 f"{self.name_prefix}{metric_name}"
             ] = self._reduce_metric(
-                torch.tensor(metric_value), self.reduction_across_images
+                torch.tensor(metric_value),
+                self.reduction_across_images,
+                ignore_nan=self.ignore_nan_in_reduction,
             )
 
         for metric_name in self.metrics:
@@ -231,7 +233,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                     aggregated_metrics[
                         f"{self.name_prefix}{self.reduction_across_classes}_{metric_name}_{confidence_level}"
                     ] = self._reduce_metric(
-                        torch.Tensor(per_class_metrics), self.reduction_across_classes
+                        torch.Tensor(per_class_metrics),
+                        self.reduction_across_classes,
+                        ignore_nan=self.ignore_nan_in_reduction,
                     )
             else:
                 per_class_metrics = []
@@ -248,7 +252,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
                 aggregated_metrics[
                     f"{self.name_prefix}{self.reduction_across_classes}_{metric_name}"
                 ] = self._reduce_metric(
-                    torch.Tensor(per_class_metrics), self.reduction_across_classes
+                    torch.Tensor(per_class_metrics),
+                    self.reduction_across_classes,
+                    ignore_nan=self.ignore_nan_in_reduction,
                 )
 
         return aggregated_metrics

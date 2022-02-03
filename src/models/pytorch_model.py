@@ -302,6 +302,7 @@ class PytorchModel(LightningModule, ABC):
                 image_ids=training_set.image_ids(),
                 slices_per_image=training_set.slices_per_image(),
                 stage="train",
+                ignore_nan_in_reduction=True,
                 **metric_kwargs,
             )
             self.train_metrics = torch.nn.ModuleList([train_average_metrics])
@@ -314,6 +315,7 @@ class PytorchModel(LightningModule, ABC):
                 image_ids=validation_set.image_ids(),
                 slices_per_image=validation_set.slices_per_image(),
                 stage="val",
+                ignore_nan_in_reduction=True,
                 **metric_kwargs,
             )
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
