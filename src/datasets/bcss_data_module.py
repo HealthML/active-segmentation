@@ -1,6 +1,6 @@
 """Module containing the data module for the BCSS dataset"""
 import shutil
-from typing import Tuple, List, Optional, Any, Union
+from typing import Tuple, List, Optional, Any, Union, Dict
 from pathlib import Path
 import os
 
@@ -30,6 +30,8 @@ class BCSSDataModule(ActiveLearningDataModule):
         channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
         image_shape (tuple, optional): Shape of the image.
         target_label (int, optional): The label to use for learning. Details are in BCSSDataset.
+        mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
+            (default = True)
         val_set_size (float, optional): The size of the validation set (default = 0.3).
         stratify (bool, optional): The option to stratify the train val split by the institutes.
         random_state (int): Random constant for shuffling the data
@@ -97,6 +99,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         channels: int = 3,
         image_shape: tuple = (300, 300),
         target_label: int = 1,
+        mask_join_non_zero: bool = True,
         val_set_size: float = 0.3,
         stratify: bool = True,
         random_state: int = 42,
@@ -115,6 +118,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         self.channels = channels
         self.image_shape = tuple(image_shape)
         self.target_label = target_label
+        self.mask_join_non_zero = mask_join_non_zero
         self.cache_size = cache_size
         self.active_learning_mode = active_learning_mode
         self.initial_training_set_size = initial_training_set_size
@@ -308,6 +312,27 @@ class BCSSDataModule(ActiveLearningDataModule):
     def data_channels(self) -> int:
         """Returns the number of channels"""
         return self.channels
+
+    def multi_label(self) -> bool:
+        """
+        Returns:
+            bool: Whether the dataset is a multi-label or a single-label dataset.
+        """
+        return False
+
+    def id_to_class_names(self) -> Dict[int, str]:
+        """
+        Returns:
+            Dict[int, str]: A mapping of class indices to descriptive class names.
+        """
+
+        if self.mask_join_non_zero:
+            id_to_classes = {0: "background", 1: "tumor"}
+        else:
+            raise NotImplementedError(
+                "This dataset currently only supports single label targets."
+            )
+        return id_to_classes
 
 
 def copy_test_set_to_separate_folder(source_dir: str, target_dir: str) -> None:
