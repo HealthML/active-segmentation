@@ -1,6 +1,6 @@
 """ Module containing a metrics class for tracking several metrics related to one 3d image """
 
-from typing import Dict, Iterable, Literal, Optional
+from typing import Dict, Iterable, List, Literal, Optional, Union
 import torch
 import torchmetrics
 
@@ -162,6 +162,7 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         self,
         prediction: torch.Tensor,
         target: torch.Tensor,
+        slice_ids: Optional[Union[int, List[int]]] = None,
     ) -> None:
         """
         Takes a prediction and a target slice of the 3d image and updates the metrics accordingly.
@@ -169,22 +170,35 @@ class CombinedPerImageMetric(torchmetrics.Metric):
         Args:
             prediction (Tensor): A prediction slice or a whole 3d image.
             target (Tensor): A target slice or a whole 3d image.
+            slice_ids (Union[int, List[int]]): Indices of the image slices represented by `prediction` and `target`.
+                Must be provided if `target` is a single slice or a subset of slices taken from a 3d image.
         """
 
         if self.multi_label:
             for confidence_level, confidence_level_name in self.confidence_levels:
                 for metric in self._metrics[confidence_level_name].values():
+                    metric_kwargs = (
+                        {"slice_ids": slice_ids}
+                        if isinstance(metric, HausdorffDistance)
+                        else {}
+                    )
 
                     sharp_prediction = (prediction > confidence_level).int()
 
-                    metric.update(sharp_prediction, target)
+                    metric.update(sharp_prediction, target, **metric_kwargs)
         else:
             for metric in self._metrics.values():
+                metric_kwargs = (
+                    {"slice_ids": slice_ids}
+                    if isinstance(metric, HausdorffDistance)
+                    else {}
+                )
+
                 if prediction.dtype == torch.int:
                     sharp_prediction = prediction
                 else:
                     sharp_prediction = torch.argmax(prediction, dim=0).int()
-                metric.update(sharp_prediction, target)
+                metric.update(sharp_prediction, target, **metric_kwargs)
 
     def compute(self) -> Dict[str, torch.Tensor]:
         """

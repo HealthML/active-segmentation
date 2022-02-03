@@ -55,8 +55,9 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         predictions and to have the shape :math:`(N, C, X, Y)` or :math:`(N, C, X, Y, Z)`.
 
     Shape:
-        - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size` and `C = number of classes` (see Notes above).
-        - Target: :math:`(N, X, Y, ...)`, or :math:`(N, C, X, Y, ...)` (see Notes above).
+        - Prediction: :math:`(N, C, X, Y, ...)` or :math:`(N, X, Y, ...)`, where `N = batch size` and `C = number of
+             classes` (see Notes above).
+        - Target: :math:`(N, C, X, Y, ...)`, or :math:`(N, X, Y, ...)` (see Notes above).
         - Image_ids: :math:`(N)`, where `N = batch size`.
     """
 
@@ -143,7 +144,24 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         """
 
         for idx, image_id in enumerate(image_ids):
-            self._metrics_per_image[image_id].update(prediction[idx], target[idx])
+            if self.multi_label:
+                dimensionality = prediction[idx].dim() - 1
+            else:
+                # if prediction is of type int we assume it is label encoded
+                dimensionality = (
+                    prediction[idx].dim()
+                    if prediction.dtype == torch.int
+                    else prediction[idx].dim() - 1
+                )
+            assert dimensionality in [2, 3]
+
+            slice_id = int(image_id.split("-")[-1]) if dimensionality == 2 else None
+            image_id = (
+                "-".join(image_id.split("-")[:-1]) if dimensionality == 2 else image_id
+            )
+            self._metrics_per_image[image_id].update(
+                prediction[idx], target[idx], slice_ids=slice_id
+            )
             self.metrics_to_compute.add(image_id)
 
     @staticmethod

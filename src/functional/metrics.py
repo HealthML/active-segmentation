@@ -5,7 +5,7 @@ The metric implementations are based on the TorchMetrics framework. For instruct
 with this framework, see https://torchmetrics.readthedocs.io/en/latest/pages/implement.html.
 """
 import abc
-from typing import Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 import psutil
 import torch
@@ -943,18 +943,21 @@ class HausdorffDistance(SegmentationMetric):
             include_background=include_background,
             reduction=reduction,
         )
+        num_classes = num_classes if self.include_background else num_classes - 1
+
         self.normalize = normalize
         self.percentile = percentile
-        self.predictions = []
-        self.targets = []
-        self.add_state("predictions", [])
-        self.add_state("targets", [])
+        self.predictions = torch.empty(slices_per_image)
+        self.targets = torch.empty(slices_per_image)
+        self.add_state("predictions", torch.empty(slices_per_image))
+        self.add_state("targets", torch.empty(slices_per_image))
         self.hausdorff_distance = torch.zeros(num_classes)
         self.add_state("hausdorff_distance", torch.zeros(num_classes))
         self.all_image_locations = None
         self.hausdorff_distance_cached = False
         self.slices_per_image = slices_per_image
         self.number_of_slices = 0
+        self.collected_slice_ids = set()
 
     def reset(self) -> None:
         """
@@ -965,15 +968,23 @@ class HausdorffDistance(SegmentationMetric):
         self.all_image_locations = None
         self.hausdorff_distance_cached = False
         self.number_of_slices = 0
+        self.collected_slice_ids = set()
 
     # pylint: disable=arguments-differ
-    def update(self, prediction: torch.Tensor, target: torch.Tensor) -> None:
+    def update(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        slice_ids: Union[int, List[int]] = None,
+    ) -> None:
         r"""
         Updates metric using the provided prediction.
 
         Args:
             prediction (Tensor): The prediction tensor.
             target (Tensor): The target tensor.
+            slice_ids (Union[int, List[int]]): Indices of the image slices represented by `prediction` and `target`.
+                Must be provided if `target` is a single slice or a subset of slices taken from a 3d image.
 
         Shape:
             - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
@@ -987,15 +998,61 @@ class HausdorffDistance(SegmentationMetric):
         )
         prediction, target = self._preprocess_inputs(prediction, target)
 
+        # the prediction and target tensor include an additional class dimension
+        dimensionality = 2 if prediction.dim() == 3 else 3
+
+        added_slices = 1 if dimensionality == 2 else prediction.shape[1]
+
+        if slice_ids is None:
+            assert self.slices_per_image == 1 or (
+                dimensionality == 3 and self.slices_per_image == prediction.shape[1]
+            ), (
+                "The `slice_ids` parameter must be provided when `prediction` and `target` are a single slice or a "
+                "subset of slices taken from a 3d image."
+            )
+
+            self.predictions = prediction
+            self.targets = target
+        else:
+            if isinstance(slice_ids, int):
+                slice_ids = [slice_ids]
+
+            assert (
+                len(slice_ids) == added_slices
+            ), "The length of `slice_ids` must be equal to the number of slices in `prediction` and `target`."
+
+            assert (
+                len(self.collected_slice_ids.intersection(set(slice_ids))) == 0
+            ), "Tried to update the Hausdorff distance with a slice that was already added."
+
+            # in this case we just collect all slices of the image since the Hausdorff distance needs to be computed
+            # over all slices
+            # note that this will be memory-intensive if this is done for multiple 3d images in parallel
+
+            if self.number_of_slices == 0:
+                # create tensors that have the shape of the original 3d images
+
+                shape_of_full_image = (
+                    prediction.shape[0],
+                    self.slices_per_image,
+                    prediction.shape[-2],
+                    prediction.shape[-1],
+                )
+
+                self.predictions = torch.zeros(*shape_of_full_image, dtype=torch.int)
+                self.targets = torch.zeros(*shape_of_full_image, dtype=torch.int)
+
+            self.collected_slice_ids.update(slice_ids)
+
+            for idx, slice_id in enumerate(slice_ids):
+                self.predictions[:, slice_id] = (
+                    prediction[:, idx] if dimensionality == 3 else prediction
+                )
+                self.targets[:, slice_id] = (
+                    target[:, idx] if dimensionality == 3 else target
+                )
+
         self.hausdorff_distance_cached = False
-
-        # we just collect all slices of the image since, for 3d images, the Hausdorff distance needs to be computed over
-        # all slices
-        # note that this will be memory-intensive if this is done for multiple 3d images in parallel
-        self.predictions.append(prediction)
-        self.targets.append(target)
-
-        added_slices = 1 if prediction.dim() == 3 else prediction.shape[1]
         self.number_of_slices += added_slices
 
         if self.number_of_slices == self.slices_per_image:
@@ -1015,18 +1072,19 @@ class HausdorffDistance(SegmentationMetric):
         """
 
         if self.hausdorff_distance_cached:
+            assert (
+                self.number_of_slices == 0
+            ), "A cached value for the Hausdorff distance is used even though there were slices added afterwards."
             return self.hausdorff_distance
 
-        if self.predictions[0].dim() == 3:
-            predictions = torch.stack(self.predictions, dim=1)
-            targets = torch.stack(self.targets, dim=1)
-        else:
-            predictions = torch.cat(self.predictions, dim=1)
-            targets = torch.cat(self.targets, dim=1)
+        assert self.number_of_slices == self.slices_per_image, (
+            "The compute method was called on the Hausdorff distance module before all slices of the image were "
+            "provided."
+        )
 
         hausdorff_dist = hausdorff_distance(
-            predictions,
-            targets,
+            self.predictions,
+            self.targets,
             self.num_classes,
             convert_to_one_hot=False,
             ignore_index=None,
@@ -1038,14 +1096,11 @@ class HausdorffDistance(SegmentationMetric):
         self.hausdorff_distance = hausdorff_dist
         self.hausdorff_distance_cached = True
 
-        for prediction in self.predictions:
-            del prediction
-        for target in self.targets:
-            del target
-
         # free memory
-        self.predictions = []
-        self.targets = []
+        del self.predictions
+        del self.targets
+        self.predictions = torch.empty(self.slices_per_image)
+        self.targets = torch.empty(self.slices_per_image)
         self.number_of_slices = 0
 
         return reduce_metric(hausdorff_dist, self.reduction)

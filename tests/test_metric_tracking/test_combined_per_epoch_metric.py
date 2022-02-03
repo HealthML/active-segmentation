@@ -49,7 +49,8 @@ class TestCombinedPerEpochMetric(unittest.TestCase):
                     _,
                 ) = test_slice_2(sharp_prediction)
 
-                image_ids = ["1", "2"]
+                image_ids = ["image-0", "image-1"]
+                image_and_slice_ids = ["image-0-0", "image-1-0"]
 
                 expected_dice_score_1 = tests.utils.expected_metrics(
                     "dice_score",
@@ -70,6 +71,8 @@ class TestCombinedPerEpochMetric(unittest.TestCase):
                 expected_dice_score_2 = torch.from_numpy(expected_dice_score_2)
 
                 prediction_batch = torch.stack([prediction_1, prediction_2])
+                if not sharp_prediction:
+                    prediction_batch = prediction_batch.float()
                 target_batch = torch.stack([target_1, target_2])
 
                 metrics = ["dice_score", "sensitivity", "specificity", "hausdorff95"]
@@ -120,7 +123,7 @@ class TestCombinedPerEpochMetric(unittest.TestCase):
                             )
 
                         per_epoch_metrics_module.update(
-                            prediction_batch, target_batch, image_ids
+                            prediction_batch, target_batch, image_and_slice_ids
                         )
 
                         per_epoch_metrics = per_epoch_metrics_module.compute()
@@ -135,13 +138,6 @@ class TestCombinedPerEpochMetric(unittest.TestCase):
                                 "The returned metrics object contains one entry per class, metric and confidence level "
                                 "and one entry per metric and confidence level for the metrics aggregated over all "
                                 "classes.",
-                            )
-
-                            print(
-                                "expected",
-                                torch.stack(
-                                    [expected_dice_score_1[0], expected_dice_score_2[0]]
-                                ),
                             )
 
                             self.assertEqual(
@@ -161,13 +157,6 @@ class TestCombinedPerEpochMetric(unittest.TestCase):
                                 f"the per-class metrics.",
                             )
                         else:
-                            print(
-                                "expected",
-                                torch.stack(
-                                    [expected_dice_score_1[0], expected_dice_score_2[0]]
-                                ),
-                            )
-
                             self.assertEqual(
                                 per_epoch_metrics["dice_score_first_test_class"],
                                 torch.stack(
