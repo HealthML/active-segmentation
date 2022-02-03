@@ -388,6 +388,7 @@ class FalsePositiveLoss(SegmentationLoss):
         """
 
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
+        assert prediction.isfinite().all() and target.isfinite().all()
 
         prediction, target = self._preprocess_inputs(prediction, target)
 
@@ -478,6 +479,7 @@ class CrossEntropyLoss(SegmentationLoss):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
     """
 
     def __init__(
@@ -485,9 +487,13 @@ class CrossEntropyLoss(SegmentationLoss):
         multi_label: bool = False,
         ignore_index: Optional[int] = None,
         reduction: Literal["mean", "sum", "none"] = "mean",
+        epsilon: float = 1e-5,
     ):
         super().__init__(
-            ignore_index=ignore_index, include_background=True, reduction=reduction
+            ignore_index=ignore_index,
+            include_background=True,
+            reduction=reduction,
+            epsilon=epsilon,
         )
         self.multi_label = multi_label
         if self.multi_label:
@@ -518,13 +524,15 @@ class CrossEntropyLoss(SegmentationLoss):
         """
 
         assert prediction.shape == target.shape or prediction.dim() == target.dim() + 1
+        assert prediction.isfinite().all() and target.isfinite().all()
 
         if self.multi_label:
             target = target.float()
         else:
             # the Pytorch NLLLoss expect the inputs to be the output of a LogSoftmax layer
             # since this loss expects the output of a Softmax layer as input, the log is taken here
-            prediction = torch.log(prediction)
+
+            prediction = torch.log(prediction + self.epsilon)
             target = target.long()
 
         loss = self.cross_entropy_loss(prediction, target)
@@ -548,11 +556,6 @@ class CrossEntropyLoss(SegmentationLoss):
 class CrossEntropyDiceLoss(SegmentationLoss):
     """
     Implements a loss function that combines the Dice loss with the binary cross-entropy (negative log-likelihood) loss.
-
-    Args:
-        epsilon (float, optional): Laplacian epsilon factor.
-        reduction (str, optional): Reduction function that is to be used to aggregate the loss values of the images of
-            one batch, must be either "mean", "sum" or "none".
 
     Args:
         multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
@@ -581,6 +584,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
             multi_label=multi_label,
             ignore_index=ignore_index,
             reduction=reduction,
+            epsilon=epsilon,
         )
         self.dice_loss = DiceLoss(
             ignore_index=ignore_index,
