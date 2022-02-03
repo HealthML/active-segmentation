@@ -106,7 +106,7 @@ class ActiveLearningPipeline:
                     self.model.reset_parameters()
 
                 if iteration != 0:
-                    self.model.start_step = self.model.global_step + 1
+                    self.model.start_global_step = self.model.global_step + 1
                     self.model.start_epoch = self.model.current_epoch + 1
                 self.model.iteration = iteration
 
