@@ -187,27 +187,9 @@ def run_active_learning_pipeline(
         dataset_config,
     )
 
-    if architecture == "fcn_resnet50":
-        if data_module.data_channels() != 1:
-            raise ValueError(
-                f"{architecture} does not support multiple input channels."
-            )
-
-        model = PytorchFCNResnet50(
-            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
-        )
-    elif architecture == "u_net":
-        model = PytorchUNet(
-            learning_rate=learning_rate,
-            lr_scheduler=lr_scheduler,
-            num_levels=num_levels,
-            in_channels=data_module.data_channels(),
-            out_channels=data_module.num_classes(),
-            multi_label=data_module.multi_label(),
-            **model_config,
-        )
-    else:
-        raise ValueError("Invalid model architecture.")
+    model = create_model(
+        data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+    )
 
     strategy = create_query_strategy(strategy)
 
@@ -249,6 +231,49 @@ def run_active_learning_pipeline(
         dataset_config=dataset_config,
     )
     inferencer.inference()
+
+
+def create_model(
+    data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+):
+    """
+    Creates the correct data module.
+
+    Args:
+        dataset (string): Name of the dataset. E.g. 'brats'
+        data_dir (string, optional): Main directory with the dataset. E.g. './data'
+        batch_size (int, optional): Size of training examples passed in one training step.
+        num_workers (int, optional): Number of workers.
+        random_state (int): Random constant for shuffling the data
+        active_learning_config (Dict[str, Any): Dictionary with active learning specific parameters.
+        dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
+
+    Returns:
+        The model.
+    """
+
+    if architecture == "fcn_resnet50":
+        if data_module.data_channels() != 1:
+            raise ValueError(
+                f"{architecture} does not support multiple input channels."
+            )
+
+        model = PytorchFCNResnet50(
+            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
+        )
+    elif architecture == "u_net":
+        model = PytorchUNet(
+            learning_rate=learning_rate,
+            lr_scheduler=lr_scheduler,
+            num_levels=num_levels,
+            in_channels=data_module.data_channels(),
+            out_channels=data_module.num_classes(),
+            multi_label=data_module.multi_label(),
+            **model_config,
+        )
+    else:
+        raise ValueError("Invalid model architecture.")
+    return model
 
 
 def create_query_strategy(strategy: str):

@@ -40,6 +40,9 @@ class PytorchUNet(PytorchModel):
         self.num_levels = num_levels
         self.in_channels = in_channels
         self.dim = dim
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.multi_label = multi_label
 
         self.model = UNet(
             in_channels=self.in_channels,
@@ -177,3 +180,17 @@ class PytorchUNet(PytorchModel):
 
         for test_metric in self.get_test_metrics():
             test_metric.update(probabilities, y, case_ids)
+
+    def reset_parameters(self):
+        """
+        This method is called when resetting the weights is activated for the active learing loop
+        """
+
+        self.model = UNet(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            multi_label=self.multi_label,
+            init_features=32,
+            num_levels=self.num_levels,
+            dim=self.dim,
+        )

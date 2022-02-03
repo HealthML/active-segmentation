@@ -410,3 +410,9 @@ class PytorchModel(LightningModule, ABC):
                 self.log(f"{stage_name}/{metric_name}", metric_value)
             self.logger.log_metrics({stage_name: test_metrics})
             test_metrics.reset()
+
+    @abstractmethod
+    def reset_parameters(self) -> int:
+        """
+        This method is called when resetting the weights is activated for the active learing loop
+        """

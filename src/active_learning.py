@@ -120,6 +120,11 @@ class ActiveLearningPipeline:
                     self.data_module.label_items(items_to_label)
 
                 self.logger.log_metrics({"train/al_loop_iterations": iteration})
+
+                # optionally reset weights after fitting on new data
+                if self.reset_weights:
+                    self.model.reset_parameters()
+
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
 
@@ -137,10 +142,6 @@ class ActiveLearningPipeline:
                         callbacks=self.callbacks,
                     )
 
-                    if self.reset_weights:
-                        for layer in self.model.children():
-                            if hasattr(layer, "reset_parameters"):
-                                layer.reset_parameters()
         else:
             # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)
