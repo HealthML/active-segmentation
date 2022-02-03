@@ -182,7 +182,7 @@
   <h1>Source code for metric_tracking.combined_per_image_metric</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Module containing a metrics class for tracking several metrics related to one 3d image &quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torchmetrics</span>
 
@@ -344,6 +344,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">slice_ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a prediction and a target slice of the 3d image and updates the metrics accordingly.</span>
@@ -351,22 +352,35 @@
 <span class="sd">        Args:</span>
 <span class="sd">            prediction (Tensor): A prediction slice or a whole 3d image.</span>
 <span class="sd">            target (Tensor): A target slice or a whole 3d image.</span>
+<span class="sd">            slice_ids (Union[int, List[int]]): Indices of the image slices represented by `prediction` and `target`.</span>
+<span class="sd">                Must be provided if `target` is a single slice or a subset of slices taken from a 3d image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">confidence_level</span><span class="p">,</span> <span class="n">confidence_level_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="p">[</span><span class="n">confidence_level_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">metric_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">{</span><span class="s2">&quot;slice_ids&quot;</span><span class="p">:</span> <span class="n">slice_ids</span><span class="p">}</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">HausdorffDistance</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="p">{}</span>
+                    <span class="p">)</span>
 
                     <span class="n">sharp_prediction</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">&gt;</span> <span class="n">confidence_level</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
 
-                    <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sharp_prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+                    <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sharp_prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">metric_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;slice_ids&quot;</span><span class="p">:</span> <span class="n">slice_ids</span><span class="p">}</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">HausdorffDistance</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="p">{}</span>
+                <span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">:</span>
                     <span class="n">sharp_prediction</span> <span class="o">=</span> <span class="n">prediction</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">sharp_prediction</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
-                <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sharp_prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div>
+                <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sharp_prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CombinedPerImageMetric.compute"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>

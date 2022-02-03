@@ -235,8 +235,9 @@
 <span class="sd">        predictions and to have the shape :math:`(N, C, X, Y)` or :math:`(N, C, X, Y, Z)`.</span>
 
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size` and `C = number of classes` (see Notes above).</span>
-<span class="sd">        - Target: :math:`(N, X, Y, ...)`, or :math:`(N, C, X, Y, ...)` (see Notes above).</span>
+<span class="sd">        - Prediction: :math:`(N, C, X, Y, ...)` or :math:`(N, X, Y, ...)`, where `N = batch size` and `C = number of</span>
+<span class="sd">             classes` (see Notes above).</span>
+<span class="sd">        - Target: :math:`(N, C, X, Y, ...)`, or :math:`(N, X, Y, ...)` (see Notes above).</span>
 <span class="sd">        - Image_ids: :math:`(N)`, where `N = batch size`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -326,7 +327,24 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">image_ids</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_image</span><span class="p">[</span><span class="n">image_id</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">prediction</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">:</span>
+                <span class="n">dimensionality</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># if prediction is of type int we assume it is label encoded</span>
+                <span class="n">dimensionality</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">prediction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">int</span>
+                    <span class="k">else</span> <span class="n">prediction</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="k">assert</span> <span class="n">dimensionality</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+            <span class="n">slice_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">image_id</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">image_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">image_id</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_image</span><span class="p">[</span><span class="n">image_id</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">prediction</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">slice_ids</span><span class="o">=</span><span class="n">slice_id</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_compute</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>

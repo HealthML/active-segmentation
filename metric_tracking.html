@@ -232,8 +232,12 @@ predictions and to have the shape <span class="math">\((N, C, X, Y)\)</span> or 
 </div>
 <dl class="simple">
 <dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite> and <cite>C = number of classes</cite> (see Notes above).</p></li>
-<li><p>Target: <span class="math">\((N, X, Y, ...)\)</span>, or <span class="math">\((N, C, X, Y, ...)\)</span> (see Notes above).</p></li>
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span> or <span class="math">\((N, X, Y, ...)\)</span>, where <cite>N = batch size</cite> and <a href="#id1"><span class="problematic" id="id2">`</span></a>C = number of</dt><dd><p>classes` (see Notes above).</p>
+</dd>
+</dl>
+</li>
+<li><p>Target: <span class="math">\((N, C, X, Y, ...)\)</span>, or <span class="math">\((N, X, Y, ...)\)</span> (see Notes above).</p></li>
 <li><p>Image_ids: <span class="math">\((N)\)</span>, where <cite>N = batch size</cite>.</p></li>
 </ul>
 </dd>
@@ -356,13 +360,15 @@ tasks and <cite>&lt;metric name&gt;_&lt;class_name&gt;</cite> for single-label s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.update" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_image_metric.html#CombinedPerImageMetric.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a prediction and a target slice of the 3d image and updates the metrics accordingly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prediction</strong> (<em>Tensor</em>) – A prediction slice or a whole 3d image.</p></li>
 <li><p><strong>target</strong> (<em>Tensor</em>) – A target slice or a whole 3d image.</p></li>
+<li><p><strong>slice_ids</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Indices of the image slices represented by <cite>prediction</cite> and <cite>target</cite>.
+Must be provided if <cite>target</cite> is a single slice or a subset of slices taken from a 3d image.</p></li>
 </ul>
 </dd>
 </dl>
