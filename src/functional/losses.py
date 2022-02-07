@@ -80,7 +80,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
             - Output: :math:`(N, C, X*Y*...)`
         """
 
-        return tensor.view(*tensor.shape[0:2], -1).float()
+        return tensor.contiguous().view(*tensor.shape[0:2], -1).float()
 
     def _preprocess_inputs(
         self, prediction: torch.Tensor, target: torch.Tensor
