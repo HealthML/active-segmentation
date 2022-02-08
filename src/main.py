@@ -208,6 +208,7 @@ def run_active_learning_pipeline(
         epochs_increase_per_query=active_learning_config.get(
             "epochs_increase_per_query", 0
         ),
+        heatmaps_per_iteration=active_learning_config.get("heatmaps_per_iteration", 0),
         logger=wandb_logger,
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,

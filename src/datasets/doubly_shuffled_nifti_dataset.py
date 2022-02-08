@@ -514,6 +514,34 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             if len(self.image_slice_indices[image_index]) == 0:
                 del self.image_slice_indices[image_index]
 
+    def get_latest_images_and_case_ids(
+        self, last_n: int = 1
+    ) -> List[Tuple[np.ndarray, str]]:
+        """
+        Retrieves the last n images and corresponding case ids from the images that were last added to the dataset.
+        Args:
+            last_n (int, optional): Number of images to get.
+
+        Returns:
+            A list of all the last added n images.
+        """
+        latest_image_slice_indices = self.image_slice_indices[-last_n:]
+        latest_images = []
+        for image_slice_index in latest_image_slice_indices:
+            image_index = image_slice_index[0]
+            slice_index = image_slice_index[1]
+            # check if image and mask are in cache
+            if image_index in self.image_cache:
+                current_image = self.image_cache[image_index]
+            # read image and mask from disk otherwise
+            else:
+                current_image = self.__read_image_as_array(
+                    self.image_paths[image_index], norm=True
+                )
+            case_id = self.__get_case_id(image_index)
+            latest_images.append((current_image[slice_index, :, :], case_id))
+        return latest_images
+
     def __image_indices(self) -> Iterable[str]:
         return self.image_slice_indices.keys()
 
