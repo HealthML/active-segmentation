@@ -119,7 +119,8 @@ class PytorchUNet(PytorchModel):
             train_metric.update(probabilities, y, case_ids)
 
         self.logger.log_metrics(
-            {"train/loss": loss}, step=self.global_step,
+            {"train/loss": loss},
+            step=self.global_step,
         )
         return loss
 

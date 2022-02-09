@@ -105,12 +105,16 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         )
         self.metrics_to_compute = set()
 
-        if reduction_across_classes not in [
-            "mean",
-            "max",
-            "min",
-            "none",
-        ] or reduction_across_images not in ["mean", "max", "min", "none"]:
+        if (
+            reduction_across_classes
+            not in [
+                "mean",
+                "max",
+                "min",
+                "none",
+            ]
+            or reduction_across_images not in ["mean", "max", "min", "none"]
+        ):
             raise ValueError("Invalid reduction method.")
 
         self.reduction_across_classes = reduction_across_classes
@@ -132,7 +136,10 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
     # pylint: disable=arguments-differ
     def update(
-        self, prediction: torch.Tensor, target: torch.Tensor, image_ids: Iterable[str],
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        image_ids: Iterable[str],
     ) -> None:
         """
         Takes the prediction and target of a given batch and updates the metrics accordingly.

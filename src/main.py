@@ -238,16 +238,16 @@ def create_model(
     data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
 ):
     """
-    Creates the correct data module.
+    Creates the correct model.
 
     Args:
-        dataset (string): Name of the dataset. E.g. 'brats'
-        data_dir (string, optional): Main directory with the dataset. E.g. './data'
-        batch_size (int, optional): Size of training examples passed in one training step.
-        num_workers (int, optional): Number of workers.
-        random_state (int): Random constant for shuffling the data
-        active_learning_config (Dict[str, Any): Dictionary with active learning specific parameters.
-        dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
+        data_module (ActiveLearningDataModule): A data module object providing data.
+        architecture (string): Name of the desired model architecture. E.g. 'u_net'.
+        learning_rate (float): The step size at each iteration while moving towards a minimum of the loss.
+        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.
+            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
+        model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
 
     Returns:
         The model.
@@ -359,7 +359,9 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(**config,)
+        run_active_learning_pipeline(
+            **config,
+        )
 
 
 if __name__ == "__main__":
