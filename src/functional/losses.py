@@ -23,7 +23,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -31,7 +31,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
 
         super().__init__()
@@ -144,7 +144,7 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -152,7 +152,7 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
         super().__init__(
             epsilon=epsilon,
@@ -228,7 +228,7 @@ class DiceLoss(AbstractDiceLoss):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -236,7 +236,7 @@ class DiceLoss(AbstractDiceLoss):
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
         super().__init__(
             epsilon=epsilon, ignore_index=ignore_index, reduction=reduction
@@ -298,7 +298,7 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -307,7 +307,7 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
         include_background: bool = True,
         weight_type: Literal["square", "simple", "uniform"] = "square",
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
         super().__init__(
             epsilon=epsilon, ignore_index=ignore_index, reduction=reduction
@@ -351,7 +351,7 @@ class FalsePositiveLoss(SegmentationLoss):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -359,7 +359,7 @@ class FalsePositiveLoss(SegmentationLoss):
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
         super().__init__(
             ignore_index=ignore_index,
@@ -422,7 +422,7 @@ class FalsePositiveDiceLoss(SegmentationLoss):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -430,7 +430,7 @@ class FalsePositiveDiceLoss(SegmentationLoss):
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
         super().__init__(reduction=reduction, epsilon=epsilon)
         self.fp_loss = FalsePositiveLoss(
@@ -479,7 +479,7 @@ class CrossEntropyLoss(SegmentationLoss):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -487,7 +487,7 @@ class CrossEntropyLoss(SegmentationLoss):
         multi_label: bool = False,
         ignore_index: Optional[int] = None,
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
         super().__init__(
             ignore_index=ignore_index,
@@ -566,7 +566,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
         reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
             multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
             of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
-        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-5`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
     """
 
     def __init__(
@@ -575,7 +575,7 @@ class CrossEntropyDiceLoss(SegmentationLoss):
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "mean",
-        epsilon: float = 1e-5,
+        epsilon: float = 1e-10,
     ):
         super().__init__(
             include_background=include_background, reduction=reduction, epsilon=epsilon
