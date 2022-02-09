@@ -224,7 +224,7 @@ def expected_cross_entropy_loss(
     fn: int,
     probability_positive: float,
     probability_negative: float,
-    *args,
+    epsilon: float,
 ) -> float:
     """
     Computes the expected cross-entropy loss for a single slice and a single class.
@@ -236,16 +236,17 @@ def expected_cross_entropy_loss(
         fn (int): Number of false negatives.
         probability_positive (float): Probability used in the fake slices for positive predictions.
         probability_negative (float): Probability used in the fake slices for negative predictions.
+        epsilon (float): Smoothing term used to avoid divisions by zero.
 
     Returns:
         float: Expected cross-entropy loss.
     """
 
     return -1 * (
-        tp * np.log(probability_positive)
-        + fn * np.log(probability_negative)
-        + tn * np.log(1 - probability_negative)
-        + fp * np.log(1 - probability_positive)
+        tp * np.log(probability_positive + epsilon)
+        + fn * np.log(probability_negative + epsilon)
+        + tn * np.log(1 - probability_negative + epsilon)
+        + fp * np.log(1 - probability_positive + epsilon)
     )
 
 
