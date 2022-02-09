@@ -132,12 +132,14 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
     @abstractmethod
-    def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+    def label_items(
+        self, ids: List[str], pseudo_labels: Optional[Dict[str, Any]] = None
+    ) -> None:
         """
         Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
         Args:
-            ids: IDs of the items to be labeled.
-            labels: Labels for the selected data items.
+            ids (List[str]): IDs of the items to be labeled.
+            pseudo_labels (Dict[str, Any], optional): Optional pseudo labels for (some of the) the selected data items.
 
         Returns:
             None.

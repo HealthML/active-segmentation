@@ -4,6 +4,7 @@ import json
 import os
 import random
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
+import numpy as np
 from torch.utils.data import DataLoader, Dataset
 
 from .collate import batch_padding_collate_fn
@@ -194,6 +195,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         with DecathlonDataModule.__open_dataset_file(self.data_folder) as dataset_file:
             dataset_info = json.load(dataset_file)
             labels = dataset_info["labels"]
+        labels = {int(key): labels[key] for key in labels}
 
         if self.mask_join_non_zero:
             return {0: "background", 1: "foreground"}
@@ -206,26 +208,31 @@ class DecathlonDataModule(ActiveLearningDataModule):
             }
         return labels
 
-    def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+    def label_items(
+        self, ids: List[str], pseudo_labels: Optional[Dict[str, np.array]] = None
+    ) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
-        if self.dim == 2:
-            # create list of files as tuple of image id and slice index
-            image_slice_ids = [tuple(case_id.split("-")) for case_id in ids]
-            ids = [image_id for image_id, _ in image_slice_ids]
+        # create list of files as tuple of image id and slice index
+        image_slice_ids = [case_id.split("-") for case_id in ids]
+        image_slice_ids = [
+            (split_id[0], int(split_id[1]) if len(split_id) > 1 else None)
+            for split_id in image_slice_ids
+        ]
 
         if self._training_set is not None and self._unlabeled_set is not None:
 
-            for index, case_id in enumerate(ids):
-                if self.dim == 2:
-                    # additionally pass slice index for dimension 2
-                    slice_index = int(image_slice_ids[index][1])
-                else:
-                    # 3D images only have one slice index of 0
-                    slice_index = 0
+            for case_id, (image_id, slice_id) in zip(ids, image_slice_ids):
+                if self.dim == 3 and slice_id is None:
+                    slice_id = 0
 
-                self._training_set.add_image(case_id, slice_index)
-                self._unlabeled_set.remove_image(case_id, slice_index)
+                if pseudo_labels is not None and case_id in pseudo_labels:
+                    self._training_set.add_image(
+                        image_id, slice_id, pseudo_labels[case_id]
+                    )
+                else:
+                    self._training_set.add_image(image_id, slice_id)
+                    self._unlabeled_set.remove_image(image_id, slice_id)
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
