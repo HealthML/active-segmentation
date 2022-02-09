@@ -422,7 +422,7 @@ class PytorchModel(LightningModule, ABC):
         self.logger.log_metrics(
             {
                 **train_metrics,
-                "trainer/epoch": self.epochs_counter,
+                "trainer/epoch": self.current_epoch,
                 "train/mean_loss": losses.mean(),
             },
             step=self.global_step,
@@ -456,7 +456,7 @@ class PytorchModel(LightningModule, ABC):
         val_metrics = {**val_metrics, "val/mean_loss": losses.mean()}
 
         if self.stage == "fit":
-            val_metrics = {**val_metrics, "trainer/epoch": self.epochs_counter}
+            val_metrics = {**val_metrics, "trainer/epoch": self.current_epoch}
 
             # log to trainer to allow model selection
             self.log_dict(val_metrics, logger=False)
