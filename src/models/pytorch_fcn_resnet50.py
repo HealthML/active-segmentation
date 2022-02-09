@@ -74,5 +74,10 @@ class PytorchFCNResnet50(PytorchModel):
 
         # ToDo: this method should return the required performance metrics
 
-    def input_dimensionality(self) -> int:
+    @staticmethod
+    def input_dimensionality() -> int:
+        """
+        Returns:
+            Number of dimensions this model takes as an input.
+        """
         return 2

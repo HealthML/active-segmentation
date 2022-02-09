@@ -1,6 +1,7 @@
 """Tests for the Hausdorff distance metric"""
 
 import math
+import random
 from typing import Dict, Optional
 import unittest
 
@@ -96,7 +97,9 @@ class TestHausdorffDistance(unittest.TestCase):
                     )
 
                     if slices_per_image is None:
-                        if prediction.dim() == 2:
+                        if (prediction.dim() == 2 and convert_to_one_hot) or (
+                            prediction.dim() == 3 and not convert_to_one_hot
+                        ):
                             slices_per_image = 1
                         else:
                             slices_per_image = (
@@ -363,7 +366,7 @@ class TestHausdorffDistance(unittest.TestCase):
     def test_splitted_3d(self):
         """
         Tests that the Hausdorff distance is computed correctly when the predictions are 3-dimensional scans whose
-        slices are scattered across multiple batches.
+        slices are scattered across multiple batches and possibly not sorted.
         """
 
         for percentile in [0.5, 0.95, 1.0]:
@@ -414,15 +417,26 @@ class TestHausdorffDistance(unittest.TestCase):
                             )
 
                             if convert_to_one_hot:
-                                for slice_idx in range(prediction.shape[0]):
+                                shuffeled_slice_indices = list(
+                                    range(prediction.shape[0])
+                                )
+                                random.shuffle(shuffeled_slice_indices)
+                                for slice_idx in shuffeled_slice_indices:
                                     hausdorff_distance_module.update(
-                                        prediction[slice_idx], target[slice_idx]
+                                        prediction[slice_idx],
+                                        target[slice_idx],
+                                        slice_idx,
                                     )
                             else:
-                                for slice_idx in range(prediction.shape[1]):
+                                shuffeled_slice_indices = list(
+                                    range(prediction.shape[1])
+                                )
+                                random.shuffle(shuffeled_slice_indices)
+                                for slice_idx in shuffeled_slice_indices:
                                     hausdorff_distance_module.update(
                                         prediction[:, slice_idx, :, :],
                                         target[:, slice_idx, :, :],
+                                        slice_idx,
                                     )
 
                             hausdorff_distance_from_module = (
@@ -545,8 +559,12 @@ class TestHausdorffDistance(unittest.TestCase):
                                 reduction=reduction,
                             )
 
-                            hausdorff_distance_module.update(prediction_1, target_1)
-                            hausdorff_distance_module.update(prediction_2, target_2)
+                            hausdorff_distance_module.update(
+                                prediction_1, target_1, [0, 1]
+                            )
+                            hausdorff_distance_module.update(
+                                prediction_2, target_2, [2, 3]
+                            )
 
                             hausdorff_distance_from_module = (
                                 hausdorff_distance_module.compute()
@@ -596,7 +614,7 @@ class TestHausdorffDistance(unittest.TestCase):
 
                             hausdorff_distance_module = HausdorffDistance(
                                 num_classes=3,
-                                slices_per_image=4,
+                                slices_per_image=1,
                                 convert_to_one_hot=convert_to_one_hot,
                                 include_background=include_background,
                                 ignore_index=-1,
@@ -617,6 +635,7 @@ class TestHausdorffDistance(unittest.TestCase):
                                 "all_image_locations": hausdorff_distance_module.all_image_locations,
                                 "hausdorff_distance_cached": hausdorff_distance_module.hausdorff_distance_cached,
                                 "number_of_slices": hausdorff_distance_module.number_of_slices,
+                                "collected_slice_ids": hausdorff_distance_module.collected_slice_ids,
                             }
 
                             is_not_same = [
@@ -635,6 +654,7 @@ class TestHausdorffDistance(unittest.TestCase):
                                 "all_image_locations": hausdorff_distance_module.all_image_locations,
                                 "hausdorff_distance_cached": hausdorff_distance_module.hausdorff_distance_cached,
                                 "number_of_slices": hausdorff_distance_module.number_of_slices,
+                                "collected_slice_ids": hausdorff_distance_module.collected_slice_ids,
                             }
 
                             is_same = [

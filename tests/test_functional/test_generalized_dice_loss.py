@@ -428,3 +428,110 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                                 reduction=reduction,
                                 epsilon=epsilon,
                             )
+
+    def test_3d(self):
+        """
+        Tests that the loss is computed correctly when the inputs are 3d images.
+        """
+
+        # pylint: disable-msg=too-many-locals, too-many-nested-blocks
+
+        for test_slice_1, test_slice_2, multi_label in [
+            (
+                test_data.standard_slice_single_label_1,
+                test_data.standard_slice_single_label_2,
+                False,
+            ),
+            (
+                test_data.standard_slice_multi_label_1,
+                test_data.standard_slice_multi_label_2,
+                True,
+            ),
+        ]:
+
+            (
+                prediction_1,
+                target_1,
+                cardinalities_1,
+                probability_positive_1,
+                probability_negative_1,
+            ) = test_slice_1(False)
+
+            (
+                prediction_2,
+                target_2,
+                cardinalities_2,
+                probability_positive_2,
+                probability_negative_2,
+            ) = test_slice_2(False)
+
+            assert probability_positive_1 == probability_positive_2
+            assert probability_negative_1 == probability_negative_2
+
+            prediction = torch.stack([prediction_1, prediction_2])
+
+            target = torch.stack([target_1, target_2])
+
+            # ensure that the class channel is the first dimension
+            prediction = prediction.swapaxes(1, 0)
+            target = target.swapaxes(1, 0) if multi_label is True else target
+
+            # create batch dimension
+            prediction = prediction.unsqueeze(dim=0)
+            target = target.unsqueeze(dim=0)
+
+            cardinalities = {}
+            for class_id, class_cardinalities in cardinalities_1.items():
+                # sum cardinalities for both stacked slices
+                cardinalities[class_id] = {
+                    key: cardinalities_1[class_id][key] + cardinalities_2[class_id][key]
+                    for key in class_cardinalities
+                }
+
+            for weight_type in ["square", "simple", "uniform"]:
+                for reduction in ["none", "mean", "sum"]:
+                    for include_background in [True, False]:
+                        for epsilon in [0, 1]:
+
+                            expected_loss = tests.utils.expected_generalized_dice_loss(
+                                cardinalities,
+                                probability_positive_1,
+                                probability_negative_1,
+                                epsilon,
+                                include_background=include_background,
+                                weight_type=weight_type,
+                            )
+
+                            if reduction == "mean":
+                                expected_loss = torch.as_tensor(expected_loss.mean())
+                            elif reduction == "sum":
+                                expected_loss = torch.as_tensor(expected_loss.sum())
+                            else:
+                                expected_loss = torch.Tensor([expected_loss])
+
+                            prediction = prediction.float()
+                            target = target.float()
+
+                            loss_module = self.loss_module(
+                                include_background=include_background,
+                                weight_type=weight_type,
+                                reduction=reduction,
+                                epsilon=epsilon,
+                            )
+                            loss = loss_module(prediction, target)
+
+                            self.assertTrue(
+                                loss.shape == expected_loss.shape,
+                                f"Returns loss tensor with correct shape if reduction is {reduction}.",
+                            )
+
+                            test_case_description = (
+                                f"include_background is {include_background}, reduction is {reduction} and epsilon is "
+                                f"{epsilon}"
+                            )
+
+                            torch.testing.assert_allclose(
+                                loss,
+                                expected_loss,
+                                msg=f"Correctly computes loss value when {test_case_description}.",
+                            )

@@ -107,6 +107,23 @@ make clean && make html
 
 To view the documentation, open the `./docs/build/html/index.html` file in your browser.
 
+## Formatting
+To see what black wants to format run:
+```
+black ./src --check
+black ./tests --check
+```
+
+To actually apply the formatting:
+```
+black ./src
+black ./tests
+```
+## Linting
+```
+pylint src --rcfile=.rcfile
+```
+
 ## Running the Tests
 
 To execute all unit tests, run:
