@@ -1,7 +1,9 @@
 """ Module for representativeness sampling strategy """
+import math
 from typing import List, Literal, Tuple, Union
 
 import numpy as np
+import psutil
 import scipy.spatial
 import torch
 
@@ -93,6 +95,71 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
 
         return feature_vectors, case_ids
 
+    def _feature_distances(
+        self,
+        feature_vectors_training_set: np.array,
+        feature_vectors_unlabeled_set: np.array,
+    ) -> np.array:
+        """
+        Computes average distances between the feature vectors from the unlabeled set and the feature vectors from the
+        training set.
+
+        Args:
+            feature_vectors_training_set (numpy.array): Feature vectors from the training set.
+            feature_vectors_unlabeled_set (numpy.array): Feature vectors from the unlabeled set.
+
+        Returns:
+            np.array: For each feature vector from the unlabeled set, average distance to the feature vectors from the
+                training set
+        """
+
+        # as the feature vectors possibly might be large, the feature vectors from the unlabeled set are split into
+        # chunks so that one chunk of feature vectors from the unlabeled set and all feature vectors from the training
+        # set fit into memory
+
+        free_memory = psutil.virtual_memory().available
+
+        memory_consumption_feature_vectors_training_set = np.zeros(
+            len(feature_vectors_training_set)
+        ).nbytes
+
+        split_size = math.floor(
+            max(
+                math.floor(
+                    free_memory / memory_consumption_feature_vectors_training_set
+                )
+                - 1,
+                1,
+            )
+        )
+
+        n_splits = math.ceil(len(feature_vectors_unlabeled_set) / split_size)
+
+        feature_vectors_unlabeled_set_splitted = np.array_split(
+            feature_vectors_unlabeled_set, n_splits
+        )
+
+        average_feature_distances = np.zeros(len(feature_vectors_unlabeled_set))
+
+        for idx, current_chunk_feature_vectors_unlabeled_set in enumerate(
+            feature_vectors_unlabeled_set_splitted
+        ):
+            feature_distances = scipy.spatial.distance.cdist(
+                current_chunk_feature_vectors_unlabeled_set,
+                feature_vectors_training_set,
+                self.distance_metric,
+            )
+
+            average_distances_for_current_chunk = feature_distances.mean(axis=1)
+            split_size = len(current_chunk_feature_vectors_unlabeled_set)
+            start_index = idx * split_size
+            end_index = (idx + 1) * split_size
+            average_feature_distances[
+                start_index:end_index
+            ] = average_distances_for_current_chunk
+
+        return average_feature_distances
+
     # pylint: disable=too-many-locals
     def select_items_to_label(
         self,
@@ -138,12 +205,9 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
             models, data_module.unlabeled_dataloader()
         )
 
-        pairwise_feature_distances = scipy.spatial.distance.cdist(
-            feature_vectors_unlabeled_set,
-            feature_vectors_training_set,
-            self.distance_metric,
+        average_feature_distances = self._feature_distances(
+            feature_vectors_training_set, feature_vectors_unlabeled_set
         )
-        average_feature_distances = pairwise_feature_distances.mean(axis=1)
 
         # sort unlabeled items by their average feature distance to the labeled items in the training set
         average_feature_distances = list(zip(average_feature_distances, case_ids))
@@ -151,6 +215,11 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
 
         # select the items that have the highest average feature distance to the labeled items in the training set
         selected_ids = [id for (_, id) in average_feature_distances[0:items_to_label]]
+
+        # free memory
+        del feature_vectors_unlabeled_set
+        del feature_vectors_training_set
+        del average_feature_distances
 
         interception_hook.remove()
 
