@@ -29,6 +29,9 @@ class UncertaintySamplingStrategy(QueryStrategy):
             data_module (ActiveLearningDataModule): A data module object providing data.
             items_to_label (int): Number of items that should be selected for labeling.
             **kwargs: Additional, strategy-specific parameters.
+                Keyword Args:
+                    exclude_background (bool): Whether to exclude the background dimension in calculating the
+                        uncertainty value.
 
         Returns:
             IDs of the data items to be labeled.
@@ -46,6 +49,8 @@ class UncertaintySamplingStrategy(QueryStrategy):
 
         for images, case_ids in data_module.unlabeled_dataloader():
             predictions = models.predict(images.to(device))
+            if kwargs.get("exclude_background", False):
+                predictions = predictions[:, 1:, :, :]
             max_uncertainty_value = 1 / data_module.num_classes()
             uncertainty = (
                 torch.sum(torch.abs(max_uncertainty_value - predictions), (1, 2, 3))

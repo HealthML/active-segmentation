@@ -44,6 +44,7 @@ class ActiveLearningPipeline:
             the increased training dataset size (default = 0).
         heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration.
             (default = 0)
+        **kwargs: Additional, strategy-specific parameters.
     """
 
     # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes,too-many-locals
@@ -67,6 +68,7 @@ class ActiveLearningPipeline:
         early_stopping: bool = False,
         lr_scheduler: str = None,
         model_selection_criterion="loss",
+        **kwargs,
     ) -> None:
 
         self.data_module = data_module
@@ -90,6 +92,7 @@ class ActiveLearningPipeline:
         self.model_selection_criterion = model_selection_criterion
         self.reset_weights = reset_weights
         self.epochs_increase_per_query = epochs_increase_per_query
+        self.kwargs = kwargs
 
     def run(self) -> None:
         """Run the pipeline"""
@@ -105,7 +108,7 @@ class ActiveLearningPipeline:
                 if iteration != 0:
                     # query batch selection
                     items_to_label = self.strategy.select_items_to_label(
-                        self.model, self.data_module, self.items_to_label
+                        self.model, self.data_module, self.items_to_label, **self.kwargs
                     )
                     # label batch
                     self.data_module.label_items(items_to_label)
