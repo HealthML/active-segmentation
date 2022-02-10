@@ -59,7 +59,9 @@ class PascalVOCDataModule(ActiveLearningDataModule):
         self.__training_set_size = 4
         self.__validation_set_size = 4
 
-    def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+    def label_items(
+        self, ids: List[str], pseudo_labels: Optional[Dict[str, Any]] = None
+    ) -> None:
         """TBD"""
         # ToDo: implement labeling logic
         return None
