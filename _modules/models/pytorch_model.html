@@ -277,7 +277,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_global_step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -297,10 +296,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configure_loss</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">multi_label</span><span class="p">()</span>
             <span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">global_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_global_step</span> <span class="o">+</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">global_step</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">current_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -463,8 +458,7 @@
         <span class="c1"># see https://docs.wandb.ai/guides/track/log#customize-axes-and-summaries-with-define_metric</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/iteration&quot;</span><span class="p">)</span>
-        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/global_step&quot;</span><span class="p">)</span>
-        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/global_step&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/mean_loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;val/mean_loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
 
@@ -606,9 +600,9 @@
             <span class="p">{</span>
                 <span class="o">**</span><span class="n">train_metrics</span><span class="p">,</span>
                 <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
+                <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
                 <span class="s2">&quot;train/mean_loss&quot;</span><span class="p">:</span> <span class="n">losses</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-            <span class="p">},</span>
-            <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span><span class="p">,</span>
+            <span class="p">}</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.validation_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.validation_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">validation_epoch_end</span><span class="p">(</span>
@@ -622,7 +616,10 @@
 <span class="sd">            outputs: List of return values of all validation steps of the current validation epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
+            <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+        <span class="p">}</span>
 
         <span class="k">for</span> <span class="n">val_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span><span class="p">:</span>
             <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="o">**</span><span class="n">val_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()}</span>
@@ -639,22 +636,17 @@
         <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;val/mean_loss&quot;</span><span class="p">:</span> <span class="n">losses</span><span class="o">.</span><span class="n">mean</span><span class="p">()}</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
-            <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">}</span>
-
             <span class="c1"># log to trainer to allow model selection</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log_dict</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sanity_checking</span><span class="p">:</span>
                 <span class="c1"># log to Weights and Biases</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
-                    <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">},</span>
-                    <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
-                <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">},</span>
-                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span><span class="p">,</span>
-            <span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.test_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.test_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">test_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -664,15 +656,16 @@
 <span class="sd">            outputs: List of return values of all validation steps of the current testing epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">test_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">test_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
+            <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+        <span class="p">}</span>
 
         <span class="k">for</span> <span class="n">test_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span><span class="p">:</span>
             <span class="n">test_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">test_metrics</span><span class="p">,</span> <span class="o">**</span><span class="n">test_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()}</span>
             <span class="n">test_metrics</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
-            <span class="p">{</span><span class="o">**</span><span class="n">test_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">},</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span>
-        <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="n">test_metrics</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.reset_parameters"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.reset_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
