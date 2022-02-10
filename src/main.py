@@ -238,7 +238,7 @@ def create_model(
     data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
 ):
     """
-    Creates the correct model.
+    Creates the specified model.
 
     Args:
         data_module (ActiveLearningDataModule): A data module object providing data.
