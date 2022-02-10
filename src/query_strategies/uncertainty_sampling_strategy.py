@@ -11,7 +11,7 @@ from .query_strategy import QueryStrategy
 # pylint: disable=too-few-public-methods
 class UncertaintySamplingStrategy(QueryStrategy):
     """
-    Class for selecting items via a random sampling strategy
+    Class for selecting items to label by highest uncertainty
     """
 
     # pylint: disable=too-many-locals
