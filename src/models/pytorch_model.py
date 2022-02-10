@@ -95,7 +95,6 @@ class PytorchModel(LightningModule, ABC):
         self.test_metrics = torch.nn.ModuleList([])
 
         self.stage = None
-        self.start_global_step = 0
         self.start_epoch = 0
         self.iteration = 0
 
@@ -115,10 +114,6 @@ class PytorchModel(LightningModule, ABC):
             self.loss_module = self.configure_loss(
                 self.loss, self.trainer.datamodule.multi_label()
             )
-
-    @property
-    def global_step(self) -> int:
-        return self.start_global_step + super().global_step
 
     @property
     def current_epoch(self) -> int:
