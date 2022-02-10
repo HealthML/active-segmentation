@@ -217,6 +217,7 @@ def run_active_learning_pipeline(
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,
         model_selection_criterion=model_selection_criterion,
+        **active_learning_config.get("optional_arguments", {}),
     )
     pipeline.run()
 
