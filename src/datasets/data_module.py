@@ -19,6 +19,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
         num_workers: Number of workers for DataLoader.
+        batch_size_unlabeled_set (int, optional): Batch size for the unlabeled set. Defaults to `batch_size`.
         active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for
             conventional model training (default = False).
         initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is
@@ -28,13 +29,14 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         **kwargs: Further, dataset specific parameters.
     """
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
     def __init__(
         self,
         data_dir: str,
         batch_size: int,
         num_workers: int,
         active_learning_mode: bool = False,
+        batch_size_unlabeled_set: Optional[int] = None,
         initial_training_set_size: int = 1,
         pin_memory: bool = True,
         shuffle: bool = True,
@@ -44,6 +46,11 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         super().__init__(**kwargs)
         self.data_dir = data_dir
         self.batch_size = batch_size
+        self.batch_size_unlabeled_set = (
+            batch_size_unlabeled_set
+            if batch_size_unlabeled_set is not None
+            else batch_size
+        )
         self.num_workers = num_workers
         self.active_learning_mode = active_learning_mode
         self.initial_training_set_size = initial_training_set_size
@@ -200,7 +207,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         if self._unlabeled_set:
             return DataLoader(
                 self._unlabeled_set,
-                batch_size=1,
+                batch_size=self.batch_size_unlabeled_set,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
                 collate_fn=self._get_collate_fn(),
