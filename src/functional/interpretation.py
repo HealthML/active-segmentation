@@ -1,5 +1,4 @@
 """Module to generate heat maps for trained model"""
-import logging
 from typing import List
 
 import torch
@@ -54,11 +53,12 @@ class HeatMaps:
         Returns:
             The input image in RGB format with mapped heatmap.
         """
+        if isinstance(image, torch.Tensor):
+            image = image.cpu().numpy()
         # Clip negative values if image was padded
         image = np.clip(image, 0, 1)
         if len(image.shape) == 2:
             image = np.expand_dims(image, axis=2)
-            logging.info("Expanded image to %s", image.shape)
         elif image.shape[0] == 1:
             image = np.moveaxis(image, 0, 2)
         cam_image = show_cam_on_image(image, grayscale_heatmap, use_rgb=True)
@@ -114,7 +114,9 @@ class HeatMaps:
         """
         input_tensor = self.__prepare_tensor_for_model(input_tensor=input_tensor)
         prediction = self.model.predict(input_tensor)
-        segmentation = np.squeeze(prediction)[target_category]
+        if self.use_cuda:
+            prediction = prediction.cpu()
+        segmentation = np.squeeze(prediction.numpy())[target_category]
         return segmentation
 
     def __initialize_targets_for_gradcam(
@@ -132,11 +134,12 @@ class HeatMaps:
             A list usable as targets for the GradCam calculation.
         """
         prediction = self.model.predict(input_tensor)
-        segmentation = np.squeeze(prediction)
+        if self.use_cuda:
+            prediction = prediction.cpu()
+        segmentation = np.squeeze(prediction.numpy())
         segmentation = (segmentation >= 0.5) * 255
-        targets = [
-            SemanticSegmentationTarget(category=category, mask=np.float32(segmentation))
-        ]
+        segmentation = np.float32(segmentation)
+        targets = [SemanticSegmentationTarget(category=category, mask=segmentation)]
         return targets
 
     def __prepare_tensor_for_model(self, input_tensor: torch.Tensor) -> torch.Tensor:

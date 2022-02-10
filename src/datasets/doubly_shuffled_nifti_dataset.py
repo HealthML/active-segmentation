@@ -539,7 +539,9 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                     self.image_paths[image_index], norm=True
                 )
             case_id = self.__get_case_id(image_index)
-            latest_images.append((current_image[slice_index, :, :], case_id))
+            latest_images.append(
+                (current_image[slice_index, :, :], f"{case_id}-slice_{slice_index}")
+            )
         return latest_images
 
     def __image_indices(self) -> Iterable[str]:
