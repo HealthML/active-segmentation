@@ -46,8 +46,11 @@ class UncertaintySamplingStrategy(QueryStrategy):
 
         for images, case_ids in data_module.unlabeled_dataloader():
             predictions = models.predict(images.to(device))
+            max_uncertainty_value = 1 / data_module.num_classes()
             uncertainty = (
-                torch.sum(torch.abs(0.5 - predictions), (1, 2, 3)).cpu().numpy()
+                torch.sum(torch.abs(max_uncertainty_value - predictions), (1, 2, 3))
+                .cpu()
+                .numpy()
             )
 
             for idx, case_id in enumerate(case_ids):
