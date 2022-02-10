@@ -148,7 +148,7 @@ class ActiveLearningPipeline:
 
         monitoring_mode = "min" if "loss" in self.model_selection_criterion else "max"
 
-        if iteration is not None:
+        if self.checkpoint_dir is not None and iteration is not None:
             checkpoint_dir = os.path.join(self.checkpoint_dir, str(iteration))
         else:
             checkpoint_dir = self.checkpoint_dir
