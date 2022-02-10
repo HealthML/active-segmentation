@@ -51,7 +51,7 @@ python3 -m pip install -e .
 
 ## Setting up using conda
 `conda env create -f environment.yaml`
-
+`conda activate al`
 ## Additional Setup Steps
 
 Install and log into Weights and Biases:
