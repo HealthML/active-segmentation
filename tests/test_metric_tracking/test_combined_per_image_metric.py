@@ -325,3 +325,36 @@ class TestCombinedPerImageMetric(unittest.TestCase):
                                 "The CombinedPerImageMetric correctly resets the sensitivity for single-label "
                                 "classification tasks.",
                             )
+
+    def test_attribute_passing(self):
+        """Tests that the relevant attributes are correctly passed to the per-image metrics."""
+
+        for multi_label in [True, False]:
+            confidence_levels = [0.1, 0.2, 0.3, 0.4]
+
+            metrics_per_image = CombinedPerImageMetric(
+                ["dice_score", "sensitivity", "specificity", "hausdorff95"],
+                {
+                    0: "first_test_class",
+                    1: "second_test_class",
+                    2: "third_test_class",
+                },
+                1,
+                multi_label=multi_label,
+                confidence_levels=confidence_levels,
+            )
+
+            # pylint: disable=protected-access
+            if multi_label:
+                metrics = []
+                for metrics_per_confidence_level in metrics_per_image._metrics.values():
+                    metrics.extend(metrics_per_confidence_level.values())
+            else:
+                metrics = metrics_per_image._metrics.values()
+
+            for metric in metrics:
+                self.assertNotEqual(metric.convert_to_one_hot, multi_label)
+                self.assertEqual(metric.num_classes, 3)
+                self.assertTrue(metric.include_background)
+                self.assertEqual(metric.ignore_index, -1)
+                self.assertEqual(metric.reduction, "none")

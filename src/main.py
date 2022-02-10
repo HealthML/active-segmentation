@@ -191,6 +191,72 @@ def run_active_learning_pipeline(
         dataset_config,
     )
 
+    model = create_model(
+        data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+    )
+
+    strategy = create_query_strategy(strategy)
+
+    if checkpoint_dir is not None:
+        checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
+
+    prediction_dir = os.path.join(prediction_dir, f"{wandb_logger.experiment.id}")
+
+    pipeline = ActiveLearningPipeline(
+        data_module,
+        model,
+        strategy,
+        epochs,
+        gpus,
+        checkpoint_dir,
+        active_learning_mode=active_learning_config.get("active_learning_mode", False),
+        initial_epochs=active_learning_config.get("initial_epochs", epochs),
+        items_to_label=active_learning_config.get("items_to_label", 1),
+        iterations=active_learning_config.get("iterations", 10),
+        reset_weights=active_learning_config.get("reset_weights", False),
+        epochs_increase_per_query=active_learning_config.get(
+            "epochs_increase_per_query", 0
+        ),
+        logger=wandb_logger,
+        early_stopping=early_stopping,
+        lr_scheduler=lr_scheduler,
+        model_selection_criterion=model_selection_criterion,
+    )
+    pipeline.run()
+
+    if prediction_count is None:
+        return
+
+    inferencer = Inferencer(
+        model,
+        dataset,
+        data_dir,
+        prediction_dir,
+        prediction_count,
+        dataset_config=dataset_config,
+    )
+    inferencer.inference()
+
+
+def create_model(
+    data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+):
+    """
+    Creates the specified model.
+
+    Args:
+        data_module (ActiveLearningDataModule): A data module object providing data.
+        architecture (string): Name of the desired model architecture. E.g. 'u_net'.
+        learning_rate (float): The step size at each iteration while moving towards a minimum of the loss.
+        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.
+            E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
+        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
+        model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
+
+    Returns:
+        The model.
+    """
+
     if architecture == "fcn_resnet50":
         if data_module.data_channels() != 1:
             raise ValueError(
@@ -212,44 +278,7 @@ def run_active_learning_pipeline(
         )
     else:
         raise ValueError("Invalid model architecture.")
-
-    strategy = create_query_strategy(strategy)
-
-    if checkpoint_dir is not None:
-        checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
-
-    prediction_dir = os.path.join(prediction_dir, f"{wandb_logger.experiment.id}")
-
-    pipeline = ActiveLearningPipeline(
-        data_module,
-        model,
-        strategy,
-        epochs,
-        gpus,
-        checkpoint_dir,
-        active_learning_mode=active_learning_config.get("active_learning_mode", False),
-        items_to_label=active_learning_config.get("items_to_label", 1),
-        iterations=active_learning_config.get("iterations", 10),
-        reset_weights=active_learning_config.get("reset_weights", False),
-        logger=wandb_logger,
-        early_stopping=early_stopping,
-        lr_scheduler=lr_scheduler,
-        model_selection_criterion=model_selection_criterion,
-    )
-    pipeline.run()
-
-    if prediction_count is None:
-        return
-
-    inferencer = Inferencer(
-        model,
-        dataset,
-        data_dir,
-        prediction_dir,
-        prediction_count,
-        dataset_config=dataset_config,
-    )
-    inferencer.inference()
+    return model
 
 
 def create_query_strategy(strategy: str):
@@ -336,9 +365,7 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(
-            **config,
-        )
+        run_active_learning_pipeline(**config,)
 
 
 if __name__ == "__main__":

@@ -81,3 +81,12 @@ class PytorchFCNResnet50(PytorchModel):
             Number of dimensions this model takes as an input.
         """
         return 2
+
+    def reset_parameters(self) -> None:
+        """
+        This method is called when resetting the weights is activated for the active learing loop
+        """
+
+        self.model = models.segmentation.fcn_resnet50(
+            pretrained=True, progress=True, num_classes=21
+        )

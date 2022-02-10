@@ -4,6 +4,7 @@ import unittest
 from typing import Callable, Dict, Literal, Optional, Tuple
 
 import numpy as np
+from parameterized import parameterized
 import torch
 
 from functional import CrossEntropyLoss
@@ -20,12 +21,14 @@ class TestCrossEntropyLoss(unittest.TestCase):
         ignore_index: Optional[int] = None,
         multi_label: bool = False,
         reduction: Literal["mean", "sum", "none"] = "none",
+        epsilon: float = 0,
     ) -> torch.nn.Module:
         """
         Args:
             ignore_index (bool, optional): `ignore_index` parameter of the loss.
             multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
             reduction (string, optional): `reduction` parameter of the loss.
+            epsilon (float, optional): `epsilon` parameter of the loss.
 
         Returns:
             torch.nn.Module: The loss module to be tested.
@@ -35,11 +38,12 @@ class TestCrossEntropyLoss(unittest.TestCase):
             multi_label=multi_label,
             ignore_index=ignore_index,
             reduction=reduction,
+            epsilon=epsilon,
         )
 
     @staticmethod
     def _expected_cross_entropy_loss(
-        prediction: torch.Tensor, target: torch.Tensor
+        prediction: torch.Tensor, target: torch.Tensor, epsilon: float
     ) -> np.ndarray:
         """
         Computes expected cross-entropy loss.
@@ -47,12 +51,13 @@ class TestCrossEntropyLoss(unittest.TestCase):
         Args:
             prediction (Tensor): The prediction tensor.
             target (Tensor): The target tensor.
+            epsilon (float): Smoothing term used to avoid divisions by zero.
 
         Returns:
             numpy.ndarray: Expected loss per pixel / per voxel.
         """
 
-        prediction = prediction.detach().numpy()
+        prediction = prediction.detach().numpy() + epsilon
         target = target.detach().numpy()
 
         expected_loss = np.zeros(target.shape)
@@ -66,9 +71,10 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
         return expected_loss
 
+    # pylint: disable=unused-argument
     @staticmethod
     def _expected_binary_cross_entropy_loss(
-        prediction: torch.Tensor, target: torch.Tensor
+        prediction: torch.Tensor, target: torch.Tensor, epsilon: float
     ) -> np.ndarray:
         """
         Computes expected binary cross-entropy loss.
@@ -76,6 +82,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         Args:
             prediction (Tensor): The prediction tensor.
             target (Tensor): The target tensor.
+            epsilon (float): Smoothing term used to avoid divisions by zero.
 
         Returns:
             numpy.ndarray: Expected loss per pixel / per voxel.
@@ -102,6 +109,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         expected_loss: Optional[torch.Tensor] = None,
         ignore_index: Optional[int] = None,
         reduction: Literal["mean", "sum", "none"] = "none",
+        epsilon: float = 0,
     ) -> None:
         """
         Helper function that calculates the cross-entropy loss with the given settings for the given predictions and
@@ -114,6 +122,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
             expected_loss (Tensor, optional): Expected loss value.
             ignore_index (bool, optional): `ignore_index` parameter of the loss.
             reduction (string, optional): `reduction` parameter of the loss.
+            epsilon (float, optional): `epsilon` parameter of the loss.
         """
 
         # pylint: disable-msg=too-many-locals
@@ -139,10 +148,12 @@ class TestCrossEntropyLoss(unittest.TestCase):
         if expected_loss is None:
             if multi_label:
                 expected_loss = self._expected_binary_cross_entropy_loss(
-                    prediction, target
+                    prediction, target, epsilon
                 )
             else:
-                expected_loss = self._expected_cross_entropy_loss(prediction, target)
+                expected_loss = self._expected_cross_entropy_loss(
+                    prediction, target, epsilon
+                )
 
             expected_loss = torch.from_numpy(expected_loss)
 
@@ -163,6 +174,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
             ignore_index=ignore_index,
             reduction=reduction,
             multi_label=multi_label,
+            epsilon=epsilon,
         )
 
         cross_entropy_loss = loss_module(prediction, target)
@@ -172,269 +184,218 @@ class TestCrossEntropyLoss(unittest.TestCase):
             f"Returns cross-entropy loss tensor with correct shape when reduction is {reduction}.",
         )
 
-        test_case_description = (
-            f"ignore_index is {ignore_index}, and reduction is {reduction}"
-        )
+        task_type = "multi-label" if multi_label else "single-label"
+
+        test_case_description = f"ignore_index is {ignore_index}, reduction is {reduction}, and epsilon is {epsilon}"
 
         self.assertNotEqual(
             cross_entropy_loss.grad_fn,
             None,
-            msg=f"Cross-entropy loss is differentiable when {test_case_description}.",
+            msg=f"Cross-entropy loss is differentiable for {task_type} tasks when {test_case_description}.",
         )
 
         torch.testing.assert_allclose(
             cross_entropy_loss,
             expected_loss,
-            msg=f"Correctly computes cross-entropy loss value when {test_case_description}.",
+            msg=f"Correctly computes cross-entropy loss for {task_type} tasks when {test_case_description}.",
         )
 
-    def test_standard_case(self) -> None:
+    # fmt: off
+    @parameterized.expand([
+        (test_data.standard_slice_single_label_1, test_data.standard_slice_single_label_2, False, "none", 0),
+        (test_data.standard_slice_single_label_1, test_data.standard_slice_single_label_2, False, "mean", 0),
+        (test_data.standard_slice_single_label_1, test_data.standard_slice_single_label_2, False, "sum", 0),
+
+        (test_data.standard_slice_single_label_1, test_data.standard_slice_single_label_2, False, "none", 1),
+        (test_data.standard_slice_single_label_1, test_data.standard_slice_single_label_2, False, "mean", 1),
+        (test_data.standard_slice_single_label_1, test_data.standard_slice_single_label_2, False, "sum", 1),
+
+        (test_data.standard_slice_multi_label_1, test_data.standard_slice_multi_label_2, True, "none", 0),
+        (test_data.standard_slice_multi_label_1, test_data.standard_slice_multi_label_2, True, "mean", 0),
+        (test_data.standard_slice_multi_label_1, test_data.standard_slice_multi_label_2, True, "sum", 0),
+
+        (test_data.standard_slice_multi_label_1, test_data.standard_slice_multi_label_2, True, "none", 1),
+        (test_data.standard_slice_multi_label_1, test_data.standard_slice_multi_label_2, True, "mean", 1),
+        (test_data.standard_slice_multi_label_1, test_data.standard_slice_multi_label_2, True, "sum", 1),
+    ])
+    # fmt: on
+    def test_standard_case(
+        self,
+        test_slice_1: torch.Tensor,
+        test_slice_2: torch.Tensor,
+        multi_label: bool,
+        reduction: str,
+        epsilon: float,
+    ) -> None:
         """
         Tests that the loss is computed correctly tasks when there are both true and false predictions.
         """
 
-        for test_slice_1, test_slice_2, multi_label in [
-            (
-                test_data.standard_slice_single_label_1,
-                test_data.standard_slice_single_label_2,
-                False,
-            ),
-            (
-                test_data.standard_slice_multi_label_1,
-                test_data.standard_slice_multi_label_2,
-                True,
-            ),
-        ]:
-            for reduction in ["none", "mean", "sum"]:
-                self._test_loss(
-                    test_slice_1,
-                    test_slice_2,
-                    multi_label,
-                    reduction=reduction,
-                )
+        self._test_loss(
+            test_slice_1,
+            test_slice_2,
+            multi_label,
+            reduction=reduction,
+            epsilon=epsilon,
+        )
 
-    def test_all_true(self):
+    # fmt: off
+    @parameterized.expand([
+        (test_data.slice_all_true_single_label, False, "none", 0, torch.zeros((2, 3, 3))),
+        (test_data.slice_all_true_single_label, False, "mean", 0, torch.as_tensor(0.0)),
+        (test_data.slice_all_true_single_label, False, "sum", 0, torch.as_tensor(0.0)),
+
+        (test_data.slice_all_true_single_label, False, "none", 1),
+        (test_data.slice_all_true_single_label, False, "mean", 1),
+        (test_data.slice_all_true_single_label, False, "sum", 1),
+
+        (test_data.slice_all_true_multi_label, True, "none", 0, torch.zeros((2, 3, 3, 3))),
+        (test_data.slice_all_true_multi_label, True, "mean", 0, torch.as_tensor(0.0)),
+        (test_data.slice_all_true_multi_label, True, "sum", 0, torch.as_tensor(0.0)),
+
+        (test_data.slice_all_true_multi_label, True, "none", 1, torch.zeros((2, 3, 3, 3))),
+        (test_data.slice_all_true_multi_label, True, "mean", 1, torch.as_tensor(0.0)),
+        (test_data.slice_all_true_multi_label, True, "sum", 1, torch.as_tensor(0.0)),
+    ])
+    # fmt: on
+    def test_all_true(
+        self,
+        test_slice: torch.Tensor,
+        multi_label: bool,
+        reduction: str,
+        epsilon: float,
+        expected_loss: Optional[torch.Tensor] = None,
+    ):
         """
         Tests that the loss is computed correctly when all predictions are correct.
         """
 
-        for test_slice, multi_label in [
-            (test_data.slice_all_true_single_label, False),
-            (test_data.slice_all_true_multi_label, True),
-        ]:
+        self._test_loss(
+            test_slice,
+            test_slice,
+            multi_label,
+            reduction=reduction,
+            expected_loss=expected_loss,
+            epsilon=epsilon,
+        )
 
-            if multi_label:
-                expected_loss = torch.zeros((2, 3, 3, 3))
-            else:
-                expected_loss = torch.zeros((2, 3, 3))
+    # fmt: off
+    @parameterized.expand([
+        (test_data.slice_all_false_single_label, False, "none", 0,  -1 * torch.log(torch.zeros(2, 3, 3))),
+        (test_data.slice_all_false_single_label, False, "mean", 0, torch.as_tensor(float("inf"))),
+        (test_data.slice_all_false_single_label, False, "sum", 0, torch.as_tensor(float("inf"))),
 
-            self._test_loss(
-                test_slice,
-                test_slice,
-                multi_label,
-                reduction="none",
-                expected_loss=expected_loss,
-            )
+        (test_data.slice_all_false_single_label, False, "none", 1),
+        (test_data.slice_all_false_single_label, False, "mean", 1),
+        (test_data.slice_all_false_single_label, False, "sum", 1),
 
-            for reduction in ["mean", "sum"]:
-                self._test_loss(
-                    test_slice,
-                    test_slice,
-                    multi_label,
-                    reduction=reduction,
-                    expected_loss=torch.as_tensor(0.0),
-                )
+        # PyTorch's BCELoss implementation clamps the loss values to [0, 100]
+        (test_data.slice_all_false_multi_label, True, "none", 0, 100 * torch.ones(2, 3, 3, 3)),
+        (test_data.slice_all_false_multi_label, True, "mean", 0, torch.as_tensor(100)),
+        (test_data.slice_all_false_multi_label, True, "sum", 0,  torch.as_tensor(100 * 2 * 3 * 3 * 3)),
 
-    def test_all_false(self):
+        (test_data.slice_all_false_multi_label, True, "none", 1, 100 * torch.ones(2, 3, 3, 3)),
+        (test_data.slice_all_false_multi_label, True, "mean", 1, torch.as_tensor(100)),
+        (test_data.slice_all_false_multi_label, True, "sum", 1,  torch.as_tensor(100 * 2 * 3 * 3 * 3)),
+    ])
+    # fmt: on
+    def test_all_false(
+        self,
+        test_slice: torch.Tensor,
+        multi_label: bool,
+        reduction: str,
+        epsilon: float,
+        expected_loss: Optional[torch.Tensor] = None,
+    ):
         """
         Tests that the loss is computed correctly when all predictions are wrong.
         """
 
-        for test_slice, multi_label in [
-            (test_data.slice_all_false_single_label, False),
-            (test_data.slice_all_false_multi_label, True),
-        ]:
-            if multi_label:
-                # PyTorch's BCELoss implementation clamps the loss values to [0, 100]
-                expected_loss_no_reduction = 100 * torch.ones(2, 3, 3, 3)
-                expected_loss_mean = torch.as_tensor(100)
-                expected_loss_sum = torch.as_tensor(100 * 2 * 3 * 3 * 3)
-            else:
-                expected_loss_no_reduction = -1 * torch.log(torch.zeros(2, 3, 3))
-                expected_loss_mean = torch.as_tensor(float("inf"))
-                expected_loss_sum = torch.as_tensor(float("inf"))
+        self._test_loss(
+            test_slice,
+            test_slice,
+            multi_label,
+            reduction=reduction,
+            expected_loss=expected_loss,
+            epsilon=epsilon,
+        )
 
-            self._test_loss(
-                test_slice,
-                test_slice,
-                multi_label,
-                reduction="none",
-                expected_loss=expected_loss_no_reduction,
-            )
-            self._test_loss(
-                test_slice,
-                test_slice,
-                multi_label,
-                reduction="mean",
-                expected_loss=expected_loss_mean,
-            )
-            self._test_loss(
-                test_slice,
-                test_slice,
-                multi_label,
-                reduction="sum",
-                expected_loss=expected_loss_sum,
-            )
+    # fmt: off
+    @parameterized.expand([
+        (test_data.standard_slice_single_label_1, test_data.slice_ignore_index_single_label, False, "none", 0),
+        (test_data.standard_slice_single_label_1, test_data.slice_ignore_index_single_label, False, "mean", 0),
+        (test_data.standard_slice_single_label_1, test_data.slice_ignore_index_single_label, False, "sum", 0),
 
-    def test_ignore_index(self):
+        (test_data.standard_slice_single_label_1, test_data.slice_ignore_index_single_label, False, "none", 1),
+        (test_data.standard_slice_single_label_1, test_data.slice_ignore_index_single_label, False, "mean", 1),
+        (test_data.standard_slice_single_label_1, test_data.slice_ignore_index_single_label, False, "sum", 1),
+
+        (test_data.standard_slice_multi_label_1, test_data.slice_ignore_index_multi_label, True, "none", 0),
+        (test_data.standard_slice_multi_label_1, test_data.slice_ignore_index_multi_label, True, "mean", 0),
+        (test_data.standard_slice_multi_label_1, test_data.slice_ignore_index_multi_label, True, "sum", 0),
+
+        (test_data.standard_slice_multi_label_1, test_data.slice_ignore_index_multi_label, True, "none", 1),
+        (test_data.standard_slice_multi_label_1, test_data.slice_ignore_index_multi_label, True, "mean", 1),
+        (test_data.standard_slice_multi_label_1, test_data.slice_ignore_index_multi_label, True, "sum", 1),
+    ])
+    # fmt: on
+    def test_ignore_index(
+        self,
+        test_slice_1: torch.Tensor,
+        test_slice_2: torch.Tensor,
+        multi_label: bool,
+        reduction: str,
+        epsilon: float,
+    ):
         """
         Tests that the loss is computed correctly when there are are pixels / voxels to be ignored.
         """
 
-        for test_slice_1, test_slice_2, multi_label in [
-            (
-                test_data.standard_slice_single_label_1,
-                test_data.slice_ignore_index_single_label,
-                False,
-            ),
-            (
-                test_data.standard_slice_multi_label_1,
-                test_data.slice_ignore_index_multi_label,
-                True,
-            ),
-        ]:
-            for reduction in ["none", "mean", "sum"]:
-                self._test_loss(
-                    test_slice_1,
-                    test_slice_2,
-                    multi_label,
-                    ignore_index=-1,
-                    reduction=reduction,
-                )
+        self._test_loss(
+            test_slice_1,
+            test_slice_2,
+            multi_label,
+            ignore_index=-1,
+            reduction=reduction,
+            epsilon=epsilon,
+        )
 
-    def test_all_true_negative(self):
+    # fmt: off
+    @parameterized.expand([
+        (test_data.slice_all_true_single_label, False, "none", 0, torch.zeros(2, 3, 3)),
+        (test_data.slice_all_true_single_label, False, "mean", 0, torch.as_tensor(0.0)),
+        (test_data.slice_all_true_single_label, False, "sum", 0, torch.as_tensor(0.0)),
+
+        (test_data.slice_all_true_single_label, False, "none", 1),
+        (test_data.slice_all_true_single_label, False, "mean", 1),
+        (test_data.slice_all_true_single_label, False, "sum", 1),
+
+        (test_data.slice_all_true_multi_label, True, "none", 0, torch.zeros(2, 3, 3, 3)),
+        (test_data.slice_all_true_multi_label, True, "mean", 0, torch.as_tensor(0.0)),
+        (test_data.slice_all_true_multi_label, True, "sum", 0, torch.as_tensor(0.0)),
+
+        (test_data.slice_all_true_multi_label, True, "none", 1, torch.zeros(2, 3, 3, 3)),
+        (test_data.slice_all_true_multi_label, True, "mean", 1, torch.as_tensor(0.0)),
+        (test_data.slice_all_true_multi_label, True, "sum", 1, torch.as_tensor(0.0)),
+    ])
+    # fmt: on
+    def test_all_true_negative(
+        self,
+        test_slice: torch.Tensor,
+        multi_label: bool,
+        reduction: str,
+        epsilon: float,
+        expected_loss: Optional[torch.Tensor] = None,
+    ):
         """
         Tests that the loss is computed correctly when there are no positives.
         """
 
-        for test_slice, multi_label in [
-            (test_data.slice_all_true_negatives_single_label, False),
-            (test_data.slice_all_true_negatives_multi_label, True),
-        ]:
-            self._test_loss(
-                test_slice,
-                test_slice,
-                multi_label=multi_label,
-                reduction="none",
-                expected_loss=torch.zeros(2, 3, 3, 3)
-                if multi_label
-                else torch.zeros(2, 3, 3),
-            )
-
-            for reduction in ["mean", "sum"]:
-                self._test_loss(
-                    test_slice,
-                    test_slice,
-                    multi_label=multi_label,
-                    reduction=reduction,
-                    expected_loss=torch.as_tensor(0.0),
-                )
-
-    def test_3d(self):
-        """
-        Tests that the loss is computed correctly when the inputs are 3d images.
-        """
-
-        # pylint: disable-msg=too-many-locals
-
-        for test_slice_1, test_slice_2, multi_label in [
-            (
-                test_data.standard_slice_single_label_1,
-                test_data.standard_slice_single_label_2,
-                False,
-            ),
-            (
-                test_data.standard_slice_multi_label_1,
-                test_data.standard_slice_multi_label_2,
-                True,
-            ),
-        ]:
-
-            (
-                prediction_1,
-                target_1,
-                _,
-                probability_positive_1,
-                probability_negative_1,
-            ) = test_slice_1(False)
-
-            (
-                prediction_2,
-                target_2,
-                _,
-                probability_positive_2,
-                probability_negative_2,
-            ) = test_slice_2(False)
-
-            assert probability_positive_1 == probability_positive_2
-            assert probability_negative_1 == probability_negative_2
-
-            prediction = torch.stack([prediction_1, prediction_2])
-            target = torch.stack([target_1, target_2])
-
-            # ensure that the class channel is the first dimension
-            prediction = prediction.swapaxes(1, 0)
-            target = target.swapaxes(1, 0) if multi_label is True else target
-
-            # create batch dimension
-            prediction = prediction.unsqueeze(dim=0)
-            target = target.unsqueeze(dim=0)
-
-            for reduction in ["none", "mean", "sum"]:
-                if multi_label:
-                    expected_loss = self._expected_binary_cross_entropy_loss(
-                        prediction, target
-                    )
-                else:
-                    expected_loss = self._expected_cross_entropy_loss(
-                        prediction, target
-                    )
-                expected_loss = torch.from_numpy(expected_loss)
-
-                if reduction == "mean":
-                    expected_loss = expected_loss.mean()
-                elif reduction == "sum":
-                    expected_loss = expected_loss.sum()
-
-                prediction = prediction.float()
-                target = target.float()
-
-                prediction.requires_grad = True
-                target.requires_grad = True
-
-                cross_entropy_loss_module = CrossEntropyLoss(
-                    multi_label=multi_label,
-                    ignore_index=None,
-                    reduction=reduction,
-                )
-
-                cross_entropy_loss = cross_entropy_loss_module(prediction, target)
-
-                test_case_description = f"reduction is {reduction}"
-
-                self.assertTrue(
-                    cross_entropy_loss.shape == expected_loss.shape,
-                    f"Returns cross-entropy loss tensor with correct shape when {test_case_description}.",
-                )
-
-                self.assertNotEqual(
-                    cross_entropy_loss.grad_fn,
-                    None,
-                    msg=f"Cross-entropy loss is differentiable when {test_case_description}.",
-                )
-
-                torch.testing.assert_allclose(
-                    cross_entropy_loss,
-                    expected_loss,
-                    msg=f"Correctly computes cross-entropy loss value when {test_case_description}.",
-                )
+        self._test_loss(
+            test_slice,
+            test_slice,
+            multi_label=multi_label,
+            reduction=reduction,
+            expected_loss=expected_loss,
+            epsilon=epsilon,
+        )
