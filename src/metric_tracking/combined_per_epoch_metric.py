@@ -105,12 +105,16 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         )
         self.metrics_to_compute = set()
 
-        if reduction_across_classes not in [
-            "mean",
-            "max",
-            "min",
-            "none",
-        ] or reduction_across_images not in ["mean", "max", "min", "none"]:
+        if (
+            reduction_across_classes
+            not in [
+                "mean",
+                "max",
+                "min",
+                "none",
+            ]
+            or reduction_across_images not in ["mean", "max", "min", "none"]
+        ):
             raise ValueError("Invalid reduction method.")
 
         self.reduction_across_classes = reduction_across_classes
@@ -132,7 +136,10 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
     # pylint: disable=arguments-differ
     def update(
-        self, prediction: torch.Tensor, target: torch.Tensor, image_ids: Iterable[str],
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        image_ids: Iterable[str],
     ) -> None:
         """
         Takes the prediction and target of a given batch and updates the metrics accordingly.
@@ -280,28 +287,28 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
     def get_metric_names(self) -> List[str]:
         """
         Returns:
-            string: Names of the entries that the dictionary returned by the `compute()` method of this module will
-                    contain.
+            List[string]: A list containing the keys of the dictionary returned by the `compute()` method of this
+                    module.
         """
 
-        if self.reduction_across_images == "none":
-            metric_names = []
-            for metric in self.metrics:
-                metric_names.extend(
-                    [f"{metric}_{image_id}" for image_id in self.image_ids]
-                )
-        else:
-            metric_names = []
-            for metric in self.metrics:
-                metric_names.extend(
-                    [
-                        f"{self.name_prefix}{metric}_{class_name}"
-                        for class_name in self.id_to_class_names.values()
-                    ]
-                )
+        metric_names = []
+        for metric in self.metrics:
+            if self.reduction_across_images == "none":
+                new_metric_names = [
+                    f"{self.name_prefix}{metric}_{image_id}"
+                    for image_id in self.image_ids
+                ]
+            else:
+                new_metric_names = [
+                    f"{self.name_prefix}{metric}_{class_name}"
+                    for class_name in self.id_to_class_names.values()
+                ]
+
                 metric_names.append(
                     f"{self.name_prefix}{self.reduction_across_classes}_{metric}"
                 )
+
+            metric_names.extend(new_metric_names)
 
         if self.multi_label:
             metric_names_confidence_level = []
