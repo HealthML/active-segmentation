@@ -101,14 +101,15 @@ class ActiveLearningPipeline:
                     # label batch
                     self.data_module.label_items(items_to_label)
 
-                    # increase start global steo and epoch by 1
-                    self.model.start_global_step = self.model.global_step + 1
-                    self.model.start_epoch = self.model.current_epoch + 1
+                    self.model_trainer = self.setup_trainer(
+                        self.epochs, iteration=iteration
+                    )
 
                 # optionally reset weights after fitting on new data
                 if self.reset_weights:
                     self.model.reset_parameters()
 
+                self.model.start_epoch = self.model.current_epoch
                 self.model.iteration = iteration
 
                 # train model on labeled batch
@@ -118,13 +119,6 @@ class ActiveLearningPipeline:
                 self.model_trainer.validate(
                     ckpt_path="best", dataloaders=self.data_module
                 )
-
-                # don't reset the model trainer in the last iteration
-                if iteration != self.iterations - 1:
-                    # reset model trainer
-                    self.model_trainer = self.setup_trainer(
-                        self.epochs, iteration=iteration + 1
-                    )
 
         else:
             self.model_trainer = self.setup_trainer(self.epochs, iteration=0)
@@ -154,7 +148,7 @@ class ActiveLearningPipeline:
 
         monitoring_mode = "min" if "loss" in self.model_selection_criterion else "max"
 
-        if iteration is not None:
+        if self.checkpoint_dir is not None and iteration is not None:
             checkpoint_dir = os.path.join(self.checkpoint_dir, str(iteration))
         else:
             checkpoint_dir = self.checkpoint_dir
