@@ -130,7 +130,7 @@ class ActiveLearningPipeline:
                     )
 
         else:
-            self.model_trainer = self.setup_trainer(self.epochs)
+            self.model_trainer = self.setup_trainer(self.epochs, iteration=0)
             # run regular fit run with all the data if no active learning mode
             self.model_trainer.fit(self.model, self.data_module)
 
