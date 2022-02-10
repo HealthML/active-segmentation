@@ -127,4 +127,3 @@ dependencies:
     - yarl==1.7.2
     - yaspin==2.1.0
     - zipp==3.6.0
-prefix: /dhc/home/jasper.blum/conda3/envs/al
