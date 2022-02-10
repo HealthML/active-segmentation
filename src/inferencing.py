@@ -111,9 +111,9 @@ class Inferencer:
                 else torch.unsqueeze(x, 0)
             )
             pred = self.model.predict(x.to(device)).cpu().numpy()
-            seg = np.squeeze(np.swapaxes(pred, 0, 1) if self.model_dim == 2 else pred)
-
-            seg = (seg >= 0.5) * 255
+            seg = np.argmax(
+                np.swapaxes(pred, 0, 1) if self.model_dim == 2 else pred, axis=0
+            )
             seg = np.moveaxis(seg, 0, 2)
             seg = seg.astype("float64")
 
