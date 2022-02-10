@@ -281,8 +281,7 @@ class PytorchModel(LightningModule, ABC):
         # see https://docs.wandb.ai/guides/track/log#customize-axes-and-summaries-with-define_metric
         wandb.define_metric("trainer/epoch")
         wandb.define_metric("trainer/iteration")
-        wandb.define_metric("trainer/global_step")
-        wandb.define_metric("train/loss", step_metric="trainer/global_step")
+        wandb.define_metric("train/loss", step_metric="step")
         wandb.define_metric("train/mean_loss", step_metric="trainer/epoch")
         wandb.define_metric("val/mean_loss", step_metric="trainer/epoch")
 
@@ -424,9 +423,9 @@ class PytorchModel(LightningModule, ABC):
             {
                 **train_metrics,
                 "trainer/epoch": self.current_epoch,
+                "trainer/iteration": self.iteration,
                 "train/mean_loss": losses.mean(),
-            },
-            step=self.global_step,
+            }
         )
 
     def validation_epoch_end(
@@ -440,7 +439,10 @@ class PytorchModel(LightningModule, ABC):
             outputs: List of return values of all validation steps of the current validation epoch.
         """
 
-        val_metrics = {}
+        val_metrics = {
+            "trainer/epoch": self.current_epoch,
+            "trainer/iteration": self.iteration,
+        }
 
         for val_metric in self.val_metrics:
             val_metrics = {**val_metrics, **val_metric.compute()}
@@ -457,22 +459,17 @@ class PytorchModel(LightningModule, ABC):
         val_metrics = {**val_metrics, "val/mean_loss": losses.mean()}
 
         if self.stage == "fit":
-            val_metrics = {**val_metrics, "trainer/epoch": self.current_epoch}
-
             # log to trainer to allow model selection
             self.log_dict(val_metrics, logger=False)
 
             if not self.trainer.sanity_checking:
                 # log to Weights and Biases
-                self.logger.log_metrics(
-                    {**val_metrics, "trainer/epoch": self.current_epoch},
-                    step=self.global_step,
-                )
+                if self.stage == "fit":
+                    self.logger.experiment.log(val_metrics, commit=False)
+                else:
+                    self.logger.log_metrics(val_metrics)
         else:
-            self.logger.log_metrics(
-                {**val_metrics, "trainer/iteration": self.iteration},
-                step=self.global_step,
-            )
+            self.logger.log_metrics(val_metrics)
 
     def test_epoch_end(self, outputs: Any) -> None:
         """
@@ -482,15 +479,16 @@ class PytorchModel(LightningModule, ABC):
             outputs: List of return values of all validation steps of the current testing epoch.
         """
 
-        test_metrics = {}
+        test_metrics = {
+            "trainer/epoch": self.current_epoch,
+            "trainer/iteration": self.iteration,
+        }
 
         for test_metric in self.test_metrics:
             test_metrics = {**test_metrics, **test_metric.compute()}
             test_metrics.reset()
 
-        self.logger.log_metrics(
-            {**test_metrics, "trainer/iteration": self.iteration}, step=self.global_step
-        )
+        self.logger.log_metrics(test_metrics)
 
     @abstractmethod
     def reset_parameters(self) -> None:
