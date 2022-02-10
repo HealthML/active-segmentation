@@ -321,12 +321,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ActiveLearningDataModule.label_items"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.label_items">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">label_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">label_items</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">pseudo_labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).</span>
 <span class="sd">        Args:</span>
-<span class="sd">            ids: IDs of the items to be labeled.</span>
-<span class="sd">            labels: Labels for the selected data items.</span>
+<span class="sd">            ids (List[str]): IDs of the items to be labeled.</span>
+<span class="sd">            pseudo_labels (Dict[str, Any], optional): Optional pseudo labels for (some of the) the selected data items.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None.</span>
