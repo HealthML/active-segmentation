@@ -206,10 +206,32 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="main.create_model">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">create_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">architecture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#create_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.create_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the specified model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>architecture</strong> (<em>string</em>) – Name of the desired model architecture. E.g. ‘u_net’.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – The step size at each iteration while moving towards a minimum of the loss.</p></li>
+<li><p><strong>lr_scheduler</strong> (<em>string</em><em>, </em><em>optional</em>) – Algorithm used for dynamically updating the learning rate during training.
+E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p></li>
+<li><p><strong>num_levels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</p></li>
+<li><p><strong>model_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Dictionary with model specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="main.create_query_strategy">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">create_query_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#create_query_strategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.create_query_strategy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialises the chosen query strategy
-:param strategy: Name of the query strategy. E.g. ‘base’
+:param strategy: Name of the query strategy. E.g. ‘random’
 :type strategy: str</p>
 </dd></dl>
 
@@ -225,7 +247,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>architecture</strong> (<em>string</em>) – Name of the desired model architecture. E.g. ‘u_net’.</p></li>
 <li><p><strong>dataset</strong> (<em>string</em>) – Name of the dataset. E.g. ‘brats’</p></li>
-<li><p><strong>strategy</strong> (<em>string</em>) – Name of the query strategy. E.g. ‘base’</p></li>
+<li><p><strong>strategy</strong> (<em>string</em>) – Name of the query strategy. E.g. ‘random’</p></li>
 <li><p><strong>experiment_name</strong> (<em>string</em>) – Name of the experiment.</p></li>
 <li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of training examples passed in one training step.</p></li>
 <li><p><strong>checkpoint_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory where the model checkpoints are to be saved.</p></li>

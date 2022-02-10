@@ -198,7 +198,7 @@
     <span class="n">DecathlonDataModule</span><span class="p">,</span>
     <span class="n">BCSSDataModule</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="n">QueryStrategy</span><span class="p">,</span> <span class="n">RandomSamplingStrategy</span>
+<span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="n">RandomSamplingStrategy</span><span class="p">,</span> <span class="n">UncertaintySamplingStrategy</span>
 
 
 <div class="viewcode-block" id="create_data_module"><a class="viewcode-back" href="../main.html#main.create_data_module">[docs]</a><span class="k">def</span> <span class="nf">create_data_module</span><span class="p">(</span>
@@ -238,6 +238,10 @@
             <span class="n">active_learning_mode</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;active_learning_mode&quot;</span><span class="p">,</span> <span class="kc">False</span>
             <span class="p">),</span>
+            <span class="n">batch_size_unlabeled_set</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span>
+                <span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;batch_size_unlabeled_set&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">),</span>
+                <span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;items_to_label&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">),</span>
             <span class="n">initial_training_set_size</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;initial_training_set_size&quot;</span><span class="p">,</span> <span class="mi">10</span>
             <span class="p">),</span>
@@ -251,6 +255,10 @@
             <span class="n">num_workers</span><span class="p">,</span>
             <span class="n">active_learning_mode</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;active_learning_mode&quot;</span><span class="p">,</span> <span class="kc">False</span>
+            <span class="p">),</span>
+            <span class="n">batch_size_unlabeled_set</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span>
+                <span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;batch_size_unlabeled_set&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">),</span>
+                <span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;items_to_label&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
             <span class="p">),</span>
             <span class="n">initial_training_set_size</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="s2">&quot;initial_training_set_size&quot;</span><span class="p">,</span> <span class="mi">10</span>
@@ -311,7 +319,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        architecture (string): Name of the desired model architecture. E.g. &#39;u_net&#39;.</span>
 <span class="sd">        dataset (string): Name of the dataset. E.g. &#39;brats&#39;</span>
-<span class="sd">        strategy (string): Name of the query strategy. E.g. &#39;base&#39;</span>
+<span class="sd">        strategy (string): Name of the query strategy. E.g. &#39;random&#39;</span>
 <span class="sd">        experiment_name (string): Name of the experiment.</span>
 <span class="sd">        batch_size (int, optional): Size of training examples passed in one training step.</span>
 <span class="sd">        checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.</span>
@@ -361,27 +369,9 @@
         <span class="n">dataset_config</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;fcn_resnet50&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">architecture</span><span class="si">}</span><span class="s2"> does not support multiple input channels.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchFCNResnet50</span><span class="p">(</span>
-            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span> <span class="o">**</span><span class="n">model_config</span>
-        <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;u_net&quot;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchUNet</span><span class="p">(</span>
-            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
-            <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
-            <span class="n">num_levels</span><span class="o">=</span><span class="n">num_levels</span><span class="p">,</span>
-            <span class="n">in_channels</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">(),</span>
-            <span class="n">out_channels</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">num_classes</span><span class="p">(),</span>
-            <span class="n">multi_label</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">multi_label</span><span class="p">(),</span>
-            <span class="o">**</span><span class="n">model_config</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid model architecture.&quot;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">create_model</span><span class="p">(</span>
+        <span class="n">data_module</span><span class="p">,</span> <span class="n">architecture</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">,</span> <span class="n">model_config</span>
+    <span class="p">)</span>
 
     <span class="n">strategy</span> <span class="o">=</span> <span class="n">create_query_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
 
@@ -398,8 +388,13 @@
         <span class="n">gpus</span><span class="p">,</span>
         <span class="n">checkpoint_dir</span><span class="p">,</span>
         <span class="n">active_learning_mode</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;active_learning_mode&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="n">initial_epochs</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;initial_epochs&quot;</span><span class="p">,</span> <span class="n">epochs</span><span class="p">),</span>
         <span class="n">items_to_label</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;items_to_label&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="n">iterations</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;iterations&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="n">reset_weights</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reset_weights&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="n">epochs_increase_per_query</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;epochs_increase_per_query&quot;</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="p">),</span>
         <span class="n">logger</span><span class="o">=</span><span class="n">wandb_logger</span><span class="p">,</span>
         <span class="n">early_stopping</span><span class="o">=</span><span class="n">early_stopping</span><span class="p">,</span>
         <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
@@ -421,16 +416,59 @@
     <span class="n">inferencer</span><span class="o">.</span><span class="n">inference</span><span class="p">()</span></div>
 
 
+<div class="viewcode-block" id="create_model"><a class="viewcode-back" href="../main.html#main.create_model">[docs]</a><span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span>
+    <span class="n">data_module</span><span class="p">,</span> <span class="n">architecture</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">,</span> <span class="n">model_config</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates the specified model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_module (ActiveLearningDataModule): A data module object providing data.</span>
+<span class="sd">        architecture (string): Name of the desired model architecture. E.g. &#39;u_net&#39;.</span>
+<span class="sd">        learning_rate (float): The step size at each iteration while moving towards a minimum of the loss.</span>
+<span class="sd">        lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training.</span>
+<span class="sd">            E.g. &#39;reduceLROnPlateau&#39; or &#39;cosineAnnealingLR&#39;</span>
+<span class="sd">        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</span>
+<span class="sd">        model_config (Dict[str, Any], optional): Dictionary with model specific parameters.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;fcn_resnet50&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">architecture</span><span class="si">}</span><span class="s2"> does not support multiple input channels.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchFCNResnet50</span><span class="p">(</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span> <span class="o">**</span><span class="n">model_config</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;u_net&quot;</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchUNet</span><span class="p">(</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
+            <span class="n">num_levels</span><span class="o">=</span><span class="n">num_levels</span><span class="p">,</span>
+            <span class="n">in_channels</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">(),</span>
+            <span class="n">out_channels</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">num_classes</span><span class="p">(),</span>
+            <span class="n">multi_label</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">multi_label</span><span class="p">(),</span>
+            <span class="o">**</span><span class="n">model_config</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid model architecture.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
 <div class="viewcode-block" id="create_query_strategy"><a class="viewcode-back" href="../main.html#main.create_query_strategy">[docs]</a><span class="k">def</span> <span class="nf">create_query_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialises the chosen query strategy</span>
 <span class="sd">    Args:</span>
-<span class="sd">        strategy (str): Name of the query strategy. E.g. &#39;base&#39;</span>
+<span class="sd">        strategy (str): Name of the query strategy. E.g. &#39;random&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;base&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">QueryStrategy</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RandomSamplingStrategy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UncertaintySamplingStrategy</span><span class="p">()</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid query strategy.&quot;</span><span class="p">)</span></div>
 
 

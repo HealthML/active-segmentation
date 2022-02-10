@@ -219,6 +219,8 @@
 <span class="sd">       reduction_across_images (string, optional):  Reduction function that is to be used to aggregate the metric</span>
 <span class="sd">            values of all images in order to obtain the per-class metric value, must be either &quot;mean&quot;, &quot;max&quot;, &quot;min&quot; or</span>
 <span class="sd">            &quot;none&quot;. Defaults to `&quot;mean&quot;`.</span>
+<span class="sd">        stage (string, optional): Name of the current stage to be used as prefix for the metric names. E.g. `train`,</span>
+<span class="sd">            `val` or `test`. Defaults to `None` (no name prefix is used).</span>
 <span class="sd">    Note:</span>
 <span class="sd">        If `multi_label` is `False`, the `prediction` tensor is expected to be either the output of the final softmax</span>
 <span class="sd">        layer of a segmentation model or a label-encoded, sharp prediction. In the first case, the prediction tensor</span>
@@ -253,6 +255,8 @@
         <span class="n">confidence_levels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reduction_across_classes</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
         <span class="n">reduction_across_images</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="n">ignore_nan_in_reduction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
@@ -297,6 +301,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span> <span class="o">=</span> <span class="n">reduction_across_classes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_images</span> <span class="o">=</span> <span class="n">reduction_across_images</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">/&quot;</span> <span class="k">if</span> <span class="n">stage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignore_nan_in_reduction</span> <span class="o">=</span> <span class="n">ignore_nan_in_reduction</span>
 
 <div class="viewcode-block" id="CombinedPerEpochMetric.reset"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -348,7 +354,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">metrics_to_compute</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_reduce_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">reduction</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_reduce_metric</span><span class="p">(</span>
+        <span class="n">metric</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">reduction</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ignore_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Aggregates metric values.</span>
 
@@ -360,6 +368,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Tensor: Aggregated metric.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ignore_nan</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="o">~</span><span class="n">metric</span><span class="o">.</span><span class="n">isnan</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">metric</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -404,8 +415,12 @@
         <span class="n">aggregated_metrics</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">per_image_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_metric</span><span class="p">(</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">metric_value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_images</span>
+            <span class="n">aggregated_metrics</span><span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_metric</span><span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">metric_value</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_images</span><span class="p">,</span>
+                <span class="n">ignore_nan</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ignore_nan_in_reduction</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
@@ -419,13 +434,15 @@
                             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_background_in_reduced_metrics</span>
                         <span class="p">):</span>
                             <span class="n">per_class_metric</span> <span class="o">=</span> <span class="n">aggregated_metrics</span><span class="p">[</span>
-                                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">confidence_level</span><span class="si">}</span><span class="s2">&quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">confidence_level</span><span class="si">}</span><span class="s2">&quot;</span>
                             <span class="p">]</span>
                             <span class="n">per_class_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">per_class_metric</span><span class="p">)</span>
                     <span class="n">aggregated_metrics</span><span class="p">[</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">confidence_level</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">confidence_level</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_metric</span><span class="p">(</span>
-                        <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">per_class_metrics</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">per_class_metrics</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span><span class="p">,</span>
+                        <span class="n">ignore_nan</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ignore_nan_in_reduction</span><span class="p">,</span>
                     <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">per_class_metrics</span> <span class="o">=</span> <span class="p">[]</span>
@@ -436,16 +453,57 @@
                         <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_background_in_reduced_metrics</span>
                     <span class="p">):</span>
                         <span class="n">per_class_metric</span> <span class="o">=</span> <span class="n">aggregated_metrics</span><span class="p">[</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">&quot;</span>
                         <span class="p">]</span>
                         <span class="n">per_class_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">per_class_metric</span><span class="p">)</span>
                 <span class="n">aggregated_metrics</span><span class="p">[</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_metric</span><span class="p">(</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">per_class_metrics</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">per_class_metrics</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span><span class="p">,</span>
+                    <span class="n">ignore_nan</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ignore_nan_in_reduction</span><span class="p">,</span>
                 <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">aggregated_metrics</span></div></div>
+        <span class="k">return</span> <span class="n">aggregated_metrics</span></div>
+
+<div class="viewcode-block" id="CombinedPerEpochMetric.get_metric_names"><a class="viewcode-back" href="../../metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.get_metric_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_metric_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[string]: A list containing the keys of the dictionary returned by the `compute()` method of this</span>
+<span class="sd">                    module.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">metric_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_images</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+                <span class="n">new_metric_names</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="n">metric</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_id</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="k">for</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_ids</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_metric_names</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="n">metric</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="p">]</span>
+
+                <span class="n">metric_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_prefix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">reduction_across_classes</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">metric_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_metric_names</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span><span class="p">:</span>
+            <span class="n">metric_names_confidence_level</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">confidence_level</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence_levels</span><span class="p">:</span>
+                <span class="n">metric_names_confidence_level</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">confidence_level</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">metric_names</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">metric_names_confidence_level</span>
+
+        <span class="k">return</span> <span class="n">metric_names</span></div></div>
 </pre></div>
 
               </article>

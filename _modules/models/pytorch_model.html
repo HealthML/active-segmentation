@@ -189,6 +189,7 @@
 <span class="kn">from</span> <span class="nn">pytorch_lightning.core.lightning</span> <span class="kn">import</span> <span class="n">LightningModule</span>
 <span class="kn">from</span> <span class="nn">torch.optim</span> <span class="kn">import</span> <span class="n">Adam</span><span class="p">,</span> <span class="n">SGD</span>
 <span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">ReduceLROnPlateau</span><span class="p">,</span> <span class="n">CosineAnnealingLR</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
 
 <span class="kn">import</span> <span class="nn">functional</span>
 <span class="kn">from</span> <span class="nn">metric_tracking</span> <span class="kn">import</span> <span class="n">CombinedPerEpochMetric</span>
@@ -276,7 +277,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">epochs_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_global_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="PytorchModel.setup"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -288,63 +291,20 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">=</span> <span class="n">stage</span>
 
-        <span class="n">metric_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;id_to_class_names&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="p">(),</span>
-            <span class="s2">&quot;multi_label&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">multi_label</span><span class="p">(),</span>
-            <span class="s2">&quot;reduction_across_classes&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;reduction_across_images&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
-
-        <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
-            <span class="n">training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
-
-            <span class="n">train_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
-                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_names</span><span class="p">,</span>
-                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">training_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
-                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">train_average_metrics</span><span class="p">])</span>
-
-            <span class="n">validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
-
-            <span class="n">val_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
-                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_names</span><span class="p">,</span>
-                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
-                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
-
-        <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;validate&quot;</span><span class="p">:</span>
-            <span class="n">validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
-
-            <span class="n">val_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
-                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
-                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
-                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="n">test_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
-
-            <span class="n">test_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
-                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
-                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_confidence_levels</span><span class="p">,</span>
-                <span class="n">image_ids</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
-                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
-                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">test_average_metrics</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configure_metrics</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">stage</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="s2">&quot;validate&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configure_loss</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">metric_kwargs</span><span class="p">[</span><span class="s2">&quot;multi_label&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">multi_label</span><span class="p">()</span>
             <span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">global_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_global_step</span> <span class="o">+</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">global_step</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">current_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">+</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">current_epoch</span>
 
 <div class="viewcode-block" id="PytorchModel.training_step"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.training_step">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -361,7 +321,7 @@
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="PytorchModel.validation_step"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.validation_step">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the model on a given batch of model inputs.</span>
 <span class="sd">        # this method should match the requirements of the pytorch lightning framework.</span>
@@ -369,6 +329,9 @@
 <span class="sd">        Args:</span>
 <span class="sd">            batch: A batch of model inputs.</span>
 <span class="sd">            batch_idx: Index of the current batch.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Validation loss.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="PytorchModel.predict_step"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.predict_step">[docs]</a>    <span class="k">def</span> <span class="nf">predict_step</span><span class="p">(</span>
@@ -491,6 +454,92 @@
             <span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid loss name.&quot;</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="PytorchModel.configure_metrics"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.configure_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">configure_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configures metrics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># define metrics in Weights and Biases</span>
+        <span class="c1"># see https://docs.wandb.ai/guides/track/log#customize-axes-and-summaries-with-define_metric</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/iteration&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/global_step&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/global_step&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/mean_loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;val/mean_loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
+
+        <span class="n">metric_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id_to_class_names&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="p">(),</span>
+            <span class="s2">&quot;multi_label&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">multi_label</span><span class="p">(),</span>
+            <span class="s2">&quot;reduction_across_classes&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reduction_across_images&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
+            <span class="n">training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
+
+            <span class="n">train_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_names</span><span class="p">,</span>
+                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_confidence_levels</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">training_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+                <span class="n">ignore_nan_in_reduction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">train_average_metrics</span><span class="p">])</span>
+
+            <span class="n">validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
+
+            <span class="n">val_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_names</span><span class="p">,</span>
+                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metric_confidence_levels</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">,</span>
+                <span class="n">ignore_nan_in_reduction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_metric_names</span><span class="p">():</span>
+                    <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;validate&quot;</span><span class="p">:</span>
+            <span class="n">validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">val_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
+
+            <span class="n">val_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
+                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_confidence_levels</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;best_model_val&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_metric_names</span><span class="p">():</span>
+                    <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
+            <span class="n">test_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">test_dataloader</span><span class="p">()</span><span class="o">.</span><span class="n">dataset</span>
+
+            <span class="n">test_average_metrics</span> <span class="o">=</span> <span class="n">CombinedPerEpochMetric</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_names</span><span class="p">,</span>
+                <span class="n">confidence_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_metric_confidence_levels</span><span class="p">,</span>
+                <span class="n">image_ids</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
+                <span class="n">slices_per_image</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
+                <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;best_model_test&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">test_average_metrics</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_metric_names</span><span class="p">():</span>
+                    <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="PytorchModel.predict"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes predictions for a given batch of model inputs.</span>
@@ -503,7 +552,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.get_train_metrics"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.get_train_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">get_train_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">torchmetrics</span><span class="o">.</span><span class="n">Metric</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -529,27 +578,43 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span></div>
 
-<div class="viewcode-block" id="PytorchModel.training_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.training_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">training_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<div class="viewcode-block" id="PytorchModel.training_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.training_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">training_epoch_end</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is called by the Pytorch Lightning framework at the end of each training epoch.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            outputs: List of return values of all training steps of the current training epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">train_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># collect loss values</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="n">outputs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+            <span class="p">)</span>
+
         <span class="k">for</span> <span class="n">train_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span><span class="p">:</span>
-            <span class="n">train_metrics</span> <span class="o">=</span> <span class="n">train_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">train_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log_dict</span><span class="p">(</span>
-                    <span class="p">{</span>
-                        <span class="sa">f</span><span class="s2">&quot;train/</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">metric_value</span><span class="p">,</span>
-                        <span class="s2">&quot;train/epochs_counter&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs_counter</span><span class="p">,</span>
-                    <span class="p">}</span>
-                <span class="p">)</span>
+            <span class="n">train_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">train_metrics</span><span class="p">,</span> <span class="o">**</span><span class="n">train_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()}</span>
             <span class="n">train_metric</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">epochs_counter</span> <span class="o">+=</span> <span class="mi">1</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="o">**</span><span class="n">train_metrics</span><span class="p">,</span>
+                <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
+                <span class="s2">&quot;train/mean_loss&quot;</span><span class="p">:</span> <span class="n">losses</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+            <span class="p">},</span>
+            <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="PytorchModel.validation_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.validation_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">validation_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<div class="viewcode-block" id="PytorchModel.validation_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.validation_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">validation_epoch_end</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]],</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method is called by the Pytorch Lightning framework at the end of each validation epoch.</span>
 
@@ -557,16 +622,39 @@
 <span class="sd">            outputs: List of return values of all validation steps of the current validation epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;validate&quot;</span><span class="p">:</span>
-            <span class="n">stage_name</span> <span class="o">=</span> <span class="s2">&quot;best_model_val&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">stage_name</span> <span class="o">=</span> <span class="s2">&quot;val&quot;</span>
+        <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">val_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span><span class="p">:</span>
-            <span class="n">val_metrics</span> <span class="o">=</span> <span class="n">val_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">val_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">)</span>
-            <span class="n">val_metric</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+            <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="o">**</span><span class="n">val_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()}</span>
+            <span class="n">val_metric</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="c1"># collect loss values</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="n">outputs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">losses</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;val/mean_loss&quot;</span><span class="p">:</span> <span class="n">losses</span><span class="o">.</span><span class="n">mean</span><span class="p">()}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
+            <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">}</span>
+
+            <span class="c1"># log to trainer to allow model selection</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_dict</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sanity_checking</span><span class="p">:</span>
+                <span class="c1"># log to Weights and Biases</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
+                    <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">},</span>
+                    <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
+                <span class="p">{</span><span class="o">**</span><span class="n">val_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">},</span>
+                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span><span class="p">,</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.test_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.test_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">test_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -576,17 +664,21 @@
 <span class="sd">            outputs: List of return values of all validation steps of the current testing epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="n">stage_name</span> <span class="o">=</span> <span class="s2">&quot;best_model_test&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">stage_name</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+        <span class="n">test_metrics</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">test_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span><span class="p">:</span>
-            <span class="n">test_metrics</span> <span class="o">=</span> <span class="n">test_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">test_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stage_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">metric_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">({</span><span class="n">stage_name</span><span class="p">:</span> <span class="n">test_metrics</span><span class="p">})</span>
-            <span class="n">test_metrics</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div></div>
+            <span class="n">test_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">test_metrics</span><span class="p">,</span> <span class="o">**</span><span class="n">test_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()}</span>
+            <span class="n">test_metrics</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
+            <span class="p">{</span><span class="o">**</span><span class="n">test_metrics</span><span class="p">,</span> <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">},</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PytorchModel.reset_parameters"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.reset_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">reset_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is called when resetting the weights is activated for the active learing loop</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 </pre></div>
 
               </article>

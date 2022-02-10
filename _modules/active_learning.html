@@ -182,6 +182,7 @@
   <h1>Source code for active_learning</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Module containing the active learning pipeline &quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pytorch_lightning</span> <span class="kn">import</span> <span class="n">Trainer</span>
@@ -211,10 +212,14 @@
 <span class="sd">        lr_scheduler (string, optional): Algorithm used for dynamically updating the</span>
 <span class="sd">            learning rate during training. E.g. &#39;reduceLROnPlateau&#39; or &#39;cosineAnnealingLR&#39;</span>
 <span class="sd">        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).</span>
+<span class="sd">        initial_epochs (int, optional): Number of epochs the initial model should be trained. Defaults to `epochs`.</span>
 <span class="sd">        items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.</span>
 <span class="sd">            (default = 1).</span>
 <span class="sd">        iterations (int, optional): iteration times how often the active learning pipeline should be</span>
 <span class="sd">        executed (default = 10).</span>
+<span class="sd">        reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run</span>
+<span class="sd">        epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for</span>
+<span class="sd">            the increased training dataset size (default = 0).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals</span>
@@ -227,8 +232,11 @@
         <span class="n">gpus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">checkpoint_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">active_learning_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">initial_epochs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">items_to_label</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">reset_weights</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">epochs_increase_per_query</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LightningLoggerBase</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">LightningLoggerBase</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">early_stopping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">lr_scheduler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -237,52 +245,33 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span> <span class="o">=</span> <span class="n">data_module</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># log gradients, parameter histogram and model topology</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">watch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
-        <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">lr_scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LearningRateMonitor</span><span class="p">(</span><span class="n">logging_interval</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">early_stopping</span><span class="p">:</span>
-            <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EarlyStopping</span><span class="p">(</span><span class="s2">&quot;validation/loss&quot;</span><span class="p">))</span>
-
-        <span class="n">monitoring_mode</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span> <span class="k">if</span> <span class="s2">&quot;loss&quot;</span> <span class="ow">in</span> <span class="n">model_selection_criterion</span> <span class="k">else</span> <span class="s2">&quot;max&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_callback</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
-            <span class="n">dirpath</span><span class="o">=</span><span class="n">checkpoint_dir</span><span class="p">,</span>
-            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;best_model_epoch_</span><span class="si">{epoch}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">auto_insert_metric_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">monitor</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;val/</span><span class="si">{</span><span class="n">model_selection_criterion</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">mode</span><span class="o">=</span><span class="n">monitoring_mode</span><span class="p">,</span>
-            <span class="n">save_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">every_n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">save_on_train_epoch_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_callback</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
-            <span class="n">deterministic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">profiler</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
-            <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
-            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-            <span class="n">gpus</span><span class="o">=</span><span class="n">gpus</span><span class="p">,</span>
-            <span class="n">benchmark</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">strategy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gpus</span> <span class="o">=</span> <span class="n">gpus</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span> <span class="o">=</span> <span class="n">active_learning_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">checkpoint_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping</span> <span class="o">=</span> <span class="n">early_stopping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_epochs</span> <span class="o">=</span> <span class="n">initial_epochs</span> <span class="k">if</span> <span class="n">initial_epochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">epochs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">items_to_label</span> <span class="o">=</span> <span class="n">items_to_label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="n">iterations</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span> <span class="o">=</span> <span class="n">callbacks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="o">=</span> <span class="n">lr_scheduler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_selection_criterion</span> <span class="o">=</span> <span class="n">model_selection_criterion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_weights</span> <span class="o">=</span> <span class="n">reset_weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs_increase_per_query</span> <span class="o">=</span> <span class="n">epochs_increase_per_query</span>
 
 <div class="viewcode-block" id="ActiveLearningPipeline.run"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Run the pipeline&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
+        <span class="c1"># pylint: disable=too-many-nested-blocks</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_trainer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_epochs</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="c1"># run pipeline</span>
             <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="p">):</span>
                 <span class="c1"># skip labeling in the first iteration because the model hasn&#39;t trained yet</span>
@@ -294,28 +283,91 @@
                     <span class="c1"># label batch</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">({</span><span class="s2">&quot;train/al_loop_iterations&quot;</span><span class="p">:</span> <span class="n">iteration</span><span class="p">})</span>
+                    <span class="c1"># increase start global steo and epoch by 1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">start_global_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">global_step</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="c1"># optionally reset weights after fitting on new data</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_weights</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">reset_parameters</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="n">iteration</span>
+
                 <span class="c1"># train model on labeled batch</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
+
+                <span class="c1"># compute metrics for the best model on the validation set</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+                    <span class="n">ckpt_path</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">dataloaders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_module</span>
+                <span class="p">)</span>
 
                 <span class="c1"># don&#39;t reset the model trainer in the last iteration</span>
                 <span class="k">if</span> <span class="n">iteration</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="c1"># reset model trainer</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
-                        <span class="n">deterministic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">profiler</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
-                        <span class="n">max_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
-                        <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
-                        <span class="n">gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gpus</span><span class="p">,</span>
-                        <span class="n">benchmark</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">callbacks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_trainer</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span> <span class="o">+</span> <span class="mi">1</span>
                     <span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_trainer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">)</span>
             <span class="c1"># run regular fit run with all the data if no active learning mode</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
 
-        <span class="c1"># compute metrics for the best model on the validation set</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span></div></div>
+            <span class="c1"># compute metrics for the best model on the validation set</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">ckpt_path</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ActiveLearningPipeline.setup_trainer"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline.setup_trainer">[docs]</a>    <span class="k">def</span> <span class="nf">setup_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trainer</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a new Pytorch Lightning trainer object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epochs (int): Number of training epochs.</span>
+<span class="sd">            iteration (Optional[int], optional): Current active learning iteration. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pytorch_lightning.Trainer: A trainer object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LearningRateMonitor</span><span class="p">(</span><span class="n">logging_interval</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping</span><span class="p">:</span>
+            <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EarlyStopping</span><span class="p">(</span><span class="s2">&quot;validation/loss&quot;</span><span class="p">))</span>
+
+        <span class="n">monitoring_mode</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span> <span class="k">if</span> <span class="s2">&quot;loss&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_selection_criterion</span> <span class="k">else</span> <span class="s2">&quot;max&quot;</span>
+
+        <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">iteration</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_dir</span>
+
+        <span class="n">num_sanity_val_steps</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">checkpoint_callback</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
+            <span class="n">dirpath</span><span class="o">=</span><span class="n">checkpoint_dir</span><span class="p">,</span>
+            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;best_model_epoch_</span><span class="si">{epoch}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">auto_insert_metric_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">monitor</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;val/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_selection_criterion</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">monitoring_mode</span><span class="p">,</span>
+            <span class="n">save_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">every_n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">every_n_train_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">save_on_train_epoch_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkpoint_callback</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Trainer</span><span class="p">(</span>
+            <span class="n">deterministic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">profiler</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
+            <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span> <span class="o">+</span> <span class="n">iteration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs_increase_per_query</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+            <span class="n">log_every_n_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gpus</span><span class="p">,</span>
+            <span class="n">benchmark</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
+            <span class="n">num_sanity_val_steps</span><span class="o">=</span><span class="n">num_sanity_val_steps</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
               </article>

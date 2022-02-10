@@ -199,10 +199,11 @@
 <li><p><strong>data_dir</strong> (<em>string</em>) – Path of the directory that contains the data.</p></li>
 <li><p><strong>batch_size</strong> (<em>int</em>) – Batch size.</p></li>
 <li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers for DataLoader.</p></li>
-<li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
-(default = 0).</p></li>
 <li><p><strong>active_learning_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the datamodule should be configured for active learning or for
 conventional model training (default = False).</p></li>
+<li><p><strong>batch_size_unlabeled_set</strong> (<em>int</em><em>, </em><em>optional</em>) – Batch size for the unlabeled set. Defaults ot <code class="xref py py-attr docutils literal notranslate"><span class="pre">batch_size</span></code>.</p></li>
+<li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
+(default = 0).</p></li>
 <li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
 activated.</p></li>
 <li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
@@ -294,6 +295,8 @@ all values.</p></li>
 :param data_dir: Path of the directory that contains the data.
 :param batch_size: Batch size.
 :param num_workers: Number of workers for DataLoader.
+:param batch_size_unlabeled_set: Batch size for the unlabeled set. Defaults to <cite>batch_size</cite>.
+:type batch_size_unlabeled_set: int, optional
 :param active_learning_mode: Whether the datamodule should be configured for active learning or for</p>
 <blockquote>
 <div><p>conventional model training (default = False).</p>

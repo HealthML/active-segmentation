@@ -191,7 +191,7 @@
 whose slices may be scattered across different batches.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_epoch_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerEpochMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_class_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background_in_reduced_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction_across_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction_across_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">metric_tracking.combined_per_epoch_metric.</span></span><span class="sig-name descname"><span class="pre">CombinedPerEpochMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_to_class_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slices_per_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background_in_reduced_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction_across_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction_across_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_nan_in_reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code></p>
 <p>A metrics class that tracks the metrics of multiple 3D images whose slices may be scattered across different
 batches. Different metrics can be tracked per image, e.g. dice score and Hausdorff distance, and in case of
@@ -260,6 +260,23 @@ contains the keys <cite>&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;</c
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Dict[string, Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.get_metric_names">
+<span class="sig-name descname"><span class="pre">get_metric_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric.get_metric_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.get_metric_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>A list containing the keys of the dictionary returned by the <cite>compute()</cite> method of this</dt><dd><p>module.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[string]</p>
 </dd>
 </dl>
 </dd></dl>

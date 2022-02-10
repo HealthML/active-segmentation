@@ -199,10 +199,11 @@
 <span class="sd">        data_dir (string): Path of the directory that contains the data.</span>
 <span class="sd">        batch_size (int): Batch size.</span>
 <span class="sd">        num_workers (int): Number of workers for DataLoader.</span>
-<span class="sd">        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading</span>
-<span class="sd">            (default = 0).</span>
 <span class="sd">        active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for</span>
 <span class="sd">            conventional model training (default = False).</span>
+<span class="sd">        batch_size_unlabeled_set (int, optional): Batch size for the unlabeled set. Defaults ot :attr:`batch_size`.</span>
+<span class="sd">        cache_size (int, optional): Number of images to keep in memory between epochs to speed-up data loading</span>
+<span class="sd">            (default = 0).</span>
 <span class="sd">        initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is</span>
 <span class="sd">            activated.</span>
 <span class="sd">        pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.</span>
@@ -262,8 +263,9 @@
         <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">cache_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">active_learning_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">batch_size_unlabeled_set</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">initial_training_set_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -278,8 +280,9 @@
             <span class="n">data_dir</span><span class="p">,</span>
             <span class="n">batch_size</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="p">,</span>
-            <span class="n">active_learning_mode</span><span class="p">,</span>
-            <span class="n">initial_training_set_size</span><span class="p">,</span>
+            <span class="n">active_learning_mode</span><span class="o">=</span><span class="n">active_learning_mode</span><span class="p">,</span>
+            <span class="n">batch_size_unlabeled_set</span><span class="o">=</span><span class="n">batch_size_unlabeled_set</span><span class="p">,</span>
+            <span class="n">initial_training_set_size</span><span class="o">=</span><span class="n">initial_training_set_size</span><span class="p">,</span>
             <span class="n">pin_memory</span><span class="o">=</span><span class="n">pin_memory</span><span class="p">,</span>
             <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>

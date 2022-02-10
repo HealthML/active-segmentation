@@ -225,6 +225,12 @@ Details about the Resnet50 architecture: <a class="reference external" href="htt
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.reset_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called when resetting the weights is activated for the active learing loop</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.test_step">
 <span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.test_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tests the model on a given batch of input images.</p>
@@ -321,6 +327,12 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.configure_metrics">
+<span class="sig-name descname"><span class="pre">configure_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.configure_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.configure_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures metrics.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.configure_optimizers">
 <span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.configure_optimizers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.configure_optimizers" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is called by the PyTorch lightning framework before starting model training.</p>
@@ -330,6 +342,11 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.current_epoch">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">current_epoch</span></span><a class="headerlink" href="#models.pytorch_model.PytorchModel.current_epoch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.get_test_metrics">
@@ -360,6 +377,11 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.global_step">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">global_step</span></span><a class="headerlink" href="#models.pytorch_model.PytorchModel.global_step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.input_dimensionality">
@@ -395,6 +417,12 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.reset_parameters">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.reset_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called when resetting the weights is activated for the active learing loop</p>
 </dd></dl>
 
 <dl class="py method">
@@ -488,6 +516,11 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 # see <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</a>
 :param batch: A batch of model inputs.
 :param batch_idx: Index of the current batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Validation loss.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -583,6 +616,12 @@ activation layers are used to compute the model’s predicitions. Defaults to Fa
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet.reset_parameters">
+<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet.reset_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is called when resetting the weights is activated for the active learing loop</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet.test_step">
 <span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet.test_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tests the model on a given batch of input images.</p>
@@ -640,6 +679,9 @@ activation layers are used to compute the model’s predicitions. Defaults to Fa
 <li><p><strong>batch</strong> (<em>Tensor</em>) – Batch of validation images.</p></li>
 <li><p><strong>batch_idx</strong> – Index of the validation batch.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loss on the validation batch.</p>
 </dd>
 </dl>
 </dd></dl>

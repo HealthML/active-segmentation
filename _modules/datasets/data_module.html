@@ -201,6 +201,7 @@
 <span class="sd">        data_dir: Path of the directory that contains the data.</span>
 <span class="sd">        batch_size: Batch size.</span>
 <span class="sd">        num_workers: Number of workers for DataLoader.</span>
+<span class="sd">        batch_size_unlabeled_set (int, optional): Batch size for the unlabeled set. Defaults to `batch_size`.</span>
 <span class="sd">        active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for</span>
 <span class="sd">            conventional model training (default = False).</span>
 <span class="sd">        initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is</span>
@@ -210,13 +211,14 @@
 <span class="sd">        **kwargs: Further, dataset specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes, too-many-arguments</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">active_learning_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">batch_size_unlabeled_set</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">initial_training_set_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -226,6 +228,11 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">data_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size_unlabeled_set</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">batch_size_unlabeled_set</span>
+            <span class="k">if</span> <span class="n">batch_size_unlabeled_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">batch_size</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="n">num_workers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">active_learning_mode</span> <span class="o">=</span> <span class="n">active_learning_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_training_set_size</span> <span class="o">=</span> <span class="n">initial_training_set_size</span>
@@ -382,7 +389,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="p">,</span>
-                <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size_unlabeled_set</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
                 <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_collate_fn</span><span class="p">(),</span>
