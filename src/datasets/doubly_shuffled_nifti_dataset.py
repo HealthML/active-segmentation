@@ -478,6 +478,16 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         image_index = self.__get_image_index(image_id)
 
+        if (
+            image_index in self.image_slice_indices
+            and slice_index in self.image_slice_indices[image_index]
+            and self.image_slice_indices[image_index][slice_index] is None
+        ):
+            if pseudo_label is not None:
+                # If a pseudo label is added even though the real label already exists it should be ignored
+                return
+            raise ValueError("Slice of image already belongs to this dataset.")
+
         if image_index not in self.image_slice_indices:
             self.image_slice_indices[image_index] = {}
 
