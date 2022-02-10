@@ -40,6 +40,9 @@ class PytorchUNet(PytorchModel):
         self.num_levels = num_levels
         self.in_channels = in_channels
         self.dim = dim
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.multi_label = multi_label
 
         self.model = UNet(
             in_channels=self.in_channels,
@@ -116,17 +119,20 @@ class PytorchUNet(PytorchModel):
             train_metric.update(probabilities, y, case_ids)
 
         self.logger.log_metrics(
-            {"train/loss": loss, "train/epochs_counter": self.epochs_counter}
+            {"train/loss": loss}, step=self.global_step,
         )
         return loss
 
-    def validation_step(self, batch, batch_idx) -> None:
+    def validation_step(self, batch, batch_idx) -> float:
         """
         Validates the model on a given batch of input images.
 
         Args:
             batch (Tensor): Batch of validation images.
             batch_idx: Index of the validation batch.
+
+        Returns:
+            Loss on the validation batch.
         """
 
         x, y, case_ids = batch
@@ -134,11 +140,15 @@ class PytorchUNet(PytorchModel):
         probabilities = self(x)
 
         loss = self.loss_module(probabilities, y)
+
         if self.stage == "fit":
-            self.log("val/loss", loss)  # log validation loss via weights&biases
+            # log to trainer for model selection
+            self.log("val/loss", loss, logger=False, on_epoch=True, on_step=False)
 
         for val_metric in self.get_val_metrics():
             val_metric.update(probabilities, y, case_ids)
+
+        return loss
 
     def predict_step(
         self, batch: torch.Tensor, batch_idx: int, dataloader_idx: int = 0
@@ -171,7 +181,21 @@ class PytorchUNet(PytorchModel):
         probabilities = self(x)
 
         loss = self.loss_module(probabilities, y)
-        self.log("test/loss", loss)
+        self.logger.log_metrics({"test/loss": loss}, step=self.global_step)
 
         for test_metric in self.get_test_metrics():
             test_metric.update(probabilities, y, case_ids)
+
+    def reset_parameters(self):
+        """
+        This method is called when resetting the weights is activated for the active learing loop
+        """
+
+        self.model = UNet(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            multi_label=self.multi_label,
+            init_features=32,
+            num_levels=self.num_levels,
+            dim=self.dim,
+        )

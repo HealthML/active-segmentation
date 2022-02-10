@@ -3,14 +3,14 @@
     "architecture": "u_net",
     "optimizer": "adam",
     "loss": "dice",
-    "learning_rate": 0.0001,
+    "learning_rate": 0.0005,
     "num_levels": 4,
     "dim": 2,
-    "model_selection_criterion": "mean_dice_score",
+    "model_selection_criterion": "mean_dice_score_0.5",
     "train_metrics": ["dice_score"],
     "train_metric_confidence_levels": [0.5],
     "test_metrics": ["dice_score", "sensitivity", "specificity", "hausdorff95"],
-    "test_metric_confidence_levels": [0.5]
+    "test_metric_confidence_levels": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
   },
   "dataset_config": {
     "dataset": "brats",
@@ -20,23 +20,19 @@
   },
   "active_learning_config": {
     "active_learning_mode": true,
-    "reset_weights": false,
-    "initial_training_set_size": 752,
-    "iterations": 100,
-    "items_to_label": 128,
-    "batch_size_unlabeled_set": 128
+    "initial_training_set_size": 80,
+    "iterations": 1000,
+    "items_to_label": 32
   },
-  "wandb_project_name": "active-segmentation-tests",
+  "wandb_project_name": "active-segmentation",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
   "strategy": "random",
-  "experiment_name": "test-experiment",
+  "experiment_name": "random-query-experiment",
   "experiment_tags": [],
-  "batch_size": 32,
-  "epochs": 5,
+  "batch_size": 16,
+  "epochs": 3,
   "num_workers": 8,
   "gpus": 1,
-  "prediction_count": 5,
-  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
   "early_stopping": false,
-  "random_state": 42
+  "random_state": 43
 }

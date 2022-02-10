@@ -1,12 +1,14 @@
 # pylint: disable=all
 from torch.utils.data import DataLoader
 from typing import List, Union
+from abc import ABC, abstractmethod
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
 
 
-class QueryStrategy:
+class QueryStrategy(ABC):
+    @abstractmethod
     def select_items_to_label(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
@@ -25,16 +27,5 @@ class QueryStrategy:
         Returns:
             IDs of the data items to be labeled.
         """
-        # default strategy: select first n data items
-        # this method should be overwritten in derived classes to implement other strategies
 
-        selected_ids = []
-        selected_items = 0
-
-        for image, image_id in data_module.unlabeled_dataloader():
-            if selected_items == items_to_label:
-                break
-            selected_ids.append(image_id)
-            selected_items += 1
-
-        return selected_ids
+        raise NotImplementedError()

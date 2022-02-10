@@ -16,7 +16,7 @@ from datasets import (
     DecathlonDataModule,
     BCSSDataModule,
 )
-from query_strategies import QueryStrategy, RandomSamplingStrategy
+from query_strategies import RandomSamplingStrategy, UncertaintySamplingStrategy
 
 
 def create_data_module(
@@ -56,6 +56,10 @@ def create_data_module(
             active_learning_mode=active_learning_config.get(
                 "active_learning_mode", False
             ),
+            batch_size_unlabeled_set=min(
+                active_learning_config.get("batch_size_unlabeled_set", batch_size),
+                active_learning_config.get("items_to_label", 1),
+            ),
             initial_training_set_size=active_learning_config.get(
                 "initial_training_set_size", 10
             ),
@@ -69,6 +73,10 @@ def create_data_module(
             num_workers,
             active_learning_mode=active_learning_config.get(
                 "active_learning_mode", False
+            ),
+            batch_size_unlabeled_set=min(
+                active_learning_config.get("batch_size_unlabeled_set", batch_size),
+                active_learning_config.get("items_to_label", 1),
             ),
             initial_training_set_size=active_learning_config.get(
                 "initial_training_set_size", 10
@@ -129,7 +137,7 @@ def run_active_learning_pipeline(
     Args:
         architecture (string): Name of the desired model architecture. E.g. 'u_net'.
         dataset (string): Name of the dataset. E.g. 'brats'
-        strategy (string): Name of the query strategy. E.g. 'base'
+        strategy (string): Name of the query strategy. E.g. 'random'
         experiment_name (string): Name of the experiment.
         batch_size (int, optional): Size of training examples passed in one training step.
         checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
@@ -179,27 +187,9 @@ def run_active_learning_pipeline(
         dataset_config,
     )
 
-    if architecture == "fcn_resnet50":
-        if data_module.data_channels() != 1:
-            raise ValueError(
-                f"{architecture} does not support multiple input channels."
-            )
-
-        model = PytorchFCNResnet50(
-            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
-        )
-    elif architecture == "u_net":
-        model = PytorchUNet(
-            learning_rate=learning_rate,
-            lr_scheduler=lr_scheduler,
-            num_levels=num_levels,
-            in_channels=data_module.data_channels(),
-            out_channels=data_module.num_classes(),
-            multi_label=data_module.multi_label(),
-            **model_config,
-        )
-    else:
-        raise ValueError("Invalid model architecture.")
+    model = create_model(
+        data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+    )
 
     strategy = create_query_strategy(strategy)
 
@@ -216,8 +206,13 @@ def run_active_learning_pipeline(
         gpus,
         checkpoint_dir,
         active_learning_mode=active_learning_config.get("active_learning_mode", False),
+        initial_epochs=active_learning_config.get("initial_epochs", epochs),
         items_to_label=active_learning_config.get("items_to_label", 1),
         iterations=active_learning_config.get("iterations", 10),
+        reset_weights=active_learning_config.get("reset_weights", False),
+        epochs_increase_per_query=active_learning_config.get(
+            "epochs_increase_per_query", 0
+        ),
         logger=wandb_logger,
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,
@@ -239,16 +234,59 @@ def run_active_learning_pipeline(
     inferencer.inference()
 
 
+def create_model(
+    data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+):
+    """
+    Creates the correct data module.
+
+    Args:
+        dataset (string): Name of the dataset. E.g. 'brats'
+        data_dir (string, optional): Main directory with the dataset. E.g. './data'
+        batch_size (int, optional): Size of training examples passed in one training step.
+        num_workers (int, optional): Number of workers.
+        random_state (int): Random constant for shuffling the data
+        active_learning_config (Dict[str, Any): Dictionary with active learning specific parameters.
+        dataset_config (Dict[str, Any]): Dictionary with dataset specific parameters.
+
+    Returns:
+        The model.
+    """
+
+    if architecture == "fcn_resnet50":
+        if data_module.data_channels() != 1:
+            raise ValueError(
+                f"{architecture} does not support multiple input channels."
+            )
+
+        model = PytorchFCNResnet50(
+            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
+        )
+    elif architecture == "u_net":
+        model = PytorchUNet(
+            learning_rate=learning_rate,
+            lr_scheduler=lr_scheduler,
+            num_levels=num_levels,
+            in_channels=data_module.data_channels(),
+            out_channels=data_module.num_classes(),
+            multi_label=data_module.multi_label(),
+            **model_config,
+        )
+    else:
+        raise ValueError("Invalid model architecture.")
+    return model
+
+
 def create_query_strategy(strategy: str):
     """
     Initialises the chosen query strategy
     Args:
-        strategy (str): Name of the query strategy. E.g. 'base'
+        strategy (str): Name of the query strategy. E.g. 'random'
     """
-    if strategy == "base":
-        return QueryStrategy()
     if strategy == "random":
         return RandomSamplingStrategy()
+    if strategy == "uncertainty":
+        return UncertaintySamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 
@@ -321,9 +359,7 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(
-            **config,
-        )
+        run_active_learning_pipeline(**config,)
 
 
 if __name__ == "__main__":

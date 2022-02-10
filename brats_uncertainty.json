@@ -13,26 +13,26 @@
     "test_metric_confidence_levels": [0.5]
   },
   "dataset_config": {
-    "dataset": "decathlon",
-    "data_dir": "/dhc/groups/mpws2021cl1/Data/Decathlon",
+    "dataset": "brats",
+    "data_dir": "/dhc/groups/mpws2021cl1/Data/BraTS",
     "cache_size": 250,
-    "pin_memory": true,
-    "task": "Task04_Hippocampus"
+    "pin_memory": true
   },
   "active_learning_config": {
     "active_learning_mode": true,
-    "reset_weights": false,
+    "reset_weights": true,
+    "epochs_increase_per_query": 2,
     "initial_training_set_size": 752,
-    "iterations": 100,
-    "items_to_label": 128,
-    "batch_size_unlabeled_set": 128
+    "iterations": 10,
+    "items_to_label": 128
   },
   "wandb_project_name": "active-segmentation-tests",
-  "strategy": "uncertainty",
-  "experiment_name": "hippocampus-uncertainty-sampling",
+  "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
+  "strategy": "uncertainty", 
+  "experiment_name": "brats-uncertainty-query-experiment-v2",
   "experiment_tags": [],
-  "batch_size": 32,
-  "epochs": 1,
+  "batch_size": 8,
+  "epochs": 5,
   "num_workers": 8,
   "gpus": 1,
   "early_stopping": false,
