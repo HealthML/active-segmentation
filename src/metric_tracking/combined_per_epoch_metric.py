@@ -295,7 +295,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         for metric in self.metrics:
             if self.reduction_across_images == "none":
                 new_metric_names = [
-                    f"{metric}_{image_id}" for image_id in self.image_ids
+                    f"{self.name_prefix}{metric}_{image_id}"
+                    for image_id in self.image_ids
                 ]
             else:
                 new_metric_names = [
