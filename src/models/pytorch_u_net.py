@@ -187,7 +187,7 @@ class PytorchUNet(PytorchModel):
         for test_metric in self.get_test_metrics():
             test_metric.update(probabilities, y, case_ids)
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """
         This method is called when resetting the weights is activated for the active learing loop
         """

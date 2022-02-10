@@ -340,6 +340,7 @@ class PytorchModel(LightningModule, ABC):
             for metrics in self.val_metrics:
                 for metric_name in metrics.get_metric_names():
                     wandb.define_metric(metric_name, step_metric="trainer/iteration")
+
         if self.stage == "test":
             test_set = self.trainer.datamodule.test_dataloader().dataset
 
@@ -492,7 +493,7 @@ class PytorchModel(LightningModule, ABC):
         )
 
     @abstractmethod
-    def reset_parameters(self) -> int:
+    def reset_parameters(self) -> None:
         """
         This method is called when resetting the weights is activated for the active learing loop
         """

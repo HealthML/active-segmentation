@@ -82,7 +82,7 @@ class PytorchFCNResnet50(PytorchModel):
         """
         return 2
 
-    def reset_parameters(self):
+    def reset_parameters(self) -> None:
         """
         This method is called when resetting the weights is activated for the active learing loop
         """

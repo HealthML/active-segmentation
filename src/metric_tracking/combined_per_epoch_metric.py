@@ -287,28 +287,27 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
     def get_metric_names(self) -> List[str]:
         """
         Returns:
-            string: Names of the entries that the dictionary returned by the `compute()` method of this module will
-                    contain.
+            List[string]: A list containing the keys of the dictionary returned by the `compute()` method of this
+                    module.
         """
 
-        if self.reduction_across_images == "none":
-            metric_names = []
-            for metric in self.metrics:
-                metric_names.extend(
-                    [f"{metric}_{image_id}" for image_id in self.image_ids]
-                )
-        else:
-            metric_names = []
-            for metric in self.metrics:
-                metric_names.extend(
-                    [
-                        f"{self.name_prefix}{metric}_{class_name}"
-                        for class_name in self.id_to_class_names.values()
-                    ]
-                )
+        metric_names = []
+        for metric in self.metrics:
+            if self.reduction_across_images == "none":
+                new_metric_names = [
+                    f"{metric}_{image_id}" for image_id in self.image_ids
+                ]
+            else:
+                new_metric_names = [
+                    f"{self.name_prefix}{metric}_{class_name}"
+                    for class_name in self.id_to_class_names.values()
+                ]
+
                 metric_names.append(
                     f"{self.name_prefix}{self.reduction_across_classes}_{metric}"
                 )
+
+            metric_names.extend(new_metric_names)
 
         if self.multi_label:
             metric_names_confidence_level = []
