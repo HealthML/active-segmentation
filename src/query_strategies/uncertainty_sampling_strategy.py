@@ -33,7 +33,6 @@ class UncertaintySamplingStrategy(QueryStrategy):
         Returns:
             IDs of the data items to be labeled.
         """
-        # randomly select ids to query
 
         if isinstance(models, List):
             raise ValueError(
