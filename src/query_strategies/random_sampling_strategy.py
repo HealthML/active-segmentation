@@ -1,5 +1,5 @@
 """ Module for random sampling strategy """
-from typing import List, Union
+from typing import List, Tuple, Union
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
@@ -18,7 +18,7 @@ class RandomSamplingStrategy(QueryStrategy):
         data_module: ActiveLearningDataModule,
         items_to_label: int,
         **kwargs
-    ) -> List[str]:
+    ) -> Tuple[List[str], None]:
         """
         Selects random subset of the unlabeled data that should be labeled next. We are using
         the shuffling of the dataset for randomisation.
@@ -43,4 +43,4 @@ class RandomSamplingStrategy(QueryStrategy):
             selected_ids.append(image_id[0])
             selected_items += 1
 
-        return selected_ids
+        return selected_ids, None

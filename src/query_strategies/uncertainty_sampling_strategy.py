@@ -1,5 +1,5 @@
 """ Module for uncertainty sampling strategy """
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import torch
 
@@ -21,7 +21,7 @@ class UncertaintySamplingStrategy(QueryStrategy):
         data_module: ActiveLearningDataModule,
         items_to_label: int,
         **kwargs
-    ) -> List[str]:
+    ) -> Tuple[List[str], None]:
         """
         Selects subset of the unlabeled data with the highest uncertainty that should be labeled next.
         Args:
@@ -56,4 +56,4 @@ class UncertaintySamplingStrategy(QueryStrategy):
         uncertainties.sort(key=lambda y: y[0])
 
         selected_ids = [id for (_, id) in uncertainties[0:items_to_label]]
-        return selected_ids
+        return selected_ids, None

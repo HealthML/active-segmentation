@@ -16,7 +16,11 @@ from datasets import (
     DecathlonDataModule,
     BCSSDataModule,
 )
-from query_strategies import RandomSamplingStrategy, UncertaintySamplingStrategy
+from query_strategies import (
+    RandomSamplingStrategy,
+    UncertaintySamplingStrategy,
+    InterpolationSamplingStrategy,
+)
 
 
 def create_data_module(
@@ -287,6 +291,8 @@ def create_query_strategy(strategy: str):
         return RandomSamplingStrategy()
     if strategy == "uncertainty":
         return UncertaintySamplingStrategy()
+    if strategy == "interpolation":
+        return InterpolationSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 

@@ -28,8 +28,9 @@
     "batch_size_unlabeled_set": 128
   },
   "wandb_project_name": "active-segmentation-tests",
-  "strategy": "uncertainty",
-  "experiment_name": "hippocampus-uncertainty-sampling",
+  "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
+  "strategy": "interpolation",
+  "experiment_name": "hippocampus-test",
   "experiment_tags": [],
   "batch_size": 32,
   "epochs": 1,

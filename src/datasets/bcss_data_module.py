@@ -132,7 +132,7 @@ class BCSSDataModule(ActiveLearningDataModule):
     ) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
-        if self._training_set is not None and self._unlabeled_set is not None:
+        if self.training_set is not None and self._unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
                 self._case_id_to_filepaths(
                     case_id=case_id,
@@ -143,7 +143,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             for _, (labeled_image_path, labeled_image_annotation_path) in enumerate(
                 labeled_image_and_annotation_paths
             ):
-                self._training_set.add_image(
+                self.training_set.add_image(
                     labeled_image_path, labeled_image_annotation_path
                 )
                 self._unlabeled_set.remove_image(
@@ -241,9 +241,9 @@ class BCSSDataModule(ActiveLearningDataModule):
 
         # disable shuffling in the dataloader since the BCSS dataset is a subclass of
         # IterableDataset and implements it's own shuffling
-        if self._training_set:
+        if self.training_set:
             return DataLoader(
-                self._training_set,
+                self.training_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,

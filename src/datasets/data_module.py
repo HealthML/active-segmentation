@@ -57,7 +57,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         self.pin_memory = pin_memory
         self.shuffle = shuffle
 
-        self._training_set = None
+        self.training_set = None
         self._validation_set = None
         self._test_set = None
         self._unlabeled_set = None
@@ -69,7 +69,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             stage: Current training stage.
         """
 
-        self._training_set = self._create_training_set()
+        self.training_set = self._create_training_set()
         self._validation_set = self._create_validation_set()
         self._test_set = self._create_test_set()
         self._unlabeled_set = self._create_unlabeled_set()
@@ -158,9 +158,9 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Pytorch dataloader or Keras sequence representing the training set.
         """
 
-        if self._training_set:
+        if self.training_set:
             return DataLoader(
-                self._training_set,
+                self.training_set,
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
                 num_workers=self.num_workers,
@@ -222,8 +222,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Size of training set.
         """
 
-        if self._training_set:
-            return len(self._training_set)
+        if self.training_set:
+            return len(self.training_set)
         return 0
 
     def validation_set_size(self) -> int:

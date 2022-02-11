@@ -95,11 +95,11 @@ class ActiveLearningPipeline:
                 # skip labeling in the first iteration because the model hasn't trained yet
                 if iteration != 0:
                     # query batch selection
-                    items_to_label = self.strategy.select_items_to_label(
+                    items_to_label, pseudo_labels = self.strategy.select_items_to_label(
                         self.model, self.data_module, self.items_to_label
                     )
                     # label batch
-                    self.data_module.label_items(items_to_label)
+                    self.data_module.label_items(items_to_label, pseudo_labels)
 
                     # increase start global steo and epoch by 1
                     self.model.start_global_step = self.model.global_step + 1
@@ -115,9 +115,9 @@ class ActiveLearningPipeline:
                 self.model_trainer.fit(self.model, self.data_module)
 
                 # compute metrics for the best model on the validation set
-                self.model_trainer.validate(
-                    ckpt_path="best", dataloaders=self.data_module
-                )
+                # self.model_trainer.validate(
+                #     ckpt_path="best", dataloaders=self.data_module
+                # )
 
                 # don't reset the model trainer in the last iteration
                 if iteration != self.iterations - 1:
@@ -132,7 +132,7 @@ class ActiveLearningPipeline:
             self.model_trainer.fit(self.model, self.data_module)
 
             # compute metrics for the best model on the validation set
-            self.model_trainer.validate(ckpt_path="best")
+            # self.model_trainer.validate(ckpt_path="best")
 
     def setup_trainer(self, epochs: int, iteration: Optional[int] = None) -> Trainer:
         """
