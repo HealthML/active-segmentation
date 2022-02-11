@@ -243,7 +243,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         Returns:
             A dictionary of per-image dictionaries which contain slice indices as keys. If a slice index is not part of
-            the per-image dictionary, it is not part of the datset. If its value is None, it does not have a pseudo
+            the per-image dictionary, it is not part of the dataset. If its value is None, it does not have a pseudo
             label. If its value is a np.array, this is the pseudo label for that slice.
         """
         if slice_indices is None:
@@ -486,7 +486,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             image_id (str): The id of the image.
             slice_index (int): Index of the slice to be added.
             pseudo_label (np.array, optional): An optional pseudo label for the slice. If no pseudo label is provided,
-                the actual label from the orresponding file is used.
+                the actual label from the corresponding file is used.
         """
 
         image_index = self.__get_image_index(image_id)
