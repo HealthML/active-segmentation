@@ -464,48 +464,8 @@ activated.</p></li>
 </dd></dl>
 
 </section>
-<section id="module-datasets.pascal_voc_data_module">
-<span id="pascalvocdatamodule"></span><h2>PascalVocDataModule<a class="headerlink" href="#module-datasets.pascal_voc_data_module" title="Permalink to this headline">¶</a></h2>
-<p>Module to load pascal voc data</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PILMaskToTensor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.pascal_voc_data_module.</span></span><span class="sig-name descname"><span class="pre">PILMaskToTensor</span></span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PILMaskToTensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PILMaskToTensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>TBD</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.pascal_voc_data_module.</span></span><span class="sig-name descname"><span class="pre">PascalVOCDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.data_module.ActiveLearningDataModule</span></code></a></p>
-<p>The PASCAL Visual Object Classes (VOC) 2012 dataset contains 20 object categories including vehicles, household,
-animals, and other: aeroplane, bicycle, boat, bus, car, motorbike, train, bottle, chair, dining table, potted plant,
-sofa, TV/monitor, bird, cat, cow, dog, horse, sheep, and person. Each image in this dataset has pixel-level
-segmentation annotations, bounding box annotations, and object class annotations.
-Further information: <a class="reference external" href="http://host.robots.ox.ac.uk/pascal/VOC/">http://host.robots.ox.ac.uk/pascal/VOC/</a>
-:param data_dir: Path of the directory that contains the data.
-:param batch_size: Batch size.
-:param um_workers: Number of workers for DataLoader.
-:param shuffle: Flag if the data should be shuffled.
-:param **kwargs: Further, dataset specific parameters.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule.id_to_class_names">
-<span class="sig-name descname"><span class="pre">id_to_class_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule.id_to_class_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule.id_to_class_names" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule.label_items">
-<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudo_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule.label_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>TBD</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="datasets.pascal_voc_data_module.PascalVOCDataModule.multi_label">
-<span class="sig-name descname"><span class="pre">multi_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/pascal_voc_data_module.html#PascalVOCDataModule.multi_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.pascal_voc_data_module.PascalVOCDataModule.multi_label" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<section id="pascalvocdatamodule">
+<h2>PascalVocDataModule<a class="headerlink" href="#pascalvocdatamodule" title="Permalink to this headline">¶</a></h2>
 </section>
 </section>
 
@@ -552,7 +512,7 @@ Further information: <a class="reference external" href="http://host.robots.ox.a
 <li><a class="reference internal" href="#module-datasets.brats_data_module">BraTSDataModule</a></li>
 <li><a class="reference internal" href="#bratsdataset">BraTSDataset</a></li>
 <li><a class="reference internal" href="#module-datasets.data_module">DataModule</a></li>
-<li><a class="reference internal" href="#module-datasets.pascal_voc_data_module">PascalVocDataModule</a></li>
+<li><a class="reference internal" href="#pascalvocdatamodule">PascalVocDataModule</a></li>
 </ul>
 </li>
 </ul>
