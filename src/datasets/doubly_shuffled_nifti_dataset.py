@@ -514,22 +514,28 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             if len(self.image_slice_indices[image_index]) == 0:
                 del self.image_slice_indices[image_index]
 
-    def get_latest_images_and_case_ids(
-        self, last_n: int = 1
+    def get_images_by_id(
+        self,
+        case_ids: List[str],
     ) -> List[Tuple[np.ndarray, str]]:
         """
         Retrieves the last n images and corresponding case ids from the images that were last added to the dataset.
         Args:
-            last_n (int, optional): Number of images to get.
+            case_ids (List[str]): List with case_ids to get.
 
         Returns:
-            A list of all the last added n images.
+            A list of all the images with provided case ids.
         """
-        latest_image_slice_indices = self.image_slice_indices[-last_n:]
-        latest_images = []
-        for image_slice_index in latest_image_slice_indices:
-            image_index = image_slice_index[0]
-            slice_index = image_slice_index[1]
+
+        # create list of files as tuple of image id and slice index
+        image_slice_ids = [case_id.split("-") for case_id in case_ids]
+        image_slice_ids = [
+            (split_id[0], int(split_id[1]) if len(split_id) > 1 else None)
+            for split_id in image_slice_ids
+        ]
+        all_images = []
+        for case_id, (image_id, slice_index) in zip(case_ids, image_slice_ids):
+            image_index = self.__get_image_index(image_id)
             # check if image and mask are in cache
             if image_index in self.image_cache:
                 current_image = self.image_cache[image_index]
@@ -538,11 +544,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 current_image = self.__read_image_as_array(
                     self.image_paths[image_index], norm=True
                 )
-            case_id = self.__get_case_id(image_index)
-            latest_images.append(
-                (current_image[slice_index, :, :], f"{case_id}-slice_{slice_index}")
-            )
-        return latest_images
+            all_images.append((current_image[slice_index, :, :], case_id))
+        return all_images
 
     def __image_indices(self) -> Iterable[str]:
         return self.image_slice_indices.keys()

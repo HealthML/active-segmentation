@@ -112,8 +112,10 @@ class ActiveLearningPipeline:
 
                     if self.heatmaps_per_iteration > 0:
                         # Get latest added items from dataset
-                        items_to_inspect = self.data_module._training_set.get_latest_images_and_case_ids(
-                            last_n=self.heatmaps_per_iteration
+                        items_to_inspect = (
+                            self.data_module._training_set.get_images_by_id(
+                                case_ids=items_to_label[: self.heatmaps_per_iteration],
+                            )
                         )
                         # Generate heatmaps using final predictions and heatmaps
                         if len(items_to_inspect) > 0:
@@ -122,8 +124,8 @@ class ActiveLearningPipeline:
                             )
 
                     self.model_trainer = self.setup_trainer(
-                            self.epochs, iteration=iteration
-                        )
+                        self.epochs, iteration=iteration
+                    )
 
                 # optionally reset weights after fitting on new data
                 if self.reset_weights:
