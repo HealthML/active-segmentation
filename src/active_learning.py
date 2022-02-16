@@ -170,7 +170,7 @@ class ActiveLearningPipeline:
         callbacks.append(checkpoint_callback)
 
         return Trainer(
-            deterministic=True,
+            deterministic=False,
             profiler="simple",
             max_epochs=epochs + iteration * self.epochs_increase_per_query,
             logger=self.logger,
