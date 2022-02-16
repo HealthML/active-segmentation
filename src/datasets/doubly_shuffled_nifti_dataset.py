@@ -436,7 +436,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 x = torch.from_numpy(self._current_image[slice_index, :, :])
             pseudo_label = self.image_slice_indices[image_index][slice_index]
             y = (
-                pseudo_label
+                torch.from_numpy(pseudo_label).int()
                 if pseudo_label is not None
                 else torch.from_numpy(self._current_mask[slice_index, :, :]).int()
             )

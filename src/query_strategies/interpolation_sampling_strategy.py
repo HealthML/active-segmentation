@@ -61,14 +61,14 @@ class InterpolationSamplingStrategy(QueryStrategy):
         block_uncertainties = []
         for case_id in slice_uncertainties:
             prefix, image_slice_ids = case_id.split("_")
-            image_id, slice_id = map(int, image_slice_ids.split("-"))
+            image_id, top_slice_id = map(int, image_slice_ids.split("-"))
 
-            if slice_id < block_thickness - 1:
+            if top_slice_id < block_thickness - 1:
                 # We only want blokcs which have the full thickness
                 continue
 
             uncertainties = [
-                slice_uncertainties.get(f"{prefix}_{image_id}-{slice_id - i}")
+                slice_uncertainties.get(f"{prefix}_{image_id}-{top_slice_id - i}")
                 for i in range(block_thickness)
             ]
 
@@ -79,7 +79,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
             block_uncertainties.append(
                 (
                     sum(uncertainties),
-                    (prefix, image_id, slice_id),
+                    (prefix, image_id, top_slice_id),
                 )
             )
 
@@ -105,21 +105,29 @@ class InterpolationSamplingStrategy(QueryStrategy):
             if len(block_ids) >= items_to_label / 2:
                 break
 
-        pseudo_labels = {}
-
         class_ids = [id for id in data_module.id_to_class_names().keys() if id != 0]
 
-        for prefix, image_id, slice_id in block_ids:
+        selected_ids = []
+        pseudo_labels = {}
+
+        for prefix, image_id, top_slice_id in block_ids:
+            bottom_slice_id = top_slice_id - block_thickness + 1
+
+            selected_ids.append(f"{prefix}_{image_id}-{top_slice_id}")
+            selected_ids.append(f"{prefix}_{image_id}-{bottom_slice_id}")
+
             label = data_module.training_set.read_mask_for_image(image_id)
-            top = label[slice_id, :, :]
-            bottom = label[slice_id - block_thickness + 1, :, :]
+            top = label[top_slice_id, :, :]
+            bottom = label[bottom_slice_id, :, :]
+
             interpolation = self._interpolate_slices(
                 top, bottom, class_ids, block_thickness
             )
-            # TODO: Use save returned pseudo labels in pseudo_labels
-
-        # TODO: Construct selected_ids
-        selected_ids = []
+            if interpolation is not None:
+                for i, pseudo_label in enumerate(interpolation):
+                    case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
+                    selected_ids.append(case_id)
+                    pseudo_labels[case_id] = pseudo_label
 
         return selected_ids, pseudo_labels
 
