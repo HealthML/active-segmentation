@@ -85,8 +85,25 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         block_uncertainties.sort(key=lambda y: y[0])
 
-        # TODO: Make sure the blocks don't overlap
-        block_ids = [id for (_, id) in block_uncertainties[0 : items_to_label // 2]]
+        block_ids = []
+        for _, (
+            block_prefix,
+            block_image_id,
+            block_top_slice_id,
+        ) in block_uncertainties:
+
+            overlaps = [
+                prefix == block_prefix
+                and image_id == block_image_id
+                and abs(top_slice_id - block_top_slice_id) < block_thickness
+                for prefix, image_id, top_slice_id in block_ids
+            ]
+
+            if not any(overlaps):
+                block_ids.append((block_prefix, block_image_id, block_top_slice_id))
+
+            if len(block_ids) >= items_to_label / 2:
+                break
 
         pseudo_labels = {}
 
