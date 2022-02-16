@@ -159,12 +159,17 @@ class InterpolationSamplingStrategy(QueryStrategy):
             class_top = top == class_id
             class_bottom = bottom == class_id
 
-            # TODO: Check interpolation conditions
-
-            slices = [
-                interpolate(class_top, class_bottom, step)
-                for step in interpolation_steps
-            ]
-            single_class_interpolations[class_id] = np.array(slices)
+            if not np.any(class_top) and not np.any(class_bottom):
+                single_class_interpolations[class_id] = np.zeros(
+                    (len(interpolation_steps), *top.shape)
+                )
+            elif not np.any(np.logical_and(class_top, class_bottom)):
+                single_class_interpolations[class_id] = None
+            else:
+                slices = [
+                    interpolate(class_top, class_bottom, step)
+                    for step in interpolation_steps
+                ]
+                single_class_interpolations[class_id] = np.array(slices)
 
         # TODO: Merge class interpolations and return
