@@ -308,7 +308,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
 
             <span class="c1"># compute metrics for the best model on the validation set</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">ckpt_path</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">ckpt_path</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">dataloaders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ActiveLearningPipeline.setup_trainer"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline.setup_trainer">[docs]</a>    <span class="k">def</span> <span class="nf">setup_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trainer</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -354,7 +354,9 @@
         <span class="k">return</span> <span class="n">Trainer</span><span class="p">(</span>
             <span class="n">deterministic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">profiler</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
-            <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span> <span class="o">+</span> <span class="n">iteration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs_increase_per_query</span><span class="p">,</span>
+            <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span> <span class="o">+</span> <span class="n">iteration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs_increase_per_query</span>
+            <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">epochs</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
             <span class="n">log_every_n_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
             <span class="n">gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gpus</span><span class="p">,</span>
