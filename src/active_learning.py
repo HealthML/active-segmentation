@@ -37,7 +37,7 @@ class ActiveLearningPipeline:
         initial_epochs (int, optional): Number of epochs the initial model should be trained. Defaults to `epochs`.
         items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.
             (default = 1).
-        iterations (int, optional): iteration times how often the active learning pipeline should be
+        iterations (int, optional): Number of iterations how often the active learning pipeline should be
             executed (default = 10).
         reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run
         epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for
