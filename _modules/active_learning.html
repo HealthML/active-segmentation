@@ -352,7 +352,7 @@
         <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkpoint_callback</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Trainer</span><span class="p">(</span>
-            <span class="n">deterministic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">deterministic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">profiler</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
             <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span> <span class="o">+</span> <span class="n">iteration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs_increase_per_query</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>

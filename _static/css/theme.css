@@ -10694,9 +10694,6 @@ article.sphinx-template-article .py.function .viewcode-link, article.sphinx-temp
 article.sphinx-template-article .py.function dd, article.sphinx-template-article .attribute dd, article.sphinx-template-article .class .attribute dd, article.sphinx-template-article .class dd {
   padding-left: 3.75rem;
 }
-article.sphinx-template-article .py.function dd p, article.sphinx-template-article .attribute dd p, article.sphinx-template-article .class .attribute dd p, article.sphinx-template-article .class dd p {
-  color: #262626;
-}
 article.sphinx-template-article .py.function table tbody tr th.field-name, article.sphinx-template-article .attribute table tbody tr th.field-name, article.sphinx-template-article .class table tbody tr th.field-name {
   white-space: nowrap;
   color: #262626;
