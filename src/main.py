@@ -365,7 +365,9 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(**config,)
+        run_active_learning_pipeline(
+            **config,
+        )
 
 
 if __name__ == "__main__":
