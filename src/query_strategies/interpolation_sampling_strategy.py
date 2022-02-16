@@ -107,21 +107,24 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         pseudo_labels = {}
 
-        class_ids = data_module.id_to_class_names().keys()
+        class_ids = [id for id in data_module.id_to_class_names().keys() if id != 0]
 
         for prefix, image_id, slice_id in block_ids:
             label = data_module.training_set.read_mask_for_image(image_id)
             top = label[slice_id, :, :]
             bottom = label[slice_id - block_thickness + 1, :, :]
-            # TODO: Use _interpolate slices and save returned pseudo labels in pseudo_labels
+            interpolation = self._interpolate_slices(
+                top, bottom, class_ids, block_thickness
+            )
+            # TODO: Use save returned pseudo labels in pseudo_labels
 
         # TODO: Construct selected_ids
         selected_ids = []
 
         return selected_ids, pseudo_labels
 
+    @staticmethod
     def _interpolate_slices(
-        self,
         top: np.array,
         bottom: np.array,
         class_ids: Iterable[int],
@@ -161,10 +164,10 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
             if not np.any(class_top) and not np.any(class_bottom):
                 single_class_interpolations[class_id] = np.zeros(
-                    (len(interpolation_steps), *top.shape)
+                    (len(interpolation_steps), *top.shape), dtype=bool
                 )
             elif not np.any(np.logical_and(class_top, class_bottom)):
-                single_class_interpolations[class_id] = None
+                return None
             else:
                 slices = [
                     interpolate(class_top, class_bottom, step)
@@ -172,4 +175,9 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 ]
                 single_class_interpolations[class_id] = np.array(slices)
 
-        # TODO: Merge class interpolations and return
+        result = np.zeros((len(interpolation_steps), *top.shape))
+
+        for class_id, interpolation in single_class_interpolations.items():
+            result[interpolation] = class_id
+
+        return result
