@@ -126,7 +126,7 @@ class ActiveLearningPipeline:
             self.model_trainer.fit(self.model, self.data_module)
 
             # compute metrics for the best model on the validation set
-            self.model_trainer.validate(ckpt_path="best")
+            self.model_trainer.validate(ckpt_path="best", dataloaders=self.data_module)
 
     def setup_trainer(self, epochs: int, iteration: Optional[int] = None) -> Trainer:
         """
@@ -172,7 +172,9 @@ class ActiveLearningPipeline:
         return Trainer(
             deterministic=False,
             profiler="simple",
-            max_epochs=epochs + iteration * self.epochs_increase_per_query,
+            max_epochs=epochs + iteration * self.epochs_increase_per_query
+            if iteration is not None
+            else epochs,
             logger=self.logger,
             log_every_n_steps=20,
             gpus=self.gpus,
