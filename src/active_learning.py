@@ -116,9 +116,9 @@ class ActiveLearningPipeline:
                 self.model_trainer.fit(self.model, self.data_module)
 
                 # compute metrics for the best model on the validation set
-                # self.model_trainer.validate(
-                #     ckpt_path="best", dataloaders=self.data_module
-                # )
+                self.model_trainer.validate(
+                    ckpt_path="best", dataloaders=self.data_module
+                )
 
         else:
             self.model_trainer = self.setup_trainer(self.epochs, iteration=0)
