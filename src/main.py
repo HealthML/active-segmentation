@@ -12,7 +12,6 @@ from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import (
     BraTSDataModule,
-    PascalVOCDataModule,
     DecathlonDataModule,
     BCSSDataModule,
 )
@@ -48,11 +47,7 @@ def create_data_module(
         The data module.
     """
 
-    if dataset == "pascal-voc":
-        data_module = PascalVOCDataModule(
-            data_dir, batch_size, num_workers, **dataset_config
-        )
-    elif dataset == "brats":
+    if dataset == "brats":
         data_module = BraTSDataModule(
             data_dir,
             batch_size,

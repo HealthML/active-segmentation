@@ -119,8 +119,11 @@ class PytorchUNet(PytorchModel):
             train_metric.update(probabilities, y, case_ids)
 
         self.logger.log_metrics(
-            {"train/loss": loss},
-            step=self.global_step,
+            {
+                "train/loss": loss,
+                "trainer/iteration": self.iteration,
+                "trainer/epoch": self.current_epoch,
+            }
         )
         return loss
 
@@ -182,7 +185,13 @@ class PytorchUNet(PytorchModel):
         probabilities = self(x)
 
         loss = self.loss_module(probabilities, y)
-        self.logger.log_metrics({"test/loss": loss}, step=self.global_step)
+        self.logger.log_metrics(
+            {
+                "test/loss": loss,
+                "trainer/iteration": self.iteration,
+                "trainer/epoch": self.current_epoch,
+            }
+        )
 
         for test_metric in self.get_test_metrics():
             test_metric.update(probabilities, y, case_ids)
