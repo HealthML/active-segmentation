@@ -204,6 +204,8 @@
 <span class="sd">        multi_label (bool, optional): Whether the model should produce single-label or multi-label outputs. If set to</span>
 <span class="sd">            `False`, the model&#39;s predictions are computed using a Softmax activation layer. to If set to `True`, sigmoid</span>
 <span class="sd">            activation layers are used to compute the model&#39;s predicitions. Defaults to False.</span>
+<span class="sd">        p_dropout (float, optional): Probability of applying dropout to the outputs of the encoder layers. Defaults to</span>
+<span class="sd">            0.</span>
 <span class="sd">        **kwargs: Further, dataset specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -214,6 +216,7 @@
         <span class="n">in_channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">out_channels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">multi_label</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">p_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 
@@ -225,6 +228,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span> <span class="o">=</span> <span class="n">in_channels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_channels</span> <span class="o">=</span> <span class="n">out_channels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">multi_label</span> <span class="o">=</span> <span class="n">multi_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_dropout</span> <span class="o">=</span> <span class="n">p_dropout</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">UNet</span><span class="p">(</span>
             <span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_channels</span><span class="p">,</span>
@@ -233,6 +237,7 @@
             <span class="n">init_features</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
             <span class="n">num_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">,</span>
             <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+            <span class="n">p_dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p_dropout</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="PytorchUNet.input_dimensionality"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet.input_dimensionality">[docs]</a>    <span class="k">def</span> <span class="nf">input_dimensionality</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -390,6 +395,7 @@
             <span class="n">init_features</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
             <span class="n">num_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">,</span>
             <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+            <span class="n">p_dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p_dropout</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 </pre></div>
 
