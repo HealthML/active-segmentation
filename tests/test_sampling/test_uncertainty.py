@@ -53,9 +53,6 @@ class ModelMock:
 class UncertaintyTestCase(unittest.TestCase):
     """Test case for uncertainty sampling"""
 
-    def setUp(self) -> None:
-        self.uncertainty_cls = UncertaintySamplingStrategy()
-
     @parameterized.expand(
         [
             (
@@ -151,7 +148,8 @@ class UncertaintyTestCase(unittest.TestCase):
         expected_cases,
     ):
         """Tests the select items method"""
-        actual_cases = self.uncertainty_cls.select_items_to_label(
+        strategy = UncertaintySamplingStrategy(**kwargs)
+        actual_cases = strategy.select_items_to_label(
             models=ModelMock(prediction_tensor=prediction),
             data_module=DataLoaderMock(
                 cases=cases, is_multi_label=is_multi_label, num_classes=num_classes
