@@ -23,6 +23,7 @@
     "active_learning_mode": true,
     "reset_weights": false,
     "initial_training_set_size": 752,
+    "iterations": null,
     "stop_when_all_items_labeled": true,
     "items_to_label": 128,
     "batch_size_unlabeled_set": 128
