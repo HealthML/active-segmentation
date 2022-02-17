@@ -223,7 +223,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._training_set:
-            return len(self._training_set)
+            return self._training_set.size()
         return 0
 
     def validation_set_size(self) -> int:
@@ -233,7 +233,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._validation_set:
-            return len(self._validation_set)
+            return self._validation_set.size()
         return 0
 
     def test_set_size(self) -> int:
@@ -243,7 +243,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._test_set:
-            return len(self._test_set)
+            return self._test_set.size()
         return 0
 
     def unlabeled_set_size(self) -> int:
@@ -253,7 +253,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._unlabeled_set:
-            return len(self._unlabeled_set)
+            return self._unlabeled_set.size()
         return 0
 
     def num_classes(self) -> int:
