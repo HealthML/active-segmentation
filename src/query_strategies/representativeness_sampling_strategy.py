@@ -208,29 +208,30 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
         selected_ids = []
 
         for _ in range(items_to_label):
-            average_feature_distances = self._feature_distances(
-                feature_vectors_training_set, feature_vectors_unlabeled_set
-            )
+            if len(feature_vectors_unlabeled_set) > 0:
+                average_feature_distances = self._feature_distances(
+                    feature_vectors_training_set, feature_vectors_unlabeled_set
+                )
 
-            # sort unlabeled items by their average feature distance to the labeled items in the training set
-            unlabeled_indices = np.arange(len(case_ids))
-            average_feature_distances = list(
-                zip(average_feature_distances, unlabeled_indices)
-            )
-            average_feature_distances.sort(key=lambda y: y[0], reverse=True)
-            # select the sample with the highest average distance to the training set
-            index_of_most_distant_sample = average_feature_distances[0][1]
-            selected_ids.append(case_ids[index_of_most_distant_sample])
+                # sort unlabeled items by their average feature distance to the labeled items in the training set
+                unlabeled_indices = np.arange(len(case_ids))
+                average_feature_distances = list(
+                    zip(average_feature_distances, unlabeled_indices)
+                )
+                average_feature_distances.sort(key=lambda y: y[0], reverse=True)
+                # select the sample with the highest average distance to the training set
+                index_of_most_distant_sample = average_feature_distances[0][1]
+                selected_ids.append(case_ids[index_of_most_distant_sample])
 
-            np.insert(
-                feature_vectors_training_set,
-                0,
-                feature_vectors_unlabeled_set[index_of_most_distant_sample],
-            )
-            np.delete(
-                feature_vectors_unlabeled_set, index_of_most_distant_sample, axis=0
-            )
-            del case_ids[index_of_most_distant_sample]
+                np.insert(
+                    feature_vectors_training_set,
+                    0,
+                    feature_vectors_unlabeled_set[index_of_most_distant_sample],
+                )
+                np.delete(
+                    feature_vectors_unlabeled_set, index_of_most_distant_sample, axis=0
+                )
+                del case_ids[index_of_most_distant_sample]
 
         # free memory
         del feature_vectors_unlabeled_set
