@@ -35,13 +35,13 @@ class ActiveLearningPipeline:
         items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.
             (default = 1).
         iterations (int, optional): iteration times how often the active learning pipeline should be
-            executed. If None, the active learning pipeline is run until the whole dataset is labeled. Defaults to None.
+            executed. If None, the active learning pipeline is run until the whole dataset is labeled (default = None).
         reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run
         epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for
             the increased training dataset size (default = 0).
         stop_when_all_items_labeled (bool, optional): Whether the active learning loop should be stopped when all items
-            were selected for labeling. This parameter is only considered when `active_learning_mode` is set to `True`.
-            Defaults to `True`.
+            were selected for labeling. This parameter is only considered when `active_learning_mode` is set to `True`
+            (default = True).
     """
 
     # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals
@@ -93,7 +93,6 @@ class ActiveLearningPipeline:
         self.model_selection_criterion = model_selection_criterion
         self.reset_weights = reset_weights
         self.epochs_increase_per_query = epochs_increase_per_query
-        self.stop_when_all_items_labeled = stop_when_all_items_labeled
 
     def run(self) -> None:
         """Run the pipeline"""
@@ -108,11 +107,6 @@ class ActiveLearningPipeline:
                 self.iterations = math.ceil(
                     self.data_module.unlabeled_set_size() / self.items_to_label
                 )
-                print("self.iterations", self.iterations)
-                print(
-                    "self.data_module.unlabeled_set_size()",
-                    self.data_module.unlabeled_set_size(),
-                )
 
             # run pipeline
             for iteration in range(0, self.iterations):
@@ -126,16 +120,9 @@ class ActiveLearningPipeline:
                         # label batch
                         self.data_module.label_items(items_to_label)
 
-                    if (
-                        self.stop_when_all_items_labeled
-                        and self.data_module.unlabeled_set_size() == 0
-                    ):
-                        # double the number of epoch in the final iteration
-                        epochs = self.epochs * 2
-                    else:
-                        epochs = self.epochs
-
-                    self.model_trainer = self.setup_trainer(epochs, iteration=iteration)
+                    self.model_trainer = self.setup_trainer(
+                        self.epochs, iteration=iteration
+                    )
 
                 # optionally reset weights after fitting on new data
                 if self.reset_weights:
