@@ -2,16 +2,20 @@
 
 import math
 import os
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional, Union, Tuple, List
 
+import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
 from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
+import numpy as np
+import wandb
 
 from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
 from models import PytorchModel
+from functional.interpretation import HeatMaps
 
 
 class ActiveLearningPipeline:
@@ -39,12 +43,16 @@ class ActiveLearningPipeline:
         reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run
         epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for
             the increased training dataset size (default = 0).
+        heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration.
+            (default = 0)
         stop_when_all_items_labeled (bool, optional): Whether the active learning loop should be stopped when all items
             were selected for labeling. This parameter is only considered when `active_learning_mode` is set to `True`
             (default = True).
+        **kwargs: Additional, strategy-specific parameters.
     """
 
-    # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals
+    # pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes,too-many-locals
+    # pylint: disable=protected-access
     def __init__(
         self,
         data_module: ActiveLearningDataModule,
@@ -59,11 +67,13 @@ class ActiveLearningPipeline:
         iterations: Optional[int] = None,
         reset_weights: bool = False,
         epochs_increase_per_query: int = 0,
+        heatmaps_per_iteration: int = 0,
         logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool] = True,
         early_stopping: bool = False,
         lr_scheduler: str = None,
         model_selection_criterion="loss",
         stop_when_all_items_labeled: bool = True,
+        **kwargs,
     ) -> None:
 
         self.data_module = data_module
@@ -89,10 +99,12 @@ class ActiveLearningPipeline:
 
         self.stop_when_all_items_labeled = stop_when_all_items_labeled
         self.iterations = iterations
+        self.heatmaps_per_iteration = heatmaps_per_iteration
         self.lr_scheduler = lr_scheduler
         self.model_selection_criterion = model_selection_criterion
         self.reset_weights = reset_weights
         self.epochs_increase_per_query = epochs_increase_per_query
+        self.kwargs = kwargs
 
     def run(self) -> None:
         """Run the pipeline"""
@@ -115,10 +127,26 @@ class ActiveLearningPipeline:
                     # query batch selection
                     if self.data_module.unlabeled_set_size() > 0:
                         items_to_label = self.strategy.select_items_to_label(
-                            self.model, self.data_module, self.items_to_label
+                            self.model,
+                            self.data_module,
+                            self.items_to_label,
+                            **self.kwargs,
                         )
                         # label batch
                         self.data_module.label_items(items_to_label)
+
+                    if self.heatmaps_per_iteration > 0:
+                        # Get latest added items from dataset
+                        items_to_inspect = (
+                            self.data_module._training_set.get_images_by_id(
+                                case_ids=items_to_label[: self.heatmaps_per_iteration],
+                            )
+                        )
+                        # Generate heatmaps using final predictions and heatmaps
+                        if len(items_to_inspect) > 0:
+                            self.__generate_and_log_heatmaps(
+                                items_to_inspect=items_to_inspect, iteration=iteration
+                            )
 
                     self.model_trainer = self.setup_trainer(
                         self.epochs, iteration=iteration
@@ -130,7 +158,6 @@ class ActiveLearningPipeline:
 
                 self.model.start_epoch = self.model.current_epoch
                 self.model.iteration = iteration
-
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
 
@@ -200,3 +227,72 @@ class ActiveLearningPipeline:
             callbacks=callbacks,
             num_sanity_val_steps=num_sanity_val_steps,
         )
+
+    def __generate_and_log_heatmaps(
+        self, items_to_inspect: List[Tuple[np.ndarray, str]], iteration: int
+    ) -> None:
+        """
+        Generates heatmaps using gradient based method and the prediction of the last layer of the model.
+        Args:
+            items_to_inspect (List[Tuple[np.ndarray, str]]): A list with the items to generate heatmaps for.
+            iteration (int): The iteration of the active learning loop.
+
+        """
+
+        # Generate heatmaps using final predictions and gradient based method
+        gcam_images, logit_images = [], []
+        for img, case_id in items_to_inspect:
+            gcam_heatmap, logit_heatmap = self.__generate_heatmaps(
+                img=img, case_id=case_id
+            )
+            gcam_images.append(
+                wandb.Image(
+                    gcam_heatmap,
+                    caption=f"AL Iteration: {iteration}, Case ID: {case_id}",
+                )
+            )
+            logit_images.append(
+                wandb.Image(
+                    logit_heatmap,
+                    caption=f"AL Iteration: {iteration}, Case ID: {case_id}",
+                )
+            )
+        wandb.log({"GradCam heatmaps": gcam_images})
+        wandb.log({"Logit heatmaps": logit_images})
+
+    def __generate_heatmaps(
+        self,
+        img: np.ndarray,
+        case_id: str,
+        target_category: int = 1,
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Generates two heatmaps: One based on the GradCam method and one based on the predictions of the last layer.
+        Args:
+            img (np.ndarray): The image as numpy array.
+            case_id (str): The id of the current image.
+            target_category (int, optional): The label of the target class to analyze.
+
+        Returns:
+            A tuple of both heatmaps. GradCamp heatmap, prediction heatmap.
+        """
+
+        input_tensor = torch.from_numpy(img)
+        heatmap = HeatMaps(model=self.model)
+        target_layers = [self.model.model.conv]
+        gcam_gray = heatmap.generate_grayscale_cam(
+            input_tensor=input_tensor,
+            target_category=target_category,
+            target_layers=target_layers,
+        )
+        logits_gray = heatmap.generate_grayscale_logits(
+            input_tensor=input_tensor, target_category=target_category
+        )
+        gcam_img = heatmap.show_grayscale_heatmap_on_image(
+            image=img, grayscale_heatmap=gcam_gray
+        )
+        logits_img = heatmap.show_grayscale_heatmap_on_image(
+            image=img, grayscale_heatmap=logits_gray
+        )
+        print(f"Generated heatmaps for case {case_id}")
+        return gcam_img, logits_img
