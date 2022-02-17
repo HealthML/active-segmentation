@@ -30,24 +30,21 @@ class ActiveLearningPipeline:
         gpus (int): Number of GPUS to use for model training.
         checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
         early_stopping (bool, optional): Enable/Disable Early stopping when model
-            is not learning anymore (default = False).
+            is not learning anymore. Defaults to False.
         logger: A logger object as defined by Pytorch Lightning.
         lr_scheduler (string, optional): Algorithm used for dynamically updating the
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
-        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).
+        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline. Defaults to False.
         initial_epochs (int, optional): Number of epochs the initial model should be trained. Defaults to `epochs`.
         items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.
-            (default = 1).
+            Defaults to 1.
         iterations (int, optional): iteration times how often the active learning pipeline should be
-            executed. If None, the active learning pipeline is run until the whole dataset is labeled (default = None).
+            executed. If None, the active learning pipeline is run until the whole dataset is labeled. Defaults to None.
         reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run
         epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for
-            the increased training dataset size (default = 0).
-        heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration.
-            (default = 0)
-        stop_when_all_items_labeled (bool, optional): Whether the active learning loop should be stopped when all items
-            were selected for labeling. This parameter is only considered when `active_learning_mode` is set to `True`
-            (default = True).
+            the increased training dataset size. Defaults to 0.
+        heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration. Defaults to
+            0.
         **kwargs: Additional, strategy-specific parameters.
     """
 
@@ -72,7 +69,6 @@ class ActiveLearningPipeline:
         early_stopping: bool = False,
         lr_scheduler: str = None,
         model_selection_criterion="loss",
-        stop_when_all_items_labeled: bool = True,
         **kwargs,
     ) -> None:
 
@@ -91,13 +87,6 @@ class ActiveLearningPipeline:
         self.early_stopping = early_stopping
         self.initial_epochs = initial_epochs if initial_epochs is not None else epochs
         self.items_to_label = items_to_label
-
-        if stop_when_all_items_labeled is False and iterations is None:
-            raise ValueError(
-                "`iterations` must not be None when `stop_when_all_items_labeled` is set to False."
-            )
-
-        self.stop_when_all_items_labeled = stop_when_all_items_labeled
         self.iterations = iterations
         self.heatmaps_per_iteration = heatmaps_per_iteration
         self.lr_scheduler = lr_scheduler
@@ -115,7 +104,7 @@ class ActiveLearningPipeline:
         if self.active_learning_mode:
             self.model_trainer = self.setup_trainer(self.initial_epochs, iteration=0)
 
-            if self.stop_when_all_items_labeled or self.iterations is None:
+            if self.iterations is None:
                 self.iterations = math.ceil(
                     self.data_module.unlabeled_set_size() / self.items_to_label
                 )
