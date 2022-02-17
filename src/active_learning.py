@@ -81,15 +81,14 @@ class ActiveLearningPipeline:
         self.early_stopping = early_stopping
         self.initial_epochs = initial_epochs if initial_epochs is not None else epochs
         self.items_to_label = items_to_label
-        if stop_when_all_items_labeled or iterations is None:
-            self.iterations = math.ceil(
-                self.data_module.unlabeled_set_size() / items_to_label
+
+        if stop_when_all_items_labeled is False and iterations is None:
+            raise ValueError(
+                "`iterations` must not be None when `stop_when_all_items_labeled` is set to False."
             )
-        else:
-            assert (
-                iterations is not None
-            ), "`iterations` must not be None when `stop_when_all_items_labeled` is set to False."
-            self.iterations = iterations
+
+        self.stop_when_all_items_labeled = stop_when_all_items_labeled
+        self.iterations = iterations
         self.lr_scheduler = lr_scheduler
         self.model_selection_criterion = model_selection_criterion
         self.reset_weights = reset_weights
@@ -104,6 +103,17 @@ class ActiveLearningPipeline:
 
         if self.active_learning_mode:
             self.model_trainer = self.setup_trainer(self.initial_epochs, iteration=0)
+
+            if self.stop_when_all_items_labeled or self.iterations is None:
+                self.iterations = math.ceil(
+                    self.data_module.unlabeled_set_size() / self.items_to_label
+                )
+                print("self.iterations", self.iterations)
+                print(
+                    "self.data_module.unlabeled_set_size()",
+                    self.data_module.unlabeled_set_size(),
+                )
+
             # run pipeline
             for iteration in range(0, self.iterations):
                 # skip labeling in the first iteration because the model hasn't trained yet
