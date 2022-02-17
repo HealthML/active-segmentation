@@ -37,10 +37,15 @@ class RandomSamplingStrategy(QueryStrategy):
         selected_items = 0
 
         # shuffling of the dataset is used for randomization
-        for _, image_id in data_module.unlabeled_dataloader():
+        for _, image_ids in data_module.unlabeled_dataloader():
             if selected_items == items_to_label:
                 break
-            selected_ids.append(image_id[0])
-            selected_items += 1
+
+            batch_size = len(image_ids)
+
+            items_to_select = min(batch_size, items_to_label - selected_items)
+
+            selected_ids.extend(image_ids[:items_to_select])
+            selected_items += len(image_ids[:items_to_select])
 
         return selected_ids
