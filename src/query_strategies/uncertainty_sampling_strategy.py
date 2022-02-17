@@ -57,8 +57,13 @@ class UncertaintySamplingStrategy(QueryStrategy):
         models.to(device)
 
         uncertainties = []
+
+        # For the max_uncertainty_value we have two cases in out datasets:
+        # 1. multi-class, single-label (multiple foreground classes that are mutually exclusive) -> max_uncertainty is
+        #   1 / num_classes. This is because the softmax layer sums up all to 1 across labels.
+        # 2. multi-class, multi-label (multiple foreground classes that can overlap) -> max_uncertainty is 0.5
         max_uncertainty_value = (
-            1 / data_module.num_classes() if data_module.multi_label() else 0.5
+            0.5 if data_module.multi_label() else 1 / data_module.num_classes()
         )
 
         for images, case_ids in data_module.unlabeled_dataloader():
