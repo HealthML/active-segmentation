@@ -25,13 +25,16 @@
     "iterations": 100,
     "items_to_label": 128,
     "batch_size_unlabeled_set": 128,
-    "optional_arguments": {
-      "exclude_background": true
-    }
+    "heatmaps_per_iteration": 5
+  },
+  "strategy_config": {
+    "type": "uncertainty",
+    "calculation_method": "distance",
+    "exclude_background": true,
+    "prefer_unique_scans": true
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
-  "strategy": "random",
   "experiment_name": "test-experiment",
   "experiment_tags": [],
   "batch_size": 32,

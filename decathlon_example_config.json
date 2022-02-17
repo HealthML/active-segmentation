@@ -4,7 +4,7 @@
     "optimizer": "adam",
     "loss": "dice",
     "learning_rate": 0.0001,
-    "num_levels": 4,
+    "num_levels": 2,
     "dim": 2,
     "model_selection_criterion": "mean_dice_score",
     "train_metrics": ["dice_score"],
@@ -22,10 +22,17 @@
   "active_learning_config": {
     "active_learning_mode": true,
     "reset_weights": false,
-    "initial_training_set_size": 752,
-    "iterations": 100,
-    "items_to_label": 128,
-    "batch_size_unlabeled_set": 128
+    "initial_training_set_size": 128,
+    "iterations": 50,
+    "items_to_label": 64,
+    "batch_size_unlabeled_set": 64,
+    "heatmaps_per_iteration": 0
+  },
+  "strategy_config": {
+    "type": "uncertainty",
+    "calculation_method": "distance",
+    "exclude_background": true,
+    "prefer_unique_scans": true
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
@@ -33,9 +40,11 @@
   "experiment_name": "hippocampus-test",
   "experiment_tags": [],
   "batch_size": 32,
-  "epochs": 1,
+  "epochs": 10,
   "num_workers": 8,
   "gpus": 1,
+  "prediction_count": 5,
+  "prediction_dir": "/dhc/groups/mpws2021cl1/Predictions",
   "early_stopping": false,
   "random_state": 43
 }
