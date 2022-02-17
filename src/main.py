@@ -104,7 +104,7 @@ def create_data_module(
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
-    strategy: str,
+    strategy_config: dict,
     experiment_name: str,
     batch_size: int = 16,
     checkpoint_dir: Optional[str] = None,
@@ -132,7 +132,7 @@ def run_active_learning_pipeline(
     Args:
         architecture (string): Name of the desired model architecture. E.g. 'u_net'.
         dataset (string): Name of the dataset. E.g. 'brats'
-        strategy (string): Name of the query strategy. E.g. 'random'
+        strategy_config (dict): Configuration of the query strategy.
         experiment_name (string): Name of the experiment.
         batch_size (int, optional): Size of training examples passed in one training step.
         checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
@@ -186,7 +186,7 @@ def run_active_learning_pipeline(
         data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
     )
 
-    strategy = create_query_strategy(strategy)
+    strategy = create_query_strategy(strategy_config=strategy_config)
 
     if checkpoint_dir is not None:
         checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
@@ -213,7 +213,7 @@ def run_active_learning_pipeline(
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,
         model_selection_criterion=model_selection_criterion,
-        **active_learning_config.get("optional_arguments", {}),
+        **active_learning_config.get("strategy_config", {}),
     )
     pipeline.run()
 
@@ -274,16 +274,16 @@ def create_model(
     return model
 
 
-def create_query_strategy(strategy: str):
+def create_query_strategy(strategy_config: dict):
     """
     Initialises the chosen query strategy
     Args:
-        strategy (str): Name of the query strategy. E.g. 'random'
+        strategy_config (dict): Configuration of the query strategy
     """
-    if strategy == "random":
+    if strategy_config.get("type") == "random":
         return RandomSamplingStrategy()
-    if strategy == "uncertainty":
-        return UncertaintySamplingStrategy()
+    if strategy_config.get("type") == "uncertainty":
+        return UncertaintySamplingStrategy(**strategy_config)
     raise ValueError("Invalid query strategy.")
 
 
