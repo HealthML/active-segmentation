@@ -135,14 +135,14 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
 
         n_splits = math.ceil(len(feature_vectors_unlabeled_set) / split_size)
 
-        feature_vectors_unlabeled_set_splitted = np.array_split(
+        feature_vectors_unlabeled_set_split = np.array_split(
             feature_vectors_unlabeled_set, n_splits
         )
 
         average_feature_distances = np.zeros(len(feature_vectors_unlabeled_set))
 
         for idx, current_chunk_feature_vectors_unlabeled_set in enumerate(
-            feature_vectors_unlabeled_set_splitted
+            feature_vectors_unlabeled_set_split
         ):
             feature_distances = scipy.spatial.distance.cdist(
                 current_chunk_feature_vectors_unlabeled_set,
@@ -183,7 +183,7 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
 
         if isinstance(models, List):
             raise ValueError(
-                "Uncertainty sampling is only implemented for one model. You passed a list."
+                "Representativeness sampling is only implemented for one model. You passed multiple."
             )
 
         if isinstance(models, PytorchUNet):
@@ -220,7 +220,7 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
                 )
                 average_feature_distances.sort(key=lambda y: y[0], reverse=True)
                 # select the sample with the highest average distance to the training set
-                index_of_most_distant_sample = average_feature_distances[0][1]
+                _, index_of_most_distant_sample = average_feature_distances[0]
                 selected_ids.append(case_ids[index_of_most_distant_sample])
 
                 np.insert(
