@@ -183,16 +183,20 @@
 <span></span><span class="sd">&quot;&quot;&quot; Module containing the active learning pipeline &quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
 
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">pytorch_lightning</span> <span class="kn">import</span> <span class="n">Trainer</span>
 <span class="kn">from</span> <span class="nn">pytorch_lightning.loggers</span> <span class="kn">import</span> <span class="n">LightningLoggerBase</span>
 <span class="kn">from</span> <span class="nn">pytorch_lightning.callbacks</span> <span class="kn">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">LearningRateMonitor</span>
 <span class="kn">from</span> <span class="nn">pytorch_lightning.callbacks.model_checkpoint</span> <span class="kn">import</span> <span class="n">ModelCheckpoint</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
 
 <span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="n">QueryStrategy</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">ActiveLearningDataModule</span>
 <span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">PytorchModel</span>
+<span class="kn">from</span> <span class="nn">functional.interpretation</span> <span class="kn">import</span> <span class="n">HeatMaps</span>
 
 
 <div class="viewcode-block" id="ActiveLearningPipeline"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline">[docs]</a><span class="k">class</span> <span class="nc">ActiveLearningPipeline</span><span class="p">:</span>
@@ -215,14 +219,17 @@
 <span class="sd">        initial_epochs (int, optional): Number of epochs the initial model should be trained. Defaults to `epochs`.</span>
 <span class="sd">        items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.</span>
 <span class="sd">            (default = 1).</span>
-<span class="sd">        iterations (int, optional): iteration times how often the active learning pipeline should be</span>
-<span class="sd">        executed (default = 10).</span>
+<span class="sd">        iterations (int, optional): Number of iterations how often the active learning pipeline should be</span>
+<span class="sd">            executed (default = 10).</span>
 <span class="sd">        reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run</span>
 <span class="sd">        epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for</span>
 <span class="sd">            the increased training dataset size (default = 0).</span>
+<span class="sd">        heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration.</span>
+<span class="sd">            (default = 0)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes, too-many-locals</span>
+    <span class="c1"># pylint: disable=too-few-public-methods,too-many-arguments,too-many-instance-attributes,too-many-locals</span>
+    <span class="c1"># pylint: disable=protected-access</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
@@ -237,6 +244,7 @@
         <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
         <span class="n">reset_weights</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">epochs_increase_per_query</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">heatmaps_per_iteration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LightningLoggerBase</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">LightningLoggerBase</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">early_stopping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">lr_scheduler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -259,6 +267,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_epochs</span> <span class="o">=</span> <span class="n">initial_epochs</span> <span class="k">if</span> <span class="n">initial_epochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">epochs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">items_to_label</span> <span class="o">=</span> <span class="n">items_to_label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="n">iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heatmaps_per_iteration</span> <span class="o">=</span> <span class="n">heatmaps_per_iteration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="o">=</span> <span class="n">lr_scheduler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_selection_criterion</span> <span class="o">=</span> <span class="n">model_selection_criterion</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_weights</span> <span class="o">=</span> <span class="n">reset_weights</span>
@@ -283,6 +292,19 @@
                     <span class="c1"># label batch</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">)</span>
 
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">heatmaps_per_iteration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="c1"># Get latest added items from dataset</span>
+                        <span class="n">items_to_inspect</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">_training_set</span><span class="o">.</span><span class="n">get_images_by_id</span><span class="p">(</span>
+                                <span class="n">case_ids</span><span class="o">=</span><span class="n">items_to_label</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">heatmaps_per_iteration</span><span class="p">],</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="c1"># Generate heatmaps using final predictions and heatmaps</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items_to_inspect</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__generate_and_log_heatmaps</span><span class="p">(</span>
+                                <span class="n">items_to_inspect</span><span class="o">=</span><span class="n">items_to_inspect</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span>
+                            <span class="p">)</span>
+
                     <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_trainer</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="n">iteration</span>
                     <span class="p">)</span>
@@ -293,7 +315,6 @@
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">current_epoch</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="n">iteration</span>
-
                 <span class="c1"># train model on labeled batch</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
 
@@ -363,7 +384,76 @@
             <span class="n">benchmark</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
             <span class="n">num_sanity_val_steps</span><span class="o">=</span><span class="n">num_sanity_val_steps</span><span class="p">,</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__generate_and_log_heatmaps</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">items_to_inspect</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates heatmaps using gradient based method and the prediction of the last layer of the model.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            items_to_inspect (List[Tuple[np.ndarray, str]]): A list with the items to generate heatmaps for.</span>
+<span class="sd">            iteration (int): The iteration of the active learning loop.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Generate heatmaps using final predictions and gradient based method</span>
+        <span class="n">gcam_images</span><span class="p">,</span> <span class="n">logit_images</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">img</span><span class="p">,</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">items_to_inspect</span><span class="p">:</span>
+            <span class="n">gcam_heatmap</span><span class="p">,</span> <span class="n">logit_heatmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generate_heatmaps</span><span class="p">(</span>
+                <span class="n">img</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">case_id</span><span class="o">=</span><span class="n">case_id</span>
+            <span class="p">)</span>
+            <span class="n">gcam_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">wandb</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span>
+                    <span class="n">gcam_heatmap</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;AL Iteration: </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">, Case ID: </span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">logit_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">wandb</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span>
+                    <span class="n">logit_heatmap</span><span class="p">,</span>
+                    <span class="n">caption</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;AL Iteration: </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">, Case ID: </span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="s2">&quot;GradCam heatmaps&quot;</span><span class="p">:</span> <span class="n">gcam_images</span><span class="p">})</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="s2">&quot;Logit heatmaps&quot;</span><span class="p">:</span> <span class="n">logit_images</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">__generate_heatmaps</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">case_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">target_category</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates two heatmaps: One based on the GradCam method and one based on the predictions of the last layer.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            img (np.ndarray): The image as numpy array.</span>
+<span class="sd">            case_id (str): The id of the current image.</span>
+<span class="sd">            target_category (int, optional): The label of the target class to analyze.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A tuple of both heatmaps. GradCamp heatmap, prediction heatmap.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">heatmap</span> <span class="o">=</span> <span class="n">HeatMaps</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">target_layers</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">conv</span><span class="p">]</span>
+        <span class="n">gcam_gray</span> <span class="o">=</span> <span class="n">heatmap</span><span class="o">.</span><span class="n">generate_grayscale_cam</span><span class="p">(</span>
+            <span class="n">input_tensor</span><span class="o">=</span><span class="n">input_tensor</span><span class="p">,</span>
+            <span class="n">target_category</span><span class="o">=</span><span class="n">target_category</span><span class="p">,</span>
+            <span class="n">target_layers</span><span class="o">=</span><span class="n">target_layers</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">logits_gray</span> <span class="o">=</span> <span class="n">heatmap</span><span class="o">.</span><span class="n">generate_grayscale_logits</span><span class="p">(</span>
+            <span class="n">input_tensor</span><span class="o">=</span><span class="n">input_tensor</span><span class="p">,</span> <span class="n">target_category</span><span class="o">=</span><span class="n">target_category</span>
+        <span class="p">)</span>
+        <span class="n">gcam_img</span> <span class="o">=</span> <span class="n">heatmap</span><span class="o">.</span><span class="n">show_grayscale_heatmap_on_image</span><span class="p">(</span>
+            <span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">grayscale_heatmap</span><span class="o">=</span><span class="n">gcam_gray</span>
+        <span class="p">)</span>
+        <span class="n">logits_img</span> <span class="o">=</span> <span class="n">heatmap</span><span class="o">.</span><span class="n">show_grayscale_heatmap_on_image</span><span class="p">(</span>
+            <span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">grayscale_heatmap</span><span class="o">=</span><span class="n">logits_gray</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated heatmaps for case </span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gcam_img</span><span class="p">,</span> <span class="n">logits_img</span></div>
 </pre></div>
 
               </article>
