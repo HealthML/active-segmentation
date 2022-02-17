@@ -286,7 +286,7 @@
 <div class="viewcode-block" id="run_active_learning_pipeline"><a class="viewcode-back" href="../main.html#main.run_active_learning_pipeline">[docs]</a><span class="k">def</span> <span class="nf">run_active_learning_pipeline</span><span class="p">(</span>
     <span class="n">architecture</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">dataset</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">strategy_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">experiment_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
     <span class="n">checkpoint_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -314,7 +314,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        architecture (string): Name of the desired model architecture. E.g. &#39;u_net&#39;.</span>
 <span class="sd">        dataset (string): Name of the dataset. E.g. &#39;brats&#39;</span>
-<span class="sd">        strategy (string): Name of the query strategy. E.g. &#39;random&#39;</span>
+<span class="sd">        strategy_config (dict): Configuration of the query strategy.</span>
 <span class="sd">        experiment_name (string): Name of the experiment.</span>
 <span class="sd">        batch_size (int, optional): Size of training examples passed in one training step.</span>
 <span class="sd">        checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.</span>
@@ -368,7 +368,7 @@
         <span class="n">data_module</span><span class="p">,</span> <span class="n">architecture</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">,</span> <span class="n">model_config</span>
     <span class="p">)</span>
 
-    <span class="n">strategy</span> <span class="o">=</span> <span class="n">create_query_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+    <span class="n">strategy</span> <span class="o">=</span> <span class="n">create_query_strategy</span><span class="p">(</span><span class="n">strategy_config</span><span class="o">=</span><span class="n">strategy_config</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">checkpoint_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wandb_logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -395,6 +395,7 @@
         <span class="n">early_stopping</span><span class="o">=</span><span class="n">early_stopping</span><span class="p">,</span>
         <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
         <span class="n">model_selection_criterion</span><span class="o">=</span><span class="n">model_selection_criterion</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;strategy_config&quot;</span><span class="p">,</span> <span class="p">{}),</span>
     <span class="p">)</span>
     <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
@@ -455,16 +456,16 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="create_query_strategy"><a class="viewcode-back" href="../main.html#main.create_query_strategy">[docs]</a><span class="k">def</span> <span class="nf">create_query_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="create_query_strategy"><a class="viewcode-back" href="../main.html#main.create_query_strategy">[docs]</a><span class="k">def</span> <span class="nf">create_query_strategy</span><span class="p">(</span><span class="n">strategy_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialises the chosen query strategy</span>
 <span class="sd">    Args:</span>
-<span class="sd">        strategy (str): Name of the query strategy. E.g. &#39;random&#39;</span>
+<span class="sd">        strategy_config (dict): Configuration of the query strategy</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RandomSamplingStrategy</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">UncertaintySamplingStrategy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UncertaintySamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid query strategy.&quot;</span><span class="p">)</span></div>
 
 
