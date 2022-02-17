@@ -1,6 +1,8 @@
 """ Module for random sampling strategy """
 from typing import List, Union
 
+import numpy as np
+
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
 from .query_strategy import QueryStrategy
@@ -33,19 +35,9 @@ class RandomSamplingStrategy(QueryStrategy):
         """
         # randomly select ids to query
 
-        selected_ids = []
-        selected_items = 0
+        unlabeled_image_ids = []
 
-        # shuffling of the dataset is used for randomization
         for _, image_ids in data_module.unlabeled_dataloader():
-            if selected_items == items_to_label:
-                break
+            unlabeled_image_ids.extend(image_ids)
 
-            batch_size = len(image_ids)
-
-            items_to_select = min(batch_size, items_to_label - selected_items)
-
-            selected_ids.extend(image_ids[:items_to_select])
-            selected_items += len(image_ids[:items_to_select])
-
-        return selected_ids
+        return list(np.random.choice(unlabeled_image_ids, size=items_to_label))
