@@ -7,6 +7,7 @@ from scipy.ndimage import distance_transform_edt
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
+from .functions import select_uncertainty_calculation
 from .query_strategy import QueryStrategy
 
 
@@ -15,7 +16,16 @@ class InterpolationSamplingStrategy(QueryStrategy):
     """
     Class for selecting blocks to label by highest uncertainty and then interpolating within those
     blocks to generate additonal pseudo labels.
+    Args:
+        **kwargs: Optional keyword arguments:
+            calculation_method (str): Specification of the method used to calculate the uncertainty
+                values: `"distance"` |  `"entropy"`.
+            exclude_background (bool): Whether to exclude the background dimension in calculating the
+                uncertainty value.
     """
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
 
     # pylint: disable=too-many-locals
     def select_items_to_label(
@@ -47,10 +57,23 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         slice_uncertainties = {}
 
+        # For the max_uncertainty_value we have two cases in out datasets:
+        # 1. multi-class, single-label (multiple foreground classes that are mutually exclusive) -> max_uncertainty is
+        #   1 / num_classes. This is because the softmax layer sums up all to 1 across labels.
+        # 2. multi-class, multi-label (multiple foreground classes that can overlap) -> max_uncertainty is 0.5
+        max_uncertainty_value = (
+            0.5 if data_module.multi_label() else 1 / data_module.num_classes()
+        )
+
         for images, case_ids in data_module.unlabeled_dataloader():
             predictions = models.predict(images.to(device))
-            uncertainty = (
-                torch.sum(torch.abs(0.5 - predictions), (1, 2, 3)).cpu().numpy()
+            uncertainty_calculation = select_uncertainty_calculation(
+                calculation_method=self.kwargs.get("calculation_method", None)
+            )
+            uncertainty = uncertainty_calculation(
+                predictions=predictions,
+                max_uncertainty_value=max_uncertainty_value,
+                **self.kwargs,
             )
 
             for idx, case_id in enumerate(case_ids):

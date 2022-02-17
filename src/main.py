@@ -289,7 +289,7 @@ def create_query_strategy(strategy_config: dict):
     if strategy_type == "random":
         return RandomSamplingStrategy()
     if strategy_type == "interpolation":
-        return InterpolationSamplingStrategy()
+        return InterpolationSamplingStrategy(**strategy_config)
     if strategy_type == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
     raise ValueError("Invalid query strategy.")

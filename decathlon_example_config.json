@@ -2,14 +2,14 @@
   "model_config": {
     "architecture": "u_net",
     "optimizer": "adam",
-    "loss": "dice",
+    "loss": "cross_entropy",
     "learning_rate": 0.0001,
     "num_levels": 4,
     "dim": 2,
     "model_selection_criterion": "mean_dice_score",
     "train_metrics": ["dice_score"],
     "train_metric_confidence_levels": [0.5],
-    "test_metrics": ["dice_score", "sensitivity", "specificity", "hausdorff95"],
+    "test_metrics": ["dice_score", "sensitivity", "specificity"],
     "test_metric_confidence_levels": [0.5]
   },
   "dataset_config": {
@@ -17,29 +17,29 @@
     "data_dir": "/dhc/groups/mpws2021cl1/Data/Decathlon",
     "cache_size": 250,
     "pin_memory": true,
-    "task": "Task04_Hippocampus"
+    "task": "Task04_Hippocampus",
+    "mask_join_non_zero": false
   },
   "active_learning_config": {
     "active_learning_mode": true,
     "reset_weights": false,
-    "initial_training_set_size": 128,
+    "initial_training_set_size": 64,
     "iterations": 50,
-    "items_to_label": 64,
-    "batch_size_unlabeled_set": 64,
+    "items_to_label": 32,
+    "batch_size_unlabeled_set": 32,
     "heatmaps_per_iteration": 0
   },
   "strategy_config": {
-    "type": "uncertainty",
+    "type": "interpolation",
     "calculation_method": "distance",
-    "exclude_background": true,
-    "prefer_unique_scans": true
+    "exclude_background": true
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
-  "experiment_name": "hippocampus-test",
+  "experiment_name": "hippocampus-test-interpolation",
   "experiment_tags": [],
   "batch_size": 32,
-  "epochs": 10,
+  "epochs": 2,
   "num_workers": 8,
   "gpus": 1,
   "prediction_count": 5,
