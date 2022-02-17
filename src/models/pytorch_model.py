@@ -279,6 +279,8 @@ class PytorchModel(LightningModule, ABC):
         wandb.define_metric("train/loss", step_metric="step")
         wandb.define_metric("train/mean_loss", step_metric="trainer/epoch")
         wandb.define_metric("val/mean_loss", step_metric="trainer/epoch")
+        wandb.define_metric("train/training_set_size", step_metric="trainer/iteration")
+        wandb.define_metric("train/unlabeled_set_size", step_metric="trainer/iteration")
 
         metric_kwargs = {
             "id_to_class_names": self.trainer.datamodule.id_to_class_names(),
@@ -420,6 +422,8 @@ class PytorchModel(LightningModule, ABC):
                 "trainer/epoch": self.current_epoch,
                 "trainer/iteration": self.iteration,
                 "train/mean_loss": losses.mean(),
+                "train/training_set_size": self.trainer.datamodule.training_set_size(),
+                "train/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
             }
         )
 
@@ -437,6 +441,8 @@ class PytorchModel(LightningModule, ABC):
         val_metrics = {
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
+            "train/training_set_size": self.trainer.datamodule.training_set_size(),
+            "train/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
         }
 
         for val_metric in self.val_metrics:
@@ -477,6 +483,8 @@ class PytorchModel(LightningModule, ABC):
         test_metrics = {
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
+            "train/training_set_size": self.trainer.datamodule.training_set_size(),
+            "train/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
         }
 
         for test_metric in self.test_metrics:
