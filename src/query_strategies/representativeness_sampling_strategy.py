@@ -1,4 +1,5 @@
 """ Module for representativeness sampling strategy """
+import logging
 import math
 from typing import List, Literal, Tuple, Union
 
@@ -6,6 +7,7 @@ import numpy as np
 import psutil
 import scipy.spatial
 from sklearn.cluster import MeanShift
+from sklearn.decomposition import PCA
 import torch
 
 from datasets import ActiveLearningDataModule
@@ -298,7 +300,34 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
         return selected_ids
 
     @staticmethod
+    def reduce_features(
+        feature_vectors: np.array, target_dimensionality: int = 10
+    ) -> np.array:
+        """
+        Reduces the dimensionality of feature vectors using a principle component analysis.
+
+        Args:
+            feature_vectors (numpy.array): Feature vectors to be reduced.
+            target_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
+                Defaults to 10.
+
+        Returns:
+            numpy.array: Reduced feature vectors.
+        """
+
+        min_values = feature_vectors.min(axis=0, keepdims=True)
+        max_values = feature_vectors.max(axis=0, keepdims=True)
+
+        normalized_feature_vectors = (feature_vectors - min_values) / (
+            max_values - min_values
+        )
+
+        pca = PCA(n_components=target_dimensionality).fit(normalized_feature_vectors)
+
+        return pca.transform(feature_vectors)
+
     def select_items_with_best_cluster_coverage(
+        self,
         feature_vectors_training_set: np.ndarray,
         feature_vectors_unlabeled_set: np.ndarray,
         case_ids: List[str],
@@ -328,13 +357,17 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
             (feature_vectors_training_set, feature_vectors_unlabeled_set)
         )
 
-        clustering = MeanShift().fit(feature_vectors)
+        reduced_feature_vectors = self.reduce_features(feature_vectors)
+
+        clustering = MeanShift(bandwidth=5).fit(reduced_feature_vectors)
 
         cluster_labels_training_set = clustering.labels_[:training_set_size]
         cluster_labels_unlabeled_set = clustering.labels_[training_set_size:]
 
         cluster_ids, cluster_sizes = np.unique(clustering.labels_, return_counts=True)
         cluster_sizes_total = dict(zip(cluster_ids, cluster_sizes))
+
+        logging.info("Sizes of current feature clusters: %s", cluster_sizes_total)
 
         cluster_ids_training_set, cluster_sizes_training_set = np.unique(
             cluster_labels_training_set, return_counts=True
@@ -354,10 +387,15 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
 
         for _ in range(min(items_to_label, unlabeled_set_size)):
 
-            relative_cluster_sizes_training_set = {
-                cluster_id: cluster_sizes_training_set[cluster_id] / total_cluster_size
-                for cluster_id, total_cluster_size in cluster_sizes_total.items()
-            }
+            relative_cluster_sizes_training_set = {}
+
+            for cluster_id, total_cluster_size in cluster_sizes_total.items():
+                if cluster_id in cluster_sizes_training_set:
+                    relative_cluster_sizes_training_set[cluster_id] = (
+                        cluster_sizes_training_set[cluster_id] / total_cluster_size
+                    )
+                else:
+                    relative_cluster_sizes_training_set[cluster_id] = 0
 
             relative_cluster_sizes = list(relative_cluster_sizes_training_set.items())
 
@@ -376,7 +414,10 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
             selected_case_id = np.random.choice(case_ids_belonging_to_selected_cluster)
 
             is_selected[case_ids == selected_case_id] = True
-            cluster_sizes_training_set[selected_cluster_id] += 1
+            if selected_cluster_id not in cluster_sizes_training_set:
+                cluster_sizes_training_set[selected_cluster_id] = 1
+            else:
+                cluster_sizes_training_set[selected_cluster_id] += 1
             cluster_sizes_unlabeled_set[selected_cluster_id] -= 1
 
             selected_ids.append(selected_case_id)
