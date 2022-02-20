@@ -32,7 +32,8 @@
   "strategy_config": {
     "type": "interpolation",
     "calculation_method": "distance",
-    "exclude_background": true
+    "exclude_background": true,
+    "block_thickness": 10
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",

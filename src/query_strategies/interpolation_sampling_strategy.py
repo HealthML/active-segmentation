@@ -79,7 +79,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
             for idx, case_id in enumerate(case_ids):
                 slice_uncertainties[case_id] = uncertainty[idx]
 
-        block_thickness = kwargs.get("block_thickness", 5)
+        block_thickness = self.kwargs.get("block_thickness", 5)
 
         block_uncertainties = []
         for case_id in slice_uncertainties:
