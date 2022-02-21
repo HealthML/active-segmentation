@@ -32,7 +32,8 @@ class BraTSDataModule(ActiveLearningDataModule):
             (default = True)
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
-        random_state (int): Random constant for shuffling the data
+        random_state (int, optional): Random state for splitting the data into an initial training set and an unlabeled
+            set and for shuffling the data. Pass an int for reproducibility across runs.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -91,7 +92,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         dim: int = 2,
         mask_join_non_zero: bool = True,
         mask_filter_values: Optional[Tuple[int]] = None,
-        random_state: int = 42,
+        random_state: int = None,
         **kwargs,
     ):
 
@@ -111,6 +112,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.cache_size = cache_size
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
+        self.random_state = random_state
 
         if self.active_learning_mode:
             (
@@ -204,6 +206,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
             slice_indices=self.initial_training_samples,
+            random_state=self.random_state,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -237,6 +240,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
             case_id_prefix="val",
+            random_state=self.random_state,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -261,6 +265,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 mask_join_non_zero=self.mask_join_non_zero,
                 mask_filter_values=self.mask_filter_values,
                 slice_indices=self.initial_unlabeled_samples,
+                random_state=self.random_state,
             )
 
         # unlabeled set is empty

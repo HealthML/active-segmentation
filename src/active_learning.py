@@ -205,7 +205,7 @@ class ActiveLearningPipeline:
         callbacks.append(checkpoint_callback)
 
         return Trainer(
-            deterministic=False,
+            deterministic=True,
             profiler="simple",
             max_epochs=epochs + iteration * self.epochs_increase_per_query
             if iteration is not None

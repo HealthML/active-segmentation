@@ -2,7 +2,6 @@
 from io import TextIOWrapper
 import json
 import os
-import random
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
@@ -34,7 +33,8 @@ class DecathlonDataModule(ActiveLearningDataModule):
             (default = True)
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
-        random_state (int): Random constant for shuffling the data
+        random_state (int, optional): Random state for splitting the data into an initial training set and an unlabeled
+            set and for shuffling the data. Pass an int for reproducibility across runs.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -77,6 +77,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         dir_path: str,
         subset: Literal["train", "val", "test"],
         random_samples: Optional[int] = None,
+        random_state: Optional[int] = None,
     ) -> Tuple[List[str], List[str]]:
         """
         Discover the .nii file paths from the corresponding JSON file.
@@ -104,8 +105,8 @@ class DecathlonDataModule(ActiveLearningDataModule):
                 ]
 
                 if random_samples is not None and random_samples < len(cases):
-                    random.seed(42)
-                    cases = random.sample(cases, random_samples)
+                    rng = np.random.default_rng(random_state)
+                    cases = rng.choice(cases, random_samples, replace=False)
 
                 image_paths = [
                     os.path.join(dir_path, case["image"][2:]) for case in cases
@@ -135,7 +136,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         dim: int = 2,
         mask_join_non_zero: bool = True,
         mask_filter_values: Optional[Tuple[int]] = None,
-        random_state: int = 42,
+        random_state: Optional[int] = None,
         **kwargs,
     ):
 
@@ -156,6 +157,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
         self._data_channels = DecathlonDataModule.__read_data_channels(self.data_folder)
+        self.random_state = random_state
 
         if self.active_learning_mode:
             (
@@ -252,6 +254,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
             slice_indices=self.initial_training_samples,
+            random_state=self.random_state,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -285,6 +288,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
             case_id_prefix="val",
+            random_state=self.random_state,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -310,6 +314,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
                 mask_join_non_zero=self.mask_join_non_zero,
                 mask_filter_values=self.mask_filter_values,
                 slice_indices=self.initial_unlabeled_samples,
+                random_state=self.random_state,
             )
 
         # unlabeled set is empty

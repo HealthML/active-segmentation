@@ -3,7 +3,9 @@ import json
 import os.path
 from typing import Any, Dict, Iterable, Optional
 
+import torch
 import fire
+import pytorch_lightning
 from pytorch_lightning.loggers import WandbLogger
 import wandb
 
@@ -157,6 +159,15 @@ def run_active_learning_pipeline(
         None.
     """
 
+    # set global seed for reproducibility
+    pytorch_lightning.utilities.seed.seed_everything(random_state)
+    torch.backends.cudnn.deterministic = True
+
+    if model_config.get("dim") == 2:
+        # Pytorch lightning currently does not support deterministic 3d max pooling
+        # therefore this option is only enabled for the 2d case
+        torch.use_deterministic_algorithms(True)
+
     wandb_logger = WandbLogger(
         project=wandb_project_name,
         entity="active-segmentation",
@@ -281,7 +292,7 @@ def create_query_strategy(strategy_config: dict):
         strategy_config (dict): Configuration of the query strategy
     """
     if strategy_config.get("type") == "random":
-        return RandomSamplingStrategy()
+        return RandomSamplingStrategy(**strategy_config)
     if strategy_config.get("type") == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
     raise ValueError("Invalid query strategy.")
@@ -356,9 +367,7 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(
-            **config,
-        )
+        run_active_learning_pipeline(**config)
 
 
 if __name__ == "__main__":

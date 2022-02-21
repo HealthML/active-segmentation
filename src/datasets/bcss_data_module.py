@@ -34,7 +34,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             (default = True)
         val_set_size (float, optional): The size of the validation set (default = 0.3).
         stratify (bool, optional): The option to stratify the train val split by the institutes.
-        random_state (int): Random constant for shuffling the data
+        random_state (int, optional): Controls the data splitting and shuffling. Pass an int for reproducible output
+            across multiple runs.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -102,7 +103,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         mask_join_non_zero: bool = True,
         val_set_size: float = 0.3,
         stratify: bool = True,
-        random_state: int = 42,
+        random_state: Optional[int] = None,
         **kwargs,
     ):
 
@@ -231,6 +232,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_shape=self.image_shape,
             target_label=self.target_label,
             cache_size=self.cache_size,
+            random_state=self.random_state,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -261,6 +263,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_shape=self.image_shape,
             target_label=self.target_label,
             cache_size=self.cache_size,
+            random_state=self.random_state,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -277,6 +280,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_shape=self.image_shape,
             target_label=self.target_label,
             cache_size=self.cache_size,
+            random_state=self.random_state,
         )
 
     def _create_unlabeled_set(self) -> Optional[Dataset]:
@@ -305,6 +309,7 @@ class BCSSDataModule(ActiveLearningDataModule):
                 target_label=self.target_label,
                 cache_size=self.cache_size,
                 is_unlabeled=True,
+                random_state=self.random_state,
             )
         # Unlabeled set is empty
         unlabeled_set = self._create_training_set()
