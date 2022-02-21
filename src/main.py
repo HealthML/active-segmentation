@@ -15,7 +15,11 @@ from datasets import (
     DecathlonDataModule,
     BCSSDataModule,
 )
-from query_strategies import RandomSamplingStrategy, UncertaintySamplingStrategy
+from query_strategies import (
+    RandomSamplingStrategy,
+    UncertaintySamplingStrategy,
+    RepresentativenessSamplingStrategy,
+)
 
 
 def create_data_module(
@@ -284,6 +288,8 @@ def create_query_strategy(strategy_config: dict):
         return RandomSamplingStrategy()
     if strategy_config.get("type") == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
+    if strategy_config.get("type") == "representativeness":
+        return RepresentativenessSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 
