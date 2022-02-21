@@ -274,3 +274,11 @@ class BCSSDataset(IterableDataset):
     def image_ids(self) -> List[str]:
         """For each image returns the case ID's"""
         return [self.get_case_id(filepath=path) for path in self.image_paths]
+
+    def size(self) -> int:
+        """
+        Returns:
+            int: Size of the dataset.
+        """
+
+        return self.__len__()

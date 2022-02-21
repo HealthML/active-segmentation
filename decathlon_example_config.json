@@ -23,7 +23,7 @@
     "active_learning_mode": true,
     "reset_weights": false,
     "initial_training_set_size": 128,
-    "iterations": 50,
+    "iterations": null,
     "items_to_label": 64,
     "batch_size_unlabeled_set": 64,
     "heatmaps_per_iteration": 0

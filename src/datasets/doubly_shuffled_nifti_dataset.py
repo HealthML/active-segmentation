@@ -335,7 +335,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 filepaths=self.image_paths,
                 dim=self.dim,
                 shuffle=self.shuffle,
-                seed=42,
+                seed=None,
                 slice_indices=slice_indices,
             )
         )
@@ -558,3 +558,19 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             DoublyShuffledNIfTIDataset.__read_slice_count(self.image_paths[image_idx])
             for image_idx in self.__image_indices()
         ]
+
+    def size(self) -> int:
+        """
+        Returns:
+            int: Size of the dataset.
+        """
+
+        if self.dim == 2:
+            size = 0
+
+            for inner_dict in self.image_slice_indices.values():
+                size += len(inner_dict)
+
+            return size
+
+        return len(self.image_ids)
