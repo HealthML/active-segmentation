@@ -139,12 +139,14 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
     @abstractmethod
-    def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+    def label_items(
+        self, ids: List[str], pseudo_labels: Optional[Dict[str, Any]] = None
+    ) -> None:
         """
         Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
         Args:
-            ids: IDs of the items to be labeled.
-            labels: Labels for the selected data items.
+            ids (List[str]): IDs of the items to be labeled.
+            pseudo_labels (Dict[str, Any], optional): Optional pseudo labels for (some of the) the selected data items.
 
         Returns:
             None.
@@ -221,7 +223,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._training_set:
-            return len(self._training_set)
+            return self._training_set.size()
         return 0
 
     def validation_set_size(self) -> int:
@@ -231,7 +233,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._validation_set:
-            return len(self._validation_set)
+            return self._validation_set.size()
         return 0
 
     def test_set_size(self) -> int:
@@ -241,7 +243,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._test_set:
-            return len(self._test_set)
+            return self._test_set.size()
         return 0
 
     def unlabeled_set_size(self) -> int:
@@ -251,7 +253,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         """
 
         if self._unlabeled_set:
-            return len(self._unlabeled_set)
+            return self._unlabeled_set.size()
         return 0
 
     def num_classes(self) -> int:

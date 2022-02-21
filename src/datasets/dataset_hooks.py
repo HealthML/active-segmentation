@@ -10,6 +10,13 @@ class DatasetHooks(ABC):
     """
 
     @abstractmethod
+    def size(self) -> int:
+        """
+        Returns:
+            int: Size of the dataset.
+        """
+
+    @abstractmethod
     def image_ids(self) -> Iterable[str]:
         """
         Returns:

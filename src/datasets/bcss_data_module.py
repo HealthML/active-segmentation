@@ -127,7 +127,9 @@ class BCSSDataModule(ActiveLearningDataModule):
         self.random_state = random_state
         self.split = {}
 
-    def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+    def label_items(
+        self, ids: List[str], pseudo_labels: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
         if self._training_set is not None and self._unlabeled_set is not None:
