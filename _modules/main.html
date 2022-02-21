@@ -197,7 +197,11 @@
     <span class="n">DecathlonDataModule</span><span class="p">,</span>
     <span class="n">BCSSDataModule</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="n">RandomSamplingStrategy</span><span class="p">,</span> <span class="n">UncertaintySamplingStrategy</span>
+<span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RandomSamplingStrategy</span><span class="p">,</span>
+    <span class="n">UncertaintySamplingStrategy</span><span class="p">,</span>
+    <span class="n">RepresentativenessSamplingStrategy</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="create_data_module"><a class="viewcode-back" href="../main.html#main.create_data_module">[docs]</a><span class="k">def</span> <span class="nf">create_data_module</span><span class="p">(</span>
@@ -466,6 +470,8 @@
         <span class="k">return</span> <span class="n">RandomSamplingStrategy</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UncertaintySamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;representativeness&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RepresentativenessSamplingStrategy</span><span class="p">()</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid query strategy.&quot;</span><span class="p">)</span></div>
 
 
