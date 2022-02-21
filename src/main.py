@@ -204,9 +204,6 @@ def run_active_learning_pipeline(
         initial_epochs=active_learning_config.get("initial_epochs", epochs),
         items_to_label=active_learning_config.get("items_to_label", 1),
         iterations=active_learning_config.get("iterations", None),
-        stop_when_all_items_labeled=active_learning_config.get(
-            "stop_when_all_items_labeled", True
-        ),
         reset_weights=active_learning_config.get("reset_weights", False),
         epochs_increase_per_query=active_learning_config.get(
             "epochs_increase_per_query", 0
