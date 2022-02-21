@@ -134,7 +134,8 @@ class ActiveLearningPipeline:
                 if self.reset_weights:
                     self.model.reset_parameters()
 
-                self.model.start_epoch = self.model.current_epoch
+                self.model.start_epoch = self.model.current_epoch + 1
+
                 self.model.iteration = iteration
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
