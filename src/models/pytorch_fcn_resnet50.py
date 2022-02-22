@@ -18,6 +18,7 @@ class PytorchFCNResnet50(PytorchModel):
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
+        self.save_hyperparameters()
 
         self.model = models.segmentation.fcn_resnet50(
             pretrained=True, progress=True, num_classes=21
