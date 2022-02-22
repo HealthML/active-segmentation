@@ -126,10 +126,8 @@ class ActiveLearningPipeline:
 
                     if self.heatmaps_per_iteration > 0:
                         # Get latest added items from dataset
-                        items_to_inspect = (
-                            self.data_module._training_set.get_images_by_id(
-                                case_ids=items_to_label[: self.heatmaps_per_iteration],
-                            )
+                        items_to_inspect = self.data_module._training_set.get_images_by_id(
+                            case_ids=items_to_label[: self.heatmaps_per_iteration],
                         )
                         # Generate heatmaps using final predictions and heatmaps
                         if len(items_to_inspect) > 0:
@@ -142,7 +140,7 @@ class ActiveLearningPipeline:
                     )
 
                 # optionally reset weights after fitting on new data
-                if self.reset_weights:
+                if self.reset_weights and iteration != 0:
                     self.model.reset_parameters()
 
                 self.model.start_epoch = self.model.current_epoch + 1
@@ -263,10 +261,7 @@ class ActiveLearningPipeline:
         wandb.log({"Logit heatmaps": logit_images})
 
     def __generate_heatmaps(
-        self,
-        img: np.ndarray,
-        case_id: str,
-        target_category: int = 1,
+        self, img: np.ndarray, case_id: str, target_category: int = 1,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Generates two heatmaps: One based on the GradCam method and one based on the predictions of the last layer.
