@@ -110,7 +110,7 @@ class ActiveLearningPipeline:
                 )
 
             # run pipeline
-            for iteration in range(0, self.iterations):
+            for iteration in range(0, self.iterations + 1):
                 # skip labeling in the first iteration because the model hasn't trained yet
                 if iteration != 0:
                     # query batch selection
