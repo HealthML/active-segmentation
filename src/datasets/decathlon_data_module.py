@@ -223,19 +223,19 @@ class DecathlonDataModule(ActiveLearningDataModule):
             for split_id in image_slice_ids
         ]
 
-        if self._training_set is not None and self._unlabeled_set is not None:
+        if self.training_set is not None and self.unlabeled_set is not None:
 
             for case_id, (image_id, slice_id) in zip(ids, image_slice_ids):
                 if self.dim == 3 and slice_id is None:
                     slice_id = 0
 
                 if pseudo_labels is not None and case_id in pseudo_labels:
-                    self._training_set.add_image(
+                    self.training_set.add_image(
                         image_id, slice_id, pseudo_labels[case_id]
                     )
                 else:
-                    self._training_set.add_image(image_id, slice_id)
-                    self._unlabeled_set.remove_image(image_id, slice_id)
+                    self.training_set.add_image(image_id, slice_id)
+                    self.unlabeled_set.remove_image(image_id, slice_id)
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
@@ -262,9 +262,9 @@ class DecathlonDataModule(ActiveLearningDataModule):
 
         # disable shuffling in the dataloader since the dataset is a subclass of
         # IterableDataset and implements it's own shuffling
-        if self._training_set:
+        if self.training_set:
             return DataLoader(
-                self._training_set,
+                self.training_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
