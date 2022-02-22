@@ -7,7 +7,7 @@ from scipy.ndimage import distance_transform_edt
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
-from .functions import select_uncertainty_calculation
+from .utils import select_uncertainty_calculation
 from .query_strategy import QueryStrategy
 
 
@@ -22,6 +22,9 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 values: `"distance"` |  `"entropy"`.
             exclude_background (bool): Whether to exclude the background dimension in calculating the
                 uncertainty value.
+            epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
+                metric.
+            block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
     """
 
     def __init__(self, **kwargs):
@@ -44,7 +47,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], Dict[str, np.array]]: List of IDs of the data items to be labeled and a
+            dictonary of pseudo labels with the corresponding IDs as keys.
         """
 
         if isinstance(models, List):
@@ -83,11 +87,11 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         block_uncertainties = []
         for case_id in slice_uncertainties:
-            prefix, image_slice_ids = case_id.split("_")
-            image_id, top_slice_id = map(int, image_slice_ids.split("-"))
+            prefix, image_slice_id = case_id.split("_")
+            image_id, top_slice_id = map(int, image_slice_id.split("-"))
 
             if top_slice_id < block_thickness - 1:
-                # We only want blokcs which have the full thickness
+                # We only want blocks which have the full thickness
                 continue
 
             uncertainties = [

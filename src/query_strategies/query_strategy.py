@@ -27,7 +27,8 @@ class QueryStrategy(ABC):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], Optional[Dict[str, np.array]]]: List of IDs of the data items to be labeled
+            and an optional dictonary of pseudo labels with the corresponding IDs as keys.
         """
 
         raise NotImplementedError()

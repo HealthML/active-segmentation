@@ -31,7 +31,8 @@ class RandomSamplingStrategy(QueryStrategy):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
+                generated.
         """
         # randomly select ids to query
 

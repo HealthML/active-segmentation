@@ -5,7 +5,7 @@ import torch
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
-from .functions import clean_duplicate_scans, select_uncertainty_calculation
+from .utils import clean_duplicate_scans, select_uncertainty_calculation
 from .query_strategy import QueryStrategy
 
 
@@ -23,6 +23,8 @@ class UncertaintySamplingStrategy(QueryStrategy):
                 scans, if possible.
                 E.g. with items_to_label set to 2:
                 ['slice_1-32', 'slice_1-33', 'slice_2-50'] -> ['slice_1-32', 'slice_2-50']
+            epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
+                metric.
     """
 
     def __init__(self, **kwargs):
@@ -50,7 +52,8 @@ class UncertaintySamplingStrategy(QueryStrategy):
                         uncertainty value.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
+                generated.
         """
 
         if isinstance(models, List):
