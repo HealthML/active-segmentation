@@ -200,6 +200,7 @@
 <span class="kn">from</span> <span class="nn">query_strategies</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">RandomSamplingStrategy</span><span class="p">,</span>
     <span class="n">UncertaintySamplingStrategy</span><span class="p">,</span>
+    <span class="n">InterpolationSamplingStrategy</span><span class="p">,</span>
     <span class="n">RepresentativenessSamplingStrategy</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -466,9 +467,13 @@
 <span class="sd">    Args:</span>
 <span class="sd">        strategy_config (dict): Configuration of the query strategy</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
+    <span class="n">strategy_type</span> <span class="o">=</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RandomSamplingStrategy</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">InterpolationSamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UncertaintySamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;representativeness&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RepresentativenessSamplingStrategy</span><span class="p">()</span>
