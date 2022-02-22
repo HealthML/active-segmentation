@@ -57,10 +57,10 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
         self.pin_memory = pin_memory
         self.shuffle = shuffle
 
-        self._training_set = None
-        self._validation_set = None
-        self._test_set = None
-        self._unlabeled_set = None
+        self.training_set = None
+        self.validation_set = None
+        self.test_set = None
+        self.unlabeled_set = None
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
@@ -69,10 +69,10 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             stage: Current training stage.
         """
 
-        self._training_set = self._create_training_set()
-        self._validation_set = self._create_validation_set()
-        self._test_set = self._create_test_set()
-        self._unlabeled_set = self._create_unlabeled_set()
+        self.training_set = self._create_training_set()
+        self.validation_set = self._create_validation_set()
+        self.test_set = self._create_test_set()
+        self.unlabeled_set = self._create_unlabeled_set()
 
     @staticmethod
     def data_channels() -> int:
@@ -158,9 +158,9 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Pytorch dataloader or Keras sequence representing the training set.
         """
 
-        if self._training_set:
+        if self.training_set:
             return DataLoader(
-                self._training_set,
+                self.training_set,
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
                 num_workers=self.num_workers,
@@ -175,9 +175,9 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Pytorch dataloader or Keras sequence representing the validation set.
         """
 
-        if self._validation_set:
+        if self.validation_set:
             return DataLoader(
-                self._validation_set,
+                self.validation_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
@@ -191,9 +191,9 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Pytorch dataloader or Keras sequence representing the test set.
         """
 
-        if self._test_set:
+        if self.test_set:
             return DataLoader(
-                self._test_set,
+                self.test_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 collate_fn=self._get_collate_fn(),
@@ -206,9 +206,9 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Pytorch dataloader or Keras sequence representing the unlabeled set.
         """
 
-        if self._unlabeled_set:
+        if self.unlabeled_set:
             return DataLoader(
-                self._unlabeled_set,
+                self.unlabeled_set,
                 batch_size=self.batch_size_unlabeled_set,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
@@ -222,8 +222,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Size of training set.
         """
 
-        if self._training_set:
-            return self._training_set.size()
+        if self.training_set:
+            return self.training_set.size()
         return 0
 
     def validation_set_size(self) -> int:
@@ -232,8 +232,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Size of validation set.
         """
 
-        if self._validation_set:
-            return self._validation_set.size()
+        if self.validation_set:
+            return self.validation_set.size()
         return 0
 
     def test_set_size(self) -> int:
@@ -242,8 +242,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Size of test set.
         """
 
-        if self._test_set:
-            return self._test_set.size()
+        if self.test_set:
+            return self.test_set.size()
         return 0
 
     def unlabeled_set_size(self) -> int:
@@ -252,8 +252,8 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             Number of unlabeled items.
         """
 
-        if self._unlabeled_set:
-            return self._unlabeled_set.size()
+        if self.unlabeled_set:
+            return self.unlabeled_set.size()
         return 0
 
     def num_classes(self) -> int:

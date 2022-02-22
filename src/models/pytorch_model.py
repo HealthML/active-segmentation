@@ -276,9 +276,21 @@ class PytorchModel(LightningModule, ABC):
         # see https://docs.wandb.ai/guides/track/log#customize-axes-and-summaries-with-define_metric
         wandb.define_metric("trainer/epoch")
         wandb.define_metric("trainer/iteration")
-        wandb.define_metric("train/loss", step_metric="step")
+        wandb.define_metric("train/loss", step_metric="Step")
         wandb.define_metric("train/mean_loss", step_metric="trainer/epoch")
         wandb.define_metric("val/mean_loss", step_metric="trainer/epoch")
+        wandb.define_metric(
+            "trainer/training_set_size", step_metric="trainer/iteration"
+        )
+        wandb.define_metric(
+            "trainer/training_set_n_cases", step_metric="trainer/iteration"
+        )
+        wandb.define_metric(
+            "trainer/unlabeled_set_size", step_metric="trainer/iteration"
+        )
+        wandb.define_metric(
+            "trainer/unlabeled_set_n_cases", step_metric="trainer/iteration"
+        )
 
         metric_kwargs = {
             "id_to_class_names": self.trainer.datamodule.id_to_class_names(),
@@ -400,7 +412,19 @@ class PytorchModel(LightningModule, ABC):
         Args:
             outputs: List of return values of all training steps of the current training epoch.
         """
-        train_metrics = {}
+
+        train_metrics = {
+            "trainer/epoch": self.current_epoch,
+            "trainer/iteration": self.iteration,
+            "trainer/training_set_size": self.trainer.datamodule.training_set_size(),
+            "trainer/training_set_n_cases": len(
+                set(self.trainer.datamodule.training_set.image_ids())
+            ),
+            "trainer/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
+            "trainer/unlabeled_set_n_cases": len(
+                set(self.trainer.datamodule.unlabeled_set.image_ids())
+            ),
+        }
 
         # collect loss values
         if isinstance(outputs, torch.Tensor):
@@ -410,18 +434,13 @@ class PytorchModel(LightningModule, ABC):
                 [item["loss"] if isinstance(item, dict) else item for item in outputs]
             )
 
+        train_metrics["train/mean_loss"] = losses.mean()
+
         for train_metric in self.train_metrics:
             train_metrics = {**train_metrics, **train_metric.compute()}
             train_metric.reset()
 
-        self.logger.log_metrics(
-            {
-                **train_metrics,
-                "trainer/epoch": self.current_epoch,
-                "trainer/iteration": self.iteration,
-                "train/mean_loss": losses.mean(),
-            }
-        )
+        self.logger.log_metrics(train_metrics)
 
     def validation_epoch_end(
         self,
@@ -437,6 +456,14 @@ class PytorchModel(LightningModule, ABC):
         val_metrics = {
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
+            "trainer/training_set_size": self.trainer.datamodule.training_set_size(),
+            "trainer/training_set_n_cases": len(
+                set(self.trainer.datamodule.training_set.image_ids())
+            ),
+            "trainer/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
+            "trainer/unlabeled_set_n_cases": len(
+                set(self.trainer.datamodule.unlabeled_set.image_ids())
+            ),
         }
 
         for val_metric in self.val_metrics:
@@ -477,6 +504,14 @@ class PytorchModel(LightningModule, ABC):
         test_metrics = {
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
+            "train/training_set_size": self.trainer.datamodule.training_set_size(),
+            "train/training_set_n_cases": len(
+                set(self.trainer.datamodule.training_set.image_ids())
+            ),
+            "train/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
+            "train/unlabeled_set_n_cases": len(
+                set(self.trainer.datamodule.unlabeled_set.image_ids())
+            ),
         }
 
         for test_metric in self.test_metrics:
