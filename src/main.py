@@ -19,6 +19,7 @@ from query_strategies import (
     RandomSamplingStrategy,
     UncertaintySamplingStrategy,
     InterpolationSamplingStrategy,
+    RepresentativenessSamplingStrategy,
 )
 
 
@@ -207,7 +208,7 @@ def run_active_learning_pipeline(
         active_learning_mode=active_learning_config.get("active_learning_mode", False),
         initial_epochs=active_learning_config.get("initial_epochs", epochs),
         items_to_label=active_learning_config.get("items_to_label", 1),
-        iterations=active_learning_config.get("iterations", 10),
+        iterations=active_learning_config.get("iterations", None),
         reset_weights=active_learning_config.get("reset_weights", False),
         epochs_increase_per_query=active_learning_config.get(
             "epochs_increase_per_query", 0
@@ -292,6 +293,8 @@ def create_query_strategy(strategy_config: dict):
         return InterpolationSamplingStrategy(**strategy_config)
     if strategy_type == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
+    if strategy_config.get("type") == "representativeness":
+        return RepresentativenessSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 

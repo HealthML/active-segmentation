@@ -223,7 +223,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             for split_id in image_slice_ids
         ]
 
-        if self.training_set is not None and self._unlabeled_set is not None:
+        if self.training_set is not None and self.unlabeled_set is not None:
 
             for case_id, (image_id, slice_id) in zip(ids, image_slice_ids):
                 if self.dim == 3 and slice_id is None:
@@ -235,7 +235,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
                     )
                 else:
                     self.training_set.add_image(image_id, slice_id)
-                    self._unlabeled_set.remove_image(image_id, slice_id)
+                    self.unlabeled_set.remove_image(image_id, slice_id)
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""

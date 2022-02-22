@@ -132,7 +132,7 @@ class BCSSDataModule(ActiveLearningDataModule):
     ) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
-        if self.training_set is not None and self._unlabeled_set is not None:
+        if self.training_set is not None and self.unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
                 self._case_id_to_filepaths(
                     case_id=case_id,
@@ -146,7 +146,7 @@ class BCSSDataModule(ActiveLearningDataModule):
                 self.training_set.add_image(
                     labeled_image_path, labeled_image_annotation_path
                 )
-                self._unlabeled_set.remove_image(
+                self.unlabeled_set.remove_image(
                     labeled_image_path, labeled_image_annotation_path
                 )
 

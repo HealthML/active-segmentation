@@ -5,3 +5,6 @@ from query_strategies.uncertainty_sampling_strategy import UncertaintySamplingSt
 from query_strategies.interpolation_sampling_strategy import (
     InterpolationSamplingStrategy,
 )
+from query_strategies.representativeness_sampling_strategy import (
+    RepresentativenessSamplingStrategy,
+)

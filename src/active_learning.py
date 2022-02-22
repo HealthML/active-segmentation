@@ -1,5 +1,6 @@
 """ Module containing the active learning pipeline """
 
+import math
 import os
 from typing import Iterable, Optional, Union, Tuple, List
 
@@ -29,21 +30,21 @@ class ActiveLearningPipeline:
         gpus (int): Number of GPUS to use for model training.
         checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
         early_stopping (bool, optional): Enable/Disable Early stopping when model
-            is not learning anymore (default = False).
+            is not learning anymore. Defaults to False.
         logger: A logger object as defined by Pytorch Lightning.
         lr_scheduler (string, optional): Algorithm used for dynamically updating the
             learning rate during training. E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
-        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline (default = False).
+        active_learning_mode (bool, optional): Enable/Disabled Active Learning Pipeline. Defaults to False.
         initial_epochs (int, optional): Number of epochs the initial model should be trained. Defaults to `epochs`.
         items_to_label (int, optional): Number of items that should be selected for labeling in the active learning run.
-            (default = 1).
-        iterations (int, optional): Number of iterations how often the active learning pipeline should be
-            executed (default = 10).
+            Defaults to 1.
+        iterations (int, optional): iteration times how often the active learning pipeline should be
+            executed. If None, the active learning pipeline is run until the whole dataset is labeled. Defaults to None.
         reset_weights (bool, optional): Enable/Disable resetting of weights after every active learning run
         epochs_increase_per_query (int, optional): Increase number of epochs for every query to compensate for
-            the increased training dataset size (default = 0).
-        heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration.
-            (default = 0)
+            the increased training dataset size. Defaults to 0.
+        heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration. Defaults to
+            0.
         **kwargs: Additional, strategy-specific parameters.
     """
 
@@ -60,7 +61,7 @@ class ActiveLearningPipeline:
         active_learning_mode: bool = False,
         initial_epochs: Optional[int] = None,
         items_to_label: int = 1,
-        iterations: int = 10,
+        iterations: Optional[int] = None,
         reset_weights: bool = False,
         epochs_increase_per_query: int = 0,
         heatmaps_per_iteration: int = 0,
@@ -102,16 +103,29 @@ class ActiveLearningPipeline:
 
         if self.active_learning_mode:
             self.model_trainer = self.setup_trainer(self.initial_epochs, iteration=0)
+
+            if self.iterations is None:
+                self.iterations = math.ceil(
+                    self.data_module.unlabeled_set_size() / self.items_to_label
+                )
+
             # run pipeline
             for iteration in range(0, self.iterations):
                 # skip labeling in the first iteration because the model hasn't trained yet
                 if iteration != 0:
                     # query batch selection
-                    items_to_label, pseudo_labels = self.strategy.select_items_to_label(
-                        self.model, self.data_module, self.items_to_label, **self.kwargs
-                    )
-                    # label batch
-                    self.data_module.label_items(items_to_label, pseudo_labels)
+                    if self.data_module.unlabeled_set_size() > 0:
+                        (
+                            items_to_label,
+                            pseudo_labels,
+                        ) = self.strategy.select_items_to_label(
+                            self.model,
+                            self.data_module,
+                            self.items_to_label,
+                            **self.kwargs,
+                        )
+                        # label batch
+                        self.data_module.label_items(items_to_label, pseudo_labels)
 
                     if self.heatmaps_per_iteration > 0:
                         # Get latest added items from dataset
@@ -134,7 +148,8 @@ class ActiveLearningPipeline:
                 if self.reset_weights:
                     self.model.reset_parameters()
 
-                self.model.start_epoch = self.model.current_epoch
+                self.model.start_epoch = self.model.current_epoch + 1
+
                 self.model.iteration = iteration
                 # train model on labeled batch
                 self.model_trainer.fit(self.model, self.data_module)
@@ -143,7 +158,6 @@ class ActiveLearningPipeline:
                 self.model_trainer.validate(
                     ckpt_path="best", dataloaders=self.data_module
                 )
-
         else:
             self.model_trainer = self.setup_trainer(self.epochs, iteration=0)
             # run regular fit run with all the data if no active learning mode

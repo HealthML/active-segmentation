@@ -23,10 +23,10 @@
   "active_learning_config": {
     "active_learning_mode": true,
     "reset_weights": false,
-    "initial_training_set_size": 64,
-    "iterations": 50,
-    "items_to_label": 32,
-    "batch_size_unlabeled_set": 32,
+    "initial_training_set_size": 128,
+    "iterations": null,
+    "items_to_label": 64,
+    "batch_size_unlabeled_set": 64,
     "heatmaps_per_iteration": 0
   },
   "strategy_config": {
