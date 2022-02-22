@@ -178,7 +178,8 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
+                generated.
         """
 
         if isinstance(models, List):
@@ -240,4 +241,4 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
 
         interception_hook.remove()
 
-        return selected_ids
+        return selected_ids, None

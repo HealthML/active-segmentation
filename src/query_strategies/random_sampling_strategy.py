@@ -1,5 +1,5 @@
 """ Module for random sampling strategy """
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -20,7 +20,7 @@ class RandomSamplingStrategy(QueryStrategy):
         data_module: ActiveLearningDataModule,
         items_to_label: int,
         **kwargs
-    ) -> List[str]:
+    ) -> Tuple[List[str], None]:
         """
         Selects random subset of the unlabeled data that should be labeled next. We are using
         the shuffling of the dataset for randomisation.
@@ -31,7 +31,8 @@ class RandomSamplingStrategy(QueryStrategy):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
+                generated.
         """
         # randomly select ids to query
 
@@ -40,4 +41,4 @@ class RandomSamplingStrategy(QueryStrategy):
         for _, image_ids in data_module.unlabeled_dataloader():
             unlabeled_image_ids.extend(image_ids)
 
-        return list(np.random.choice(unlabeled_image_ids, size=items_to_label))
+        return list(np.random.choice(unlabeled_image_ids, size=items_to_label)), None

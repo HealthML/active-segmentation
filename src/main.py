@@ -18,6 +18,7 @@ from datasets import (
 from query_strategies import (
     RandomSamplingStrategy,
     UncertaintySamplingStrategy,
+    InterpolationSamplingStrategy,
     RepresentativenessSamplingStrategy,
 )
 
@@ -284,9 +285,13 @@ def create_query_strategy(strategy_config: dict):
     Args:
         strategy_config (dict): Configuration of the query strategy
     """
-    if strategy_config.get("type") == "random":
+    strategy_type = strategy_config.get("type")
+
+    if strategy_type == "random":
         return RandomSamplingStrategy()
-    if strategy_config.get("type") == "uncertainty":
+    if strategy_type == "interpolation":
+        return InterpolationSamplingStrategy(**strategy_config)
+    if strategy_type == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
     if strategy_config.get("type") == "representativeness":
         return RepresentativenessSamplingStrategy()
