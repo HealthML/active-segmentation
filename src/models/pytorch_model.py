@@ -279,13 +279,17 @@ class PytorchModel(LightningModule, ABC):
         wandb.define_metric("train/loss", step_metric="Step")
         wandb.define_metric("train/mean_loss", step_metric="trainer/epoch")
         wandb.define_metric("val/mean_loss", step_metric="trainer/epoch")
-        wandb.define_metric("train/training_set_size", step_metric="trainer/iteration")
         wandb.define_metric(
-            "train/training_set_n_cases", step_metric="trainer/iteration"
+            "trainer/training_set_size", step_metric="trainer/iteration"
         )
-        wandb.define_metric("train/unlabeled_set_size", step_metric="trainer/iteration")
         wandb.define_metric(
-            "train/unlabeled_set_n_cases", step_metric="trainer/iteration"
+            "trainer/training_set_n_cases", step_metric="trainer/iteration"
+        )
+        wandb.define_metric(
+            "trainer/unlabeled_set_size", step_metric="trainer/iteration"
+        )
+        wandb.define_metric(
+            "trainer/unlabeled_set_n_cases", step_metric="trainer/iteration"
         )
 
         metric_kwargs = {
@@ -408,16 +412,17 @@ class PytorchModel(LightningModule, ABC):
         Args:
             outputs: List of return values of all training steps of the current training epoch.
         """
+
         train_metrics = {
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
-            "train/training_set_size": self.trainer.datamodule.training_set_size(),
-            "train/training_set_n_cases": len(
-                self.trainer.datamodule.training_set.image_ids()
+            "trainer/training_set_size": self.trainer.datamodule.training_set_size(),
+            "trainer/training_set_n_cases": len(
+                set(self.trainer.datamodule.training_set.image_ids())
             ),
-            "train/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
-            "train/unlabeled_set_n_cases": len(
-                self.trainer.datamodule.unlabeled_set.image_ids()
+            "trainer/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
+            "trainer/unlabeled_set_n_cases": len(
+                set(self.trainer.datamodule.unlabeled_set.image_ids())
             ),
         }
 
@@ -451,13 +456,13 @@ class PytorchModel(LightningModule, ABC):
         val_metrics = {
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
-            "train/training_set_size": self.trainer.datamodule.training_set_size(),
-            "train/training_set_n_cases": len(
-                self.trainer.datamodule.training_set.image_ids()
+            "trainer/training_set_size": self.trainer.datamodule.training_set_size(),
+            "trainer/training_set_n_cases": len(
+                set(self.trainer.datamodule.training_set.image_ids())
             ),
-            "train/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
-            "train/unlabeled_set_n_cases": len(
-                self.trainer.datamodule.unlabeled_set.image_ids()
+            "trainer/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
+            "trainer/unlabeled_set_n_cases": len(
+                set(self.trainer.datamodule.unlabeled_set.image_ids())
             ),
         }
 
@@ -501,11 +506,11 @@ class PytorchModel(LightningModule, ABC):
             "trainer/iteration": self.iteration,
             "train/training_set_size": self.trainer.datamodule.training_set_size(),
             "train/training_set_n_cases": len(
-                self.trainer.datamodule.training_set.image_ids()
+                set(self.trainer.datamodule.training_set.image_ids())
             ),
             "train/unlabeled_set_size": self.trainer.datamodule.unlabeled_set_size(),
             "train/unlabeled_set_n_cases": len(
-                self.trainer.datamodule.unlabeled_set.image_ids()
+                set(self.trainer.datamodule.unlabeled_set.image_ids())
             ),
         }
 
