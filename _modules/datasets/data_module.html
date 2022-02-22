@@ -239,10 +239,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span> <span class="o">=</span> <span class="n">pin_memory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validation_set</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_set</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ActiveLearningDataModule.setup"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -251,10 +251,10 @@
 <span class="sd">            stage: Current training stage.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_training_set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_validation_set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_test_set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_unlabeled_set</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_training_set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_validation_set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_test_set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_unlabeled_set</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ActiveLearningDataModule.data_channels"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.data_channels">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">data_channels</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -340,9 +340,9 @@
 <span class="sd">            Pytorch dataloader or Keras sequence representing the training set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="p">,</span>
                 <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
@@ -357,9 +357,9 @@
 <span class="sd">            Pytorch dataloader or Keras sequence representing the validation set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validation_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_validation_set</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validation_set</span><span class="p">,</span>
                 <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
@@ -373,9 +373,9 @@
 <span class="sd">            Pytorch dataloader or Keras sequence representing the test set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span><span class="p">,</span>
                 <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">collate_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_collate_fn</span><span class="p">(),</span>
@@ -388,9 +388,9 @@
 <span class="sd">            Pytorch dataloader or Keras sequence representing the unlabeled set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="p">,</span>
                 <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size_unlabeled_set</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
@@ -404,8 +404,8 @@
 <span class="sd">            Size of training set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ActiveLearningDataModule.validation_set_size"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.validation_set_size">[docs]</a>    <span class="k">def</span> <span class="nf">validation_set_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -414,8 +414,8 @@
 <span class="sd">            Size of validation set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validation_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validation_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_set</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ActiveLearningDataModule.test_set_size"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.test_set_size">[docs]</a>    <span class="k">def</span> <span class="nf">test_set_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -424,8 +424,8 @@
 <span class="sd">            Size of test set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ActiveLearningDataModule.unlabeled_set_size"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.unlabeled_set_size">[docs]</a>    <span class="k">def</span> <span class="nf">unlabeled_set_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -434,8 +434,8 @@
 <span class="sd">            Number of unlabeled items.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ActiveLearningDataModule.num_classes"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.num_classes">[docs]</a>    <span class="k">def</span> <span class="nf">num_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>

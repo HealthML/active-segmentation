@@ -354,19 +354,19 @@
             <span class="k">for</span> <span class="n">split_id</span> <span class="ow">in</span> <span class="n">image_slice_ids</span>
         <span class="p">]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
             <span class="k">for</span> <span class="n">case_id</span><span class="p">,</span> <span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">image_slice_ids</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">slice_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">slice_id</span> <span class="o">=</span> <span class="mi">0</span>
 
                 <span class="k">if</span> <span class="n">pseudo_labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">pseudo_labels</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span>
                         <span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">,</span> <span class="n">pseudo_labels</span><span class="p">[</span><span class="n">case_id</span><span class="p">]</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_unlabeled_set</span><span class="o">.</span><span class="n">remove_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">)</span></div>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="o">.</span><span class="n">remove_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_create_training_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -396,9 +396,9 @@
 
         <span class="c1"># disable shuffling in the dataloader since the dataset is a subclass of</span>
         <span class="c1"># IterableDataset and implements it&#39;s own shuffling</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_training_set</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="p">,</span>
                 <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
                 <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>

@@ -458,9 +458,21 @@
         <span class="c1"># see https://docs.wandb.ai/guides/track/log#customize-axes-and-summaries-with-define_metric</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;trainer/iteration&quot;</span><span class="p">)</span>
-        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;Step&quot;</span><span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;train/mean_loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span><span class="s2">&quot;val/mean_loss&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/epoch&quot;</span><span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span>
+            <span class="s2">&quot;trainer/training_set_size&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span>
+        <span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span>
+            <span class="s2">&quot;trainer/training_set_n_cases&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span>
+        <span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span>
+            <span class="s2">&quot;trainer/unlabeled_set_size&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span>
+        <span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span>
+            <span class="s2">&quot;trainer/unlabeled_set_n_cases&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span>
+        <span class="p">)</span>
 
         <span class="n">metric_kwargs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;id_to_class_names&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">id_to_class_names</span><span class="p">(),</span>
@@ -582,7 +594,19 @@
 <span class="sd">        Args:</span>
 <span class="sd">            outputs: List of return values of all training steps of the current training epoch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">train_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">train_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
+            <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+            <span class="s2">&quot;trainer/training_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;trainer/training_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;trainer/unlabeled_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">unlabeled_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;trainer/unlabeled_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
 
         <span class="c1"># collect loss values</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
@@ -592,18 +616,13 @@
                 <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
             <span class="p">)</span>
 
+        <span class="n">train_metrics</span><span class="p">[</span><span class="s2">&quot;train/mean_loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">losses</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
         <span class="k">for</span> <span class="n">train_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span><span class="p">:</span>
             <span class="n">train_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">train_metrics</span><span class="p">,</span> <span class="o">**</span><span class="n">train_metric</span><span class="o">.</span><span class="n">compute</span><span class="p">()}</span>
             <span class="n">train_metric</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="o">**</span><span class="n">train_metrics</span><span class="p">,</span>
-                <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
-                <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
-                <span class="s2">&quot;train/mean_loss&quot;</span><span class="p">:</span> <span class="n">losses</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-            <span class="p">}</span>
-        <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="n">train_metrics</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PytorchModel.validation_epoch_end"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.validation_epoch_end">[docs]</a>    <span class="k">def</span> <span class="nf">validation_epoch_end</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -619,6 +638,14 @@
         <span class="n">val_metrics</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
             <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+            <span class="s2">&quot;trainer/training_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;trainer/training_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;trainer/unlabeled_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">unlabeled_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;trainer/unlabeled_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
+            <span class="p">),</span>
         <span class="p">}</span>
 
         <span class="k">for</span> <span class="n">val_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span><span class="p">:</span>
@@ -659,6 +686,14 @@
         <span class="n">test_metrics</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
             <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
+            <span class="s2">&quot;train/training_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;train/training_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;train/unlabeled_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">unlabeled_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;train/unlabeled_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">unlabeled_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
+            <span class="p">),</span>
         <span class="p">}</span>
 
         <span class="k">for</span> <span class="n">test_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span><span class="p">:</span>
