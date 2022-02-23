@@ -41,4 +41,11 @@ class RandomSamplingStrategy(QueryStrategy):
         for _, image_ids in data_module.unlabeled_dataloader():
             unlabeled_image_ids.extend(image_ids)
 
-        return list(np.random.choice(unlabeled_image_ids, size=items_to_label)), None
+        return (
+            list(
+                np.random.choice(
+                    unlabeled_image_ids, size=items_to_label, replace=False
+                )
+            ),
+            None,
+        )
