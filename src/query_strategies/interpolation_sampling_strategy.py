@@ -1,17 +1,19 @@
 """ Module for interpolation sampling strategy """
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union, Literal
 
 import torch
 import numpy as np
 from scipy.ndimage import distance_transform_edt
+import wandb
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
+from functional.metrics import DiceScore
 from .utils import select_uncertainty_calculation
 from .query_strategy import QueryStrategy
 
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,too-many-branches
 class InterpolationSamplingStrategy(QueryStrategy):
     """
     Class for selecting blocks to label by highest uncertainty and then interpolating within those
@@ -156,6 +158,13 @@ class InterpolationSamplingStrategy(QueryStrategy):
                     selected_ids.append(case_id)
                     pseudo_labels[case_id] = pseudo_label
 
+                if self.kwargs.get("interpolation_quality_metric", None) in ["dice"]:
+                    _ = self._calculate_and_log_interpolation_quality_score(
+                        interpolation=interpolation,
+                        ground_truth=label[bottom_slice_id : top_slice_id - 1, :, :],
+                        num_classes=data_module.num_classes(),
+                        metric=self.kwargs.get("interpolation_quality_metric"),
+                    )
         return selected_ids, pseudo_labels
 
     @staticmethod
@@ -216,3 +225,36 @@ class InterpolationSamplingStrategy(QueryStrategy):
             result[interpolation] = class_id
 
         return result
+
+    @staticmethod
+    def _calculate_and_log_interpolation_quality_score(
+        interpolation: np.ndarray,
+        ground_truth: np.ndarray,
+        num_classes: int,
+        metric: Literal["dice"] = "dice",
+    ) -> float:
+        """
+        Calculates a quality score for the interpolations and logs them on wandb.
+        Args:
+            interpolation (np.ndarray): The interpolated slices.
+            ground_truth (np.ndarray): The ground truth slices.
+            num_classes (int): Number of classes in the corresponding dataset.
+            metric (str): The metric to calculate the score.
+                values: `"dice"`.
+
+        Returns:
+            The calculated value.
+        """
+        if metric == "dice":
+            dice = DiceScore(
+                num_classes=num_classes,
+                reduction="mean",
+            )
+            dice.update(
+                prediction=torch.from_numpy(interpolation).int(),
+                target=torch.from_numpy(ground_truth).int(),
+            )
+            mean_dice_score = dice.compute().item()
+            wandb.log({"val/mean_dice_score_interpolation": mean_dice_score})
+            return mean_dice_score
+        raise ValueError(f"Chosen metric {metric} not supported. Choose from: 'dice' .")
