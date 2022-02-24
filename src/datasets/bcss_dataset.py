@@ -1,5 +1,5 @@
 """ Module to load and batch bcss dataset """
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 from pathlib import Path
 import math
 
@@ -47,6 +47,8 @@ class BCSSDataset(IterableDataset):
             shuffle (bool, optional): Whether the data should be shuffled.
             channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
             image_shape (tuple, optional): Shape of the image.
+            random_state (int, optional): Controls the data shuffling. Pass an int for reproducible output across
+                multiple runs.
     """
 
     # pylint: disable=too-many-instance-attributes,abstract-method
@@ -95,7 +97,10 @@ class BCSSDataset(IterableDataset):
         shuffle: bool = True,
         channels: int = 3,
         image_shape: tuple = (300, 300),
+        random_state: Optional[int] = None,
     ) -> None:
+
+        super().__init__()
 
         self.image_paths = image_paths
         self.annotation_paths = annotation_paths
@@ -126,7 +131,8 @@ class BCSSDataset(IterableDataset):
 
         self.indices = list(np.arange(self.num_images))
         if shuffle:
-            np.random.shuffle(self.indices)
+            rng = np.random.default_rng(random_state)
+            rng.shuffle(self.indices)
 
         self.start_index = 0
         self.end_index = self.__len__()

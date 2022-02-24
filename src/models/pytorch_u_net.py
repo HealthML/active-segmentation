@@ -39,6 +39,7 @@ class PytorchUNet(PytorchModel):
     ):
 
         super().__init__(**kwargs)
+        self.save_hyperparameters()
 
         self.num_levels = num_levels
         self.in_channels = in_channels

@@ -110,7 +110,7 @@ class ActiveLearningPipeline:
                 )
 
             # run pipeline
-            for iteration in range(0, self.iterations):
+            for iteration in range(0, self.iterations + 1):
                 # skip labeling in the first iteration because the model hasn't trained yet
                 if iteration != 0:
                     # query batch selection
@@ -145,7 +145,7 @@ class ActiveLearningPipeline:
                     )
 
                 # optionally reset weights after fitting on new data
-                if self.reset_weights:
+                if self.reset_weights and iteration != 0:
                     self.model.reset_parameters()
 
                 self.model.start_epoch = self.model.current_epoch + 1
@@ -193,7 +193,7 @@ class ActiveLearningPipeline:
 
         num_sanity_val_steps = 2 if iteration is None or iteration == 0 else 0
 
-        checkpoint_callback = ModelCheckpoint(
+        best_model_checkpoint_callback = ModelCheckpoint(
             dirpath=checkpoint_dir,
             filename="best_model_epoch_{epoch}",
             auto_insert_metric_name=False,
@@ -205,10 +205,22 @@ class ActiveLearningPipeline:
             save_on_train_epoch_end=False,
         )
 
-        callbacks.append(checkpoint_callback)
+        callbacks.append(best_model_checkpoint_callback)
+
+        all_models_checkpoint_callback = ModelCheckpoint(
+            dirpath=os.path.join(checkpoint_dir, "all_models"),
+            filename="epoch_{epoch}",
+            auto_insert_metric_name=False,
+            save_top_k=-1,
+            every_n_epochs=1,
+            every_n_train_steps=0,
+            save_on_train_epoch_end=False,
+        )
+
+        callbacks.append(all_models_checkpoint_callback)
 
         return Trainer(
-            deterministic=False,
+            deterministic=True,
             profiler="simple",
             max_epochs=epochs + iteration * self.epochs_increase_per_query
             if iteration is not None
