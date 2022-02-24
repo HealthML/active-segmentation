@@ -132,12 +132,14 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
     def reduce_features(
         self,
         feature_vectors: np.array,
+        epsilon: float = 1e-10,
     ) -> np.array:
         """
         Reduces the dimensionality of feature vectors using a principle component analysis.
 
         Args:
             feature_vectors (numpy.array): Feature vectors to be reduced.
+            epsilon (float, optional): Smoothing operator.
 
         Returns:
             numpy.array: Reduced feature vectors.
@@ -147,7 +149,7 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
         max_values = feature_vectors.max(axis=0, keepdims=True)
 
         normalized_feature_vectors = (feature_vectors - min_values) / (
-            max_values - min_values
+            max_values - min_values + epsilon
         )
 
         pca = PCA(n_components=self.feature_dimensionality).fit(
