@@ -185,7 +185,9 @@
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">fire</span>
+<span class="kn">import</span> <span class="nn">pytorch_lightning</span>
 <span class="kn">from</span> <span class="nn">pytorch_lightning.loggers</span> <span class="kn">import</span> <span class="n">WandbLogger</span>
 <span class="kn">import</span> <span class="nn">wandb</span>
 
@@ -344,6 +346,15 @@
 <span class="sd">        None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># set global seed for reproducibility</span>
+    <span class="n">pytorch_lightning</span><span class="o">.</span><span class="n">utilities</span><span class="o">.</span><span class="n">seed</span><span class="o">.</span><span class="n">seed_everything</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dim&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># Pytorch lightning currently does not support deterministic 3d max pooling</span>
+        <span class="c1"># therefore this option is only enabled for the 2d case</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">use_deterministic_algorithms</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="n">wandb_logger</span> <span class="o">=</span> <span class="n">WandbLogger</span><span class="p">(</span>
         <span class="n">project</span><span class="o">=</span><span class="n">wandb_project_name</span><span class="p">,</span>
         <span class="n">entity</span><span class="o">=</span><span class="s2">&quot;active-segmentation&quot;</span><span class="p">,</span>
@@ -470,7 +481,7 @@
     <span class="n">strategy_type</span> <span class="o">=</span> <span class="n">strategy_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">RandomSamplingStrategy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">RandomSamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">InterpolationSamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
@@ -549,9 +560,7 @@
             <span class="c1"># Config parameters are automatically set by W&amp;B sweep agent</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">wandb</span><span class="o">.</span><span class="n">config</span>
 
-        <span class="n">run_active_learning_pipeline</span><span class="p">(</span>
-            <span class="o">**</span><span class="n">config</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="n">run_active_learning_pipeline</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

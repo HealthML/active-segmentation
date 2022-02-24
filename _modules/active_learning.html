@@ -292,7 +292,7 @@
                 <span class="p">)</span>
 
             <span class="c1"># run pipeline</span>
-            <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="c1"># skip labeling in the first iteration because the model hasn&#39;t trained yet</span>
                 <span class="k">if</span> <span class="n">iteration</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># query batch selection</span>
@@ -327,7 +327,7 @@
                     <span class="p">)</span>
 
                 <span class="c1"># optionally reset weights after fitting on new data</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_weights</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_weights</span> <span class="ow">and</span> <span class="n">iteration</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">reset_parameters</span><span class="p">()</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">start_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">+</span> <span class="mi">1</span>
@@ -375,7 +375,7 @@
 
         <span class="n">num_sanity_val_steps</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">iteration</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
 
-        <span class="n">checkpoint_callback</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
+        <span class="n">best_model_checkpoint_callback</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
             <span class="n">dirpath</span><span class="o">=</span><span class="n">checkpoint_dir</span><span class="p">,</span>
             <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;best_model_epoch_</span><span class="si">{epoch}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">auto_insert_metric_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -387,10 +387,22 @@
             <span class="n">save_on_train_epoch_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">checkpoint_callback</span><span class="p">)</span>
+        <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_model_checkpoint_callback</span><span class="p">)</span>
+
+        <span class="n">all_models_checkpoint_callback</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
+            <span class="n">dirpath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;all_models&quot;</span><span class="p">),</span>
+            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;epoch_</span><span class="si">{epoch}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">auto_insert_metric_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">save_top_k</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">every_n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">every_n_train_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">save_on_train_epoch_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_models_checkpoint_callback</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Trainer</span><span class="p">(</span>
-            <span class="n">deterministic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">deterministic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">profiler</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span>
             <span class="n">max_epochs</span><span class="o">=</span><span class="n">epochs</span> <span class="o">+</span> <span class="n">iteration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">epochs_increase_per_query</span>
             <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
