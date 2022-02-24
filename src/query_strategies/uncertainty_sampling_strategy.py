@@ -27,9 +27,8 @@ class UncertaintySamplingStrategy(QueryStrategy):
                 metric.
     """
 
-    @staticmethod
     def compute_uncertainties(
-        model: PytorchModel, data_module: ActiveLearningDataModule
+        self, model: PytorchModel, data_module: ActiveLearningDataModule
     ) -> Tuple[List[float], List[str]]:
         """
 
@@ -42,7 +41,7 @@ class UncertaintySamplingStrategy(QueryStrategy):
         """
 
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        models.to(device)
+        model.to(device)
 
         uncertainties = []
         case_ids = []
@@ -56,7 +55,7 @@ class UncertaintySamplingStrategy(QueryStrategy):
         )
 
         for images, current_case_ids in data_module.unlabeled_dataloader():
-            predictions = models.predict(images.to(device))
+            predictions = model.predict(images.to(device))
             uncertainty_calculation = select_uncertainty_calculation(
                 calculation_method=self.kwargs.get("calculation_method", None)
             )
