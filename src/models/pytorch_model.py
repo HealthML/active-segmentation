@@ -339,6 +339,7 @@ class PytorchModel(LightningModule, ABC):
                 image_ids=validation_set.image_ids(),
                 slices_per_image=validation_set.slices_per_image(),
                 stage="best_model_val",
+                ignore_nan_in_reduction=True,
                 **metric_kwargs,
             )
             self.val_metrics = torch.nn.ModuleList([val_average_metrics])
@@ -356,6 +357,7 @@ class PytorchModel(LightningModule, ABC):
                 image_ids=test_set.image_ids(),
                 slices_per_image=test_set.slices_per_image(),
                 stage="best_model_test",
+                ignore_nan_in_reduction=True,
                 **metric_kwargs,
             )
             self.test_metrics = torch.nn.ModuleList([test_average_metrics])
@@ -486,10 +488,7 @@ class PytorchModel(LightningModule, ABC):
 
             if not self.trainer.sanity_checking:
                 # log to Weights and Biases
-                if self.stage == "fit":
-                    self.logger.experiment.log(val_metrics, commit=False)
-                else:
-                    self.logger.log_metrics(val_metrics)
+                self.logger.experiment.log(val_metrics, commit=False)
         else:
             self.logger.log_metrics(val_metrics)
 
