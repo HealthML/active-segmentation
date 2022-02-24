@@ -1,10 +1,13 @@
 """ Module for representativeness sampling strategy """
+import logging
 import math
 from typing import List, Literal, Tuple, Union
 
 import numpy as np
 import psutil
 import scipy.spatial
+from sklearn.cluster import MeanShift
+from sklearn.decomposition import PCA
 import torch
 
 from datasets import ActiveLearningDataModule
@@ -19,16 +22,30 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
 
     Args:
         distance_metric (string, optional): Metric to be used for calculation the distance between feature vectors.
+        algorithm (string, optional): The algorithm to be used to select the most representative samples:
+            `"most_distant_sample"` | `"cluster_coverage"`. Defaults to `"cluster_coverage"`.
+                - `"most_distant_sample"`: The unlabeled item that has the highest feature distance to the labeled set
+                    is selected for labeling.
+                - `"cluster_coverage"`: The features of the unlabeled and labeled items are clustered and an item from
+                    the most underrepresented cluster is selected for labeling.
     """
 
     def __init__(
         self,
         distance_metric: Literal["euclidean", "cosine", "russellrao"] = "euclidean",
+        algorithm: Literal[
+            "most_distant_sample", "cluster_coverage"
+        ] = "cluster_coverage",
     ):
         if distance_metric not in ["euclidean", "cosine", "russellrao"]:
             raise ValueError(f"Invalid distance metric: {distance_metric}.")
 
         self.distance_metric = distance_metric
+
+        if algorithm not in ["most_distant_sample", "cluster_coverage"]:
+            raise ValueError(f"Invalid algorithm: {algorithm}.")
+
+        self.algorithm = algorithm
 
         # variable for storing feature vectors in the forward hook
         self.feature_vector = torch.empty(1)
@@ -206,6 +223,50 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
             models, data_module.unlabeled_dataloader()
         )
 
+        if self.algorithm == "most_distant_sample":
+            selected_ids = self.select_most_distant_samples(
+                feature_vectors_training_set,
+                feature_vectors_unlabeled_set,
+                case_ids,
+                items_to_label,
+            )
+        else:
+            selected_ids = self.select_items_with_best_cluster_coverage(
+                feature_vectors_training_set,
+                feature_vectors_unlabeled_set,
+                case_ids,
+                items_to_label,
+            )
+
+        # free memory
+        del feature_vectors_unlabeled_set
+        del feature_vectors_training_set
+
+        interception_hook.remove()
+
+        return selected_ids
+
+    # pylint: disable=too-many-locals
+    def select_most_distant_samples(
+        self,
+        feature_vectors_training_set: np.ndarray,
+        feature_vectors_unlabeled_set: np.ndarray,
+        case_ids: List[str],
+        items_to_label: int,
+    ) -> List[str]:
+        """
+        Selects a subset of the unlabeled data that increases the representativeness of the training set.
+
+        Args:
+            feature_vectors_training_set (numpy.ndarray): Feature vectors of the items in the training set.
+            feature_vectors_unlabeled_set (numpy.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids (List[str]): Case Ids of the unlabeled items.
+            items_to_label (int): Number of items that should be selected for labeling.
+
+        Returns:
+            IDs of the data items to be labeled.
+        """
+
         selected_ids = []
 
         for _ in range(items_to_label):
@@ -235,10 +296,131 @@ class RepresentativenessSamplingStrategy(QueryStrategy):
                 del case_ids[index_of_most_distant_sample]
 
         # free memory
-        del feature_vectors_unlabeled_set
-        del feature_vectors_training_set
         del average_feature_distances
 
-        interception_hook.remove()
+        return selected_ids
+
+    @staticmethod
+    def reduce_features(
+        feature_vectors: np.array, target_dimensionality: int = 10
+    ) -> np.array:
+        """
+        Reduces the dimensionality of feature vectors using a principle component analysis.
+
+        Args:
+            feature_vectors (numpy.array): Feature vectors to be reduced.
+            target_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
+                Defaults to 10.
+
+        Returns:
+            numpy.array: Reduced feature vectors.
+        """
+
+        min_values = feature_vectors.min(axis=0, keepdims=True)
+        max_values = feature_vectors.max(axis=0, keepdims=True)
+
+        normalized_feature_vectors = (feature_vectors - min_values) / (
+            max_values - min_values
+        )
+
+        pca = PCA(n_components=target_dimensionality).fit(normalized_feature_vectors)
+
+        return pca.transform(feature_vectors)
+
+    def select_items_with_best_cluster_coverage(
+        self,
+        feature_vectors_training_set: np.ndarray,
+        feature_vectors_unlabeled_set: np.ndarray,
+        case_ids: List[str],
+        items_to_label: int,
+    ) -> List[str]:
+        """
+        Selects a subset of the unlabeled data that increases the representativeness of the training set.
+
+        Args:
+            feature_vectors_training_set (numpy.ndarray): Feature vectors of the items in the training set.
+            feature_vectors_unlabeled_set (numpy.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids (List[str]): Case Ids of the unlabeled items.
+            items_to_label (int): Number of items that should be selected for labeling.
+
+        Returns:
+            IDs of the data items to be labeled.
+        """
+
+        case_ids = np.array(case_ids)
+
+        selected_ids = []
+
+        training_set_size = len(feature_vectors_training_set)
+        unlabeled_set_size = len(feature_vectors_unlabeled_set)
+
+        feature_vectors = np.concatenate(
+            (feature_vectors_training_set, feature_vectors_unlabeled_set)
+        )
+
+        reduced_feature_vectors = self.reduce_features(feature_vectors)
+
+        clustering = MeanShift(bandwidth=5).fit(reduced_feature_vectors)
+
+        cluster_labels_training_set = clustering.labels_[:training_set_size]
+        cluster_labels_unlabeled_set = clustering.labels_[training_set_size:]
+
+        cluster_ids, cluster_sizes = np.unique(clustering.labels_, return_counts=True)
+        cluster_sizes_total = dict(zip(cluster_ids, cluster_sizes))
+
+        logging.info("Sizes of current feature clusters: %s", cluster_sizes_total)
+
+        cluster_ids_training_set, cluster_sizes_training_set = np.unique(
+            cluster_labels_training_set, return_counts=True
+        )
+        cluster_sizes_training_set = dict(
+            zip(cluster_ids_training_set, cluster_sizes_training_set)
+        )
+
+        cluster_ids_unlabeled_set, cluster_sizes_unlabeled_set = np.unique(
+            cluster_labels_unlabeled_set, return_counts=True
+        )
+        cluster_sizes_unlabeled_set = dict(
+            zip(cluster_ids_unlabeled_set, cluster_sizes_unlabeled_set)
+        )
+
+        is_selected = np.zeros_like(cluster_labels_unlabeled_set, dtype=np.bool)
+
+        for _ in range(min(items_to_label, unlabeled_set_size)):
+
+            relative_cluster_sizes_training_set = {}
+
+            for cluster_id, total_cluster_size in cluster_sizes_total.items():
+                if cluster_id in cluster_sizes_training_set:
+                    relative_cluster_sizes_training_set[cluster_id] = (
+                        cluster_sizes_training_set[cluster_id] / total_cluster_size
+                    )
+                else:
+                    relative_cluster_sizes_training_set[cluster_id] = 0
+
+            relative_cluster_sizes = list(relative_cluster_sizes_training_set.items())
+
+            relative_cluster_sizes.sort(key=lambda y: y[1])
+
+            selected_cluster_id = relative_cluster_sizes[0][0]
+
+            # pylint: disable=singleton-comparison
+            case_ids_belonging_to_selected_cluster = case_ids[
+                (cluster_labels_unlabeled_set == selected_cluster_id)
+                & (is_selected == False)
+            ]
+
+            assert len(case_ids_belonging_to_selected_cluster) > 0
+
+            selected_case_id = np.random.choice(case_ids_belonging_to_selected_cluster)
+
+            is_selected[case_ids == selected_case_id] = True
+            if selected_cluster_id not in cluster_sizes_training_set:
+                cluster_sizes_training_set[selected_cluster_id] = 1
+            else:
+                cluster_sizes_training_set[selected_cluster_id] += 1
+            cluster_sizes_unlabeled_set[selected_cluster_id] -= 1
+
+            selected_ids.append(selected_case_id)
 
         return selected_ids, None
