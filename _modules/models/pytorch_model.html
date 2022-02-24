@@ -521,6 +521,7 @@
                 <span class="n">image_ids</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
                 <span class="n">slices_per_image</span><span class="o">=</span><span class="n">validation_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
                 <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;best_model_val&quot;</span><span class="p">,</span>
+                <span class="n">ignore_nan_in_reduction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">val_average_metrics</span><span class="p">])</span>
@@ -538,6 +539,7 @@
                 <span class="n">image_ids</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">(),</span>
                 <span class="n">slices_per_image</span><span class="o">=</span><span class="n">test_set</span><span class="o">.</span><span class="n">slices_per_image</span><span class="p">(),</span>
                 <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;best_model_test&quot;</span><span class="p">,</span>
+                <span class="n">ignore_nan_in_reduction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">metric_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">test_average_metrics</span><span class="p">])</span>
@@ -668,10 +670,7 @@
 
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sanity_checking</span><span class="p">:</span>
                 <span class="c1"># log to Weights and Biases</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="n">val_metrics</span><span class="p">)</span></div>
 
