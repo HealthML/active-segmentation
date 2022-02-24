@@ -1,5 +1,5 @@
 """ Base class for implementing representativeness sampling strategies """
-import abc
+from abc import ABC, abstractmethod
 from typing import List, Tuple, Union
 
 import numpy as np
@@ -11,7 +11,7 @@ from models import PytorchUNet
 from .query_strategy import QueryStrategy
 
 # pylint: disable=too-few-public-methods
-class RepresentativenessSamplingStrategyBase(QueryStrategy, abc.ABC):
+class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
     """
     Base class for implementing representativeness sampling strategies
     """
@@ -179,7 +179,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, abc.ABC):
             feature_vectors_unlabeled_set (np.array): Feature vectors of the items in the unlabeled set.
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def compute_representativeness_scores(
         self,
         model: PytorchModel,
