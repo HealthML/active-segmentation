@@ -7,10 +7,20 @@
     "num_levels": 4,
     "dim": 2,
     "model_selection_criterion": "mean_dice_score",
-    "train_metrics": ["dice_score"],
-    "train_metric_confidence_levels": [0.5],
-    "test_metrics": ["dice_score", "sensitivity", "specificity"],
-    "test_metric_confidence_levels": [0.5]
+    "train_metrics": [
+      "dice_score"
+    ],
+    "train_metric_confidence_levels": [
+      0.5
+    ],
+    "test_metrics": [
+      "dice_score",
+      "sensitivity",
+      "specificity"
+    ],
+    "test_metric_confidence_levels": [
+      0.5
+    ]
   },
   "dataset_config": {
     "dataset": "decathlon",
@@ -31,13 +41,14 @@
   },
   "strategy_config": {
     "type": "interpolation",
+    "interpolation_type": "morph-contour",
     "calculation_method": "distance",
     "exclude_background": true,
     "block_thickness": 5
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
-  "experiment_name": "hippocampus-test-interpolation",
+  "experiment_name": "hippocampus-test-morph-interpolation",
   "experiment_tags": [],
   "batch_size": 32,
   "epochs": 2,
