@@ -21,7 +21,9 @@ from query_strategies import (
     RandomSamplingStrategy,
     UncertaintySamplingStrategy,
     InterpolationSamplingStrategy,
-    RepresentativenessSamplingStrategy,
+    DistanceBasedRepresentativenessSamplingStrategy,
+    ClusteringBasedRepresentativenessSamplingStrategy,
+    UncertaintyRepresentativenessSamplingStrategy,
 )
 
 
@@ -304,8 +306,12 @@ def create_query_strategy(strategy_config: dict):
         return InterpolationSamplingStrategy(**strategy_config)
     if strategy_type == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
-    if strategy_config.get("type") == "representativeness":
-        return RepresentativenessSamplingStrategy()
+    if strategy_type == "representativeness_distance":
+        return DistanceBasedRepresentativenessSamplingStrategy()
+    if strategy_type == "representativeness_clustering":
+        return ClusteringBasedRepresentativenessSamplingStrategy()
+    if strategy_type == "representativeness_uncertainty":
+        return UncertaintyRepresentativenessSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 

@@ -5,6 +5,12 @@ from query_strategies.uncertainty_sampling_strategy import UncertaintySamplingSt
 from query_strategies.interpolation_sampling_strategy import (
     InterpolationSamplingStrategy,
 )
-from query_strategies.representativeness_sampling_strategy import (
-    RepresentativenessSamplingStrategy,
+from query_strategies.representativeness_sampling_clustering import (
+    ClusteringBasedRepresentativenessSamplingStrategy,
+)
+from query_strategies.representativeness_sampling_distances import (
+    DistanceBasedRepresentativenessSamplingStrategy,
+)
+from query_strategies.representativeness_sampling_uncertainty import (
+    UncertaintyRepresentativenessSamplingStrategy,
 )
