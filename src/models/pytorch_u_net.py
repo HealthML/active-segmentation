@@ -22,6 +22,8 @@ class PytorchUNet(PytorchModel):
         multi_label (bool, optional): Whether the model should produce single-label or multi-label outputs. If set to
             `False`, the model's predictions are computed using a Softmax activation layer. to If set to `True`, sigmoid
             activation layers are used to compute the model's predicitions. Defaults to False.
+        p_dropout (float, optional): Probability of applying dropout to the outputs of the encoder layers. Defaults to
+            0.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -32,10 +34,12 @@ class PytorchUNet(PytorchModel):
         in_channels=1,
         out_channels=2,
         multi_label=False,
+        p_dropout: float = 0,
         **kwargs
     ):
 
         super().__init__(**kwargs)
+        self.save_hyperparameters()
 
         self.num_levels = num_levels
         self.in_channels = in_channels
@@ -43,6 +47,7 @@ class PytorchUNet(PytorchModel):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.multi_label = multi_label
+        self.p_dropout = p_dropout
 
         self.model = UNet(
             in_channels=self.in_channels,
@@ -51,6 +56,7 @@ class PytorchUNet(PytorchModel):
             init_features=32,
             num_levels=self.num_levels,
             dim=self.dim,
+            p_dropout=self.p_dropout,
         )
 
     def input_dimensionality(self) -> int:
@@ -208,4 +214,5 @@ class PytorchUNet(PytorchModel):
             init_features=32,
             num_levels=self.num_levels,
             dim=self.dim,
+            p_dropout=self.p_dropout,
         )

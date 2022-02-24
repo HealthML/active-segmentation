@@ -1,9 +1,6 @@
 """ Module to load and batch nifti datasets """
-from functools import reduce
-from typing import Any, Callable, Iterable, List, Optional, Tuple
-import math
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from multiprocessing import Manager
-import random
 from sklearn.model_selection import train_test_split
 
 import nibabel as nib
@@ -17,7 +14,7 @@ from datasets.dataset_hooks import DatasetHooks
 # pylint: disable=too-many-instance-attributes,abstract-method
 class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     """
-    This datset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.
+    This dataset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.
 
     Args:
         image_paths (List[str]): List with the paths to the images. Has to contain paths of all images which can ever
@@ -37,6 +34,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             Defaults to 2.
         slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
             Uses all slices if None. Defaults to None.
+        random_state (int, optional): Controls the data shuffling. Pass an int for reproducible output across multiple
+            runs.
     """
 
     @staticmethod
@@ -92,7 +91,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         filepaths: List[str],
         dim: int,
         initial_training_set_size: int,
-        random_state: int,
+        random_state: Optional[int] = None,
     ) -> Tuple[List[np.array]]:
         """
         Generates a split between initial training set and initially unlabeled set for active learning.
@@ -100,7 +99,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             filepaths (List[str]): The file paths to the Nifti files.
             dim (int): The dimensionality of the dataset. (2 or 3.)
             initial_training_set_size (int): The number of samples in the initial training set.
-            random_state (int): The random state used to generate the split.
+            random_state (int, optional): The random state used to generate the split. Pass an int for reproducibility
+                across runs.
 
         Returns:
             A tuple of two lists of np.arrays. The lists contain one array per filepath which contains the
@@ -224,9 +224,9 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         filepaths: List[str],
         dim: int = 2,
         shuffle: bool = False,
-        seed: Optional[int] = None,
+        random_state: Optional[int] = None,
         slice_indices: Optional[List[np.array]] = None,
-    ) -> List[Tuple[int]]:
+    ) -> Dict[int, Dict[int, Optional[np.array]]]:
         """
         Reads the slice indices for the images at the provided slice paths and pairs them with their image index.
 
@@ -239,12 +239,14 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             filepaths (List[str]): The paths of the images.
             dim (int, optional): The dimensionality of the dataset. Defaults to 2.
             shuffle (boolean, optional): Flag indicating wether to shuffle the slices. Defaults to False.
-            seed (int, optional): Random seed for shuffling.
+            random_state (int, optional): Random seed for shuffling.
             slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
                 Uses all slices if None. Defaults to None.
 
         Returns:
-            A list of (image_index, slice_index) tuples.
+            A dictionary of per-image dictionaries which contain slice indices as keys. If a slice index is not part of
+            the per-image dictionary, it is not part of the dataset. If its value is None, it does not have a pseudo
+            label. If its value is a np.array, this is the pseudo label for that slice.
         """
         if slice_indices is None:
             slice_indices = [
@@ -255,27 +257,25 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             ]
 
         if shuffle:
-            if seed is not None:
-                np.random.seed(seed)
-                random.seed(seed)
+            rng = np.random.default_rng(random_state)
 
             # Shuffle the slices within the images
             for slices in slice_indices:
-                np.random.shuffle(slices)
+                rng.shuffle(slices)
 
             # Shuffle the images
             enumerated_slice_indices = list(enumerate(slice_indices))
-            random.shuffle(enumerated_slice_indices)
+            rng.shuffle(enumerated_slice_indices)
         else:
             enumerated_slice_indices = enumerate(slice_indices)
 
         # Pair up the slices indices with their image index and concatenate for all images
         # (e.g. [5,1,9,0,...] for image index 3 becomes [(3,5),(3,1),(3,9),(3,0),...])
-        image_slice_indices = [
-            (image_index, slice_index)
+        image_slice_indices = {
+            image_index: {slice_index: None for slice_index in slices}
             for image_index, slices in enumerated_slice_indices
-            for slice_index in slices
-        ]
+            if len(slices) > 0
+        }
 
         # Concatenate the [image_index, slice_index] pairs for all images
         return image_slice_indices
@@ -295,6 +295,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         dim: int = 2,
         slice_indices: Optional[List[np.array]] = None,
         case_id_prefix: str = "train",
+        random_state: Optional[int] = None,
     ):
 
         self.image_paths = image_paths
@@ -308,7 +309,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         self._current_image = None
         self._current_mask = None
-        self._current_image_index = None
+        self._currently_loaded_image_index = None
         self.cache_size = cache_size
 
         manager = Manager()
@@ -335,14 +336,14 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 filepaths=self.image_paths,
                 dim=self.dim,
                 shuffle=self.shuffle,
-                seed=42,
+                random_state=random_state,
                 slice_indices=slice_indices,
             )
         )
 
-        self.start_index = 0
-        self.end_index = self._length()
-        self.current_index = 0
+        self.num_workers = 1
+        self.current_image_key_index = 0
+        self.current_slice_key_index = 0
 
     def __get_case_id(self, image_index: int):
         return f"{self.case_id_prefix}_{image_index}"
@@ -361,17 +362,24 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         # check whether data loading is split across multiple workers
         if worker_info is not None:
-            # code adapted from https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset
-            per_worker = int(
-                math.ceil(
-                    (self.end_index - self.start_index) / float(worker_info.num_workers)
-                )
-            )
-            worker_id = worker_info.id
-            self.start_index = self.start_index + worker_id * per_worker
-            self.current_index = self.start_index
-            self.end_index = min(self.start_index + per_worker, self.end_index)
+            self.num_workers = worker_info.num_workers
+            self.current_image_key_index = worker_info.id
+            self.current_slice_key_index = 0
         return self
+
+    def read_mask_for_image(self, image_index: int) -> np.array:
+        """
+        Reads the mask for the image from file. Uses correct mask specific parameters.
+
+        Args:
+            image_index (int): Index of the image to load.
+        """
+        return self.__read_image_as_array(
+            self.annotation_paths[image_index],
+            norm=False,
+            join_non_zero=self.mask_join_non_zero,
+            filter_values=self.mask_filter_values,
+        )
 
     def __load_image_and_mask(self, image_index: int) -> None:
         """
@@ -381,7 +389,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             image_index (int): Index of the image to load.
         """
 
-        self._current_image_index = image_index
+        self._currently_loaded_image_index = image_index
 
         # check if image and mask are in cache
         if image_index in self.image_cache and image_index in self.mask_cache:
@@ -392,119 +400,169 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             self._current_image = self.__read_image_as_array(
                 self.image_paths[image_index], norm=True
             )
-            self._current_mask = self.__read_image_as_array(
-                self.annotation_paths[image_index],
-                norm=False,
-                join_non_zero=self.mask_join_non_zero,
-                filter_values=self.mask_filter_values,
-            )
+            self._current_mask = self.read_mask_for_image(image_index)
 
         # cache image and mask if there is still space in cache
         if len(self.image_cache.keys()) < self.cache_size:
             self.image_cache[image_index] = self._current_image
             self.mask_cache[image_index] = self._current_mask
 
-    def __next__(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        if self.current_index >= self.end_index:
+    # pylint: disable=too-many-branches
+    def __next__(
+        self,
+    ) -> Union[
+        Tuple[torch.Tensor, torch.Tensor, str], Tuple[torch.Tensor, torch.Tensor]
+    ]:
+        if self.current_image_key_index >= len(self.image_slice_indices):
             raise StopIteration
 
-        image_slice_index = self.image_slice_indices[self.current_index]
-        image_index = image_slice_index[0]
+        image_index = list(self.image_slice_indices.keys())[
+            self.current_image_key_index
+        ]
 
-        if image_index != self._current_image_index:
+        if image_index != self._currently_loaded_image_index:
             self.__load_image_and_mask(image_index)
 
-        case_id = self.__get_case_id(self._current_image_index)
+        case_id = self.__get_case_id(image_index)
 
         if self.dim == 2:
-            slice_index = image_slice_index[1]
+            slice_index = list(self.image_slice_indices[image_index].keys())[
+                self.current_slice_key_index
+            ]
+            case_id = f"{case_id}-{slice_index}"
 
             if len(self._current_image.shape) == 4:
                 x = torch.from_numpy(self._current_image[:, slice_index, :, :])
             else:
                 x = torch.from_numpy(self._current_image[slice_index, :, :])
-            y = torch.from_numpy(self._current_mask[slice_index, :, :]).int()
+            pseudo_label = self.image_slice_indices[image_index][slice_index]
+            y = (
+                torch.from_numpy(pseudo_label).int()
+                if pseudo_label is not None
+                else torch.from_numpy(self._current_mask[slice_index, :, :]).int()
+            )
+
+            self.current_slice_key_index += 1
+
+            if self.current_slice_key_index >= len(
+                self.image_slice_indices[image_index]
+            ):
+                self.current_image_key_index += self.num_workers
+                self.current_slice_key_index = 0
         else:
             x = torch.from_numpy(self._current_image)
             y = torch.from_numpy(self._current_mask).int()
+
+            for slice_id in range(len(y)):
+                if slice_id not in self.image_slice_indices[image_index]:
+                    y[slice_id, :, :] = -1
+                elif self.image_slice_indices[image_index][slice_id] is not None:
+                    y[slice_id, :, :] = torch.from_numpy(
+                        self.image_slice_indices[image_index][slice_id]
+                    ).int()
+
+            self.current_image_key_index += self.num_workers
 
         if self.transform:
             x = self.transform(x)
         if self.target_transform:
             y = self.target_transform(y)
 
-        self.current_index += 1
-
         x = DoublyShuffledNIfTIDataset.__ensure_channel_dim(x, self.dim)
 
         if self.is_unlabeled:
-            return (
-                x,
-                f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
-            )
+            return (x, case_id)
 
-        return (
-            x,
-            y,
-            f"{case_id}-{slice_index}" if self.dim == 2 else case_id,
-        )
+        return (x, y, case_id)
 
-    def _length(self):
-        """
-        Note: The __len__ method must not be overridden since this dataset implements a custom splitting across workers.
-        If __len__ would be overriden, the Pytorch lightning trainer might skip some incomplete batches of some workers.
-        """
-
-        return len(self.image_slice_indices)
-
-    def add_image(self, case_id: str, slice_index: int = 0) -> None:
+    def add_image(
+        self,
+        image_id: str,
+        slice_index: int = 0,
+        pseudo_label: Optional[np.array] = None,
+    ) -> None:
         """
         Adds an image to this dataset.
         Args:
-            image_path: Path of the image to be added.
-            annotation_path: Path of the annotation of the image to be added.
-
-        Returns:
-            None. Raises ValueError if image already exists.
+            image_id (str): The id of the image.
+            slice_index (int): Index of the slice to be added.
+            pseudo_label (np.array, optional): An optional pseudo label for the slice. If no pseudo label is provided,
+                the actual label from the corresponding file is used.
         """
 
-        image_index = self.__get_image_index(case_id)
-        new_image_slice_index = (image_index, slice_index)
+        image_index = self.__get_image_index(image_id)
 
-        if new_image_slice_index not in self.image_slice_indices:
-            # add new image slice indices to existing ones
-            self.image_slice_indices = self.image_slice_indices + [
-                new_image_slice_index
-            ]
-            self.end_index = self._length()
-        else:
+        if (
+            image_index in self.image_slice_indices
+            and slice_index in self.image_slice_indices[image_index]
+            and self.image_slice_indices[image_index][slice_index] is None
+        ):
+            if pseudo_label is not None:
+                # If a pseudo label is added even though the real label already exists it should be ignored
+                return
             raise ValueError("Slice of image already belongs to this dataset.")
 
-    def remove_image(self, case_id: str, slice_index: int = 0) -> None:
+        if image_index not in self.image_slice_indices:
+            self.image_slice_indices[image_index] = {}
+
+        if (
+            slice_index not in self.image_slice_indices[image_index]
+            or self.image_slice_indices[image_index][slice_index] is not None
+        ):
+            self.image_slice_indices[image_index][slice_index] = pseudo_label
+
+    def remove_image(self, image_id: str, slice_index: int = 0) -> None:
         """
         Removes an image from this dataset.
         Args:
-            image_path: Path of the image to be removed.
-            annotation_path: Path of the annotation of the image to be removed.
-
-        Returns:
-            None. Raises ValueError if image already exists.
+            image_id (str): The id of the image.
+            slice_index (int): Index of the slice to be removed.
         """
 
-        image_index = self.__get_image_index(case_id)
-        image_slice_index_to_remove = (image_index, slice_index)
-        if image_slice_index_to_remove in self.image_slice_indices:
-            self.image_slice_indices.remove((image_index, slice_index))
-            self.end_index = self._length()
-        else:
-            raise ValueError("Slice of image does not belong to this dataset.")
+        image_index = self.__get_image_index(image_id)
+        if (
+            image_index in self.image_slice_indices
+            and slice_index in self.image_slice_indices[image_index]
+        ):
+            del self.image_slice_indices[image_index][slice_index]
+            if len(self.image_slice_indices[image_index]) == 0:
+                del self.image_slice_indices[image_index]
+
+    def get_images_by_id(
+        self,
+        case_ids: List[str],
+    ) -> List[Tuple[np.ndarray, str]]:
+        """
+        Retrieves the last n images and corresponding case ids from the images that were last added to the dataset.
+        Args:
+            case_ids (List[str]): List with case_ids to get.
+
+        Returns:
+            A list of all the images with provided case ids.
+        """
+
+        # create list of files as tuple of image id and slice index
+        image_slice_ids = [case_id.split("-") for case_id in case_ids]
+        image_slice_ids = [
+            (split_id[0], int(split_id[1]) if len(split_id) > 1 else None)
+            for split_id in image_slice_ids
+        ]
+        all_images = []
+        for case_id, (image_id, slice_index) in zip(case_ids, image_slice_ids):
+            image_index = self.__get_image_index(image_id)
+            # check if image and mask are in cache
+            if image_index in self.image_cache:
+                current_image = self.image_cache[image_index]
+            # read image and mask from disk otherwise
+            else:
+                current_image = self.__read_image_as_array(
+                    self.image_paths[image_index], norm=True
+                )
+            all_images.append((current_image[slice_index, :, :], case_id))
+        return all_images
 
     def __image_indices(self) -> Iterable[str]:
-        return reduce(
-            lambda acc, elem: acc + [elem] if not elem in acc else acc,
-            [image_id for image_id, _ in self.image_slice_indices],
-            [],
-        )
+        return self.image_slice_indices.keys()
 
     def image_ids(self) -> Iterable[str]:
         return [self.__get_case_id(image_idx) for image_idx in self.__image_indices()]
@@ -514,3 +572,19 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             DoublyShuffledNIfTIDataset.__read_slice_count(self.image_paths[image_idx])
             for image_idx in self.__image_indices()
         ]
+
+    def size(self) -> int:
+        """
+        Returns:
+            int: Size of the dataset.
+        """
+
+        if self.dim == 2:
+            size = 0
+
+            for inner_dict in self.image_slice_indices.values():
+                size += len(inner_dict)
+
+            return size
+
+        return len(self.image_ids())

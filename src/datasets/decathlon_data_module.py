@@ -2,8 +2,8 @@
 from io import TextIOWrapper
 import json
 import os
-import random
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
+import numpy as np
 from torch.utils.data import DataLoader, Dataset
 
 from .collate import batch_padding_collate_fn
@@ -33,7 +33,8 @@ class DecathlonDataModule(ActiveLearningDataModule):
             (default = True)
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
-        random_state (int): Random constant for shuffling the data
+        random_state (int, optional): Random state for splitting the data into an initial training set and an unlabeled
+            set and for shuffling the data. Pass an int for reproducibility across runs.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -76,6 +77,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         dir_path: str,
         subset: Literal["train", "val", "test"],
         random_samples: Optional[int] = None,
+        random_state: Optional[int] = None,
     ) -> Tuple[List[str], List[str]]:
         """
         Discover the .nii file paths from the corresponding JSON file.
@@ -103,8 +105,8 @@ class DecathlonDataModule(ActiveLearningDataModule):
                 ]
 
                 if random_samples is not None and random_samples < len(cases):
-                    random.seed(42)
-                    cases = random.sample(cases, random_samples)
+                    rng = np.random.default_rng(random_state)
+                    cases = rng.choice(cases, random_samples, replace=False)
 
                 image_paths = [
                     os.path.join(dir_path, case["image"][2:]) for case in cases
@@ -134,7 +136,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         dim: int = 2,
         mask_join_non_zero: bool = True,
         mask_filter_values: Optional[Tuple[int]] = None,
-        random_state: int = 42,
+        random_state: Optional[int] = None,
         **kwargs,
     ):
 
@@ -155,6 +157,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         self.mask_join_non_zero = mask_join_non_zero
         self.mask_filter_values = mask_filter_values
         self._data_channels = DecathlonDataModule.__read_data_channels(self.data_folder)
+        self.random_state = random_state
 
         if self.active_learning_mode:
             (
@@ -197,6 +200,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         with DecathlonDataModule.__open_dataset_file(self.data_folder) as dataset_file:
             dataset_info = json.load(dataset_file)
             labels = dataset_info["labels"]
+        labels = {int(key): labels[key] for key in labels}
 
         if self.mask_join_non_zero:
             return {0: "background", 1: "foreground"}
@@ -209,26 +213,31 @@ class DecathlonDataModule(ActiveLearningDataModule):
             }
         return labels
 
-    def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+    def label_items(
+        self, ids: List[str], pseudo_labels: Optional[Dict[str, np.array]] = None
+    ) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
-        if self.dim == 2:
-            # create list of files as tuple of image id and slice index
-            image_slice_ids = [tuple(case_id.split("-")) for case_id in ids]
-            ids = [image_id for image_id, _ in image_slice_ids]
+        # create list of files as tuple of image id and slice index
+        image_slice_ids = [case_id.split("-") for case_id in ids]
+        image_slice_ids = [
+            (split_id[0], int(split_id[1]) if len(split_id) > 1 else None)
+            for split_id in image_slice_ids
+        ]
 
-        if self._training_set is not None and self._unlabeled_set is not None:
+        if self.training_set is not None and self.unlabeled_set is not None:
 
-            for index, case_id in enumerate(ids):
-                if self.dim == 2:
-                    # additionally pass slice index for dimension 2
-                    slice_index = int(image_slice_ids[index][1])
+            for case_id, (image_id, slice_id) in zip(ids, image_slice_ids):
+                if self.dim == 3 and slice_id is None:
+                    slice_id = 0
+
+                if pseudo_labels is not None and case_id in pseudo_labels:
+                    self.training_set.add_image(
+                        image_id, slice_id, pseudo_labels[case_id]
+                    )
                 else:
-                    # 3D images only have one slice index of 0
-                    slice_index = 0
-
-                self._training_set.add_image(case_id, slice_index)
-                self._unlabeled_set.remove_image(case_id, slice_index)
+                    self.training_set.add_image(image_id, slice_id)
+                    self.unlabeled_set.remove_image(image_id, slice_id)
 
     def _create_training_set(self) -> Optional[Dataset]:
         """Creates a training dataset."""
@@ -245,6 +254,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
             slice_indices=self.initial_training_samples,
+            random_state=self.random_state,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -255,9 +265,9 @@ class DecathlonDataModule(ActiveLearningDataModule):
 
         # disable shuffling in the dataloader since the dataset is a subclass of
         # IterableDataset and implements it's own shuffling
-        if self._training_set:
+        if self.training_set:
             return DataLoader(
-                self._training_set,
+                self.training_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
@@ -278,6 +288,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             mask_join_non_zero=self.mask_join_non_zero,
             mask_filter_values=self.mask_filter_values,
             case_id_prefix="val",
+            random_state=self.random_state,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -303,6 +314,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
                 mask_join_non_zero=self.mask_join_non_zero,
                 mask_filter_values=self.mask_filter_values,
                 slice_indices=self.initial_unlabeled_samples,
+                random_state=self.random_state,
             )
 
         # unlabeled set is empty

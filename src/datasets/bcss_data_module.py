@@ -34,7 +34,8 @@ class BCSSDataModule(ActiveLearningDataModule):
             (default = True)
         val_set_size (float, optional): The size of the validation set (default = 0.3).
         stratify (bool, optional): The option to stratify the train val split by the institutes.
-        random_state (int): Random constant for shuffling the data
+        random_state (int, optional): Controls the data splitting and shuffling. Pass an int for reproducible output
+            across multiple runs.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -102,7 +103,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         mask_join_non_zero: bool = True,
         val_set_size: float = 0.3,
         stratify: bool = True,
-        random_state: int = 42,
+        random_state: Optional[int] = None,
         **kwargs,
     ):
 
@@ -127,10 +128,12 @@ class BCSSDataModule(ActiveLearningDataModule):
         self.random_state = random_state
         self.split = {}
 
-    def label_items(self, ids: List[str], labels: Optional[Any] = None) -> None:
+    def label_items(
+        self, ids: List[str], pseudo_labels: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Moves the given samples from the unlabeled dataset to the labeled dataset."""
 
-        if self._training_set is not None and self._unlabeled_set is not None:
+        if self.training_set is not None and self.unlabeled_set is not None:
             labeled_image_and_annotation_paths = [
                 self._case_id_to_filepaths(
                     case_id=case_id,
@@ -141,10 +144,10 @@ class BCSSDataModule(ActiveLearningDataModule):
             for _, (labeled_image_path, labeled_image_annotation_path) in enumerate(
                 labeled_image_and_annotation_paths
             ):
-                self._training_set.add_image(
+                self.training_set.add_image(
                     labeled_image_path, labeled_image_annotation_path
                 )
-                self._unlabeled_set.remove_image(
+                self.unlabeled_set.remove_image(
                     labeled_image_path, labeled_image_annotation_path
                 )
 
@@ -229,6 +232,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_shape=self.image_shape,
             target_label=self.target_label,
             cache_size=self.cache_size,
+            random_state=self.random_state,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -239,9 +243,9 @@ class BCSSDataModule(ActiveLearningDataModule):
 
         # disable shuffling in the dataloader since the BCSS dataset is a subclass of
         # IterableDataset and implements it's own shuffling
-        if self._training_set:
+        if self.training_set:
             return DataLoader(
-                self._training_set,
+                self.training_set,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=self.pin_memory,
@@ -259,6 +263,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_shape=self.image_shape,
             target_label=self.target_label,
             cache_size=self.cache_size,
+            random_state=self.random_state,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -275,6 +280,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             image_shape=self.image_shape,
             target_label=self.target_label,
             cache_size=self.cache_size,
+            random_state=self.random_state,
         )
 
     def _create_unlabeled_set(self) -> Optional[Dataset]:
@@ -303,6 +309,7 @@ class BCSSDataModule(ActiveLearningDataModule):
                 target_label=self.target_label,
                 cache_size=self.cache_size,
                 is_unlabeled=True,
+                random_state=self.random_state,
             )
         # Unlabeled set is empty
         unlabeled_set = self._create_training_set()

@@ -3,7 +3,9 @@ import json
 import os.path
 from typing import Any, Dict, Iterable, Optional
 
+import torch
 import fire
+import pytorch_lightning
 from pytorch_lightning.loggers import WandbLogger
 import wandb
 
@@ -12,13 +14,13 @@ from inferencing import Inferencer
 from models import PytorchFCNResnet50, PytorchUNet
 from datasets import (
     BraTSDataModule,
-    PascalVOCDataModule,
     DecathlonDataModule,
     BCSSDataModule,
 )
 from query_strategies import (
     RandomSamplingStrategy,
     UncertaintySamplingStrategy,
+    InterpolationSamplingStrategy,
     DistanceBasedRepresentativenessSamplingStrategy,
     ClusteringBasedRepresentativenessSamplingStrategy,
     UncertaintyRepresentativenessSamplingStrategy,
@@ -50,11 +52,7 @@ def create_data_module(
         The data module.
     """
 
-    if dataset == "pascal-voc":
-        data_module = PascalVOCDataModule(
-            data_dir, batch_size, num_workers, **dataset_config
-        )
-    elif dataset == "brats":
+    if dataset == "brats":
         data_module = BraTSDataModule(
             data_dir,
             batch_size,
@@ -115,7 +113,7 @@ def create_data_module(
 def run_active_learning_pipeline(
     architecture: str,
     dataset: str,
-    strategy: str,
+    strategy_config: dict,
     experiment_name: str,
     batch_size: int = 16,
     checkpoint_dir: Optional[str] = None,
@@ -143,7 +141,7 @@ def run_active_learning_pipeline(
     Args:
         architecture (string): Name of the desired model architecture. E.g. 'u_net'.
         dataset (string): Name of the dataset. E.g. 'brats'
-        strategy (string): Name of the query strategy. E.g. 'random'
+        strategy_config (dict): Configuration of the query strategy.
         experiment_name (string): Name of the experiment.
         batch_size (int, optional): Size of training examples passed in one training step.
         checkpoint_dir (str, optional): Directory where the model checkpoints are to be saved.
@@ -167,6 +165,15 @@ def run_active_learning_pipeline(
     Returns:
         None.
     """
+
+    # set global seed for reproducibility
+    pytorch_lightning.utilities.seed.seed_everything(random_state)
+    torch.backends.cudnn.deterministic = True
+
+    if model_config.get("dim") == 2:
+        # Pytorch lightning currently does not support deterministic 3d max pooling
+        # therefore this option is only enabled for the 2d case
+        torch.use_deterministic_algorithms(True)
 
     wandb_logger = WandbLogger(
         project=wandb_project_name,
@@ -197,7 +204,7 @@ def run_active_learning_pipeline(
         data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
     )
 
-    strategy = create_query_strategy(strategy)
+    strategy = create_query_strategy(strategy_config=strategy_config)
 
     if checkpoint_dir is not None:
         checkpoint_dir = os.path.join(checkpoint_dir, f"{wandb_logger.experiment.id}")
@@ -214,15 +221,17 @@ def run_active_learning_pipeline(
         active_learning_mode=active_learning_config.get("active_learning_mode", False),
         initial_epochs=active_learning_config.get("initial_epochs", epochs),
         items_to_label=active_learning_config.get("items_to_label", 1),
-        iterations=active_learning_config.get("iterations", 10),
+        iterations=active_learning_config.get("iterations", None),
         reset_weights=active_learning_config.get("reset_weights", False),
         epochs_increase_per_query=active_learning_config.get(
             "epochs_increase_per_query", 0
         ),
+        heatmaps_per_iteration=active_learning_config.get("heatmaps_per_iteration", 0),
         logger=wandb_logger,
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,
         model_selection_criterion=model_selection_criterion,
+        **active_learning_config.get("strategy_config", {}),
     )
     pipeline.run()
 
@@ -283,21 +292,25 @@ def create_model(
     return model
 
 
-def create_query_strategy(strategy: str):
+def create_query_strategy(strategy_config: dict):
     """
     Initialises the chosen query strategy
     Args:
-        strategy (str): Name of the query strategy. E.g. 'random'
+        strategy_config (dict): Configuration of the query strategy
     """
-    if strategy == "random":
-        return RandomSamplingStrategy()
-    if strategy == "uncertainty":
-        return UncertaintySamplingStrategy()
-    if strategy == "representativeness_distance":
+    strategy_type = strategy_config.get("type")
+
+    if strategy_type == "random":
+        return RandomSamplingStrategy(**strategy_config)
+    if strategy_type == "interpolation":
+        return InterpolationSamplingStrategy(**strategy_config)
+    if strategy_type == "uncertainty":
+        return UncertaintySamplingStrategy(**strategy_config)
+    if strategy_config.get("type") == "representativeness_distance":
         return DistanceBasedRepresentativenessSamplingStrategy()
-    if strategy == "representativeness_clustering":
+    if strategy_config.get("type") == "representativeness_clustering":
         return ClusteringBasedRepresentativenessSamplingStrategy()
-    if strategy == "representativeness_uncertainty":
+    if strategy_config.get("type") == "representativeness_uncertainty":
         return UncertaintyRepresentativenessSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
@@ -371,9 +384,7 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(
-            **config,
-        )
+        run_active_learning_pipeline(**config)
 
 
 if __name__ == "__main__":

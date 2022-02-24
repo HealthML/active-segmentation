@@ -25,6 +25,8 @@ class UNet(nn.Module):
             in each down-sampling block, the number of feature channels is doubled. Defaults to 32.
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         dim (int, optional): The dimensionality of the U-Net. Defaults to 2.
+        p_dropout (float, optional): Probability of applying dropout to the outputs of the encoder layers. Defaults to
+            0.
     """
 
     # pylint: disable-msg=too-many-instance-attributes
@@ -37,6 +39,7 @@ class UNet(nn.Module):
         init_features: int = 32,
         num_levels: int = 4,
         dim: int = 2,
+        p_dropout: float = 0,
     ):
 
         super().__init__()
@@ -56,6 +59,7 @@ class UNet(nn.Module):
                     features * (2 ** level),
                     name=f"enc{level + 1}",
                     dim=dim,
+                    p_dropout=p_dropout,
                 )
                 for level in range(num_levels)
             ]
@@ -140,7 +144,9 @@ class UNet(nn.Module):
         return self.prediction_layer(decoded)
 
     @staticmethod
-    def _block(in_channels: int, features: int, name: str, dim: int):
+    def _block(
+        in_channels: int, features: int, name: str, dim: int, p_dropout: float = 0
+    ):
 
         Conv = nn.Conv2d if dim == 2 else nn.Conv3d
         BatchNorm = nn.BatchNorm2d if dim == 2 else nn.BatchNorm3d
@@ -172,6 +178,7 @@ class UNet(nn.Module):
                     ),
                     (name + "norm2", BatchNorm(num_features=features)),
                     (name + "relu2", nn.ReLU(inplace=True)),
+                    (name + "dropout", nn.Dropout(p=p_dropout)),
                 ]
             )
         )

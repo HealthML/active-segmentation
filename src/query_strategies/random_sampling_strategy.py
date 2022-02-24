@@ -1,5 +1,7 @@
 """ Module for random sampling strategy """
-from typing import List, Union
+from typing import List, Tuple, Union, Optional
+
+import numpy as np
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
@@ -10,15 +12,23 @@ from .query_strategy import QueryStrategy
 class RandomSamplingStrategy(QueryStrategy):
     """
     Class for selecting items via a random sampling strategy
+
+    Args:
+        random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible outputs
+            across multiple runs.
     """
+
+    # pylint: disable=unused-argument
+    def __init__(self, random_state: Optional[int] = None, **kwargs):
+        self.random_state = random_state
 
     def select_items_to_label(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
         data_module: ActiveLearningDataModule,
         items_to_label: int,
-        **kwargs
-    ) -> List[str]:
+        **kwargs,
+    ) -> Tuple[List[str], None]:
         """
         Selects random subset of the unlabeled data that should be labeled next. We are using
         the shuffling of the dataset for randomisation.
@@ -29,18 +39,21 @@ class RandomSamplingStrategy(QueryStrategy):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
+                generated.
         """
         # randomly select ids to query
 
-        selected_ids = []
-        selected_items = 0
+        unlabeled_image_ids = []
 
-        # shuffling of the dataset is used for randomization
-        for _, image_id in data_module.unlabeled_dataloader():
-            if selected_items == items_to_label:
-                break
-            selected_ids.append(image_id[0])
-            selected_items += 1
+        for _, image_ids in data_module.unlabeled_dataloader():
+            unlabeled_image_ids.extend(image_ids)
 
-        return selected_ids
+        items_to_label = min(items_to_label, data_module.unlabeled_set_size())
+
+        rng = np.random.default_rng(self.random_state)
+
+        return (
+            list(rng.choice(unlabeled_image_ids, size=items_to_label, replace=False)),
+            None,
+        )
