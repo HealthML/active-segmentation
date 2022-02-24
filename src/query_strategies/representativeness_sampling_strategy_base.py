@@ -89,7 +89,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         data_module: ActiveLearningDataModule,
         items_to_label: int,
         **kwargs,
-    ) -> List[str]:
+    ) -> Tuple[List[str], None]:
         """
         Selects a subset of the unlabeled data that increases the representativeness of the training set.
 
@@ -100,7 +100,8 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            List[str]: IDs of the data items to be labeled.
+            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
+                generated.
         """
 
         if isinstance(models, List):
@@ -165,7 +166,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
 
         interception_hook.remove()
 
-        return selected_ids
+        return selected_ids, None
 
     def prepare_representativeness_computation(
         self, feature_vectors_training_set, feature_vectors_unlabeled_set
