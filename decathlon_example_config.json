@@ -33,7 +33,8 @@
     "type": "interpolation",
     "calculation_method": "distance",
     "exclude_background": true,
-    "block_thickness": 5
+    "block_thickness": 5,
+    "interpolation_quality_metric": "dice"
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
