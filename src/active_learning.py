@@ -115,14 +115,17 @@ class ActiveLearningPipeline:
                 if iteration != 0:
                     # query batch selection
                     if self.data_module.unlabeled_set_size() > 0:
-                        items_to_label = self.strategy.select_items_to_label(
+                        (
+                            items_to_label,
+                            pseudo_labels,
+                        ) = self.strategy.select_items_to_label(
                             self.model,
                             self.data_module,
                             self.items_to_label,
                             **self.kwargs,
                         )
                         # label batch
-                        self.data_module.label_items(items_to_label)
+                        self.data_module.label_items(items_to_label, pseudo_labels)
 
                     if self.heatmaps_per_iteration > 0:
                         # Get latest added items from dataset

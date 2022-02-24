@@ -1,5 +1,5 @@
 """ Module to load and batch nifti datasets """
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from multiprocessing import Manager
 from sklearn.model_selection import train_test_split
 
@@ -367,6 +367,20 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             self.current_slice_key_index = 0
         return self
 
+    def read_mask_for_image(self, image_index: int) -> np.array:
+        """
+        Reads the mask for the image from file. Uses correct mask specific parameters.
+
+        Args:
+            image_index (int): Index of the image to load.
+        """
+        return self.__read_image_as_array(
+            self.annotation_paths[image_index],
+            norm=False,
+            join_non_zero=self.mask_join_non_zero,
+            filter_values=self.mask_filter_values,
+        )
+
     def __load_image_and_mask(self, image_index: int) -> None:
         """
         Loads image with the given index either from cache or from disk.
@@ -386,12 +400,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             self._current_image = self.__read_image_as_array(
                 self.image_paths[image_index], norm=True
             )
-            self._current_mask = self.__read_image_as_array(
-                self.annotation_paths[image_index],
-                norm=False,
-                join_non_zero=self.mask_join_non_zero,
-                filter_values=self.mask_filter_values,
-            )
+            self._current_mask = self.read_mask_for_image(image_index)
 
         # cache image and mask if there is still space in cache
         if len(self.image_cache.keys()) < self.cache_size:
@@ -399,7 +408,11 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             self.mask_cache[image_index] = self._current_mask
 
     # pylint: disable=too-many-branches
-    def __next__(self) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __next__(
+        self,
+    ) -> Union[
+        Tuple[torch.Tensor, torch.Tensor, str], Tuple[torch.Tensor, torch.Tensor]
+    ]:
         if self.current_image_key_index >= len(self.image_slice_indices):
             raise StopIteration
 
@@ -424,7 +437,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 x = torch.from_numpy(self._current_image[slice_index, :, :])
             pseudo_label = self.image_slice_indices[image_index][slice_index]
             y = (
-                pseudo_label
+                torch.from_numpy(pseudo_label).int()
                 if pseudo_label is not None
                 else torch.from_numpy(self._current_mask[slice_index, :, :]).int()
             )

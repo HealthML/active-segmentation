@@ -2,6 +2,9 @@
 from query_strategies.query_strategy import QueryStrategy
 from query_strategies.random_sampling_strategy import RandomSamplingStrategy
 from query_strategies.uncertainty_sampling_strategy import UncertaintySamplingStrategy
+from query_strategies.interpolation_sampling_strategy import (
+    InterpolationSamplingStrategy,
+)
 from query_strategies.representativeness_sampling_strategy import (
     RepresentativenessSamplingStrategy,
 )

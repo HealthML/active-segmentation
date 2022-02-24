@@ -1,13 +1,15 @@
-# pylint: disable=all
-from torch.utils.data import DataLoader
-from typing import List, Union
+"""Module containing abstract superclass for query strategies."""
+from typing import Any, Dict, List, Optional, Tuple, Union
 from abc import ABC, abstractmethod
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
 
 
+# pylint: disable=too-few-public-methods
 class QueryStrategy(ABC):
+    """Abstract superclass for query strategies."""
+
     @abstractmethod
     def select_items_to_label(
         self,
@@ -15,7 +17,7 @@ class QueryStrategy(ABC):
         data_module: ActiveLearningDataModule,
         items_to_label: int,
         **kwargs
-    ) -> List[str]:
+    ) -> Tuple[List[str], Optional[Dict[str, Any]]]:
         """
         Selects subset of the unlabeled data that should be labeled next.
         Args:
@@ -25,7 +27,8 @@ class QueryStrategy(ABC):
             **kwargs: Additional, strategy-specific parameters.
 
         Returns:
-            IDs of the data items to be labeled.
+            Tuple[List[str], Optional[Dict[str, np.array]]]: List of IDs of the data items to be labeled
+            and an optional dictonary of pseudo labels with the corresponding IDs as keys.
         """
 
         raise NotImplementedError()

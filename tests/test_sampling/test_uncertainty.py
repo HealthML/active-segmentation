@@ -149,7 +149,7 @@ class UncertaintyTestCase(unittest.TestCase):
     ):
         """Tests the select items method"""
         strategy = UncertaintySamplingStrategy(**kwargs)
-        actual_cases = strategy.select_items_to_label(
+        actual_cases, _ = strategy.select_items_to_label(
             models=ModelMock(prediction_tensor=prediction),
             data_module=DataLoaderMock(
                 cases=cases, is_multi_label=is_multi_label, num_classes=num_classes
