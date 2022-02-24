@@ -29,6 +29,8 @@ class UncertaintyRepresentativenessSamplingStrategy(
                     is selected for labeling.
                 - `"cluster_coverage"`: The features of the unlabeled and labeled items are clustered and an item from
                     the most underrepresented cluster is selected for labeling.
+        calculation_method (string, optional): The algorithm to be used for computing the uncertainty: `"distance"` |
+            "`entropy`".
     """
 
     def __init__(
@@ -36,6 +38,7 @@ class UncertaintyRepresentativenessSamplingStrategy(
         representativeness_algorithm: Literal[
             "most_distant_sample", "cluster_coverage"
         ] = "cluster_coverage",
+        calculation_method: Literal["distance", "entropy"] = "entropy",
     ):
         super().__init__()
 
@@ -51,7 +54,9 @@ class UncertaintyRepresentativenessSamplingStrategy(
             raise ValueError(
                 f"Invalid representativeness sampling algorithm: {representativeness_algorithm}."
             )
-        self.uncertainty_sampling_strategy = UncertaintySamplingStrategy()
+        self.uncertainty_sampling_strategy = UncertaintySamplingStrategy(
+            calculation_method=calculation_method
+        )
 
     def prepare_representativeness_computation(
         self, feature_vectors_training_set, feature_vectors_unlabeled_set
