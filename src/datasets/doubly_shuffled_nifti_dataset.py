@@ -331,12 +331,14 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         self.case_id_prefix = case_id_prefix
 
-        self.image_slice_indices = DoublyShuffledNIfTIDataset.__arange_image_slice_indices(
-            filepaths=self.image_paths,
-            dim=self.dim,
-            shuffle=self.shuffle,
-            random_state=random_state,
-            slice_indices=slice_indices,
+        self.image_slice_indices = (
+            DoublyShuffledNIfTIDataset.__arange_image_slice_indices(
+                filepaths=self.image_paths,
+                dim=self.dim,
+                shuffle=self.shuffle,
+                random_state=random_state,
+                slice_indices=slice_indices,
+            )
         )
 
         self.num_workers = 1
@@ -530,7 +532,10 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             if len(self.image_slice_indices[image_index]) == 0:
                 del self.image_slice_indices[image_index]
 
-    def get_images_by_id(self, case_ids: List[str],) -> List[Tuple[np.ndarray, str]]:
+    def get_images_by_id(
+        self,
+        case_ids: List[str],
+    ) -> List[Tuple[np.ndarray, str]]:
         """
         Retrieves the last n images and corresponding case ids from the images that were last added to the dataset.
         Args:
