@@ -134,6 +134,7 @@ def run_active_learning_pipeline(
     wandb_project_name: str = "active-segmentation",
     early_stopping: bool = False,
     random_state: int = 42,
+    deterministic_mode: bool = True,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning
@@ -161,19 +162,17 @@ def run_active_learning_pipeline(
             is not learning anymore (default = False).
         random_state (int): Random constant for shuffling the data
         wandb_project_name (string, optional): Name of the project that the W&B runs are stored in.
+        deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to
+            `True`.
 
     Returns:
         None.
     """
 
-    # set global seed for reproducibility
-    pytorch_lightning.utilities.seed.seed_everything(random_state)
-    torch.backends.cudnn.deterministic = True
-
-    if model_config.get("dim") == 2:
-        # Pytorch lightning currently does not support deterministic 3d max pooling
-        # therefore this option is only enabled for the 2d case
-        torch.use_deterministic_algorithms(True)
+    # set global seeds for reproducibility
+    pytorch_lightning.utilities.seed.seed_everything(random_state, workers=True)
+    torch.cuda.manual_seed(random_state)
+    torch.cuda.manual_seed_all(random_state)  # for multi-GPU runs
 
     wandb_logger = WandbLogger(
         project=wandb_project_name,
@@ -231,6 +230,7 @@ def run_active_learning_pipeline(
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,
         model_selection_criterion=model_selection_criterion,
+        deterministic_mode=deterministic_mode,
         **active_learning_config.get("strategy_config", {}),
     )
     pipeline.run()

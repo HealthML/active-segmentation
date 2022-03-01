@@ -365,6 +365,10 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             self.num_workers = worker_info.num_workers
             self.current_image_key_index = worker_info.id
             self.current_slice_key_index = 0
+        else:
+            self.num_workers = 1
+            self.current_image_key_index = 0
+            self.current_slice_key_index = 0
         return self
 
     def read_mask_for_image(self, image_index: int) -> np.array:
