@@ -45,6 +45,8 @@ class ActiveLearningPipeline:
             the increased training dataset size. Defaults to 0.
         heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration. Defaults to
             0.
+        deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to
+            `True`.
         **kwargs: Additional, strategy-specific parameters.
     """
 
@@ -69,6 +71,7 @@ class ActiveLearningPipeline:
         early_stopping: bool = False,
         lr_scheduler: str = None,
         model_selection_criterion="loss",
+        deterministic_mode: bool = True,
         **kwargs,
     ) -> None:
 
@@ -93,6 +96,7 @@ class ActiveLearningPipeline:
         self.model_selection_criterion = model_selection_criterion
         self.reset_weights = reset_weights
         self.epochs_increase_per_query = epochs_increase_per_query
+        self.deterministic_mode = deterministic_mode
         self.kwargs = kwargs
 
     def run(self) -> None:
@@ -129,10 +133,8 @@ class ActiveLearningPipeline:
 
                     if self.heatmaps_per_iteration > 0:
                         # Get latest added items from dataset
-                        items_to_inspect = (
-                            self.data_module._training_set.get_images_by_id(
-                                case_ids=items_to_label[: self.heatmaps_per_iteration],
-                            )
+                        items_to_inspect = self.data_module._training_set.get_images_by_id(
+                            case_ids=items_to_label[: self.heatmaps_per_iteration],
                         )
                         # Generate heatmaps using final predictions and heatmaps
                         if len(items_to_inspect) > 0:
@@ -219,8 +221,16 @@ class ActiveLearningPipeline:
 
         callbacks.append(all_models_checkpoint_callback)
 
+        # Pytorch lightning currently does not support deterministic 3d max pooling
+        # therefore this option is only enabled for the 2d case
+        # see https://pytorch.org/docs/stable/notes/randomness.html
+        deterministic_mode = (
+            self.deterministic_mode if self.model.input_dimensionality() == 2 else False
+        )
+
         return Trainer(
-            deterministic=True,
+            deterministic=deterministic_mode,
+            benchmark=not self.deterministic_mode,
             profiler="simple",
             max_epochs=epochs + iteration * self.epochs_increase_per_query
             if iteration is not None
@@ -228,7 +238,6 @@ class ActiveLearningPipeline:
             logger=self.logger,
             log_every_n_steps=20,
             gpus=self.gpus,
-            benchmark=True,
             callbacks=callbacks,
             num_sanity_val_steps=num_sanity_val_steps,
         )
@@ -266,10 +275,7 @@ class ActiveLearningPipeline:
         wandb.log({"Logit heatmaps": logit_images})
 
     def __generate_heatmaps(
-        self,
-        img: np.ndarray,
-        case_id: str,
-        target_category: int = 1,
+        self, img: np.ndarray, case_id: str, target_category: int = 1,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Generates two heatmaps: One based on the GradCam method and one based on the predictions of the last layer.
