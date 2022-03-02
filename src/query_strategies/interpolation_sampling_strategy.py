@@ -20,13 +20,17 @@ class InterpolationSamplingStrategy(QueryStrategy):
     blocks to generate additonal pseudo labels.
     Args:
         **kwargs: Optional keyword arguments:
+            block_selection (str): The selection strategy for the blocks to interpolate: `"uncertainty"` | `"random"`.
+            block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
             calculation_method (str): Specification of the method used to calculate the uncertainty
                 values: `"distance"` |  `"entropy"`.
             exclude_background (bool): Whether to exclude the background dimension in calculating the
                 uncertainty value.
             epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
                 metric.
-            block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
+            random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible outputs
+                across multiple runs.
+
     """
 
     def __init__(self, **kwargs):
@@ -69,7 +73,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
             available_blocks.append((prefix, image_id, top_slice_id))
 
-        rng = np.random.default_rng(self.kwargs.get("random_state", 42))
+        rng = np.random.default_rng(self.kwargs.get("random_state", None))
         rng.shuffle(available_blocks)
 
         return available_blocks
