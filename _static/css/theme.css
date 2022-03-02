@@ -10625,9 +10625,8 @@ article.sphinx-template-article .sphx-glr-thumbcontainer .figure a.reference.int
 
 article.sphinx-template-article section :not(dt) > code {
   color: #262626;
-  border-top: solid 2px #ffffff;
-  background-color: #ffffff;
-  border-bottom: solid 2px #ffffff;
+  border-top: 2px;
+  border-bottom: 2px;
   padding: 0px 3px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
@@ -10864,13 +10863,11 @@ article.sphinx-template-article .caution :not(dt) > code,
 article.sphinx-template-article .danger :not(dt) > code,
 article.sphinx-template-article .attention :not(dt) > code,
 article.sphinx-template-article .error :not(dt) > code {
-  border-top: solid 2px #ffffff;
-  background-color: #ffffff;
-  border-bottom: solid 2px #ffffff;
+  border-top: 2px;
+  border-bottom: 2px;
   padding: 0px 3px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-  outline: 1px solid #e9e9e9;
 }
 article.sphinx-template-article .note :not(dt) > code .pre,
 article.sphinx-template-article .warning :not(dt) > code .pre,

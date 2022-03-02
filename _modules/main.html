@@ -317,6 +317,8 @@
     <span class="n">early_stopping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
     <span class="n">deterministic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_model_every_epoch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">clear_wandb_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main function to execute an active learning pipeline run, or start an active learning</span>
@@ -346,6 +348,10 @@
 <span class="sd">        wandb_project_name (string, optional): Name of the project that the W&amp;B runs are stored in.</span>
 <span class="sd">        deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to</span>
 <span class="sd">            `True`.</span>
+<span class="sd">        save_model_every_epoch (bool, optional): Whether the model files of all epochs are to be saved or only the</span>
+<span class="sd">            model file of the best epoch. Defaults to `False`.</span>
+<span class="sd">        clear_wandb_cache (bool, optional): Whether the whole Weights and Biases cache should be deleted when the run</span>
+<span class="sd">            is finished. Should only be used when no other runs are running in parallel. Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None.</span>
@@ -413,6 +419,8 @@
         <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
         <span class="n">model_selection_criterion</span><span class="o">=</span><span class="n">model_selection_criterion</span><span class="p">,</span>
         <span class="n">deterministic_mode</span><span class="o">=</span><span class="n">deterministic_mode</span><span class="p">,</span>
+        <span class="n">save_model_every_epoch</span><span class="o">=</span><span class="n">save_model_every_epoch</span><span class="p">,</span>
+        <span class="n">clear_wandb_cache</span><span class="o">=</span><span class="n">clear_wandb_cache</span><span class="p">,</span>
         <span class="o">**</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;strategy_config&quot;</span><span class="p">,</span> <span class="p">{}),</span>
     <span class="p">)</span>
     <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>

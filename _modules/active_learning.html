@@ -184,6 +184,7 @@
 
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -229,6 +230,10 @@
 <span class="sd">            0.</span>
 <span class="sd">        deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to</span>
 <span class="sd">            `True`.</span>
+<span class="sd">        save_model_every_epoch (bool, optional): Whether the model files of all epochs are to be saved or only the</span>
+<span class="sd">            model file of the best epoch. Defaults to `False`.</span>
+<span class="sd">        clear_wandb_cache (bool, optional): Whether the whole Weights and Biases cache should be deleted when the run</span>
+<span class="sd">            is finished. Should only be used when no other runs are running in parallel. Defaults to False.</span>
 <span class="sd">        **kwargs: Additional, strategy-specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -254,6 +259,8 @@
         <span class="n">lr_scheduler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model_selection_criterion</span><span class="o">=</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span>
         <span class="n">deterministic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">save_model_every_epoch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">clear_wandb_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
@@ -279,6 +286,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_weights</span> <span class="o">=</span> <span class="n">reset_weights</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs_increase_per_query</span> <span class="o">=</span> <span class="n">epochs_increase_per_query</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">deterministic_mode</span> <span class="o">=</span> <span class="n">deterministic_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_model_every_epoch</span> <span class="o">=</span> <span class="n">save_model_every_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_wandb_cache</span> <span class="o">=</span> <span class="n">clear_wandb_cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
 <div class="viewcode-block" id="ActiveLearningPipeline.run"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -350,7 +359,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
 
             <span class="c1"># compute metrics for the best model on the validation set</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">ckpt_path</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">dataloaders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">ckpt_path</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">dataloaders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="p">)</span>
+
+        <span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clear_wandb_cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_wandb_cache</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ActiveLearningPipeline.setup_trainer"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline.setup_trainer">[docs]</a>    <span class="k">def</span> <span class="nf">setup_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trainer</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -393,17 +406,18 @@
 
         <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_model_checkpoint_callback</span><span class="p">)</span>
 
-        <span class="n">all_models_checkpoint_callback</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
-            <span class="n">dirpath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;all_models&quot;</span><span class="p">),</span>
-            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;epoch_</span><span class="si">{epoch}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">auto_insert_metric_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">save_top_k</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">every_n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">every_n_train_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">save_on_train_epoch_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_model_every_epoch</span><span class="p">:</span>
+            <span class="n">all_models_checkpoint_callback</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
+                <span class="n">dirpath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;all_models&quot;</span><span class="p">),</span>
+                <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;epoch_</span><span class="si">{epoch}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">auto_insert_metric_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">save_top_k</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">every_n_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">every_n_train_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">save_on_train_epoch_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_models_checkpoint_callback</span><span class="p">)</span>
+            <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_models_checkpoint_callback</span><span class="p">)</span>
 
         <span class="c1"># Pytorch lightning currently does not support deterministic 3d max pooling</span>
         <span class="c1"># therefore this option is only enabled for the 2d case</span>
@@ -493,7 +507,19 @@
             <span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">,</span> <span class="n">grayscale_heatmap</span><span class="o">=</span><span class="n">logits_gray</span>
         <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated heatmaps for case </span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">gcam_img</span><span class="p">,</span> <span class="n">logits_img</span></div>
+        <span class="k">return</span> <span class="n">gcam_img</span><span class="p">,</span> <span class="n">logits_img</span>
+
+<div class="viewcode-block" id="ActiveLearningPipeline.remove_wandb_cache"><a class="viewcode-back" href="../active_learning.html#active_learning.ActiveLearningPipeline.remove_wandb_cache">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">remove_wandb_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deletes Weights and Biases cache directory. This is necessary since the Weights and Biases client currently does</span>
+<span class="sd">        not implement proper cache cleanup itself. See https://github.com/wandb/client/issues/1193 for more details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">wandb_cache_dir</span> <span class="o">=</span> <span class="n">wandb</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">wandb_cache_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">wandb_cache_dir</span><span class="p">)</span></div></div>
 </pre></div>
 
               </article>
