@@ -25,12 +25,20 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
         bandwidth (float, optional): Kernel bandwidth of the mean shift clustering algorithm. Defaults to 5.
         feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
             Defaults to 10.
+        cluster_all (bool, optional): Whether all data items including outliers should be assigned to a cluster.
+            Defaults to `False`.
     """
 
-    def __init__(self, bandwidth: float = 5, feature_dimensionality: int = 10):
+    def __init__(
+        self,
+        bandwidth: float = 5,
+        feature_dimensionality: int = 10,
+        cluster_all: bool = False,
+    ):
         super().__init__()
 
         self.bandwidth = bandwidth
+        self.cluster_all = cluster_all
         self.feature_dimensionality = feature_dimensionality
 
         self.is_selected = None
@@ -59,7 +67,9 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
 
         reduced_feature_vectors = self.reduce_features(feature_vectors)
 
-        clustering = MeanShift(bandwidth=self.bandwidth).fit(reduced_feature_vectors)
+        clustering = MeanShift(
+            bandwidth=self.bandwidth, cluster_all=self.cluster_all
+        ).fit(reduced_feature_vectors)
 
         self.cluster_labels_training_set = clustering.labels_[:training_set_size]
         self.cluster_labels_unlabeled_set = clustering.labels_[training_set_size:]
@@ -112,12 +122,16 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
         relative_cluster_sizes_training_set = {}
 
         for cluster_id, total_cluster_size in self.cluster_sizes_total.items():
-            if cluster_id in self.cluster_sizes_training_set:
-                relative_cluster_sizes_training_set[cluster_id] = (
-                    self.cluster_sizes_training_set[cluster_id] / total_cluster_size
-                )
+            if cluster_id == -1 and not self.cluster_all:
+                # set relative cluster size of outliers to 1 so that they are selected last
+                relative_cluster_sizes_training_set[cluster_id] = 1
             else:
-                relative_cluster_sizes_training_set[cluster_id] = 0
+                if cluster_id in self.cluster_sizes_training_set:
+                    relative_cluster_sizes_training_set[cluster_id] = (
+                        self.cluster_sizes_training_set[cluster_id] / total_cluster_size
+                    )
+                else:
+                    relative_cluster_sizes_training_set[cluster_id] = 0
 
         # pylint: disable=singleton-comparison
         representativeness_scores = [
