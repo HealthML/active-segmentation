@@ -47,6 +47,8 @@ class ActiveLearningPipeline:
             0.
         deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to
             `True`.
+        save_model_every_epoch (bool, optional): Whether the model files of all epochs are to be saved or only the
+            model file of the best epoch. Defaults to `False`.
         **kwargs: Additional, strategy-specific parameters.
     """
 
@@ -72,6 +74,7 @@ class ActiveLearningPipeline:
         lr_scheduler: str = None,
         model_selection_criterion="loss",
         deterministic_mode: bool = True,
+        save_model_every_epoch: bool = False,
         **kwargs,
     ) -> None:
 
@@ -97,6 +100,7 @@ class ActiveLearningPipeline:
         self.reset_weights = reset_weights
         self.epochs_increase_per_query = epochs_increase_per_query
         self.deterministic_mode = deterministic_mode
+        self.save_model_every_epoch = save_model_every_epoch
         self.kwargs = kwargs
 
     def run(self) -> None:
@@ -211,17 +215,18 @@ class ActiveLearningPipeline:
 
         callbacks.append(best_model_checkpoint_callback)
 
-        all_models_checkpoint_callback = ModelCheckpoint(
-            dirpath=os.path.join(checkpoint_dir, "all_models"),
-            filename="epoch_{epoch}",
-            auto_insert_metric_name=False,
-            save_top_k=-1,
-            every_n_epochs=1,
-            every_n_train_steps=0,
-            save_on_train_epoch_end=False,
-        )
+        if self.save_model_every_epoch:
+            all_models_checkpoint_callback = ModelCheckpoint(
+                dirpath=os.path.join(checkpoint_dir, "all_models"),
+                filename="epoch_{epoch}",
+                auto_insert_metric_name=False,
+                save_top_k=-1,
+                every_n_epochs=1,
+                every_n_train_steps=0,
+                save_on_train_epoch_end=False,
+            )
 
-        callbacks.append(all_models_checkpoint_callback)
+            callbacks.append(all_models_checkpoint_callback)
 
         # Pytorch lightning currently does not support deterministic 3d max pooling
         # therefore this option is only enabled for the 2d case
