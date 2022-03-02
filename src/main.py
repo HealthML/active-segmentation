@@ -135,6 +135,8 @@ def run_active_learning_pipeline(
     early_stopping: bool = False,
     random_state: int = 42,
     deterministic_mode: bool = True,
+    save_model_every_epoch: bool = False,
+    clear_wandb_cache: bool = False,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning
@@ -164,6 +166,10 @@ def run_active_learning_pipeline(
         wandb_project_name (string, optional): Name of the project that the W&B runs are stored in.
         deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to
             `True`.
+        save_model_every_epoch (bool, optional): Whether the model files of all epochs are to be saved or only the
+            model file of the best epoch. Defaults to `False`.
+        clear_wandb_cache (bool, optional): Whether the whole Weights and Biases cache should be deleted when the run
+            is finished. Should only be used when no other runs are running in parallel. Defaults to False.
 
     Returns:
         None.
@@ -231,6 +237,8 @@ def run_active_learning_pipeline(
         lr_scheduler=lr_scheduler,
         model_selection_criterion=model_selection_criterion,
         deterministic_mode=deterministic_mode,
+        save_model_every_epoch=save_model_every_epoch,
+        clear_wandb_cache=clear_wandb_cache,
         **active_learning_config.get("strategy_config", {}),
     )
     pipeline.run()
