@@ -50,6 +50,8 @@ class ActiveLearningPipeline:
             `True`.
         save_model_every_epoch (bool, optional): Whether the model files of all epochs are to be saved or only the
             model file of the best epoch. Defaults to `False`.
+        clear_wandb_cache (bool, optional): Whether the whole Weights and Biases cache should be deleted when the run
+            is finished. Should only be used when no other runs are running in parallel. Defaults to False.
         **kwargs: Additional, strategy-specific parameters.
     """
 
@@ -76,6 +78,7 @@ class ActiveLearningPipeline:
         model_selection_criterion="loss",
         deterministic_mode: bool = True,
         save_model_every_epoch: bool = False,
+        clear_wandb_cache: bool = False,
         **kwargs,
     ) -> None:
 
@@ -102,6 +105,7 @@ class ActiveLearningPipeline:
         self.epochs_increase_per_query = epochs_increase_per_query
         self.deterministic_mode = deterministic_mode
         self.save_model_every_epoch = save_model_every_epoch
+        self.clear_wandb_cache = clear_wandb_cache
         self.kwargs = kwargs
 
     def run(self) -> None:
@@ -176,7 +180,8 @@ class ActiveLearningPipeline:
             self.model_trainer.validate(ckpt_path="best", dataloaders=self.data_module)
 
         wandb.run.finish()
-        self.clear_wandb_cache()
+        if self.clear_wandb_cache:
+            self.remove_wandb_cache()
 
     def setup_trainer(self, epochs: int, iteration: Optional[int] = None) -> Trainer:
         """
@@ -323,7 +328,7 @@ class ActiveLearningPipeline:
         return gcam_img, logits_img
 
     @staticmethod
-    def clear_wandb_cache() -> None:
+    def remove_wandb_cache() -> None:
         """
         Deletes Weights and Biases cache directory. This is necessary since the Weights and Biases client currently does
         not implement proper cache cleanup itself. See https://github.com/wandb/client/issues/1193 for more details.
