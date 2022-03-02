@@ -28,8 +28,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 uncertainty value.
             epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
                 metric.
-            random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible outputs
-                across multiple runs.
+            random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
+                outputs across multiple runs.
 
     """
 
@@ -165,7 +165,9 @@ class InterpolationSamplingStrategy(QueryStrategy):
         **kwargs,
     ) -> Tuple[List[str], Dict[str, np.array]]:
         """
-        Uses a sampling strategy to select blocks for labeling and generates pseudo labels by interpolation between the bottom and the top slice of a block.
+        Uses a sampling strategy to select blocks for labeling and generates pseudo labels by interpolation
+        between the bottom and the top slice of a block.
+
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
