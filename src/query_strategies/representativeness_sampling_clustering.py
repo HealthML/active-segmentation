@@ -1,10 +1,10 @@
 """Clustering-based representativeness sampling strategy"""
 
 import logging
-from typing import List
+from typing import List, Literal
 
 import numpy as np
-from sklearn.cluster import MeanShift
+from sklearn.cluster import MeanShift, KMeans
 from sklearn.decomposition import PCA
 
 from datasets import ActiveLearningDataModule
@@ -22,24 +22,42 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
     least represented in the training set.
 
     Args:
-        bandwidth (float, optional): Kernel bandwidth of the mean shift clustering algorithm. Defaults to 5.
+        clustering_algorithm (string, optional): Clustering algorithm to be used: `"mean_shift"` | `"k_means"`. Defaults
+            to `"mean_shift"`.
         feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
             Defaults to 10.
-        cluster_all (bool, optional): Whether all data items including outliers should be assigned to a cluster.
-            Defaults to `False`.
+
+        **kwargs: Optional keyword arguments:
+            bandwidth (float, optional): Kernel bandwidth of the mean shift clustering algorithm. Defaults to 5. Only
+                used if `clustering_algorithm = "mean_shift"`.
+            cluster_all (bool, optional): Whether all data items including outliers should be assigned to a cluster.
+                Defaults to `False`. Only used if `clustering_algorithm = "mean_shift"`.
+            n_clusters (int, optional): Number of clusters. Defaults to 10.  Only used if
+                `clustering_algorithm = "k_means"`.
+            random_state (int, optional): Random state for centroid initialization of k-means algorithm. Defaults to
+                `None`. Only used if `clustering_algorithm = "k_means"`.
     """
 
     def __init__(
         self,
-        bandwidth: float = 5,
+        clustering_algorithm: Literal["mean_shift", "k_means"] = "mean_shift",
         feature_dimensionality: int = 10,
-        cluster_all: bool = False,
+        **kwargs,
     ):
         super().__init__()
 
-        self.bandwidth = bandwidth
-        self.cluster_all = cluster_all
+        if clustering_algorithm not in ["mean_shift", "k_means"]:
+            raise ValueError(f"Invalid clustering algorithm: {clustering_algorithm}.")
+
+        self.clustering_algorithm = clustering_algorithm
         self.feature_dimensionality = feature_dimensionality
+
+        if clustering_algorithm == "mean_shift":
+            self.bandwidth = kwargs.get("bandwidth", 5)
+            self.cluster_all = kwargs.get("cluster_all", False)
+        elif clustering_algorithm == "k_means":
+            self.n_clusters = kwargs.get("n_clusters", 10)
+            self.random_state = kwargs.get("n_clusters", None)
 
         self.is_selected = None
         self.cluster_sizes_total = {}
@@ -67,9 +85,15 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
 
         reduced_feature_vectors = self.reduce_features(feature_vectors)
 
-        clustering = MeanShift(
-            bandwidth=self.bandwidth, cluster_all=self.cluster_all
-        ).fit(reduced_feature_vectors)
+        if self.clustering_algorithm == "k_means":
+            clustering = KMeans(
+                n_clusters=self.n_clusters, random_state=self.random_state
+            ).fit(reduced_feature_vectors)
+
+        else:
+            clustering = MeanShift(
+                bandwidth=self.bandwidth, cluster_all=self.cluster_all
+            ).fit(reduced_feature_vectors)
 
         self.cluster_labels_training_set = clustering.labels_[:training_set_size]
         self.cluster_labels_unlabeled_set = clustering.labels_[training_set_size:]
