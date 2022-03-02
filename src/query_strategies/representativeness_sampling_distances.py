@@ -24,15 +24,23 @@ class DistanceBasedRepresentativenessSamplingStrategy(
     in the training set.
 
     Args:
+        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` | `"image_features"`:
+            - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
+            - `"image_features"`: The input images are used as feature vectors.
+            Defaults to `model_features`.
         distance_metric (string, optional):  Metric to be used for calculation the distance between feature vectors:
             `"euclidean"` | `"cosine"` | `"russellrao"`.
     """
 
     def __init__(
         self,
+        feature_type: Literal["model_features", "image_features"] = "model_features",
+        feature_dimensionality: int = 10,
         distance_metric: Literal["euclidean", "cosine", "russellrao"] = "euclidean",
     ):
-        super().__init__()
+        super().__init__(
+            feature_type=feature_type, feature_dimensionality=feature_dimensionality
+        )
 
         if distance_metric not in ["euclidean", "cosine", "russellrao"]:
             raise ValueError(f"Invalid distance metric: {distance_metric}.")

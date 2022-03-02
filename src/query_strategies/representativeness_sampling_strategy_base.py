@@ -1,8 +1,9 @@
 """ Base class for implementing representativeness sampling strategies """
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Union
+from typing import List, Literal, Tuple, Union
 
 import numpy as np
+from sklearn.decomposition import PCA
 import torch
 
 from datasets import ActiveLearningDataModule
@@ -14,13 +15,34 @@ from .query_strategy import QueryStrategy
 class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
     """
     Base class for implementing representativeness sampling strategies
+
+    Args:
+        feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
+            Defaults to 10.
+        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` | `"image_features"`:
+            - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
+            - `"image_features"`: The input images are used as feature vectors.
+            Defaults to `model_features`.
+        feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
+            Defaults to 10.
     """
 
-    def __init__(self):
-        # variable for storing feature vectors in the forward hook
-        self.feature_vector = torch.empty(1)
+    def __init__(
+        self,
+        feature_type: Literal["model_features", "image_features"] = "model_features",
+        feature_dimensionality: int = 10,
+    ):
+        if feature_type not in ["model_features", "image_features"]:
+            raise ValueError(f"Invalid feature type: {feature_type}.")
 
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.feature_type = feature_type
+        self.feature_dimensionality = feature_dimensionality
+
+        if self.feature_type == "model_features":
+            # variable for storing feature vectors in the forward hook
+            self.feature_vector = torch.empty(1)
+
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # pylint: disable=unused-argument
     def __interception_hook(
@@ -42,7 +64,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         max_values, _ = self.feature_vector.max(dim=-1)
         self.feature_vector = max_values
 
-    def _retrieve_feature_vectors(
+    def _retrieve_model_feature_vectors(
         self, model: torch.nn.Module, dataloader: torch.utils.data.DataLoader
     ) -> Tuple[np.array, List[str]]:
         """
@@ -82,6 +104,68 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
 
         return feature_vectors, case_ids
 
+    @staticmethod
+    def _retrieve_image_feature_vectors(dataloader: torch.utils.data.DataLoader):
+        """
+        Retrieves images from dataloader and uses the images as feature vectors.
+
+        Args:
+            dataloader (torch.utils.data.DataLoader): A dataloader.
+
+        Returns:
+            Tuple[numpy.array, List[str]]: List of feature vectors and list of corresponding case IDs.
+        """
+
+        feature_vectors = []
+        case_ids = []
+
+        for batch in dataloader:
+            if len(batch) == 2:
+                images, ids = batch
+            else:
+                images, _, ids = batch
+
+            case_ids.extend(ids)
+            feature_vectors.extend(list(images.split(1)))
+
+        feature_vectors = np.array(
+            [
+                feature_vector.flatten().cpu().numpy()
+                for feature_vector in feature_vectors
+            ]
+        )
+
+        return feature_vectors, case_ids
+
+    def reduce_features(
+        self,
+        feature_vectors: np.array,
+        epsilon: float = 1e-10,
+    ) -> np.array:
+        """
+        Reduces the dimensionality of feature vectors using a principle component analysis.
+
+        Args:
+            feature_vectors (numpy.array): Feature vectors to be reduced.
+            epsilon (float, optional): Smoothing operator.
+
+        Returns:
+            numpy.array: Reduced feature vectors.
+        """
+
+        min_values = feature_vectors.min(axis=0, keepdims=True)
+        max_values = feature_vectors.max(axis=0, keepdims=True)
+
+        normalized_feature_vectors = (feature_vectors - min_values) / (
+            max_values - min_values + epsilon
+        )
+
+        pca = PCA(n_components=self.feature_dimensionality).fit(
+            normalized_feature_vectors
+        )
+
+        return pca.transform(feature_vectors)
+
     # pylint: disable=too-many-locals
     def select_items_to_label(
         self,
@@ -116,17 +200,41 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 "Representativeness sampling is not implemented for the provided model architecture."
             )
 
-        models.to(self.device)
-        interception_hook = interception_module.register_forward_hook(
-            self.__interception_hook
-        )
+        if self.feature_type == "model_features":
+            models.to(self.device)
+            interception_hook = interception_module.register_forward_hook(
+                self.__interception_hook
+            )
 
-        feature_vectors_training_set, _ = self._retrieve_feature_vectors(
-            models, data_module.train_dataloader()
+            feature_vectors_training_set, _ = self._retrieve_model_feature_vectors(
+                models, data_module.train_dataloader()
+            )
+            (
+                feature_vectors_unlabeled_set,
+                case_ids,
+            ) = self._retrieve_model_feature_vectors(
+                models, data_module.unlabeled_dataloader()
+            )
+        else:
+            feature_vectors_training_set, _ = self._retrieve_image_feature_vectors(
+                data_module.train_dataloader()
+            )
+            (
+                feature_vectors_unlabeled_set,
+                case_ids,
+            ) = self._retrieve_image_feature_vectors(data_module.unlabeled_dataloader())
+
+        reduced_feature_vectors = self.reduce_features(
+            np.concatenate(
+                [feature_vectors_training_set, feature_vectors_unlabeled_set]
+            )
         )
-        feature_vectors_unlabeled_set, case_ids = self._retrieve_feature_vectors(
-            models, data_module.unlabeled_dataloader()
-        )
+        feature_vectors_training_set = reduced_feature_vectors[
+            : len(feature_vectors_training_set)
+        ]
+        feature_vectors_unlabeled_set = reduced_feature_vectors[
+            len(feature_vectors_training_set) :
+        ]
 
         selected_ids = []
 
@@ -164,7 +272,8 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             )
             del case_ids[index_of_most_representative_sample]
 
-        interception_hook.remove()
+        if self.feature_type == "model_features":
+            interception_hook.remove()
 
         return selected_ids, None
 

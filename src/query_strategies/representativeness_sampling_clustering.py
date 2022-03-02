@@ -5,7 +5,6 @@ from typing import List, Literal
 
 import numpy as np
 from sklearn.cluster import MeanShift, KMeans
-from sklearn.decomposition import PCA
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
@@ -24,6 +23,10 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
     Args:
         clustering_algorithm (string, optional): Clustering algorithm to be used: `"mean_shift"` | `"k_means"`. Defaults
             to `"mean_shift"`.
+        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` | `"image_features"`:
+            - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
+            - `"image_features"`: The input images are used as feature vectors.
+            Defaults to `model_features`.
         feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
             Defaults to 10.
 
@@ -41,10 +44,13 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
     def __init__(
         self,
         clustering_algorithm: Literal["mean_shift", "k_means"] = "mean_shift",
+        feature_type: Literal["model_features", "image_features"] = "model_features",
         feature_dimensionality: int = 10,
         **kwargs,
     ):
-        super().__init__()
+        super().__init__(
+            feature_type=feature_type, feature_dimensionality=feature_dimensionality
+        )
 
         if clustering_algorithm not in ["mean_shift", "k_means"]:
             raise ValueError(f"Invalid clustering algorithm: {clustering_algorithm}.")
@@ -83,17 +89,18 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
             (feature_vectors_training_set, feature_vectors_unlabeled_set)
         )
 
-        reduced_feature_vectors = self.reduce_features(feature_vectors)
+        if feature_vectors.shape[1] > self.feature_dimensionality:
+            feature_vectors = self.reduce_features(feature_vectors)
 
         if self.clustering_algorithm == "k_means":
             clustering = KMeans(
                 n_clusters=self.n_clusters, random_state=self.random_state
-            ).fit(reduced_feature_vectors)
+            ).fit(feature_vectors)
 
         else:
             clustering = MeanShift(
                 bandwidth=self.bandwidth, cluster_all=self.cluster_all
-            ).fit(reduced_feature_vectors)
+            ).fit(feature_vectors)
 
         self.cluster_labels_training_set = clustering.labels_[:training_set_size]
         self.cluster_labels_unlabeled_set = clustering.labels_[training_set_size:]
@@ -166,32 +173,3 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
         ]
 
         return representativeness_scores
-
-    def reduce_features(
-        self,
-        feature_vectors: np.array,
-        epsilon: float = 1e-10,
-    ) -> np.array:
-        """
-        Reduces the dimensionality of feature vectors using a principle component analysis.
-
-        Args:
-            feature_vectors (numpy.array): Feature vectors to be reduced.
-            epsilon (float, optional): Smoothing operator.
-
-        Returns:
-            numpy.array: Reduced feature vectors.
-        """
-
-        min_values = feature_vectors.min(axis=0, keepdims=True)
-        max_values = feature_vectors.max(axis=0, keepdims=True)
-
-        normalized_feature_vectors = (feature_vectors - min_values) / (
-            max_values - min_values + epsilon
-        )
-
-        pca = PCA(n_components=self.feature_dimensionality).fit(
-            normalized_feature_vectors
-        )
-
-        return pca.transform(feature_vectors)
