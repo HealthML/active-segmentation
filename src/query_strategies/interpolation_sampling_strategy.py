@@ -161,7 +161,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
         **kwargs,
     ) -> Tuple[List[str], Dict[str, np.array]]:
         """
-        Selects subset of the unlabeled data with the highest uncertainty that should be labeled next.
+        Uses a sampling strategy to select blocks for labeling and generates pseudo labels by interpolation between the bottom and the top slice of a block.
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
@@ -170,7 +170,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         Returns:
             Tuple[List[str], Dict[str, np.array]]: List of IDs of the data items to be labeled and a
-            dictonary of pseudo labels with the corresponding IDs as keys.
+            dictionary of pseudo labels with the corresponding IDs as keys.
         """
 
         block_thickness = self.kwargs.get("block_thickness", 5)
