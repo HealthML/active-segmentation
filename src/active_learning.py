@@ -2,6 +2,7 @@
 
 import math
 import os
+import shutil
 from typing import Iterable, Optional, Union, Tuple, List
 
 import torch
@@ -174,6 +175,9 @@ class ActiveLearningPipeline:
             # compute metrics for the best model on the validation set
             self.model_trainer.validate(ckpt_path="best", dataloaders=self.data_module)
 
+        wandb.run.finish()
+        self.clear_wandb_cache()
+
     def setup_trainer(self, epochs: int, iteration: Optional[int] = None) -> Trainer:
         """
         Initializes a new Pytorch Lightning trainer object.
@@ -317,3 +321,15 @@ class ActiveLearningPipeline:
         )
         print(f"Generated heatmaps for case {case_id}")
         return gcam_img, logits_img
+
+    @staticmethod
+    def clear_wandb_cache() -> None:
+        """
+        Deletes Weights and Biases cache directory. This is necessary since the Weights and Biases client currently does
+        not implement proper cache cleanup itself. See https://github.com/wandb/client/issues/1193 for more details.
+        """
+
+        wandb_cache_dir = wandb.env.get_cache_dir()
+
+        if wandb_cache_dir is not None:
+            shutil.rmtree(wandb_cache_dir)
