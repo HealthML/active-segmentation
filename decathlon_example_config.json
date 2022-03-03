@@ -44,14 +44,16 @@
     "interpolation_type": "morph-contour",
     "calculation_method": "distance",
     "exclude_background": true,
-    "block_thickness": 5
+    "block_thickness": 5,
+    "interpolation_quality_metric": "dice",
+    "block_selection": "uncertainty"
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
   "experiment_name": "hippocampus-test-morph-interpolation",
   "experiment_tags": [],
   "batch_size": 32,
-  "epochs": 2,
+  "epochs": 5,
   "num_workers": 8,
   "gpus": 1,
   "prediction_count": 5,

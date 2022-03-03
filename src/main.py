@@ -3,7 +3,9 @@ import json
 import os.path
 from typing import Any, Dict, Iterable, Optional
 
+import torch
 import fire
+import pytorch_lightning
 from pytorch_lightning.loggers import WandbLogger
 import wandb
 
@@ -19,7 +21,9 @@ from query_strategies import (
     RandomSamplingStrategy,
     UncertaintySamplingStrategy,
     InterpolationSamplingStrategy,
-    RepresentativenessSamplingStrategy,
+    DistanceBasedRepresentativenessSamplingStrategy,
+    ClusteringBasedRepresentativenessSamplingStrategy,
+    UncertaintyRepresentativenessSamplingStrategy,
 )
 
 
@@ -130,6 +134,9 @@ def run_active_learning_pipeline(
     wandb_project_name: str = "active-segmentation",
     early_stopping: bool = False,
     random_state: int = 42,
+    deterministic_mode: bool = True,
+    save_model_every_epoch: bool = False,
+    clear_wandb_cache: bool = False,
 ) -> None:
     """
     Main function to execute an active learning pipeline run, or start an active learning
@@ -157,10 +164,21 @@ def run_active_learning_pipeline(
             is not learning anymore (default = False).
         random_state (int): Random constant for shuffling the data
         wandb_project_name (string, optional): Name of the project that the W&B runs are stored in.
+        deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to
+            `True`.
+        save_model_every_epoch (bool, optional): Whether the model files of all epochs are to be saved or only the
+            model file of the best epoch. Defaults to `False`.
+        clear_wandb_cache (bool, optional): Whether the whole Weights and Biases cache should be deleted when the run
+            is finished. Should only be used when no other runs are running in parallel. Defaults to False.
 
     Returns:
         None.
     """
+
+    # set global seeds for reproducibility
+    pytorch_lightning.utilities.seed.seed_everything(random_state, workers=True)
+    torch.cuda.manual_seed(random_state)
+    torch.cuda.manual_seed_all(random_state)  # for multi-GPU runs
 
     wandb_logger = WandbLogger(
         project=wandb_project_name,
@@ -218,6 +236,9 @@ def run_active_learning_pipeline(
         early_stopping=early_stopping,
         lr_scheduler=lr_scheduler,
         model_selection_criterion=model_selection_criterion,
+        deterministic_mode=deterministic_mode,
+        save_model_every_epoch=save_model_every_epoch,
+        clear_wandb_cache=clear_wandb_cache,
         **active_learning_config.get("strategy_config", {}),
     )
     pipeline.run()
@@ -288,13 +309,17 @@ def create_query_strategy(strategy_config: dict):
     strategy_type = strategy_config.get("type")
 
     if strategy_type == "random":
-        return RandomSamplingStrategy()
+        return RandomSamplingStrategy(**strategy_config)
     if strategy_type == "interpolation":
         return InterpolationSamplingStrategy(**strategy_config)
     if strategy_type == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
-    if strategy_config.get("type") == "representativeness":
-        return RepresentativenessSamplingStrategy()
+    if strategy_type == "representativeness_distance":
+        return DistanceBasedRepresentativenessSamplingStrategy()
+    if strategy_type == "representativeness_clustering":
+        return ClusteringBasedRepresentativenessSamplingStrategy()
+    if strategy_type == "representativeness_uncertainty":
+        return UncertaintyRepresentativenessSamplingStrategy()
     raise ValueError("Invalid query strategy.")
 
 
@@ -367,9 +392,7 @@ def run_active_learning_pipeline_from_config(
             # Config parameters are automatically set by W&B sweep agent
             config = wandb.config
 
-        run_active_learning_pipeline(
-            **config,
-        )
+        run_active_learning_pipeline(**config)
 
 
 if __name__ == "__main__":

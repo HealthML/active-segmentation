@@ -1,7 +1,6 @@
 """ Module to load and batch nifti datasets """
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from multiprocessing import Manager
-import random
 from sklearn.model_selection import train_test_split
 
 import nibabel as nib
@@ -15,7 +14,7 @@ from datasets.dataset_hooks import DatasetHooks
 # pylint: disable=too-many-instance-attributes,abstract-method
 class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     """
-    This datset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.
+    This dataset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.
 
     Args:
         image_paths (List[str]): List with the paths to the images. Has to contain paths of all images which can ever
@@ -35,6 +34,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             Defaults to 2.
         slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
             Uses all slices if None. Defaults to None.
+        random_state (int, optional): Controls the data shuffling. Pass an int for reproducible output across multiple
+            runs.
     """
 
     @staticmethod
@@ -90,7 +91,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         filepaths: List[str],
         dim: int,
         initial_training_set_size: int,
-        random_state: int,
+        random_state: Optional[int] = None,
     ) -> Tuple[List[np.array]]:
         """
         Generates a split between initial training set and initially unlabeled set for active learning.
@@ -98,7 +99,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             filepaths (List[str]): The file paths to the Nifti files.
             dim (int): The dimensionality of the dataset. (2 or 3.)
             initial_training_set_size (int): The number of samples in the initial training set.
-            random_state (int): The random state used to generate the split.
+            random_state (int, optional): The random state used to generate the split. Pass an int for reproducibility
+                across runs.
 
         Returns:
             A tuple of two lists of np.arrays. The lists contain one array per filepath which contains the
@@ -222,7 +224,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         filepaths: List[str],
         dim: int = 2,
         shuffle: bool = False,
-        seed: Optional[int] = None,
+        random_state: Optional[int] = None,
         slice_indices: Optional[List[np.array]] = None,
     ) -> Dict[int, Dict[int, Optional[np.array]]]:
         """
@@ -237,7 +239,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             filepaths (List[str]): The paths of the images.
             dim (int, optional): The dimensionality of the dataset. Defaults to 2.
             shuffle (boolean, optional): Flag indicating wether to shuffle the slices. Defaults to False.
-            seed (int, optional): Random seed for shuffling.
+            random_state (int, optional): Random seed for shuffling.
             slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
                 Uses all slices if None. Defaults to None.
 
@@ -255,17 +257,15 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             ]
 
         if shuffle:
-            if seed is not None:
-                np.random.seed(seed)
-                random.seed(seed)
+            rng = np.random.default_rng(random_state)
 
             # Shuffle the slices within the images
             for slices in slice_indices:
-                np.random.shuffle(slices)
+                rng.shuffle(slices)
 
             # Shuffle the images
             enumerated_slice_indices = list(enumerate(slice_indices))
-            random.shuffle(enumerated_slice_indices)
+            rng.shuffle(enumerated_slice_indices)
         else:
             enumerated_slice_indices = enumerate(slice_indices)
 
@@ -295,6 +295,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         dim: int = 2,
         slice_indices: Optional[List[np.array]] = None,
         case_id_prefix: str = "train",
+        random_state: Optional[int] = None,
     ):
 
         self.image_paths = image_paths
@@ -335,7 +336,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 filepaths=self.image_paths,
                 dim=self.dim,
                 shuffle=self.shuffle,
-                seed=None,
+                random_state=random_state,
                 slice_indices=slice_indices,
             )
         )
@@ -363,6 +364,10 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         if worker_info is not None:
             self.num_workers = worker_info.num_workers
             self.current_image_key_index = worker_info.id
+            self.current_slice_key_index = 0
+        else:
+            self.num_workers = 1
+            self.current_image_key_index = 0
             self.current_slice_key_index = 0
         return self
 
@@ -586,4 +591,4 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
             return size
 
-        return len(self.image_ids)
+        return len(self.image_ids())

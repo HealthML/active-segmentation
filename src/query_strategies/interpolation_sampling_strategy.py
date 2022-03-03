@@ -1,24 +1,28 @@
 """ Module for interpolation sampling strategy """
-from typing import Dict, Iterable, List, Literal, Optional, Tuple, Union
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple, Union, Literal
 
 import torch
 import numpy as np
 import itk
 from scipy.ndimage import distance_transform_edt
+import wandb
 
 from datasets import ActiveLearningDataModule
 from models.pytorch_model import PytorchModel
+from functional.metrics import DiceScore
 from .utils import select_uncertainty_calculation
 from .query_strategy import QueryStrategy
 
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,too-many-branches
 class InterpolationSamplingStrategy(QueryStrategy):
     """
     Class for selecting blocks to label by highest uncertainty and then interpolating within those
     blocks to generate additonal pseudo labels.
     Args:
         **kwargs: Optional keyword arguments:
+            block_selection (str): The selection strategy for the blocks to interpolate: `"uncertainty"` | `"random"`.
+            block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
             calculation_method (str): Specification of the method used to calculate the uncertainty
                 values: `"distance"` |  `"entropy"`.
             exclude_background (bool): Whether to exclude the background dimension in calculating the
@@ -27,31 +31,71 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 metric.
             block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
             interpolation_type (str): The interpolation algorithm to use.
+            random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
+                outputs across multiple runs.
 
     """
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
-    # pylint: disable=too-many-locals
-    def select_items_to_label(
+    def _randomly_ranked_blocks(
+        self, data_module: ActiveLearningDataModule, block_thickness: int
+    ) -> Iterator[Tuple[str, int, int]]:
+        """
+        Randomly selects blocks of the unlabeled data that should be labeled next.
+        Args:
+            data_module (ActiveLearningDataModule): A data module object providing data.
+            block_thickness (int): The thickness of the blocks.
+
+        Returns:
+            A sorted iterator of blocks which should be labeled.
+        """
+
+        unlabeled_case_ids = []
+        for _, case_ids in data_module.unlabeled_dataloader():
+            for case_id in case_ids:
+                prefix, image_slice_id = case_id.split("_")
+                image_id, slice_id = map(int, image_slice_id.split("-"))
+                unlabeled_case_ids.append((prefix, image_id, slice_id))
+
+        available_blocks = []
+        for prefix, image_id, top_slice_id in unlabeled_case_ids:
+            if top_slice_id < block_thickness - 1:
+                # We only want blocks which have the full thickness
+                continue
+
+            fully_unlabeled = True
+            for i in range(block_thickness):
+                if (prefix, image_id, top_slice_id - i) not in unlabeled_case_ids:
+                    # We only want blocks which are fully unlabeled
+                    fully_unlabeled = False
+
+            if not fully_unlabeled:
+                continue
+
+            available_blocks.append((prefix, image_id, top_slice_id))
+
+        rng = np.random.default_rng(self.kwargs.get("random_state", None))
+        rng.shuffle(available_blocks)
+
+        return available_blocks
+
+    def _uncertainty_ranked_blocks(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
         data_module: ActiveLearningDataModule,
-        items_to_label: int,
-        **kwargs,
-    ) -> Tuple[List[str], Dict[str, np.array]]:
+        block_thickness: int,
+    ) -> Iterator[Tuple[str, int, int]]:
         """
-        Selects subset of the unlabeled data with the highest uncertainty that should be labeled next.
+        Selects blocks of the unlabeled data with the highest uncertainty that should be labeled next.
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
-            items_to_label (int): Number of items that should be selected for labeling.
-            **kwargs: Additional, strategy-specific parameters.
+            block_thickness (int): The thickness of the blocks.
 
         Returns:
-            Tuple[List[str], Dict[str, np.array]]: List of IDs of the data items to be labeled and a
-            dictonary of pseudo labels with the corresponding IDs as keys.
+            A sorted iterator of blocks which should be labeled.
         """
 
         if isinstance(models, List):
@@ -86,8 +130,6 @@ class InterpolationSamplingStrategy(QueryStrategy):
             for idx, case_id in enumerate(case_ids):
                 slice_uncertainties[case_id] = uncertainty[idx]
 
-        block_thickness = self.kwargs.get("block_thickness", 5)
-
         block_uncertainties = []
         for case_id in slice_uncertainties:
             prefix, image_slice_id = case_id.split("_")
@@ -111,6 +153,40 @@ class InterpolationSamplingStrategy(QueryStrategy):
             )
 
         block_uncertainties.sort(key=lambda y: y[0])
+
+        return [id for _, id in block_uncertainties]
+
+    # pylint: disable=too-many-locals
+    def select_items_to_label(
+        self,
+        models: Union[PytorchModel, List[PytorchModel]],
+        data_module: ActiveLearningDataModule,
+        items_to_label: int,
+        **kwargs,
+    ) -> Tuple[List[str], Dict[str, np.array]]:
+        """
+        Uses a sampling strategy to select blocks for labeling and generates pseudo labels by interpolation
+        between the bottom and the top slice of a block.
+
+        Args:
+            models: Current models that should be improved by selecting additional data for labeling.
+            data_module (ActiveLearningDataModule): A data module object providing data.
+            items_to_label (int): Number of items that should be selected for labeling.
+            **kwargs: Additional, strategy-specific parameters.
+
+        Returns:
+            Tuple[List[str], Dict[str, np.array]]: List of IDs of the data items to be labeled and a
+            dictionary of pseudo labels with the corresponding IDs as keys.
+        """
+
+        block_thickness = self.kwargs.get("block_thickness", 5)
+        block_selection = self.kwargs.get("block_selection", "uncertainty")
+
+        ranked_ids = (
+            self._uncertainty_ranked_blocks(models, data_module, block_thickness)
+            if block_selection == "uncertainty"
+            else self._randomly_ranked_blocks(data_module, block_thickness)
+        )
 
         block_ids = []
         for (
@@ -159,6 +235,13 @@ class InterpolationSamplingStrategy(QueryStrategy):
                     selected_ids.append(case_id)
                     pseudo_labels[case_id] = pseudo_label
 
+                if self.kwargs.get("interpolation_quality_metric", None) in ["dice"]:
+                    _ = self._calculate_and_log_interpolation_quality_score(
+                        interpolation=interpolation,
+                        ground_truth=label[bottom_slice_id : top_slice_id - 1, :, :],
+                        num_classes=data_module.num_classes(),
+                        metric=self.kwargs.get("interpolation_quality_metric"),
+                    )
         return selected_ids, pseudo_labels
 
     @staticmethod
@@ -274,3 +357,36 @@ def morphological_contour_interpolation(
     interpolated_slices = interpolated_block[1:-1, :, :]
 
     return interpolated_slices.astype(bool)
+
+    @staticmethod
+    def _calculate_and_log_interpolation_quality_score(
+        interpolation: np.ndarray,
+        ground_truth: np.ndarray,
+        num_classes: int,
+        metric: Literal["dice"] = "dice",
+    ) -> float:
+        """
+        Calculates a quality score for the interpolations and logs them on wandb.
+        Args:
+            interpolation (np.ndarray): The interpolated slices.
+            ground_truth (np.ndarray): The ground truth slices.
+            num_classes (int): Number of classes in the corresponding dataset.
+            metric (str): The metric to calculate the score.
+                values: `"dice"`.
+
+        Returns:
+            The calculated value.
+        """
+        if metric == "dice":
+            dice = DiceScore(
+                num_classes=num_classes,
+                reduction="mean",
+            )
+            dice.update(
+                prediction=torch.from_numpy(interpolation).int(),
+                target=torch.from_numpy(ground_truth).int(),
+            )
+            mean_dice_score = dice.compute().item()
+            wandb.log({"val/mean_dice_score_interpolation": mean_dice_score})
+            return mean_dice_score
+        raise ValueError(f"Chosen metric {metric} not supported. Choose from: 'dice' .")

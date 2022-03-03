@@ -2,6 +2,7 @@
 
 import math
 import os
+import shutil
 from typing import Iterable, Optional, Union, Tuple, List
 
 import torch
@@ -45,6 +46,12 @@ class ActiveLearningPipeline:
             the increased training dataset size. Defaults to 0.
         heatmaps_per_iteration (int, optional): Number of heatmaps that should be generated per iteration. Defaults to
             0.
+        deterministic_mode (bool, optional): Whether only deterministic CUDA operations should be used. Defaults to
+            `True`.
+        save_model_every_epoch (bool, optional): Whether the model files of all epochs are to be saved or only the
+            model file of the best epoch. Defaults to `False`.
+        clear_wandb_cache (bool, optional): Whether the whole Weights and Biases cache should be deleted when the run
+            is finished. Should only be used when no other runs are running in parallel. Defaults to False.
         **kwargs: Additional, strategy-specific parameters.
     """
 
@@ -69,6 +76,9 @@ class ActiveLearningPipeline:
         early_stopping: bool = False,
         lr_scheduler: str = None,
         model_selection_criterion="loss",
+        deterministic_mode: bool = True,
+        save_model_every_epoch: bool = False,
+        clear_wandb_cache: bool = False,
         **kwargs,
     ) -> None:
 
@@ -93,6 +103,9 @@ class ActiveLearningPipeline:
         self.model_selection_criterion = model_selection_criterion
         self.reset_weights = reset_weights
         self.epochs_increase_per_query = epochs_increase_per_query
+        self.deterministic_mode = deterministic_mode
+        self.save_model_every_epoch = save_model_every_epoch
+        self.clear_wandb_cache = clear_wandb_cache
         self.kwargs = kwargs
 
     def run(self) -> None:
@@ -110,7 +123,7 @@ class ActiveLearningPipeline:
                 )
 
             # run pipeline
-            for iteration in range(0, self.iterations):
+            for iteration in range(0, self.iterations + 1):
                 # skip labeling in the first iteration because the model hasn't trained yet
                 if iteration != 0:
                     # query batch selection
@@ -145,7 +158,7 @@ class ActiveLearningPipeline:
                     )
 
                 # optionally reset weights after fitting on new data
-                if self.reset_weights:
+                if self.reset_weights and iteration != 0:
                     self.model.reset_parameters()
 
                 self.model.start_epoch = self.model.current_epoch + 1
@@ -165,6 +178,10 @@ class ActiveLearningPipeline:
 
             # compute metrics for the best model on the validation set
             self.model_trainer.validate(ckpt_path="best", dataloaders=self.data_module)
+
+        wandb.run.finish()
+        if self.clear_wandb_cache:
+            self.remove_wandb_cache()
 
     def setup_trainer(self, epochs: int, iteration: Optional[int] = None) -> Trainer:
         """
@@ -193,7 +210,7 @@ class ActiveLearningPipeline:
 
         num_sanity_val_steps = 2 if iteration is None or iteration == 0 else 0
 
-        checkpoint_callback = ModelCheckpoint(
+        best_model_checkpoint_callback = ModelCheckpoint(
             dirpath=checkpoint_dir,
             filename="best_model_epoch_{epoch}",
             auto_insert_metric_name=False,
@@ -205,10 +222,31 @@ class ActiveLearningPipeline:
             save_on_train_epoch_end=False,
         )
 
-        callbacks.append(checkpoint_callback)
+        callbacks.append(best_model_checkpoint_callback)
+
+        if self.save_model_every_epoch:
+            all_models_checkpoint_callback = ModelCheckpoint(
+                dirpath=os.path.join(checkpoint_dir, "all_models"),
+                filename="epoch_{epoch}",
+                auto_insert_metric_name=False,
+                save_top_k=-1,
+                every_n_epochs=1,
+                every_n_train_steps=0,
+                save_on_train_epoch_end=False,
+            )
+
+            callbacks.append(all_models_checkpoint_callback)
+
+        # Pytorch lightning currently does not support deterministic 3d max pooling
+        # therefore this option is only enabled for the 2d case
+        # see https://pytorch.org/docs/stable/notes/randomness.html
+        deterministic_mode = (
+            self.deterministic_mode if self.model.input_dimensionality() == 2 else False
+        )
 
         return Trainer(
-            deterministic=False,
+            deterministic=deterministic_mode,
+            benchmark=not self.deterministic_mode,
             profiler="simple",
             max_epochs=epochs + iteration * self.epochs_increase_per_query
             if iteration is not None
@@ -216,7 +254,6 @@ class ActiveLearningPipeline:
             logger=self.logger,
             log_every_n_steps=20,
             gpus=self.gpus,
-            benchmark=True,
             callbacks=callbacks,
             num_sanity_val_steps=num_sanity_val_steps,
         )
@@ -289,3 +326,15 @@ class ActiveLearningPipeline:
         )
         print(f"Generated heatmaps for case {case_id}")
         return gcam_img, logits_img
+
+    @staticmethod
+    def remove_wandb_cache() -> None:
+        """
+        Deletes Weights and Biases cache directory. This is necessary since the Weights and Biases client currently does
+        not implement proper cache cleanup itself. See https://github.com/wandb/client/issues/1193 for more details.
+        """
+
+        wandb_cache_dir = wandb.env.get_cache_dir()
+
+        if wandb_cache_dir is not None:
+            shutil.rmtree(wandb_cache_dir)

@@ -27,6 +27,49 @@ class UncertaintySamplingStrategy(QueryStrategy):
                 metric.
     """
 
+    def compute_uncertainties(
+        self, model: PytorchModel, data_module: ActiveLearningDataModule
+    ) -> Tuple[List[float], List[str]]:
+        """
+
+        Args:
+            model (PytorchModel): Current model that should be improved by selecting additional data for labeling.
+            data_module (ActiveLearningDataModule): A data module object providing data.
+
+        Returns:
+            Tuple[List[float], List[str]]: Model uncertainties and case IDs for all items in the unlabeled set.
+        """
+
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model.to(device)
+
+        uncertainties = []
+        case_ids = []
+
+        # For the max_uncertainty_value we have two cases in out datasets:
+        # 1. multi-class, single-label (multiple foreground classes that are mutually exclusive) -> max_uncertainty is
+        #   1 / num_classes. This is because the softmax layer sums up all to 1 across labels.
+        # 2. multi-class, multi-label (multiple foreground classes that can overlap) -> max_uncertainty is 0.5
+        max_uncertainty_value = (
+            0.5 if data_module.multi_label() else 1 / data_module.num_classes()
+        )
+
+        for images, current_case_ids in data_module.unlabeled_dataloader():
+            predictions = model.predict(images.to(device))
+            uncertainty_calculation = select_uncertainty_calculation(
+                calculation_method=self.kwargs.get("calculation_method", None)
+            )
+            uncertainty = uncertainty_calculation(
+                predictions=predictions,
+                max_uncertainty_value=max_uncertainty_value,
+                **self.kwargs,
+            )
+
+            uncertainties.extend(list(uncertainty))
+            case_ids.extend(current_case_ids)
+
+        return uncertainties, case_ids
+
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
@@ -61,32 +104,8 @@ class UncertaintySamplingStrategy(QueryStrategy):
                 "Uncertainty sampling is only implemented for one model. You passed a list."
             )
 
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        models.to(device)
-
-        uncertainties = []
-
-        # For the max_uncertainty_value we have two cases in out datasets:
-        # 1. multi-class, single-label (multiple foreground classes that are mutually exclusive) -> max_uncertainty is
-        #   1 / num_classes. This is because the softmax layer sums up all to 1 across labels.
-        # 2. multi-class, multi-label (multiple foreground classes that can overlap) -> max_uncertainty is 0.5
-        max_uncertainty_value = (
-            0.5 if data_module.multi_label() else 1 / data_module.num_classes()
-        )
-
-        for images, case_ids in data_module.unlabeled_dataloader():
-            predictions = models.predict(images.to(device))
-            uncertainty_calculation = select_uncertainty_calculation(
-                calculation_method=self.kwargs.get("calculation_method", None)
-            )
-            uncertainty = uncertainty_calculation(
-                predictions=predictions,
-                max_uncertainty_value=max_uncertainty_value,
-                **self.kwargs,
-            )
-
-            for idx, case_id in enumerate(case_ids):
-                uncertainties.append((uncertainty[idx], case_id))
+        uncertainties, case_ids = self.compute_uncertainties(models, data_module)
+        uncertainties = list(zip(uncertainties, case_ids))
 
         uncertainties.sort(key=lambda y: y[0])
         if self.kwargs.get("prefer_unique_scans", False):

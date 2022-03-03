@@ -1,5 +1,5 @@
 """ Module for random sampling strategy """
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 import numpy as np
 
@@ -12,14 +12,22 @@ from .query_strategy import QueryStrategy
 class RandomSamplingStrategy(QueryStrategy):
     """
     Class for selecting items via a random sampling strategy
+
+    Args:
+        random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible outputs
+            across multiple runs.
     """
+
+    # pylint: disable=unused-argument
+    def __init__(self, random_state: Optional[int] = None, **kwargs):
+        self.random_state = random_state
 
     def select_items_to_label(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
         data_module: ActiveLearningDataModule,
         items_to_label: int,
-        **kwargs
+        **kwargs,
     ) -> Tuple[List[str], None]:
         """
         Selects random subset of the unlabeled data that should be labeled next. We are using
@@ -41,11 +49,11 @@ class RandomSamplingStrategy(QueryStrategy):
         for _, image_ids in data_module.unlabeled_dataloader():
             unlabeled_image_ids.extend(image_ids)
 
+        items_to_label = min(items_to_label, data_module.unlabeled_set_size())
+
+        rng = np.random.default_rng(self.random_state)
+
         return (
-            list(
-                np.random.choice(
-                    unlabeled_image_ids, size=items_to_label, replace=False
-                )
-            ),
+            list(rng.choice(unlabeled_image_ids, size=items_to_label, replace=False)),
             None,
         )
