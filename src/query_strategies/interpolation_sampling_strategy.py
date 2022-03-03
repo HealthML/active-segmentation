@@ -31,6 +31,9 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 metric.
             block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
             interpolation_type (str): The interpolation algorithm to use.
+                values: `"signed-distance"` | `"morph-contour"`.
+            interpolation_quality_metric (str): The metric used for evaluating the performance of the interpolation
+                e.g. "dice"
             random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
                 outputs across multiple runs.
 
