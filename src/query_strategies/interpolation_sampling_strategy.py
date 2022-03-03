@@ -257,7 +257,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
         bottom: np.array,
         class_ids: Iterable[int],
         block_thickness: int,
-        type: Literal["signed-distance", "morph-contour"],
+        interpolation_type: Literal["signed-distance", "morph-contour"],
     ) -> Optional[np.array]:
         """
         Interpolates between top and bottom slices if possible. Uses a signed distance function to interpolate.
@@ -267,7 +267,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
             bottom (np.array): The bottom slice of the block.
             class_ids (Iterable[int]): The class ids.
             block_thickness (int): The thickness of the block.
-            type (Literal): The type of interpolation to use. One of ["signed-distance", "morph-contour"]
+            interpolation_type (Literal): The type of interpolation to use. One of ["signed-distance", "morph-contour"]
         Returns:
             Optional[np.array]: The interpolated slices between top and bottom.
         """
@@ -286,14 +286,16 @@ class InterpolationSamplingStrategy(QueryStrategy):
             elif not np.any(np.logical_and(class_top, class_bottom)):
                 return None
             else:
-                if type == "signed-distance":
+                if interpolation_type == "signed-distance":
                     interpolation_fn = signed_distance_interpolation
 
-                elif type == "morph-contour":
+                elif interpolation_type == "morph-contour":
                     interpolation_fn = morphological_contour_interpolation
 
                 else:
-                    raise ValueError(f"Invalid interpolation type {type}.")
+                    raise ValueError(
+                        f"Invalid interpolation type {interpolation_type}."
+                    )
 
                 slices = interpolation_fn(class_top, class_bottom, block_thickness)
                 single_class_interpolations[class_id] = slices
@@ -394,8 +396,8 @@ def morphological_contour_interpolation(
     block = np.zeros((block_thickness, *top.shape))
     block[0, :, :] = bottom
     block[-1, :, :] = top
-    ImageType = itk.Image[itk.UC, 3]
-    itk_img = itk.image_from_array(block.astype(np.uint8), ttype=(ImageType,))
+    image_type = itk.Image[itk.UC, 3]
+    itk_img = itk.image_from_array(block.astype(np.uint8), ttype=(image_type,))
     image = itk.morphological_contour_interpolator(itk_img)
     interpolated_block = itk.GetArrayFromImage(image)
     interpolated_slices = interpolated_block[1:-1, :, :]
