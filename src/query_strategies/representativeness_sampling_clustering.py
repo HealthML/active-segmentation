@@ -1,6 +1,5 @@
 """Clustering-based representativeness sampling strategy"""
 
-import logging
 from typing import Dict, List, Literal, Tuple
 
 import numpy as np
@@ -138,7 +137,7 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
         Recomputes cluster sizes for current training set.
 
         Returns:
-            Tuple[Dict[str, float], Dict[str, float]]: Cluster sizes for the training set, cluster sizes for the total 
+            Tuple[Dict[str, float], Dict[str, float]]: Cluster sizes for the training set, cluster sizes for the total
                 dataset.
         """
         total_cluster_sizes = {}
