@@ -68,7 +68,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
 
     def _retrieve_model_feature_vectors(
         self, model: torch.nn.Module, dataloader: torch.utils.data.DataLoader
-    ) -> Tuple[np.array, List[str]]:
+    ) -> Tuple[List[np.array], List[str]]:
         """
         Retrieves a feature vector from the model's intermediate layers for each data item in the provided dataloader.
         The feature vectors are retrieved using the method `__interception_hook` that needs to be registered as forward
@@ -79,7 +79,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             dataloader (torch.utils.data.DataLoader): A dataloader.
 
         Returns:
-            Tuple[numpy.array, List[str]]: List of feature vectors and list of corresponding case IDs.
+            Tuple[List[numpy.array], List[str]]: List of feature vectors and list of corresponding case IDs.
         """
 
         feature_vectors = []
@@ -97,17 +97,16 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 case_ids.extend(ids)
                 feature_vectors.extend(list(self.feature_vector.split(1)))
 
-        feature_vectors = np.array(
-            [
-                feature_vector.flatten().cpu().numpy()
-                for feature_vector in feature_vectors
-            ]
-        )
+        feature_vectors = [
+            feature_vector.flatten().cpu().numpy() for feature_vector in feature_vectors
+        ]
 
         return feature_vectors, case_ids
 
     @staticmethod
-    def _retrieve_image_feature_vectors(dataloader: torch.utils.data.DataLoader):
+    def _retrieve_image_feature_vectors(
+        dataloader: torch.utils.data.DataLoader,
+    ) -> Tuple[List[np.array], List[str]]:
         """
         Retrieves images from dataloader and uses the images as feature vectors.
 
@@ -115,7 +114,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             dataloader (torch.utils.data.DataLoader): A dataloader.
 
         Returns:
-            Tuple[numpy.array, List[str]]: List of feature vectors and list of corresponding case IDs.
+            Tuple[List[numpy.array], List[str]]: List of feature vectors and list of corresponding case IDs.
         """
 
         feature_vectors = []
@@ -130,12 +129,9 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             case_ids.extend(ids)
             feature_vectors.extend(list(images.split(1)))
 
-        feature_vectors = np.array(
-            [
-                feature_vector.flatten().cpu().numpy()
-                for feature_vector in feature_vectors
-            ]
-        )
+        feature_vectors = [
+            feature_vector.flatten().cpu().numpy() for feature_vector in feature_vectors
+        ]
 
         return feature_vectors, case_ids
 
@@ -206,22 +202,26 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 self.__interception_hook
             )
 
-            feature_vectors_training_set, _ = self._retrieve_model_feature_vectors(
+            (
+                feature_vectors_training_set,
+                case_ids_training_set,
+            ) = self._retrieve_model_feature_vectors(
                 models, data_module.train_dataloader()
             )
             (
                 feature_vectors_unlabeled_set,
-                case_ids,
+                case_ids_unlabeled_set,
             ) = self._retrieve_model_feature_vectors(
                 models, data_module.unlabeled_dataloader()
             )
         else:
-            feature_vectors_training_set, _ = self._retrieve_image_feature_vectors(
-                data_module.train_dataloader()
-            )
+            (
+                feature_vectors_training_set,
+                case_ids_training_set,
+            ) = self._retrieve_image_feature_vectors(data_module.train_dataloader())
             (
                 feature_vectors_unlabeled_set,
-                case_ids,
+                case_ids_unlabeled_set,
             ) = self._retrieve_image_feature_vectors(data_module.unlabeled_dataloader())
 
         all_feature_vectors = np.concatenate(
@@ -256,7 +256,10 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         selected_ids = []
 
         self.prepare_representativeness_computation(
-            feature_vectors_training_set, feature_vectors_unlabeled_set
+            feature_vectors_training_set,
+            case_ids_training_set,
+            feature_vectors_unlabeled_set,
+            case_ids_unlabeled_set,
         )
 
         for _ in range(min(items_to_label, len(feature_vectors_unlabeled_set))):
@@ -265,17 +268,23 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 data_module,
                 feature_vectors_training_set,
                 feature_vectors_unlabeled_set,
+                case_ids_unlabeled_set,
             )
 
             # sort unlabeled items by their representativeness score
-            unlabeled_indices = np.arange(len(case_ids))
+            unlabeled_indices = np.arange(len(case_ids_unlabeled_set))
             representativeness_scores = list(
                 zip(representativeness_scores, unlabeled_indices)
             )
             representativeness_scores.sort(key=lambda y: y[0], reverse=True)
             # select the sample with the highest representativeness score
             index_of_most_representative_sample = representativeness_scores[0][1]
-            selected_ids.append(case_ids[index_of_most_representative_sample])
+            case_id_of_most_representative_sample = case_ids_unlabeled_set[
+                index_of_most_representative_sample
+            ]
+            selected_ids.append(case_id_of_most_representative_sample)
+
+            self.on_select_item(case_id_of_most_representative_sample)
 
             np.insert(
                 feature_vectors_training_set,
@@ -287,23 +296,40 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 index_of_most_representative_sample,
                 axis=0,
             )
-            del case_ids[index_of_most_representative_sample]
+            del case_ids_unlabeled_set[index_of_most_representative_sample]
 
         if self.feature_type == "model_features":
             interception_hook.remove()
 
         return selected_ids, None
 
+    def on_select_item(self, case_id: str) -> None:
+        """
+        Callback that is called when an item is selected for labeling.
+
+        Args:
+            case_id (string): Case ID of the selected item.
+        """
+
+        pass
+
     def prepare_representativeness_computation(
-        self, feature_vectors_training_set, feature_vectors_unlabeled_set
+        self,
+        feature_vectors_training_set: np.ndarray,
+        case_ids_training_set: List[str],
+        feature_vectors_unlabeled_set: np.ndarray,
+        case_ids_unlabeled_set: List[str],
     ) -> None:
         """
         Can be overridden in subclasses to perform global computations on all feature vectors before item selection
         starts.
 
+
         Args:
-            feature_vectors_training_set (np.array): Feature vectors of the items in the training set.
-            feature_vectors_unlabeled_set (np.array): Feature vectors of the items in the unlabeled set.
+            feature_vectors_training_set (numpy.ndarray): Feature vectors of the items in the training set.
+            case_ids_training_set (List[str]): Case IDs of the items in the training set.
+            feature_vectors_unlabeled_set (numpy.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.
         """
 
     @abstractmethod
@@ -313,6 +339,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         data_module: ActiveLearningDataModule,
         feature_vectors_training_set: np.ndarray,
         feature_vectors_unlabeled_set: np.ndarray,
+        case_ids_unlabeled_set: List[str],
     ) -> List[float]:
         """
         Must be overridden in subclasses to compute the representativeness scores for the items in the unlabeled set.
@@ -322,6 +349,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             data_module (ActiveLearningDataModule): A data module object providing data.
             feature_vectors_training_set (np.ndarray): Feature vectors of the items in the training set.
             feature_vectors_unlabeled_set (np.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in

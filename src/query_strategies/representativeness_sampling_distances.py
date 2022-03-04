@@ -119,6 +119,7 @@ class DistanceBasedRepresentativenessSamplingStrategy(
         data_module: ActiveLearningDataModule,
         feature_vectors_training_set,
         feature_vectors_unlabeled_set,
+        case_ids_unlabeled_set,
     ) -> List[float]:
         """
         Computes representativeness scores for all unlabeled items.
@@ -128,6 +129,7 @@ class DistanceBasedRepresentativenessSamplingStrategy(
             data_module (ActiveLearningDataModule): A data module object providing data.
             feature_vectors_training_set (np.ndarray): Feature vectors of the items in the training set.
             feature_vectors_unlabeled_set (np.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in
