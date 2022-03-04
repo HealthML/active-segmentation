@@ -185,39 +185,55 @@ class InterpolationSamplingStrategy(QueryStrategy):
         block_thickness = self.kwargs.get("block_thickness", 5)
         block_selection = self.kwargs.get("block_selection", "uncertainty")
 
-        ranked_ids = (
-            self._uncertainty_ranked_blocks(models, data_module, block_thickness)
-            if block_selection == "uncertainty"
-            else self._randomly_ranked_blocks(data_module, block_thickness)
-        )
-
         block_ids = []
-        for (
-            block_prefix,
-            block_image_id,
-            block_top_slice_id,
-        ) in ranked_ids:
 
-            overlaps = [
-                prefix == block_prefix
-                and image_id == block_image_id
-                and abs(top_slice_id - block_top_slice_id) < block_thickness
-                for prefix, image_id, top_slice_id in block_ids
-            ]
+        for thickness in reversed(range(3, block_thickness + 1)):
+            ranked_ids = (
+                self._uncertainty_ranked_blocks(models, data_module, thickness)
+                if block_selection == "uncertainty"
+                else self._randomly_ranked_blocks(data_module, thickness)
+            )
 
-            if not any(overlaps):
-                block_ids.append((block_prefix, block_image_id, block_top_slice_id))
+            for (
+                block_prefix,
+                block_image_id,
+                block_top_slice_id,
+            ) in ranked_ids:
 
-            if len(block_ids) >= items_to_label / 2:
-                break
+                overlaps = [
+                    prefix == block_prefix
+                    and image_id == block_image_id
+                    and (
+                        (
+                            block_top_slice_id
+                            >= top_slice_id
+                            > block_top_slice_id - thickness
+                        )
+                        or (top_slice_id >= block_top_slice_id > top_slice_id - thick)
+                    )
+                    for (prefix, image_id, top_slice_id), thick in block_ids
+                ]
+
+                if not any(overlaps):
+                    block_ids.append(
+                        ((block_prefix, block_image_id, block_top_slice_id), thickness)
+                    )
+
+                if len(block_ids) >= items_to_label / 2:
+                    break
+
+            # only continue if the inner loop didn't break
+            else:
+                continue
+            break
 
         class_ids = [id for id in data_module.id_to_class_names().keys() if id != 0]
 
         selected_ids = []
         pseudo_labels = {}
 
-        for prefix, image_id, top_slice_id in block_ids:
-            bottom_slice_id = top_slice_id - block_thickness + 1
+        for (prefix, image_id, top_slice_id), thickness in block_ids:
+            bottom_slice_id = top_slice_id - thickness + 1
 
             selected_ids.append(f"{prefix}_{image_id}-{top_slice_id}")
             selected_ids.append(f"{prefix}_{image_id}-{bottom_slice_id}")
@@ -226,9 +242,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
             top = label[top_slice_id, :, :]
             bottom = label[bottom_slice_id, :, :]
 
-            interpolation = self._interpolate_slices(
-                top, bottom, class_ids, block_thickness
-            )
+            interpolation = self._interpolate_slices(top, bottom, class_ids, thickness)
             if interpolation is not None:
                 for i, pseudo_label in enumerate(interpolation):
                     case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
@@ -339,6 +353,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
                     if not math.isnan(mean_dice_score)
                     # NaN means that neither the interpolation nor the ground truth include foreground pixels
                     else 1,
+                    "val/interpolation_thickness": interpolation.shape[0] + 2,
                 }
             )
             self.log_id += 1
