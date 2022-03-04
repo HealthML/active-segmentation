@@ -1,5 +1,6 @@
 """ Base class for implementing representativeness sampling strategies """
 from abc import ABC, abstractmethod
+import math
 from typing import List, Literal, Tuple, Union
 
 import numpy as np
@@ -223,11 +224,28 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 case_ids,
             ) = self._retrieve_image_feature_vectors(data_module.unlabeled_dataloader())
 
-        reduced_feature_vectors = self.reduce_features(
-            np.concatenate(
-                [feature_vectors_training_set, feature_vectors_unlabeled_set]
-            )
+        all_feature_vectors = np.concatenate(
+            [feature_vectors_training_set, feature_vectors_unlabeled_set]
         )
+
+        max_size = np.max(
+            [len(feature_vector) for feature_vector in all_feature_vectors]
+        )
+
+        all_feature_vectors_padded = -1 * np.ones((len(all_feature_vectors), max_size))
+
+        for idx, feature_vector in enumerate(all_feature_vectors):
+            pad_width = max(max_size - len(feature_vector), 0)
+            pad_width_front = math.floor(pad_width / 2)
+            pad_width_back = math.ceil(pad_width / 2)
+
+            all_feature_vectors_padded[idx, :] = np.pad(
+                feature_vector,
+                pad_width=(pad_width_front, pad_width_back),
+                constant_values=(-1, -1),
+            )
+
+        reduced_feature_vectors = self.reduce_features(all_feature_vectors_padded)
         feature_vectors_training_set = reduced_feature_vectors[
             : len(feature_vectors_training_set)
         ]
