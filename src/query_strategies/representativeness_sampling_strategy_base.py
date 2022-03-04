@@ -32,6 +32,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         self,
         feature_type: Literal["model_features", "image_features"] = "model_features",
         feature_dimensionality: int = 10,
+        **kwargs,
     ):
         if feature_type not in ["model_features", "image_features"]:
             raise ValueError(f"Invalid feature type: {feature_type}.")
@@ -44,6 +45,8 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             self.feature_vector = torch.empty(1)
 
             self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        self.random_state = kwargs.get("random_state", None)
 
     # pylint: disable=unused-argument
     def __interception_hook(
@@ -277,6 +280,11 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             representativeness_scores = list(
                 zip(representativeness_scores, unlabeled_indices)
             )
+
+            # shuffle list before sorting so that among items with the same score one is randomly selected
+            rng = np.random.default_rng(self.random_state)
+            rng.shuffle(representativeness_scores)
+
             representativeness_scores.sort(key=lambda y: y[0], reverse=True)
             # select the sample with the highest representativeness score
             index_of_most_representative_sample = representativeness_scores[0][1]

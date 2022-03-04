@@ -40,7 +40,9 @@ class DistanceBasedRepresentativenessSamplingStrategy(
         **kwargs,
     ):
         super().__init__(
-            feature_type=feature_type, feature_dimensionality=feature_dimensionality
+            feature_type=feature_type,
+            feature_dimensionality=feature_dimensionality,
+            **kwargs,
         )
 
         if distance_metric not in ["euclidean", "cosine", "russellrao"]:

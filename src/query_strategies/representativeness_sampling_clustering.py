@@ -52,7 +52,9 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
         **kwargs,
     ):
         super().__init__(
-            feature_type=feature_type, feature_dimensionality=feature_dimensionality
+            feature_type=feature_type,
+            feature_dimensionality=feature_dimensionality,
+            **kwargs,
         )
 
         if clustering_algorithm not in ["mean_shift", "k_means", "scans"]:
