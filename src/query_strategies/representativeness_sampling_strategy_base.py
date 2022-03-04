@@ -31,6 +31,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         self,
         feature_type: Literal["model_features", "image_features"] = "model_features",
         feature_dimensionality: int = 10,
+        **kwargs,
     ):
         if feature_type not in ["model_features", "image_features"]:
             raise ValueError(f"Invalid feature type: {feature_type}.")
@@ -138,9 +139,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         return feature_vectors, case_ids
 
     def reduce_features(
-        self,
-        feature_vectors: np.array,
-        epsilon: float = 1e-10,
+        self, feature_vectors: np.array, epsilon: float = 1e-10,
     ) -> np.array:
         """
         Reduces the dimensionality of feature vectors using a principle component analysis.

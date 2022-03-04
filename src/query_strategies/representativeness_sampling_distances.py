@@ -37,6 +37,7 @@ class DistanceBasedRepresentativenessSamplingStrategy(
         feature_type: Literal["model_features", "image_features"] = "model_features",
         feature_dimensionality: int = 10,
         distance_metric: Literal["euclidean", "cosine", "russellrao"] = "euclidean",
+        **kwargs,
     ):
         super().__init__(
             feature_type=feature_type, feature_dimensionality=feature_dimensionality

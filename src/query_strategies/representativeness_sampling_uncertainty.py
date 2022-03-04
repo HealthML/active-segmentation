@@ -39,6 +39,7 @@ class UncertaintyRepresentativenessSamplingStrategy(
             "most_distant_sample", "cluster_coverage"
         ] = "cluster_coverage",
         calculation_method: Literal["distance", "entropy"] = "entropy",
+        **kwargs,
     ):
         super().__init__()
 
@@ -94,13 +95,11 @@ class UncertaintyRepresentativenessSamplingStrategy(
                 the training receive higher scores.
         """
 
-        representativeness_scores = (
-            self.representativeness_sampling_strategy.compute_representativeness_scores(
-                model,
-                data_module,
-                feature_vectors_training_set,
-                feature_vectors_unlabeled_set,
-            )
+        representativeness_scores = self.representativeness_sampling_strategy.compute_representativeness_scores(
+            model,
+            data_module,
+            feature_vectors_training_set,
+            feature_vectors_unlabeled_set,
         )
         representativeness_scores = self._normalize_scores(
             np.array(representativeness_scores)
