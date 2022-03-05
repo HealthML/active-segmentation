@@ -115,7 +115,10 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
             current_config_file_path = os.path.join(output_dir, file_name)
             with open(current_config_file_path, "w", encoding="utf-8") as config_file:
                 json.dump(
-                    config, config_file, indent=2, separators=(",", ":"),
+                    config,
+                    config_file,
+                    indent=2,
+                    separators=(",", ":"),
                 )
 
 
