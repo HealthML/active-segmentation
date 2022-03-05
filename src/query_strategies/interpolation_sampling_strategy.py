@@ -374,17 +374,16 @@ def signed_distance_interpolation(
     top: np.array,
     bottom: np.array,
     block_thickness: int,
-) -> Optional[np.array]:
+) -> np.array:
     """
     Interpolates between top and bottom slices if possible. Uses a signed distance function to interpolate.
 
     Args:
         top (np.array): The top slice of the block.
         bottom (np.array): The bottom slice of the block.
-        class_ids (Iterable[int]): The class ids.
         block_thickness (int): The thickness of the block.
     Returns:
-        Optional[np.array]: The interpolated slices between top and bottom.
+        np.array: The interpolated slices between top and bottom.
     """
 
     def signed_dist(mask):
@@ -408,7 +407,7 @@ def morphological_contour_interpolation(
     top: np.array,
     bottom: np.array,
     block_thickness: int,
-) -> Optional[np.array]:
+) -> np.array:
     """
     Interpolates between top and bottom slices using the morphological_contour_interpolator from itk.
     https://www.researchgate.net/publication/307942551_ND_morphological_contour_interpolation
@@ -416,10 +415,9 @@ def morphological_contour_interpolation(
     Args:
         top (np.array): The top slice of the block.
         bottom (np.array): The bottom slice of the block.
-        class_ids (Iterable[int]): The class ids.
         block_thickness (int): The thickness of the block.
     Returns:
-        Optional[np.array]: The interpolated slices between top and bottom.
+        np.array: The interpolated slices between top and bottom.
     """
 
     block = np.zeros((block_thickness, *top.shape))
