@@ -1,5 +1,6 @@
 """ Module for interpolation sampling strategy """
 from typing import Dict, Iterable, Iterator, List, Optional, Tuple, Union, Literal
+import math
 
 import torch
 import numpy as np
@@ -41,6 +42,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+
+        self.log_id = 0
 
     def _randomly_ranked_blocks(
         self, data_module: ActiveLearningDataModule, block_thickness: int
@@ -307,8 +310,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         return result
 
-    @staticmethod
     def _calculate_and_log_interpolation_quality_score(
+        self,
         interpolation: np.ndarray,
         ground_truth: np.ndarray,
         num_classes: int,
@@ -336,7 +339,16 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 target=torch.from_numpy(ground_truth).int(),
             )
             mean_dice_score = dice.compute().item()
-            wandb.log({"val/mean_dice_score_interpolation": mean_dice_score})
+            wandb.log(
+                {
+                    "val/interpolation_id": self.log_id,
+                    "val/mean_dice_score_interpolation": mean_dice_score
+                    if not math.isnan(mean_dice_score)
+                    # NaN means that neither the interpolation nor the ground truth include foreground pixels
+                    else 1,
+                }
+            )
+            self.log_id += 1
             return mean_dice_score
         raise ValueError(f"Chosen metric {metric} not supported. Choose from: 'dice' .")
 
