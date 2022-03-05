@@ -1,3 +1,5 @@
+"""Helper script that allows to create multiple config files and sbatch scripts."""
+
 import copy
 import json
 import os
@@ -9,6 +11,20 @@ import fire
 
 
 def create_config_files(config_file_path: str, output_dir: str) -> None:
+    """
+    This function takes the path of a config file as input. The input config file can contain lists for the
+    `dataset_config`, the `strategy_config` and the `random_state` config options. For each combination of the specified
+    datasets, strategies and random states, this function will create a separate config file in the specified
+    `output_dir`.
+
+    Args:
+        config_file_path (string): Path of a config file that may contain lists of configs / values for the
+            `dataset_config`, the `strategy_config` and the `random_state` options.
+        output_dir (string): Path of the directory in which the created config files are to be saved.
+    """
+
+    # pylint: disable=too-many-branches, too-many-statements
+
     os.makedirs(output_dir, exist_ok=True)
     with open(config_file_path, encoding="utf-8") as config_file:
         config = json.load(config_file)
@@ -106,6 +122,17 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
 def create_sbatch_jobs_from_config_files(
     config_dir: str, sbatch_dir: str, run_scripts: bool = True
 ) -> None:
+    """
+    This function takes folder containing multiple config files, creates an sbatch script for each config file and
+    optionally starts the sbatch runs.
+
+    Args:
+        config_dir (string): Path of a directory containing multiple config files for which sbatch runs are to be
+            started.
+        sbatch_dir (string): Directory in which the sbatch scripts are to be saved.
+        run_scripts (bool, optional): Whether the sbatch runs should be started by this function. Defaults to `True`.
+    """
+
     os.makedirs(sbatch_dir, exist_ok=True)
 
     for config_file in os.listdir(config_dir):
@@ -121,7 +148,7 @@ def create_sbatch_jobs_from_config_files(
             sbatch_dir, config_file.replace(".json", ".sh")
         )
 
-        with open(sbatch_script_path, "w") as text_file:
+        with open(sbatch_script_path, "w", encoding="utf-8") as text_file:
             text_file.write(sbatch_script)
 
         file_stats = os.stat(sbatch_script_path)
@@ -137,7 +164,16 @@ def create_sbatch_jobs_from_config_files(
             os.remove(sbatch_script_path)
 
 
-def start_sbatch_runs(sbatch_run_dir, sbatch_finished_dir):
+def start_sbatch_runs(sbatch_run_dir: str, sbatch_finished_dir: str) -> None:
+    """
+    This function starts multiple sbatch runs.
+
+    Args:
+        sbatch_run_dir (string): Path of a directory containing multiple sbatch scripts to be started.
+        sbatch_finished_dir (string): Path of a directory to which the sbatch scripts are to be moved when the
+            corresponding sbatch runs finished.
+    """
+
     os.makedirs(sbatch_finished_dir, exist_ok=True)
 
     for sbatch_script in os.listdir(sbatch_run_dir):
@@ -161,4 +197,3 @@ if __name__ == "__main__":
             "start_sbatch_runs": start_sbatch_runs,
         }
     )
-
