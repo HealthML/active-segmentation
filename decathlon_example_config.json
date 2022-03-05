@@ -7,20 +7,10 @@
     "num_levels": 4,
     "dim": 2,
     "model_selection_criterion": "mean_dice_score",
-    "train_metrics": [
-      "dice_score"
-    ],
-    "train_metric_confidence_levels": [
-      0.5
-    ],
-    "test_metrics": [
-      "dice_score",
-      "sensitivity",
-      "specificity"
-    ],
-    "test_metric_confidence_levels": [
-      0.5
-    ]
+    "train_metrics": ["dice_score"],
+    "train_metric_confidence_levels": [0.5],
+    "test_metrics": ["dice_score", "sensitivity", "specificity"],
+    "test_metric_confidence_levels": [0.5]
   },
   "dataset_config": {
     "dataset": "decathlon",
