@@ -183,10 +183,14 @@ def run_active_learning_pipeline(
     wandb_logger = WandbLogger(
         project=wandb_project_name,
         entity="active-segmentation",
-        name=experiment_name,
+        name=experiment_name
+        if random_state is None
+        else f"{experiment_name}-{random_state}",
         tags=experiment_tags,
         log_model="all",
         config=locals().copy(),
+        group=experiment_name if random_state is not None else None,
+        job_type=f"random-state-{random_state}" if random_state is not None else None,
     )
 
     if dataset_config is None:
