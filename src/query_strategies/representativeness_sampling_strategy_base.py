@@ -193,14 +193,15 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 "Uncertainty sampling is only implemented for one model. You passed a list."
             )
 
-        if isinstance(models, PytorchUNet):
-            interception_module = models.model.bottleneck
-        else:
-            raise ValueError(
-                "Representativeness sampling is not implemented for the provided model architecture."
-            )
-
         if self.feature_type == "model_features":
+
+            if isinstance(models, PytorchUNet):
+                interception_module = models.model.bottleneck
+            else:
+                raise ValueError(
+                    "Representativeness sampling is not implemented for the provided model architecture."
+                )
+
             models.to(self.device)
             interception_hook = interception_module.register_forward_hook(
                 self.__interception_hook

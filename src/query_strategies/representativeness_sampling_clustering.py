@@ -52,7 +52,9 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
         **kwargs,
     ):
         super().__init__(
-            feature_type=feature_type,
+            feature_type=feature_type
+            if clustering_algorithm != "scans"
+            else "image_features",
             feature_dimensionality=feature_dimensionality,
             **kwargs,
         )
