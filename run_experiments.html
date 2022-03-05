@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>src &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>run_experiments module &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -159,9 +159,9 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-      <li>src</li>
+      <li>run_experiments module</li>
       <li class="sphinx-template-breadcrumbs-aside">
-            <a href="_sources/modules.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
+            <a href="_sources/run_experiments.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
   </ul>
 </div>
@@ -180,44 +180,59 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="src">
-<h1>src<a class="headerlink" href="#src" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="active_learning.html">active_learning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="datasets.html">datasets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#module-datasets.brats_data_module">BraTSDataModule</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#bratsdataset">BraTSDataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#module-datasets.data_module">DataModule</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#pascalvocdatamodule">PascalVocDataModule</a></li>
+  <section id="module-run_experiments">
+<span id="run-experiments-module"></span><h1>run_experiments module<a class="headerlink" href="#module-run_experiments" title="Permalink to this headline">¶</a></h1>
+<p>Helper script that allows to create multiple config files and sbatch scripts.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="run_experiments.create_config_files">
+<span class="sig-prename descclassname"><span class="pre">run_experiments.</span></span><span class="sig-name descname"><span class="pre">create_config_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_experiments.html#create_config_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_experiments.create_config_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes the path of a config file as input. The input config file can contain lists for the
+<cite>dataset_config</cite>, the <cite>strategy_config</cite> and the <cite>random_state</cite> config options. For each combination of the specified
+datasets, strategies and random states, this function will create a separate config file in the specified
+<cite>output_dir</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file_path</strong> (<em>string</em>) – Path of a config file that may contain lists of configs / values for the
+<cite>dataset_config</cite>, the <cite>strategy_config</cite> and the <cite>random_state</cite> options.</p></li>
+<li><p><strong>output_dir</strong> (<em>string</em>) – Path of the directory in which the created config files are to be saved.</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="functional.html">functional</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="functional.html#module-functional.losses">losses</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functional.html#module-functional.metrics">metrics</a></li>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_experiments.create_sbatch_jobs_from_config_files">
+<span class="sig-prename descclassname"><span class="pre">run_experiments.</span></span><span class="sig-name descname"><span class="pre">create_sbatch_jobs_from_config_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sbatch_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_scripts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_experiments.html#create_sbatch_jobs_from_config_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_experiments.create_sbatch_jobs_from_config_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes folder containing multiple config files, creates an sbatch script for each config file and
+optionally starts the sbatch runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_dir</strong> (<em>string</em>) – Path of a directory containing multiple config files for which sbatch runs are to be
+started.</p></li>
+<li><p><strong>sbatch_dir</strong> (<em>string</em>) – Directory in which the sbatch scripts are to be saved.</p></li>
+<li><p><strong>run_scripts</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the sbatch runs should be started by this function. Defaults to <cite>True</cite>.</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="inferencing.html">inferencing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="metric_tracking.html">metric_tracking</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html#module-metric_tracking.combined_per_epoch_metric">combined_per_epoch_metric</a></li>
-<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html#module-metric_tracking.combined_per_image_metric">combined_per_image_metric</a></li>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_experiments.start_sbatch_runs">
+<span class="sig-prename descclassname"><span class="pre">run_experiments.</span></span><span class="sig-name descname"><span class="pre">start_sbatch_runs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sbatch_run_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sbatch_finished_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_experiments.html#start_sbatch_runs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_experiments.start_sbatch_runs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function starts multiple sbatch runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sbatch_run_dir</strong> (<em>string</em>) – Path of a directory containing multiple sbatch scripts to be started.</p></li>
+<li><p><strong>sbatch_finished_dir</strong> (<em>string</em>) – Path of a directory to which the sbatch scripts are to be moved when the
+corresponding sbatch runs finished.</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.pytorch_fcn_resnet50">PytorchFCNResnet50</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.pytorch_model">PytorchModel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.pytorch_u_net">PytorchUNet</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.u_net">UNet</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="query_strategies.html">query_strategies</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="query_strategies.html#module-query_strategies.query_strategy">QueryStrategy</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
-</ul>
-</div>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -250,7 +265,7 @@
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">src</a></li>
+<li><a class="reference internal" href="#">run_experiments module</a></li>
 </ul>
 
             </div>

@@ -365,10 +365,14 @@
     <span class="n">wandb_logger</span> <span class="o">=</span> <span class="n">WandbLogger</span><span class="p">(</span>
         <span class="n">project</span><span class="o">=</span><span class="n">wandb_project_name</span><span class="p">,</span>
         <span class="n">entity</span><span class="o">=</span><span class="s2">&quot;active-segmentation&quot;</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">experiment_name</span>
+        <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">experiment_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">random_state</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="n">tags</span><span class="o">=</span><span class="n">experiment_tags</span><span class="p">,</span>
         <span class="n">log_model</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+        <span class="n">group</span><span class="o">=</span><span class="n">experiment_name</span> <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">job_type</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;random-state-</span><span class="si">{</span><span class="n">random_state</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dataset_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
