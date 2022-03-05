@@ -2,7 +2,7 @@
   "model_config": {
     "architecture": "u_net",
     "optimizer": "adam",
-    "loss": "cross_entropy",
+    "loss_config": {"type": "focal", "gamma": 3},
     "learning_rate": 0.0001,
     "num_levels": 4,
     "dim": 2,

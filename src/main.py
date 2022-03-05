@@ -1,4 +1,5 @@
 """ Main module to execute active learning pipeline from CLI """
+import copy
 import json
 import os.path
 from typing import Any, Dict, Iterable, Optional
@@ -188,7 +189,7 @@ def run_active_learning_pipeline(
         else f"{experiment_name}-{random_state}",
         tags=experiment_tags,
         log_model="all",
-        config=locals().copy(),
+        config=copy.deepcopy(locals()),
         group=experiment_name if random_state is not None else None,
         job_type=f"random-state-{random_state}" if random_state is not None else None,
     )

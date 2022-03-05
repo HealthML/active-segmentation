@@ -2,7 +2,7 @@
   "model_config": {
     "architecture": "u_net",
     "optimizer": "adam",
-    "loss": "dice",
+    "loss_config": {"type": "cross_entropy"},
     "learning_rate": 0.0001,
     "num_levels": 4,
     "dim": 2,

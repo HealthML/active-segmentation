@@ -27,8 +27,7 @@ class PytorchModel(LightningModule, ABC):
             Defaults to `0.0001`.
         lr_scheduler (string, optional): Algorithm used for dynamically updating the learning rate during training:
             ``"reduceLROnPlateau"`` | ``"cosineAnnealingLR"``. Defaults to using no scheduler.
-        loss (string, optional): The optimization criterion: ``"cross_entropy"`` | ``"dice"`` |``"cross_entropy_dice"``
-            | ``"general_dice"`` | ``"fp"`` | ``"fp_dice"``. Defaults to ``"cross_entropy"``.
+        loss_config (Dict[str, Any], optional): Dictionary with loss parameters.
         optimizer (string, optional): Algorithm used to calculate the loss and update the weights: ``"adam"`` |
             ``"sgd"``. Defaults to ``"adam"``.
         train_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged
@@ -55,14 +54,7 @@ class PytorchModel(LightningModule, ABC):
         lr_scheduler: Optional[
             Literal["reduceLROnPlateau", "cosineAnnealingLR"]
         ] = None,
-        loss: Literal[
-            "cross_entropy",
-            "dice",
-            "cross_entropy_dice",
-            "general_dice",
-            "fp",
-            "fp_dice",
-        ] = "cross_entropy",
+        loss_config: Dict[str, Any] = None,
         optimizer: Literal["adam", "sgd"] = "adam",
         train_metrics: Optional[Iterable[str]] = None,
         train_metric_confidence_levels: Optional[Iterable[float]] = None,
@@ -76,7 +68,12 @@ class PytorchModel(LightningModule, ABC):
         self.learning_rate = learning_rate
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
-        self.loss = loss
+        self.loss_config = (
+            loss_config if loss_config is not None else {"type": "cross_entropy"}
+        )
+        self.loss = self.loss_config["type"]
+        del self.loss_config["type"]
+
         self.loss_module = None
 
         self.train_metric_confidence_levels = train_metric_confidence_levels
@@ -112,7 +109,7 @@ class PytorchModel(LightningModule, ABC):
 
         if stage in ["fit", "validate", "test"]:
             self.loss_module = self.configure_loss(
-                self.loss, self.trainer.datamodule.multi_label()
+                self.loss, self.trainer.datamodule.multi_label(), **self.loss_config
             )
 
     @property
@@ -217,6 +214,7 @@ class PytorchModel(LightningModule, ABC):
 
         return [opt]
 
+    # pylint: disable=too-many-return-statements
     @staticmethod
     def configure_loss(
         loss: Literal[
@@ -226,27 +224,29 @@ class PytorchModel(LightningModule, ABC):
             "general_dice",
             "fp",
             "fp_dice",
+            "focal",
         ],
         multi_label: bool = False,
+        **kwargs,
     ) -> functional.losses.SegmentationLoss:
         """
         Configures the loss.
         Args:
-            loss (string, optional): The optimization criterion: ``"cross_entropy"`` | ``"dice"`` |
-                ``"cross_entropy_dice"`` | ``"general_dice"`` | ``"fp"`` | ``"fp_dice"``. Defaults to
-                ``"cross_entropy"``.
+            loss (string): The optimization criterion: ``"cross_entropy"`` | ``"dice"`` |
+                ``"cross_entropy_dice"`` | ``"general_dice"`` | ``"fp"`` | ``"fp_dice"`` | ``"focal"``.
             multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
+            kwargs: Additional parameters for the loss.
 
         Returns:
             The loss object.
         """
 
-        loss_kwargs = {
-            "ignore_index": -1,
-        }
+        loss_kwargs = {"ignore_index": -1, **kwargs}
 
         if loss == "cross_entropy":
             return functional.CrossEntropyLoss(multi_label=multi_label, **loss_kwargs)
+        if loss == "focal":
+            return functional.FocalLoss(multi_label=multi_label, **loss_kwargs)
         if loss == "cross_entropy_dice":
             return functional.CrossEntropyDiceLoss(
                 multi_label=multi_label, include_background=multi_label, **loss_kwargs
