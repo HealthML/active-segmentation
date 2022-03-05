@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import shutil
@@ -16,7 +17,7 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
 
         if "dataset_config" in config and isinstance(config["dataset_config"], list):
             for dataset_config in config["dataset_config"]:
-                current_config = config.copy()
+                current_config = copy.deepcopy(config)
 
                 if "name" in dataset_config:
                     dataset_name = dataset_config["name"]
@@ -51,7 +52,7 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
                 config["strategy_config"], list
             ):
                 for idx, strategy_config in enumerate(config["strategy_config"]):
-                    current_config = config.copy()
+                    current_config = copy.deepcopy(config)
 
                     if "name" in strategy_config:
                         strategy_name = strategy_config["name"]
@@ -75,6 +76,8 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
                         current_config[
                             "experiment_name"
                         ] = f"{current_config['experiment_name']}-{strategy_name}"
+                    else:
+                        current_config["experiment_name"] = strategy_name
                     strategy_configs.append(current_config)
             else:
                 strategy_configs.append(config)
@@ -84,7 +87,7 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
         for config in strategy_configs:
             if "random_state" in config and isinstance(config["random_state"], list):
                 for random_state in config["random_state"]:
-                    current_config = config.copy()
+                    current_config = copy.deepcopy(config)
                     current_config["random_state"] = random_state
                     if "strategy_config" in current_config:
                         current_config["strategy_config"]["random_state"] = random_state
@@ -92,7 +95,7 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
                     random_state_configs.append(current_config)
 
         for idx, config in enumerate(random_state_configs):
-            file_name = f"{config['experiment_name']}.json"
+            file_name = f"{config['experiment_name']}-{config['random_state']}.json"
             current_config_file_path = os.path.join(output_dir, file_name)
             with open(current_config_file_path, "w", encoding="utf-8") as config_file:
                 json.dump(
@@ -155,6 +158,7 @@ if __name__ == "__main__":
         {
             "create_config_files": create_config_files,
             "create_sbatch_jobs_from_config_files": create_sbatch_jobs_from_config_files,
+            "start_sbatch_runs": start_sbatch_runs,
         }
     )
 
