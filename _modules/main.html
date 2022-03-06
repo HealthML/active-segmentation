@@ -502,11 +502,11 @@
     <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UncertaintySamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;representativeness_distance&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">DistanceBasedRepresentativenessSamplingStrategy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">DistanceBasedRepresentativenessSamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;representativeness_clustering&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">ClusteringBasedRepresentativenessSamplingStrategy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ClusteringBasedRepresentativenessSamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">strategy_type</span> <span class="o">==</span> <span class="s2">&quot;representativeness_uncertainty&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">UncertaintyRepresentativenessSamplingStrategy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">UncertaintyRepresentativenessSamplingStrategy</span><span class="p">(</span><span class="o">**</span><span class="n">strategy_config</span><span class="p">)</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid query strategy.&quot;</span><span class="p">)</span></div>
 
 
