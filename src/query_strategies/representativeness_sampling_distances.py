@@ -28,6 +28,8 @@ class DistanceBasedRepresentativenessSamplingStrategy(
             - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
             - `"image_features"`: The input images are used as feature vectors.
             Defaults to `model_features`.
+        feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
+            Defaults to 10.
         distance_metric (string, optional):  Metric to be used for calculation the distance between feature vectors:
             `"euclidean"` | `"cosine"` | `"russellrao"`.
     """
