@@ -581,6 +581,32 @@ encoding.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="functional.losses.FocalLoss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">FocalLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FocalLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FocalLoss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#functional.losses.CrossEntropyLoss" title="functional.losses.CrossEntropyLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.CrossEntropyLoss</span></code></a></p>
+<p>Wrapper for the <cite>CrossEntropyLoss</cite> to perform some addtional computations to turn it into focal loss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is multilabel or not (default = <cite>False</cite>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the input
+gradient. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>reduction</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the reduction to aggregate the loss values over the images of a batch and
+multiple classes: <cite>“none”</cite> | <cite>“mean”</cite> | <cite>“sum”</cite>. <cite>“none”</cite>: no reduction will be applied, <cite>“mean”</cite>: the mean
+of the output is taken, <cite>“sum”</cite>: the output will be summed (default = <cite>“mean”</cite>).</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Laplacian smoothing term to avoid divisions by zero (default = <cite>1e-10</cite>).</p></li>
+<li><p><strong>gamma</strong> (<em>float</em><em>, </em><em>optional</em>) – Specifies how far the loss of well-classified examples is down-weighed (default = <cite>5</cite>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="functional.losses.FocalLoss.training">
+<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#functional.losses.FocalLoss.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="functional.losses.GeneralizedDiceLoss">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">GeneralizedDiceLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'square'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#GeneralizedDiceLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.GeneralizedDiceLoss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#functional.losses.AbstractDiceLoss" title="functional.losses.AbstractDiceLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.AbstractDiceLoss</span></code></a></p>
