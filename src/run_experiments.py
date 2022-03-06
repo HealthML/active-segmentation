@@ -35,14 +35,12 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
             for dataset_config in config["dataset_config"]:
                 current_config = copy.deepcopy(config)
 
-                if "name" in dataset_config:
-                    dataset_name = dataset_config["name"]
-                    del dataset_config["name"]
+                dataset_name = dataset_config["dataset"]
 
-                    if "wandb_project_name" in current_config:
-                        current_config[
-                            "wandb_project_name"
-                        ] = f"{current_config['wandb_project_name']}-{dataset_name}"
+                if "wandb_project_name" in current_config:
+                    current_config[
+                        "wandb_project_name"
+                    ] = f"{current_config['wandb_project_name']}-{dataset_name}"
 
                 if "experiment_tags" in dataset_config:
                     if "experiment_tags" in current_config:
@@ -70,9 +68,8 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
                 for idx, strategy_config in enumerate(config["strategy_config"]):
                     current_config = copy.deepcopy(config)
 
-                    if "name" in strategy_config:
-                        strategy_name = strategy_config["name"]
-                        del strategy_config["name"]
+                    if "description" in strategy_config:
+                        strategy_name = strategy_config["description"]
                     else:
                         strategy_name = f"strategy-{idx}"
 

@@ -29,6 +29,7 @@
   },
   "strategy_config": {
     "type": "uncertainty",
+    "description": "uncertainty-sampling",
     "calculation_method": "distance",
     "exclude_background": true,
     "prefer_unique_scans": true

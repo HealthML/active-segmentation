@@ -28,9 +28,12 @@
         "iterations": null,
         "items_to_label": 32
     },
+    "strategy_config": {
+        "type": "random",
+        "description": "random-sampling"
+    },
     "wandb_project_name": "active-segmentation-tests",
     "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
-    "strategy": "random",
     "experiment_name": "test-experiment",
     "experiment_tags": [],
     "batch_size": 16,
