@@ -4,6 +4,9 @@ from typing import List, Literal
 
 import numpy as np
 
+from datasets import ActiveLearningDataModule
+from models.pytorch_model import PytorchModel
+
 from .representativeness_sampling_strategy_base import (
     RepresentativenessSamplingStrategyBase,
 )
@@ -39,8 +42,9 @@ class UncertaintyRepresentativenessSamplingStrategy(
             "most_distant_sample", "cluster_coverage"
         ] = "cluster_coverage",
         calculation_method: Literal["distance", "entropy"] = "entropy",
+        **kwargs,
     ):
-        super().__init__()
+        super().__init__(**kwargs)
 
         if representativeness_algorithm == "most_distant_sample":
             self.representativeness_sampling_strategy = (
@@ -59,26 +63,36 @@ class UncertaintyRepresentativenessSamplingStrategy(
         )
 
     def prepare_representativeness_computation(
-        self, feature_vectors_training_set, feature_vectors_unlabeled_set
+        self,
+        feature_vectors_training_set: np.ndarray,
+        case_ids_training_set: List[str],
+        feature_vectors_unlabeled_set: np.ndarray,
+        case_ids_unlabeled_set: List[str],
     ) -> None:
         """
         Prepares computation of representativeness scores.
 
         Args:
-            feature_vectors_training_set (np.array): Feature vectors of the items in the training set.
-            feature_vectors_unlabeled_set (np.array): Feature vectors of the items in the unlabeled set.
+            feature_vectors_training_set (numpy.ndarray): Feature vectors of the items in the training set.
+            case_ids_training_set (List[str]): Case IDs of the items in the training set.
+            feature_vectors_unlabeled_set (numpy.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.
         """
 
         self.representativeness_sampling_strategy.prepare_representativeness_computation(
-            feature_vectors_training_set, feature_vectors_unlabeled_set
+            feature_vectors_training_set,
+            case_ids_training_set,
+            feature_vectors_unlabeled_set,
+            case_ids_unlabeled_set,
         )
 
     def compute_representativeness_scores(
         self,
-        model,
-        data_module,
-        feature_vectors_training_set,
-        feature_vectors_unlabeled_set,
+        model: PytorchModel,
+        data_module: ActiveLearningDataModule,
+        feature_vectors_training_set: np.ndarray,
+        feature_vectors_unlabeled_set: np.ndarray,
+        case_ids_unlabeled_set: List[str],
     ) -> List[float]:
         """
         Computes representativeness scores for all unlabeled items.
@@ -88,6 +102,7 @@ class UncertaintyRepresentativenessSamplingStrategy(
             data_module (ActiveLearningDataModule): A data module object providing data.
             feature_vectors_training_set (np.ndarray): Feature vectors of the items in the training set.
             feature_vectors_unlabeled_set (np.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in
@@ -100,6 +115,7 @@ class UncertaintyRepresentativenessSamplingStrategy(
                 data_module,
                 feature_vectors_training_set,
                 feature_vectors_unlabeled_set,
+                case_ids_unlabeled_set,
             )
         )
         representativeness_scores = self._normalize_scores(

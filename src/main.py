@@ -320,11 +320,11 @@ def create_query_strategy(strategy_config: dict):
     if strategy_type == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
     if strategy_type == "representativeness_distance":
-        return DistanceBasedRepresentativenessSamplingStrategy()
+        return DistanceBasedRepresentativenessSamplingStrategy(**strategy_config)
     if strategy_type == "representativeness_clustering":
-        return ClusteringBasedRepresentativenessSamplingStrategy()
+        return ClusteringBasedRepresentativenessSamplingStrategy(**strategy_config)
     if strategy_type == "representativeness_uncertainty":
-        return UncertaintyRepresentativenessSamplingStrategy()
+        return UncertaintyRepresentativenessSamplingStrategy(**strategy_config)
     raise ValueError("Invalid query strategy.")
 
 
