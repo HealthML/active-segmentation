@@ -4,6 +4,7 @@ import math
 
 import torch
 import numpy as np
+import itk
 from scipy.ndimage import distance_transform_edt
 import wandb
 
@@ -29,6 +30,11 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 uncertainty value.
             epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
                 metric.
+            block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
+            interpolation_type (str): The interpolation algorithm to use.
+                values: `"signed-distance"` | `"morph-contour"`.
+            interpolation_quality_metric (str): The metric used for evaluating the performance of the interpolation
+                e.g. "dice"
             random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
                 outputs across multiple runs.
 
@@ -242,7 +248,13 @@ class InterpolationSamplingStrategy(QueryStrategy):
             top = label[top_slice_id, :, :]
             bottom = label[bottom_slice_id, :, :]
 
-            interpolation = self._interpolate_slices(top, bottom, class_ids, thickness)
+            interpolation = self._interpolate_slices(
+                top,
+                bottom,
+                class_ids,
+                thickness,
+                self.kwargs.get("interpolation_type", None),
+            )
             if interpolation is not None:
                 for i, pseudo_label in enumerate(interpolation):
                     case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
@@ -264,34 +276,23 @@ class InterpolationSamplingStrategy(QueryStrategy):
         bottom: np.array,
         class_ids: Iterable[int],
         block_thickness: int,
+        interpolation_type: Literal["signed-distance", "morph-contour"],
     ) -> Optional[np.array]:
         """
-        Interpolates between top and bottom slices if possible.
+        Interpolates between top and bottom slices if possible. Uses a signed distance function to interpolate.
 
         Args:
             top (np.array): The top slice of the block.
             bottom (np.array): The bottom slice of the block.
             class_ids (Iterable[int]): The class ids.
-            block_thickness (int): THe thickness of the block.
+            block_thickness (int): The thickness of the block.
+            interpolation_type (Literal): The type of interpolation to use. One of ["signed-distance", "morph-contour"]
+        Returns:
+            Optional[np.array]: The interpolated slices between top and bottom.
         """
 
-        def signed_dist(mask):
-            inverse_mask = np.ones(mask.shape) - mask
-            return (
-                distance_transform_edt(mask)
-                - distance_transform_edt(inverse_mask)
-                + 0.5
-            )
+        interpolation_thickness = block_thickness - 2
 
-        def interpolate(start, end, dist):
-            dist_start = signed_dist(start)
-            dist_end = signed_dist(end)
-            interp = (dist_start * (1 - dist)) + (dist_end * dist)
-            interp = interp >= 0
-            return interp
-
-        step = 1 / (block_thickness - 1)
-        interpolation_steps = [i * step for i in range(1, block_thickness - 1)]
         single_class_interpolations = {}
         for class_id in class_ids:
             class_top = top == class_id
@@ -299,18 +300,26 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
             if not np.any(class_top) and not np.any(class_bottom):
                 single_class_interpolations[class_id] = np.zeros(
-                    (len(interpolation_steps), *top.shape), dtype=bool
+                    (interpolation_thickness, *top.shape), dtype=bool
                 )
             elif not np.any(np.logical_and(class_top, class_bottom)):
                 return None
             else:
-                slices = [
-                    interpolate(class_top, class_bottom, step)
-                    for step in interpolation_steps
-                ]
-                single_class_interpolations[class_id] = np.array(slices)
+                if interpolation_type == "signed-distance":
+                    interpolation_fn = signed_distance_interpolation
 
-        result = np.zeros((len(interpolation_steps), *top.shape))
+                elif interpolation_type == "morph-contour":
+                    interpolation_fn = morphological_contour_interpolation
+
+                else:
+                    raise ValueError(
+                        f"Invalid interpolation type {interpolation_type}."
+                    )
+
+                slices = interpolation_fn(class_top, class_bottom, block_thickness)
+                single_class_interpolations[class_id] = slices
+
+        result = np.zeros((interpolation_thickness, *top.shape))
 
         for class_id, interpolation in single_class_interpolations.items():
             result[interpolation] = class_id
@@ -359,3 +368,65 @@ class InterpolationSamplingStrategy(QueryStrategy):
             self.log_id += 1
             return mean_dice_score
         raise ValueError(f"Chosen metric {metric} not supported. Choose from: 'dice' .")
+
+
+def signed_distance_interpolation(
+    top: np.array,
+    bottom: np.array,
+    block_thickness: int,
+) -> np.array:
+    """
+    Interpolates between top and bottom slices if possible. Uses a signed distance function to interpolate.
+
+    Args:
+        top (np.array): The top slice of the block.
+        bottom (np.array): The bottom slice of the block.
+        block_thickness (int): The thickness of the block.
+    Returns:
+        np.array: The interpolated slices between top and bottom.
+    """
+
+    def signed_dist(mask):
+        inverse_mask = np.ones(mask.shape) - mask
+        return distance_transform_edt(mask) - distance_transform_edt(inverse_mask) + 0.5
+
+    def interpolation(start, end, dist):
+        dist_start = signed_dist(start)
+        dist_end = signed_dist(end)
+        interp = (dist_start * (1 - dist)) + (dist_end * dist)
+        interp = interp >= 0
+        return interp
+
+    step = 1 / (block_thickness - 1)
+    interpolation_steps = [i * step for i in range(1, block_thickness - 1)]
+
+    return np.array([interpolation(top, bottom, step) for step in interpolation_steps])
+
+
+def morphological_contour_interpolation(
+    top: np.array,
+    bottom: np.array,
+    block_thickness: int,
+) -> np.array:
+    """
+    Interpolates between top and bottom slices using the morphological_contour_interpolator from itk.
+    https://www.researchgate.net/publication/307942551_ND_morphological_contour_interpolation
+
+    Args:
+        top (np.array): The top slice of the block.
+        bottom (np.array): The bottom slice of the block.
+        block_thickness (int): The thickness of the block.
+    Returns:
+        np.array: The interpolated slices between top and bottom.
+    """
+
+    block = np.zeros((block_thickness, *top.shape))
+    block[0, :, :] = bottom
+    block[-1, :, :] = top
+    image_type = itk.Image[itk.UC, 3]
+    itk_img = itk.image_from_array(block.astype(np.uint8), ttype=(image_type,))
+    image = itk.morphological_contour_interpolator(itk_img)
+    interpolated_block = itk.GetArrayFromImage(image)
+    interpolated_slices = interpolated_block[1:-1, :, :]
+
+    return interpolated_slices.astype(bool)

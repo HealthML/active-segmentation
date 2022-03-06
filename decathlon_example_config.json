@@ -31,7 +31,8 @@
   },
   "strategy_config": {
     "type": "interpolation",
-    "description": "interpolation-uncertainty-distance",
+    "interpolation_type": "morph-contour",
+    "description": "interpolation-uncertainty-distance-morph",
     "calculation_method": "distance",
     "exclude_background": true,
     "block_thickness": 5,
@@ -40,7 +41,7 @@
   },
   "wandb_project_name": "active-segmentation-tests",
   "checkpoint_dir": "/dhc/groups/mpws2021cl1/Models",
-  "experiment_name": "hippocampus-uncertainty-interpolation",
+  "experiment_name": "hippocampus-test-morph-interpolation",
   "experiment_tags": [],
   "batch_size": 32,
   "epochs": 5,

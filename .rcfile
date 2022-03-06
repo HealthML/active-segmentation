@@ -3,7 +3,7 @@ ignore=venv
 
 [TYPECHECK]
 ignored-modules=torch.utils.data
-generated-members=torch.*
+generated-members=torch.*,itk.*
 extension-pkg-allow-list=math
 
 [BASIC]
