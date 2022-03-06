@@ -35,14 +35,12 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
             for dataset_config in config["dataset_config"]:
                 current_config = copy.deepcopy(config)
 
-                if "name" in dataset_config:
-                    dataset_name = dataset_config["name"]
-                    del dataset_config["name"]
+                dataset_name = dataset_config["dataset"]
 
-                    if "wandb_project_name" in current_config:
-                        current_config[
-                            "wandb_project_name"
-                        ] = f"{current_config['wandb_project_name']}-{dataset_name}"
+                if "wandb_project_name" in current_config:
+                    current_config[
+                        "wandb_project_name"
+                    ] = f"{current_config['wandb_project_name']}-{dataset_name}"
 
                 if "experiment_tags" in dataset_config:
                     if "experiment_tags" in current_config:
@@ -67,14 +65,14 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
             if "strategy_config" in config and isinstance(
                 config["strategy_config"], list
             ):
-                for idx, strategy_config in enumerate(config["strategy_config"]):
+                for strategy_config in config["strategy_config"]:
                     current_config = copy.deepcopy(config)
 
-                    if "name" in strategy_config:
-                        strategy_name = strategy_config["name"]
-                        del strategy_config["name"]
-                    else:
-                        strategy_name = f"strategy-{idx}"
+                    strategy_name = strategy_config["type"]
+                    if "description" in strategy_config:
+                        strategy_name = (
+                            f"{strategy_name}-{strategy_config['description']}"
+                        )
 
                     if "experiment_tags" in strategy_config:
                         if "experiment_tags" in current_config:
@@ -110,7 +108,7 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
 
                     random_state_configs.append(current_config)
 
-        for idx, config in enumerate(random_state_configs):
+        for config in random_state_configs:
             file_name = f"{config['experiment_name']}-{config['random_state']}.json"
             current_config_file_path = os.path.join(output_dir, file_name)
             with open(current_config_file_path, "w", encoding="utf-8") as config_file:
@@ -137,6 +135,8 @@ def create_sbatch_jobs_from_config_files(
     """
 
     os.makedirs(sbatch_dir, exist_ok=True)
+
+    config_dir = config_dir.rstrip("/")
 
     for config_file in os.listdir(config_dir):
         sbatch_script = (

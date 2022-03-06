@@ -31,6 +31,7 @@
   },
   "strategy_config": {
     "type": "interpolation",
+    "description": "interpolation-uncertainty-distance",
     "calculation_method": "distance",
     "exclude_background": true,
     "block_thickness": 5,

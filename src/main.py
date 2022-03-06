@@ -190,8 +190,8 @@ def run_active_learning_pipeline(
         tags=experiment_tags,
         log_model="all",
         config=copy.deepcopy(locals()),
-        group=experiment_name if random_state is not None else None,
-        job_type=f"random-state-{random_state}" if random_state is not None else None,
+        group=strategy_config.get("type", None),
+        job_type=strategy_config.get("description", None),
     )
 
     if dataset_config is None:
