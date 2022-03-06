@@ -108,7 +108,7 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
 
                     random_state_configs.append(current_config)
 
-        for idx, config in enumerate(random_state_configs):
+        for config in random_state_configs:
             file_name = f"{config['experiment_name']}-{config['random_state']}.json"
             current_config_file_path = os.path.join(output_dir, file_name)
             with open(current_config_file_path, "w", encoding="utf-8") as config_file:
