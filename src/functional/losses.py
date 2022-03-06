@@ -504,6 +504,11 @@ class CrossEntropyLoss(SegmentationLoss):
                 reduction="none",
             )
 
+    def _compute_loss(
+        self, prediction: torch.Tensor, target: torch.Tensor
+    ) -> torch.Tensor:
+        return self.cross_entropy_loss(prediction, target)
+
     def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         r"""
 
@@ -535,7 +540,7 @@ class CrossEntropyLoss(SegmentationLoss):
             prediction = torch.log(prediction + self.epsilon)
             target = target.long()
 
-        loss = self.cross_entropy_loss(prediction, target)
+        loss = self._compute_loss(prediction, target)
 
         if self.multi_label and self.ignore_index is not None:
             # the BCELoss from Pytorch does not provide an `ignore_index` argument
@@ -551,6 +556,41 @@ class CrossEntropyLoss(SegmentationLoss):
             loss = loss.mean(dim=axis_to_reduce)
 
         return self._reduce_loss(loss)
+
+
+class FocalLoss(CrossEntropyLoss):
+    """
+    Wrapper for the `CrossEntropyLoss` to perform some addtional computations to turn it into focal loss.
+
+    Args:
+        multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the input
+            gradient. Defaults to `None`.
+        reduction (str, optional): Specifies the reduction to aggregate the loss values over the images of a batch and
+            multiple classes: `"none"` | `"mean"` | `"sum"`. `"none"`: no reduction will be applied, `"mean"`: the mean
+            of the output is taken, `"sum"`: the output will be summed (default = `"mean"`).
+        epsilon (float, optional): Laplacian smoothing term to avoid divisions by zero (default = `1e-10`).
+        gamma (float, optional): Specifies how far the loss of well-classified examples is down-weighed (default = `5`)
+    """
+
+    def __init__(
+        self,
+        multi_label: bool = False,
+        ignore_index: Optional[int] = None,
+        reduction: Literal["mean", "sum", "none"] = "mean",
+        epsilon: float = 1e-10,
+        gamma: float = 5,
+    ):
+        super().__init__(multi_label, ignore_index, reduction, epsilon)
+        self.gamma = gamma
+
+    def _compute_loss(
+        self, prediction: torch.Tensor, target: torch.Tensor
+    ) -> torch.Tensor:
+        cross_entropy_loss = self.cross_entropy_loss(prediction, target)
+        probability = torch.exp(-cross_entropy_loss)
+        focal_loss = (1 - probability) ** self.gamma * cross_entropy_loss
+        return focal_loss
 
 
 class CrossEntropyDiceLoss(SegmentationLoss):
