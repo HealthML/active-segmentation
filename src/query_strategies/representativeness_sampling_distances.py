@@ -24,15 +24,28 @@ class DistanceBasedRepresentativenessSamplingStrategy(
     in the training set.
 
     Args:
+        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` | `"image_features"`:
+            - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
+            - `"image_features"`: The input images are used as feature vectors.
+            Defaults to `model_features`.
+        feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
+            Defaults to 10.
         distance_metric (string, optional):  Metric to be used for calculation the distance between feature vectors:
             `"euclidean"` | `"cosine"` | `"russellrao"`.
     """
 
     def __init__(
         self,
+        feature_type: Literal["model_features", "image_features"] = "model_features",
+        feature_dimensionality: int = 10,
         distance_metric: Literal["euclidean", "cosine", "russellrao"] = "euclidean",
+        **kwargs,
     ):
-        super().__init__()
+        super().__init__(
+            feature_type=feature_type,
+            feature_dimensionality=feature_dimensionality,
+            **kwargs,
+        )
 
         if distance_metric not in ["euclidean", "cosine", "russellrao"]:
             raise ValueError(f"Invalid distance metric: {distance_metric}.")
@@ -110,6 +123,7 @@ class DistanceBasedRepresentativenessSamplingStrategy(
         data_module: ActiveLearningDataModule,
         feature_vectors_training_set,
         feature_vectors_unlabeled_set,
+        case_ids_unlabeled_set,
     ) -> List[float]:
         """
         Computes representativeness scores for all unlabeled items.
@@ -119,6 +133,7 @@ class DistanceBasedRepresentativenessSamplingStrategy(
             data_module (ActiveLearningDataModule): A data module object providing data.
             feature_vectors_training_set (np.ndarray): Feature vectors of the items in the training set.
             feature_vectors_unlabeled_set (np.ndarray): Feature vectors of the items in the unlabeled set.
+            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in

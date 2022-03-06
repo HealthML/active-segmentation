@@ -1,4 +1,5 @@
 """ Main module to execute active learning pipeline from CLI """
+import copy
 import json
 import os.path
 from typing import Any, Dict, Iterable, Optional
@@ -183,10 +184,14 @@ def run_active_learning_pipeline(
     wandb_logger = WandbLogger(
         project=wandb_project_name,
         entity="active-segmentation",
-        name=experiment_name,
+        name=experiment_name
+        if random_state is None
+        else f"{experiment_name}-{random_state}",
         tags=experiment_tags,
         log_model="all",
-        config=locals().copy(),
+        config=copy.deepcopy(locals()),
+        group=strategy_config.get("type", None),
+        job_type=strategy_config.get("description", None),
     )
 
     if dataset_config is None:
@@ -315,11 +320,11 @@ def create_query_strategy(strategy_config: dict):
     if strategy_type == "uncertainty":
         return UncertaintySamplingStrategy(**strategy_config)
     if strategy_type == "representativeness_distance":
-        return DistanceBasedRepresentativenessSamplingStrategy()
+        return DistanceBasedRepresentativenessSamplingStrategy(**strategy_config)
     if strategy_type == "representativeness_clustering":
-        return ClusteringBasedRepresentativenessSamplingStrategy()
+        return ClusteringBasedRepresentativenessSamplingStrategy(**strategy_config)
     if strategy_type == "representativeness_uncertainty":
-        return UncertaintyRepresentativenessSamplingStrategy()
+        return UncertaintyRepresentativenessSamplingStrategy(**strategy_config)
     raise ValueError("Invalid query strategy.")
 
 
