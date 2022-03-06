@@ -29,8 +29,8 @@ class DecathlonDataModule(ActiveLearningDataModule):
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle (boolean): Flag if the data should be shuffled.
         dim (int): 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
-        mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
-            (default = True)
+        combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.
+            (default = False)
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
         random_state (int, optional): Random state for splitting the data into an initial training set and an unlabeled
@@ -134,7 +134,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         pin_memory: bool = True,
         shuffle: bool = True,
         dim: int = 2,
-        mask_join_non_zero: bool = True,
+        combine_foreground_classes: bool = False,
         mask_filter_values: Optional[Tuple[int]] = None,
         random_state: Optional[int] = None,
         **kwargs,
@@ -154,7 +154,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         self.data_folder = os.path.join(self.data_dir, task)
         self.dim = dim
         self.cache_size = cache_size
-        self.mask_join_non_zero = mask_join_non_zero
+        self.combine_foreground_classes = combine_foreground_classes
         self.mask_filter_values = mask_filter_values
         self._data_channels = DecathlonDataModule.__read_data_channels(self.data_folder)
         self.random_state = random_state
@@ -202,7 +202,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             labels = dataset_info["labels"]
         labels = {int(key): labels[key] for key in labels}
 
-        if self.mask_join_non_zero:
+        if self.combine_foreground_classes:
             return {0: "background", 1: "foreground"}
 
         if self.mask_filter_values is not None:
@@ -251,7 +251,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             dim=self.dim,
             cache_size=self.cache_size,
             shuffle=self.shuffle,
-            mask_join_non_zero=self.mask_join_non_zero,
+            combine_foreground_classes=self.combine_foreground_classes,
             mask_filter_values=self.mask_filter_values,
             slice_indices=self.initial_training_samples,
             random_state=self.random_state,
@@ -285,7 +285,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
             annotation_paths=val_annotation_paths,
             dim=self.dim,
             cache_size=self.cache_size,
-            mask_join_non_zero=self.mask_join_non_zero,
+            combine_foreground_classes=self.combine_foreground_classes,
             mask_filter_values=self.mask_filter_values,
             case_id_prefix="val",
             random_state=self.random_state,
@@ -311,7 +311,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
                 cache_size=self.cache_size,
                 is_unlabeled=True,
                 shuffle=self.shuffle,
-                mask_join_non_zero=self.mask_join_non_zero,
+                combine_foreground_classes=self.combine_foreground_classes,
                 mask_filter_values=self.mask_filter_values,
                 slice_indices=self.initial_unlabeled_samples,
                 random_state=self.random_state,

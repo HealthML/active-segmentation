@@ -17,8 +17,7 @@
     "data_dir": "/dhc/groups/mpws2021cl1/Data/Decathlon",
     "cache_size": 250,
     "pin_memory": true,
-    "task": "Task04_Hippocampus",
-    "mask_join_non_zero": false
+    "task": "Task04_Hippocampus"
   },
   "active_learning_config": {
     "active_learning_mode": true,
