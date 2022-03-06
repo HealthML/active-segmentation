@@ -65,13 +65,14 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
             if "strategy_config" in config and isinstance(
                 config["strategy_config"], list
             ):
-                for idx, strategy_config in enumerate(config["strategy_config"]):
+                for strategy_config in config["strategy_config"]:
                     current_config = copy.deepcopy(config)
 
+                    strategy_name = strategy_config["type"]
                     if "description" in strategy_config:
-                        strategy_name = strategy_config["description"]
-                    else:
-                        strategy_name = f"strategy-{idx}"
+                        strategy_name = (
+                            f"{strategy_name}-{strategy_config['description']}"
+                        )
 
                     if "experiment_tags" in strategy_config:
                         if "experiment_tags" in current_config:
@@ -134,6 +135,8 @@ def create_sbatch_jobs_from_config_files(
     """
 
     os.makedirs(sbatch_dir, exist_ok=True)
+
+    config_dir = config_dir.rstrip("/")
 
     for config_file in os.listdir(config_dir):
         sbatch_script = (
