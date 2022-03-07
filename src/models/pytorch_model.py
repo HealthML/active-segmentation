@@ -87,6 +87,11 @@ class PytorchModel(LightningModule, ABC):
         else:
             self.loss_weight_pseudo_labels_scheduler = None
 
+        self.loss_config.pop("weight_pseudo_labels_scheduler", None)
+        self.loss_config.pop("weight_pseudo_labels_start", None)
+        self.loss_config.pop("weight_pseudo_labels_end", None)
+        self.loss_config.pop("weight_pseudo_labels_decay_steps", None)
+
         self.loss_module = None
 
         self.train_metric_confidence_levels = train_metric_confidence_levels

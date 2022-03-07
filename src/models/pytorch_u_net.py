@@ -121,7 +121,7 @@ class PytorchUNet(PytorchModel):
         weight_pseudo_labels = self.loss_weight_pseudo_labels
 
         weight = (
-            torch.Tensor(is_pseudo_label, dtype=torch.int) * weight_pseudo_labels
+            torch.as_tensor(is_pseudo_label, device=self.device) * weight_pseudo_labels
             if weight_pseudo_labels is not None
             else None
         )
@@ -153,7 +153,7 @@ class PytorchUNet(PytorchModel):
             Loss on the validation batch.
         """
 
-        x, y, case_ids = batch
+        x, y, _, case_ids = batch
 
         probabilities = self(x)
 
@@ -194,7 +194,7 @@ class PytorchUNet(PytorchModel):
             dataloader_idx: Index of the dataloader.
         """
 
-        x, y, case_ids = batch
+        x, y, _, case_ids = batch
 
         probabilities = self(x)
 

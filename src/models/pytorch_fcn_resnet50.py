@@ -51,7 +51,7 @@ class PytorchFCNResnet50(PytorchModel):
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         """Execute one validation step."""
-        x, y = batch
+        x, y, _, case_ids = batch
 
         logits = self(x)["out"]
 
@@ -69,7 +69,7 @@ class PytorchFCNResnet50(PytorchModel):
             dataloader_idx: Index of the dataloader.
         """
 
-        x, y, case_ids = batch
+        x, y, _, case_ids = batch
 
         logits = self(x)
 
