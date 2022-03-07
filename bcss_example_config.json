@@ -2,7 +2,10 @@
     "model_config": {
         "architecture": "u_net",
         "optimizer": "adam",
-        "loss_config": {"type": "dice"},
+        "loss_config": {
+            "type": "dice",
+            "weight_pseudo_labels_start": 0.9
+        },
         "learning_rate": 0.0001,
         "num_levels": 3,
         "dim": 2,
