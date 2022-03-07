@@ -28,8 +28,8 @@ class BraTSDataModule(ActiveLearningDataModule):
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
         shuffle (boolean): Flag if the data should be shuffled.
         dim (int): 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
-        mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
-            (default = True)
+        combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.
+            (default = False)
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
         random_state (int, optional): Random state for splitting the data into an initial training set and an unlabeled
@@ -90,7 +90,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         pin_memory: bool = True,
         shuffle: bool = True,
         dim: int = 2,
-        mask_join_non_zero: bool = True,
+        combine_foreground_classes: bool = False,
         mask_filter_values: Optional[Tuple[int]] = None,
         random_state: int = None,
         **kwargs,
@@ -110,7 +110,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.data_folder = self.data_dir
         self.dim = dim
         self.cache_size = cache_size
-        self.mask_join_non_zero = mask_join_non_zero
+        self.combine_foreground_classes = combine_foreground_classes
         self.mask_filter_values = mask_filter_values
         self.random_state = random_state
 
@@ -144,7 +144,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             Dict[int, str]: A mapping of class indices to descriptive class names.
         """
 
-        if self.mask_join_non_zero:
+        if self.combine_foreground_classes:
             return {0: "background", 1: "tumor"}
 
         labels = {
@@ -203,7 +203,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             dim=self.dim,
             cache_size=self.cache_size,
             shuffle=self.shuffle,
-            mask_join_non_zero=self.mask_join_non_zero,
+            combine_foreground_classes=self.combine_foreground_classes,
             mask_filter_values=self.mask_filter_values,
             slice_indices=self.initial_training_samples,
             random_state=self.random_state,
@@ -237,7 +237,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             annotation_paths=val_annotation_paths,
             dim=self.dim,
             cache_size=self.cache_size,
-            mask_join_non_zero=self.mask_join_non_zero,
+            combine_foreground_classes=self.combine_foreground_classes,
             mask_filter_values=self.mask_filter_values,
             case_id_prefix="val",
             random_state=self.random_state,
@@ -262,7 +262,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 cache_size=self.cache_size,
                 is_unlabeled=True,
                 shuffle=self.shuffle,
-                mask_join_non_zero=self.mask_join_non_zero,
+                combine_foreground_classes=self.combine_foreground_classes,
                 mask_filter_values=self.mask_filter_values,
                 slice_indices=self.initial_unlabeled_samples,
                 random_state=self.random_state,

@@ -30,8 +30,8 @@ class BCSSDataModule(ActiveLearningDataModule):
         channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
         image_shape (tuple, optional): Shape of the image.
         target_label (int, optional): The label to use for learning. Details are in BCSSDataset.
-        mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
-            (default = True)
+        combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.
+            (default = False)
         val_set_size (float, optional): The size of the validation set (default = 0.3).
         stratify (bool, optional): The option to stratify the train val split by the institutes.
         random_state (int, optional): Controls the data splitting and shuffling. Pass an int for reproducible output
@@ -100,7 +100,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         channels: int = 3,
         image_shape: tuple = (300, 300),
         target_label: int = 1,
-        mask_join_non_zero: bool = True,
+        combine_foreground_classes: bool = False,
         val_set_size: float = 0.3,
         stratify: bool = True,
         random_state: Optional[int] = None,
@@ -119,7 +119,7 @@ class BCSSDataModule(ActiveLearningDataModule):
         self.channels = channels
         self.image_shape = tuple(image_shape)
         self.target_label = target_label
-        self.mask_join_non_zero = mask_join_non_zero
+        self.combine_foreground_classes = combine_foreground_classes
         self.cache_size = cache_size
         self.active_learning_mode = active_learning_mode
         self.initial_training_set_size = initial_training_set_size
@@ -333,7 +333,7 @@ class BCSSDataModule(ActiveLearningDataModule):
             Dict[int, str]: A mapping of class indices to descriptive class names.
         """
 
-        if self.mask_join_non_zero:
+        if self.combine_foreground_classes:
             id_to_classes = {0: "background", 1: "tumor"}
         else:
             raise NotImplementedError(

@@ -23,8 +23,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             can ever become part of the dataset.
         cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.
             Defaults to zero.
-        mask_join_non_zero (bool, optional): Flag if the non zero values of the annotations should be merged.
-            Defaults to True.
+        combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.
+            Defaults to False.
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
         shuffle (bool, optional): Whether the data should be shuffled.
@@ -286,7 +286,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         image_paths: List[str],
         annotation_paths: List[str],
         cache_size: int = 0,
-        mask_join_non_zero: bool = True,
+        combine_foreground_classes: bool = False,
         mask_filter_values: Optional[Tuple[int]] = None,
         is_unlabeled: bool = False,
         shuffle: bool = False,
@@ -300,7 +300,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         self.image_paths = image_paths
         self.annotation_paths = annotation_paths
-        self.mask_join_non_zero = mask_join_non_zero
+        self.combine_foreground_classes = combine_foreground_classes
         self.mask_filter_values = mask_filter_values
 
         assert len(image_paths) == len(annotation_paths)
@@ -381,7 +381,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         return self.__read_image_as_array(
             self.annotation_paths[image_index],
             norm=False,
-            join_non_zero=self.mask_join_non_zero,
+            join_non_zero=self.combine_foreground_classes,
             filter_values=self.mask_filter_values,
         )
 
