@@ -171,6 +171,8 @@ class ActiveLearningPipeline:
                 self.model_trainer.validate(
                     ckpt_path="best", dataloaders=self.data_module
                 )
+                self.model.step_loss_weight_pseudo_labels_scheduler()
+
         else:
             self.model_trainer = self.setup_trainer(self.epochs, iteration=0)
             # run regular fit run with all the data if no active learning mode

@@ -43,7 +43,7 @@ class PytorchFCNResnet50(PytorchModel):
 
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
         """Execute one training step."""
-        x, y = batch
+        x, y, is_pseudo_label, case_ids = batch
 
         logits = self(x)["out"]
         loss = self.loss_module(logits, y)

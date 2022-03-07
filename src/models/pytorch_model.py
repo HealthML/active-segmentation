@@ -1,6 +1,7 @@
 """ Base classes to implement models with pytorch """
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union
+
 import numpy
 import torch
 import torchmetrics
@@ -11,6 +12,7 @@ import wandb
 
 import functional
 from metric_tracking import CombinedPerEpochMetric
+from .loss_weight_scheduler import LossWeightScheduler
 
 Optimizer = Union[Adam, SGD]
 LRScheduler = Union[ReduceLROnPlateau, CosineAnnealingLR]
@@ -73,6 +75,17 @@ class PytorchModel(LightningModule, ABC):
         )
         self.loss = self.loss_config["type"]
         del self.loss_config["type"]
+
+        if self.loss_config.get("weight_pseudo_labels_start") is not None:
+            self.loss_weight_pseudo_labels_scheduler = LossWeightScheduler(
+                self.loss_config.get("weight_pseudo_labels_scheduler", "fixed"),
+                self.loss_config.get("weight_pseudo_labels_start"),
+                self.loss_config.get("weight_pseudo_labels_end", None),
+                0,
+                self.loss_config.get("weight_pseudo_labels_decay_steps", None),
+            )
+        else:
+            self.loss_weight_pseudo_labels_scheduler = None
 
         self.loss_module = None
 
@@ -524,3 +537,24 @@ class PytorchModel(LightningModule, ABC):
         """
         This method is called when resetting the weights is activated for the active learing loop
         """
+
+    def step_loss_weight_pseudo_labels_scheduler(self) -> None:
+        """
+        Increases step of pseudo-label loss weight scheduler if :attr:`loss_weight_pseudo_labels_scheduler` is not
+        `None`.
+        """
+
+        if self.loss_weight_pseudo_labels_scheduler is not None:
+            self.loss_weight_pseudo_labels_scheduler.step()
+
+    @property
+    def loss_weight_pseudo_labels(self) -> Union[float, None]:
+        """
+        Returns:
+            Union[float, None]: Pseudo-label loss weight if :attr:`loss_weight_pseudo_labels_scheduler` is not `None`,
+                else `None`.
+        """
+
+        if self.loss_weight_pseudo_labels_scheduler is not None:
+            return self.loss_weight_pseudo_labels_scheduler.current_weight()
+        return None

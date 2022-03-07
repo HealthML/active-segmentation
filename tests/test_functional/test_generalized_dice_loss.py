@@ -4,6 +4,7 @@ import unittest
 from typing import Callable, Dict, Literal, Optional, Tuple
 
 import numpy as np
+from parameterized import parameterized
 import torch
 
 from functional import GeneralizedDiceLoss
@@ -59,6 +60,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
         ignore_index: Optional[int] = None,
         include_background: bool = True,
         reduction: Literal["mean", "sum", "none"] = "none",
+        weight: Optional[torch.Tensor] = None,
         weight_type: Literal["square", "simple", "uniform"] = "square",
         epsilon: float = 0.0001,
     ) -> None:
@@ -71,6 +73,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
             get_second_slice: Getter function that returns prediction, target and expected metrics for the second slice.
             ignore_index (bool, optional): `ignore_index` parameter of the loss.
             include_background (bool, optional): `include_background` parameter of the loss.
+            weight (Tensor, optional): `weight` parameter of the loss.
             weight_type (string, optional): `weight_type` parameter of the loss.
             reduction (string, optional): `reduction` parameter of the loss.
             epsilon (float, optional): `epsilon` parameter of the loss.
@@ -120,6 +123,14 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                 [expected_loss_first_slice, expected_loss_second_slice]
             )
 
+            if weight is not None:
+                expanded_weight = weight
+                if expected_losses.ndim > 1:
+                    for _ in range(1, expected_losses.ndim):
+                        expanded_weight = expanded_weight.unsqueeze(axis=-1)
+
+                expected_losses = expected_losses * expanded_weight.numpy()
+
             if reduction == "mean":
                 expected_loss = torch.as_tensor(expected_losses.mean())
             elif reduction == "sum":
@@ -141,7 +152,7 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
             reduction=reduction,
             epsilon=epsilon,
         )
-        loss = loss_module(prediction, target)
+        loss = loss_module(prediction, target, weight=weight)
 
         self.assertTrue(
             loss.shape == expected_loss.shape,
@@ -535,3 +546,106 @@ class TestGeneralizedDiceLoss(unittest.TestCase):
                                 expected_loss,
                                 msg=f"Correctly computes loss value when {test_case_description}.",
                             )
+
+    # fmt: off
+    @parameterized.expand([
+        (test_data.standard_slice_single_label_1, "none", 0, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "mean", 0, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "sum", 0, True, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_single_label_1, "none", 0, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "mean", 0, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "sum", 0, False, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_single_label_1, "none", 0, True, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, "mean", 0, True, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, "sum", 0, True, torch.Tensor([1.0, 1.0])),
+
+        (test_data.standard_slice_single_label_1, "none", 0, False, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, "mean", 0, False, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, "sum", 0, False, torch.Tensor([1.0, 1.0])),
+
+        (test_data.standard_slice_single_label_1, "none", 1, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "mean", 1, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "sum", 1, True, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_single_label_1, "none", 1, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "mean", 1, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, "sum", 1, False, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_multi_label_1, "none", 0, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "mean", 0, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "sum", 0, True, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_multi_label_1, "none", 0, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "mean", 0, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "sum", 0, False, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_multi_label_1, "none", 0, True, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, "mean", 0, True, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, "sum", 0, True, torch.Tensor([1.0, 1.0])),
+
+        (test_data.standard_slice_multi_label_1, "none", 0, False, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, "mean", 0, False, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, "sum", 0, False, torch.Tensor([1.0, 1.0])),
+
+        (test_data.standard_slice_multi_label_1, "none", 1, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "mean", 1, True, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "sum", 1, True, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_multi_label_1, "none", 1, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "mean", 1, False, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, "sum", 1, False, torch.Tensor([1.0, 0.5])),
+    ])
+    # fmt: on
+    def test_weighted_loss(
+        self,
+        test_slice: torch.Tensor,
+        reduction: str,
+        epsilon: float,
+        include_background: bool,
+        weight: torch.Tensor,
+    ):
+        """
+        Tests that the loss is computed correctly when the images of one batch are weighted differently.
+        """
+
+        weight_type = "uniform"
+
+        (
+            _,
+            _,
+            cardinalities,
+            probability_positive,
+            probability_negative,
+        ) = test_slice(False)
+
+        expected_loss = tests.utils.expected_generalized_dice_loss(
+            cardinalities,
+            probability_positive,
+            probability_negative,
+            epsilon,
+            include_background=include_background,
+            weight_type=weight_type,
+        )
+
+        expected_loss = torch.Tensor([expected_loss, expected_loss])
+
+        for idx, current_weight in enumerate(weight):
+            expected_loss[idx] = expected_loss[idx] * current_weight
+
+        if reduction == "mean":
+            expected_loss = expected_loss.mean()
+        elif reduction == "sum":
+            expected_loss = expected_loss.sum()
+
+        self._test_loss(
+            test_slice,
+            test_slice,
+            include_background=include_background,
+            reduction=reduction,
+            weight=weight,
+            weight_type=weight_type,
+            expected_loss=expected_loss,
+            epsilon=epsilon,
+        )

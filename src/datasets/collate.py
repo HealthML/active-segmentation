@@ -28,7 +28,7 @@ def batch_padding_collate_fn(
                 for idx, samples in enumerate(zip(*batch))
             )
         )
-    if isinstance(elem, str):
+    if isinstance(elem, (bool, str)):
         return batch
 
     max_size = [max([item.size(i) for item in batch]) for i in range(batch[0].dim())]

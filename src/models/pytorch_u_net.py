@@ -116,10 +116,18 @@ class PytorchUNet(PytorchModel):
             Loss on the training batch.
         """
 
-        x, y, case_ids = batch
+        x, y, is_pseudo_label, case_ids = batch
+
+        weight_pseudo_labels = self.loss_weight_pseudo_labels
+
+        weight = (
+            torch.Tensor(is_pseudo_label, dtype=torch.int) * weight_pseudo_labels
+            if weight_pseudo_labels is not None
+            else None
+        )
 
         probabilities = self(x)
-        loss = self.loss_module(probabilities, y)
+        loss = self.loss_module(probabilities, y, weight)
 
         for train_metric in self.get_train_metrics():
             train_metric.update(probabilities, y, case_ids)
