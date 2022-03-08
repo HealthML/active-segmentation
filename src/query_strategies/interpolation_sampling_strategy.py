@@ -192,8 +192,14 @@ class InterpolationSamplingStrategy(QueryStrategy):
         block_selection = self.kwargs.get("block_selection", "uncertainty")
 
         block_ids = []
+        num_selected_slices = 0
 
-        for thickness in reversed(range(3, block_thickness + 1)):
+        for thickness in reversed(range(1, block_thickness + 1)):
+            if thickness == 2:
+                # It doesn't make sense to use blocks with thickness 2 because there is nothing to interpolate.
+                # Instead skip to thickness 1 for single slices.
+                continue
+
             ranked_ids = (
                 self._uncertainty_ranked_blocks(models, data_module, thickness)
                 if block_selection == "uncertainty"
@@ -225,7 +231,9 @@ class InterpolationSamplingStrategy(QueryStrategy):
                         ((block_prefix, block_image_id, block_top_slice_id), thickness)
                     )
 
-                if len(block_ids) >= items_to_label / 2:
+                    num_selected_slices += 2 if thickness > 1 else 1
+
+                if num_selected_slices >= items_to_label:
                     break
 
             # only continue if the inner loop didn't break
@@ -239,9 +247,20 @@ class InterpolationSamplingStrategy(QueryStrategy):
         pseudo_labels = {}
 
         for (prefix, image_id, top_slice_id), thickness in block_ids:
-            bottom_slice_id = top_slice_id - thickness + 1
-
             selected_ids.append(f"{prefix}_{image_id}-{top_slice_id}")
+
+            if thickness == 1:
+                wandb.log(
+                    {
+                        "val/interpolation_id": self.log_id,
+                        "val/mean_dice_score_interpolation": math.nan,
+                        "val/interpolation_thickness": 1,
+                    }
+                )
+                self.log_id += 1
+                continue
+
+            bottom_slice_id = top_slice_id - thickness + 1
             selected_ids.append(f"{prefix}_{image_id}-{bottom_slice_id}")
 
             label = data_module.training_set.read_mask_for_image(image_id)
