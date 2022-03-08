@@ -385,6 +385,16 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 <dd><p>The dimensionality of the input. Usually 2 or 3.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.loss_weight_pseudo_labels">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">loss_weight_pseudo_labels</span></span><a class="headerlink" href="#models.pytorch_model.PytorchModel.loss_weight_pseudo_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns:
+Union[float, None]: Pseudo-label loss weight if <code class="xref py py-attr docutils literal notranslate"><span class="pre">loss_weight_pseudo_labels_scheduler</span></code> is not <cite>None</cite>,</p>
+<blockquote>
+<div><p>else <cite>None</cite>.</p>
+</div></blockquote>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.predict" title="Permalink to this definition">¶</a></dt>
@@ -433,6 +443,13 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 <dd class="field-odd"><p><strong>stage</strong> (<em>string</em><em>, </em><em>optional</em>) – Either ‘fit’, ‘validate’, ‘test’, or ‘predict’.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.step_loss_weight_pseudo_labels_scheduler">
+<span class="sig-name descname"><span class="pre">step_loss_weight_pseudo_labels_scheduler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.step_loss_weight_pseudo_labels_scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.step_loss_weight_pseudo_labels_scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increases step of pseudo-label loss weight scheduler if <code class="xref py py-attr docutils literal notranslate"><span class="pre">loss_weight_pseudo_labels_scheduler</span></code> is not
+<cite>None</cite>.</p>
 </dd></dl>
 
 <dl class="py method">

@@ -286,13 +286,15 @@ of the output is taken, <cite>“sum”</cite>: the output will be summed (defau
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.CrossEntropyDiceLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
 <li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
 encoded.</p></li>
+<li><p><strong>weight</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Manual weight given to the loss of each image / slice. Defaults to <cite>None</cite>, which
+means that all images are weighted equally.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -315,6 +317,7 @@ encoding.</p>
 </dd>
 </dl>
 </li>
+<li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
@@ -348,13 +351,15 @@ of the output is taken, <cite>“sum”</cite>: the output will be summed (defau
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.CrossEntropyLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyLoss.forward" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#CrossEntropyLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.CrossEntropyLoss.forward" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
 <li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</p></li>
 <li><p><strong>encoded.</strong> – </p></li>
+<li><p><strong>weight</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Manual weight given to the loss of each image / slice. Defaults to <cite>None</cite>, which
+means that all images are weighted equally.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -377,6 +382,7 @@ encoding.</p>
 </dd>
 </dl>
 </li>
+<li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
@@ -431,8 +437,43 @@ of the output is taken, <cite>“sum”</cite>: the output will be summed (defau
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.DiceLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#DiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.DiceLoss.forward" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#DiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.DiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+encoded.</p></li>
+<li><p><strong>weight</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Manual weight given to the loss of each image / slice. Defaults to <cite>None</cite>, which
+means that all images are weighted equally.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dice loss.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding.</p>
+</dd>
+</dl>
+</li>
+<li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.DiceLoss.get_dice_loss_module">
@@ -475,13 +516,15 @@ of the output is taken, <cite>“sum”</cite>: the output will be summed (defau
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.FalsePositiveDiceLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
 <li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
 encoded.</p></li>
+<li><p><strong>weight</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Manual weight given to the loss of each image / slice. Defaults to <cite>None</cite>, which
+means that all images are weighted equally.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -504,6 +547,7 @@ encoding.</p>
 </dd>
 </dl>
 </li>
+<li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
@@ -538,13 +582,15 @@ of the output is taken, <cite>“sum”</cite>: the output will be summed (defau
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.FalsePositiveLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveLoss.forward" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FalsePositiveLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FalsePositiveLoss.forward" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
 <li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</p></li>
 <li><p><strong>encoded.</strong> – </p></li>
+<li><p><strong>weight</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Manual weight given to the loss of each image / slice. Defaults to <cite>None</cite>, which
+means that all images are weighted equally.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -567,6 +613,7 @@ encoding.</p>
 </dd>
 </dl>
 </li>
+<li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
 </dd>
@@ -646,8 +693,43 @@ of the output is taken, <cite>“sum”</cite>: the output will be summed (defau
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.GeneralizedDiceLoss.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#GeneralizedDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.GeneralizedDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#GeneralizedDiceLoss.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.GeneralizedDiceLoss.forward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+encoded.</p></li>
+<li><p><strong>weight</strong> (<em>Tensor</em><em>, </em><em>optional</em>) – Manual weight given to the loss of each image / slice. Defaults to <cite>None</cite>, which
+means that all images are weighted equally.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generalized dice loss.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
+encoding.</p>
+</dd>
+</dl>
+</li>
+<li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="functional.losses.GeneralizedDiceLoss.get_dice_loss_module">

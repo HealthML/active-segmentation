@@ -224,12 +224,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">=</span> <span class="n">reduction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
 
-    <span class="k">def</span> <span class="nf">_reduce_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_reduce_loss</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Aggregates the loss values of the different classes of an image as well as the different images of a batch.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            loss (Tensor): Loss to be aggregated.</span>
+<span class="sd">            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which</span>
+<span class="sd">                means that all images are weighted equally.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Aggregated loss value.</span>
@@ -237,8 +241,16 @@
 <span class="sd">        Shape:</span>
 <span class="sd">            - Loss: :math:`(N, C)`, where `N = batch size`, and `C = number of classes`, or `(N)` for binary</span>
 <span class="sd">                segmentation tasks.</span>
+<span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">loss</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
+                    <span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">*</span> <span class="n">loss</span>
 
         <span class="c1"># aggregate loss values for all class channels and the entire batch</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
@@ -425,7 +437,7 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dice_loss</span> <span class="o">=</span> <span class="n">MonaiDiceLoss</span><span class="p">(</span>
             <span class="n">include_background</span><span class="o">=</span><span class="n">include_background</span><span class="p">,</span>
-            <span class="n">reduction</span><span class="o">=</span><span class="n">reduction</span><span class="p">,</span>
+            <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
             <span class="n">smooth_nr</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
             <span class="n">smooth_dr</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
         <span class="p">)</span>
@@ -438,13 +450,41 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dice_loss</span></div>
 
-<div class="viewcode-block" id="DiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.DiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="DiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.DiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</span>
+<span class="sd">            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</span>
+<span class="sd">                encoded.</span>
+<span class="sd">            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which</span>
+<span class="sd">                means that all images are weighted equally.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Tensor: Dice loss.</span>
+
+<span class="sd">        Shape:</span>
+<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">                in :math:`[0, 1]`</span>
+<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
+<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
+<span class="sd">                encoding.</span>
+<span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
+<span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">dice_loss</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
-            <span class="c1"># the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is</span>
-            <span class="c1"># set to &quot;none&quot;</span>
-            <span class="c1"># since the spatial dimensions only contain a single element, they are squeezed here</span>
-            <span class="n">dice_loss</span> <span class="o">=</span> <span class="n">dice_loss</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">dice_loss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dice_loss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="c1"># the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is</span>
+        <span class="c1"># set to &quot;none&quot;</span>
+        <span class="c1"># since the spatial dimensions only contain a single element, they are squeezed here</span>
+        <span class="n">dice_loss</span> <span class="o">=</span> <span class="n">dice_loss</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">dice_loss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dice_loss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">dice_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_loss</span><span class="p">(</span><span class="n">dice_loss</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">dice_loss</span></div></div>
 
@@ -497,7 +537,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">generalized_dice_loss</span> <span class="o">=</span> <span class="n">MonaiGeneralizedDiceLoss</span><span class="p">(</span>
             <span class="n">include_background</span><span class="o">=</span><span class="n">include_background</span><span class="p">,</span>
             <span class="n">w_type</span><span class="o">=</span><span class="n">weight_type</span><span class="p">,</span>
-            <span class="n">reduction</span><span class="o">=</span><span class="n">reduction</span><span class="p">,</span>
+            <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
             <span class="n">smooth_nr</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
             <span class="n">smooth_dr</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
         <span class="p">)</span>
@@ -510,13 +550,41 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalized_dice_loss</span></div>
 
-<div class="viewcode-block" id="GeneralizedDiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.GeneralizedDiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="GeneralizedDiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.GeneralizedDiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</span>
+<span class="sd">            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</span>
+<span class="sd">                encoded.</span>
+<span class="sd">            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which</span>
+<span class="sd">                means that all images are weighted equally.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Tensor: Generalized dice loss.</span>
+
+<span class="sd">        Shape:</span>
+<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">                in :math:`[0, 1]`</span>
+<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
+<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
+<span class="sd">                encoding.</span>
+<span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
+<span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">dice_loss</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
-            <span class="c1"># the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is</span>
-            <span class="c1"># set to &quot;none&quot;</span>
-            <span class="c1"># since the class dimension and the spatial dimensions only contain a single element, they are squeezed here</span>
-            <span class="n">dice_loss</span> <span class="o">=</span> <span class="n">dice_loss</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dice_loss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is</span>
+        <span class="c1"># set to &quot;none&quot;</span>
+        <span class="c1"># since the class dimension and the spatial dimensions only contain a single element, they are squeezed here</span>
+        <span class="n">dice_loss</span> <span class="o">=</span> <span class="n">dice_loss</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dice_loss</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">dice_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_loss</span><span class="p">(</span><span class="n">dice_loss</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">dice_loss</span></div></div>
 
@@ -550,13 +618,20 @@
             <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="FalsePositiveLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.FalsePositiveLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="FalsePositiveLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.FalsePositiveLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</span>
 <span class="sd">            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</span>
 <span class="sd">            encoded.</span>
+<span class="sd">            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which</span>
+<span class="sd">                means that all images are weighted equally.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Tensor: False positive loss.</span>
 
@@ -566,6 +641,7 @@
 <span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
 <span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
 <span class="sd">                encoding.</span>
+<span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -589,7 +665,7 @@
         <span class="c1"># if there are no positives at all, this will yield an optimal loss value of zero</span>
         <span class="n">fp_loss</span> <span class="o">=</span> <span class="n">false_positives</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">+</span> <span class="n">positives</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_loss</span><span class="p">(</span><span class="n">fp_loss</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_loss</span><span class="p">(</span><span class="n">fp_loss</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="FalsePositiveDiceLoss"><a class="viewcode-back" href="../../functional.html#functional.losses.FalsePositiveDiceLoss">[docs]</a><span class="k">class</span> <span class="nc">FalsePositiveDiceLoss</span><span class="p">(</span><span class="n">SegmentationLoss</span><span class="p">):</span>
@@ -628,13 +704,20 @@
             <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="FalsePositiveDiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.FalsePositiveDiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="FalsePositiveDiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.FalsePositiveDiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</span>
 <span class="sd">            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</span>
 <span class="sd">                encoded.</span>
+<span class="sd">            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which</span>
+<span class="sd">                means that all images are weighted equally.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Tensor: Combined loss.</span>
 
@@ -644,10 +727,13 @@
 <span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
 <span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
 <span class="sd">                encoding.</span>
+<span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dice_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dice_loss</span><span class="p">(</span>
+            <span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span>
+        <span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="CrossEntropyLoss"><a class="viewcode-back" href="../../functional.html#functional.losses.CrossEntropyLoss">[docs]</a><span class="k">class</span> <span class="nc">CrossEntropyLoss</span><span class="p">(</span><span class="n">SegmentationLoss</span><span class="p">):</span>
@@ -691,13 +777,20 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_entropy_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CrossEntropyLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.CrossEntropyLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="CrossEntropyLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.CrossEntropyLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</span>
 <span class="sd">            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</span>
 <span class="sd">            encoded.</span>
+<span class="sd">            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which</span>
+<span class="sd">                means that all images are weighted equally.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Tensor: Cross-entropy loss.</span>
 
@@ -707,6 +800,7 @@
 <span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
 <span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
 <span class="sd">                encoding.</span>
+<span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -737,7 +831,7 @@
             <span class="n">axis_to_reduce</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">loss</span><span class="o">.</span><span class="n">dim</span><span class="p">()))</span>
             <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">axis_to_reduce</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="FocalLoss"><a class="viewcode-back" href="../../functional.html#functional.losses.FocalLoss">[docs]</a><span class="k">class</span> <span class="nc">FocalLoss</span><span class="p">(</span><span class="n">CrossEntropyLoss</span><span class="p">):</span>
@@ -815,13 +909,20 @@
             <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="CrossEntropyDiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.CrossEntropyDiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="CrossEntropyDiceLoss.forward"><a class="viewcode-back" href="../../functional.html#functional.losses.CrossEntropyDiceLoss.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.</span>
 <span class="sd">            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot</span>
 <span class="sd">                encoded.</span>
+<span class="sd">            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which</span>
+<span class="sd">                means that all images are weighted equally.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Tensor: Combined loss.</span>
 
@@ -831,12 +932,13 @@
 <span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
 <span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
 <span class="sd">                encoding.</span>
+<span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_entropy_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dice_loss</span><span class="p">(</span>
-            <span class="n">prediction</span><span class="p">,</span> <span class="n">target</span>
-        <span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_entropy_loss</span><span class="p">(</span>
+            <span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span>
+        <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dice_loss</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span></div></div>
 </pre></div>
 
               </article>

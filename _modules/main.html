@@ -393,7 +393,13 @@
     <span class="p">)</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">create_model</span><span class="p">(</span>
-        <span class="n">data_module</span><span class="p">,</span> <span class="n">architecture</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">,</span> <span class="n">model_config</span>
+        <span class="n">data_module</span><span class="p">,</span>
+        <span class="n">architecture</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">,</span>
+        <span class="n">lr_scheduler</span><span class="p">,</span>
+        <span class="n">num_levels</span><span class="p">,</span>
+        <span class="n">model_config</span><span class="p">,</span>
+        <span class="n">loss_weight_scheduler_max_steps</span><span class="o">=</span><span class="n">active_learning_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;iterations&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">strategy</span> <span class="o">=</span> <span class="n">create_query_strategy</span><span class="p">(</span><span class="n">strategy_config</span><span class="o">=</span><span class="n">strategy_config</span><span class="p">)</span>
@@ -445,7 +451,13 @@
 
 
 <div class="viewcode-block" id="create_model"><a class="viewcode-back" href="../main.html#main.create_model">[docs]</a><span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span>
-    <span class="n">data_module</span><span class="p">,</span> <span class="n">architecture</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">,</span> <span class="n">model_config</span>
+    <span class="n">data_module</span><span class="p">,</span>
+    <span class="n">architecture</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="p">,</span>
+    <span class="n">lr_scheduler</span><span class="p">,</span>
+    <span class="n">num_levels</span><span class="p">,</span>
+    <span class="n">model_config</span><span class="p">,</span>
+    <span class="n">loss_weight_scheduler_max_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates the specified model.</span>
@@ -458,10 +470,19 @@
 <span class="sd">            E.g. &#39;reduceLROnPlateau&#39; or &#39;cosineAnnealingLR&#39;</span>
 <span class="sd">        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</span>
 <span class="sd">        model_config (Dict[str, Any], optional): Dictionary with model specific parameters.</span>
+<span class="sd">        loss_weight_scheduler_max_steps (int, optional): Number of steps for pseudo-label loss weight scheduler.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="s2">&quot;loss_config&quot;</span> <span class="ow">in</span> <span class="n">model_config</span>
+        <span class="ow">and</span> <span class="s2">&quot;weight_pseudo_labels_scheduler&quot;</span> <span class="ow">in</span> <span class="n">model_config</span><span class="p">[</span><span class="s2">&quot;loss_config&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">model_config</span><span class="p">[</span><span class="s2">&quot;loss_config&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;weight_pseudo_labels_decay_steps&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">loss_weight_scheduler_max_steps</span>
 
     <span class="k">if</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;fcn_resnet50&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>

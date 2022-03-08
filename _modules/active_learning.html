@@ -353,6 +353,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
                     <span class="n">ckpt_path</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">dataloaders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_module</span>
                 <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">step_loss_weight_pseudo_labels_scheduler</span><span class="p">()</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_trainer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="c1"># run regular fit run with all the data if no active learning mode</span>

@@ -225,7 +225,7 @@
 
 <div class="viewcode-block" id="PytorchFCNResnet50.training_step"><a class="viewcode-back" href="../../models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.training_step">[docs]</a>    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Execute one training step.&quot;&quot;&quot;</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">is_pseudo_label</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
 
         <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="s2">&quot;out&quot;</span><span class="p">]</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_module</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -233,7 +233,7 @@
 
 <div class="viewcode-block" id="PytorchFCNResnet50.validation_step"><a class="viewcode-back" href="../../models.html#models.pytorch_fcn_resnet50.PytorchFCNResnet50.validation_step">[docs]</a>    <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Execute one validation step.&quot;&quot;&quot;</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
 
         <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="s2">&quot;out&quot;</span><span class="p">]</span></div>
 
@@ -251,7 +251,7 @@
 <span class="sd">            dataloader_idx: Index of the dataloader.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">case_ids</span> <span class="o">=</span> <span class="n">batch</span>
 
         <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
