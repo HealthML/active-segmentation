@@ -109,6 +109,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
         expected_loss: Optional[torch.Tensor] = None,
         ignore_index: Optional[int] = None,
         reduction: Literal["mean", "sum", "none"] = "none",
+        weight: Optional[torch.Tensor] = None,
         epsilon: float = 0,
     ) -> None:
         """
@@ -122,6 +123,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
             expected_loss (Tensor, optional): Expected loss value.
             ignore_index (bool, optional): `ignore_index` parameter of the loss.
             reduction (string, optional): `reduction` parameter of the loss.
+            weight (Tensor, optional): `weight` parameter of the loss.
             epsilon (float, optional): `epsilon` parameter of the loss.
         """
 
@@ -157,6 +159,13 @@ class TestCrossEntropyLoss(unittest.TestCase):
 
             expected_loss = torch.from_numpy(expected_loss)
 
+            if weight is not None:
+                expanded_weight = weight
+                if expected_loss.ndim > 1:
+                    for _ in range(1, expected_loss.ndim):
+                        expanded_weight = expanded_weight.unsqueeze(axis=-1)
+                expected_loss = expected_loss * expanded_weight
+
             if ignore_index is not None:
                 expected_loss = expected_loss * (target != ignore_index)
             if reduction == "mean":
@@ -177,7 +186,7 @@ class TestCrossEntropyLoss(unittest.TestCase):
             epsilon=epsilon,
         )
 
-        cross_entropy_loss = loss_module(prediction, target)
+        cross_entropy_loss = loss_module(prediction, target, weight)
 
         self.assertTrue(
             cross_entropy_loss.shape == expected_loss.shape,
@@ -396,6 +405,93 @@ class TestCrossEntropyLoss(unittest.TestCase):
             test_slice,
             multi_label=multi_label,
             reduction=reduction,
+            expected_loss=expected_loss,
+            epsilon=epsilon,
+        )
+
+    # fmt: off
+    @parameterized.expand([
+        (test_data.standard_slice_single_label_1, False, "none", 0, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, False, "mean", 0, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, False, "sum", 0, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_single_label_1, False, "none", 0, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, False, "mean", 0, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, False, "sum", 0, torch.Tensor([1.0, 1.0])),
+
+        (test_data.standard_slice_single_label_1, False, "none", 1, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, False, "mean", 1, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_single_label_1, False, "sum", 1, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_single_label_1, False, "none", 1, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, False, "mean", 1, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_single_label_1, False, "sum", 1, torch.Tensor([1.0, 1.0])),
+
+        (test_data.standard_slice_multi_label_1, True, "none", 0, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, True, "mean", 0, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, True, "sum", 0, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_multi_label_1, True, "none", 0, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, True, "mean", 0, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, True, "sum", 0, torch.Tensor([1.0, 1.0])),
+
+        (test_data.standard_slice_multi_label_1, True, "none", 1, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, True, "mean", 1, torch.Tensor([1.0, 0.5])),
+        (test_data.standard_slice_multi_label_1, True, "sum", 1, torch.Tensor([1.0, 0.5])),
+
+        (test_data.standard_slice_multi_label_1, True, "none", 1, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, True, "mean", 1, torch.Tensor([1.0, 1.0])),
+        (test_data.standard_slice_multi_label_1, True, "sum", 1, torch.Tensor([1.0, 1.0])),
+    ])
+    # fmt: on
+    def test_weighted_loss(
+        self,
+        test_slice: torch.Tensor,
+        multi_label: bool,
+        reduction: str,
+        epsilon: float,
+        weight: torch.Tensor,
+    ):
+        """
+        Tests that the loss is computed correctly when the images of one batch are weighted differently.
+        """
+
+        (
+            prediction_slice,
+            target_slice,
+            _,
+            _,
+            _,
+        ) = test_slice(False)
+
+        prediction = torch.stack([prediction_slice, prediction_slice])
+        target = torch.stack([target_slice, target_slice])
+
+        if multi_label:
+            expected_loss = self._expected_binary_cross_entropy_loss(
+                prediction, target, epsilon
+            )
+        else:
+            expected_loss = self._expected_cross_entropy_loss(
+                prediction, target, epsilon
+            )
+
+        expected_loss = torch.from_numpy(expected_loss)
+
+        for idx, current_weight in enumerate(weight):
+            expected_loss[idx] = expected_loss[idx] * current_weight
+
+        if reduction == "mean":
+            expected_loss = expected_loss.mean()
+        elif reduction == "sum":
+            expected_loss = expected_loss.sum()
+
+        self._test_loss(
+            test_slice,
+            test_slice,
+            multi_label=multi_label,
+            reduction=reduction,
+            weight=weight,
             expected_loss=expected_loss,
             epsilon=epsilon,
         )

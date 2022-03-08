@@ -224,7 +224,7 @@ class BCSSDataset(IterableDataset):
         if self.is_unlabeled:
             return x, case_id
 
-        return x, y, case_id
+        return x, y, False, case_id
 
     def __len__(self) -> int:
         """Returns the length of the dataset."""

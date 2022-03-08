@@ -211,7 +211,13 @@ def run_active_learning_pipeline(
     )
 
     model = create_model(
-        data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+        data_module,
+        architecture,
+        learning_rate,
+        lr_scheduler,
+        num_levels,
+        model_config,
+        loss_weight_scheduler_max_steps=active_learning_config.get("iterations", None),
     )
 
     strategy = create_query_strategy(strategy_config=strategy_config)
@@ -263,7 +269,13 @@ def run_active_learning_pipeline(
 
 
 def create_model(
-    data_module, architecture, learning_rate, lr_scheduler, num_levels, model_config
+    data_module,
+    architecture,
+    learning_rate,
+    lr_scheduler,
+    num_levels,
+    model_config,
+    loss_weight_scheduler_max_steps: Optional[int] = None,
 ):
     """
     Creates the specified model.
@@ -276,10 +288,19 @@ def create_model(
             E.g. 'reduceLROnPlateau' or 'cosineAnnealingLR'
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         model_config (Dict[str, Any], optional): Dictionary with model specific parameters.
+        loss_weight_scheduler_max_steps (int, optional): Number of steps for pseudo-label loss weight scheduler.
 
     Returns:
         The model.
     """
+
+    if (
+        "loss_config" in model_config
+        and "weight_pseudo_labels_scheduler" in model_config["loss_config"]
+    ):
+        model_config["loss_config"][
+            "weight_pseudo_labels_decay_steps"
+        ] = loss_weight_scheduler_max_steps
 
     if architecture == "fcn_resnet50":
         if data_module.data_channels() != 1:
