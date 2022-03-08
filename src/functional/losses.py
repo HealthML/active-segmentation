@@ -50,6 +50,8 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
 
         Args:
             loss (Tensor): Loss to be aggregated.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
 
         Returns:
             Aggregated loss value.
@@ -57,6 +59,7 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         Shape:
             - Loss: :math:`(N, C)`, where `N = batch size`, and `C = number of classes`, or `(N)` for binary
                 segmentation tasks.
+            - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
