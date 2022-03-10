@@ -120,14 +120,14 @@ class PytorchUNet(PytorchModel):
 
         weight_pseudo_labels = self.loss_weight_pseudo_labels
 
-        weight = (
-            torch.as_tensor(is_pseudo_label, device=self.device) * weight_pseudo_labels
-            if weight_pseudo_labels is not None
-            else None
-        )
+        if weight_pseudo_labels is not None:
+            weight = torch.ones(len(is_pseudo_label), device=self.device)
+            weight[is_pseudo_label] = weight_pseudo_labels
+        else:
+            weight = None
 
         probabilities = self(x)
-        loss = self.loss_module(probabilities, y, weight)
+        loss = self.loss_module(probabilities, y, weight=weight)
 
         for train_metric in self.get_train_metrics():
             train_metric.update(probabilities, y, case_ids)
