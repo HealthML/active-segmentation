@@ -51,11 +51,17 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         Returns:
             Normalized image with background values normalized to -1
         """
-        tmp = img / np.max(img)
+
+        tmp = img
+
+        tmp /= np.max(tmp)
+
         # ignore zero values for mean calculation because background dominates
-        tmp = tmp - np.mean(tmp[tmp > 0])
-        # make normalize original zero values to -1
-        return tmp / (-np.min(tmp))
+        tmp -= np.mean(tmp[tmp > 0])
+
+        tmp /= -np.min(tmp)
+
+        return tmp
 
     @staticmethod
     def __read_image(filepath: str) -> Any:
@@ -219,8 +225,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     def __ensure_channel_dim(img: torch.Tensor, dim: int) -> torch.Tensor:
         return img if len(img.shape) == dim + 1 else torch.unsqueeze(img, 0)
 
-    @staticmethod
     def __arange_image_slice_indices(
+        self,
         filepaths: List[str],
         dim: int = 2,
         shuffle: bool = False,
@@ -271,11 +277,13 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         # Pair up the slices indices with their image index and concatenate for all images
         # (e.g. [5,1,9,0,...] for image index 3 becomes [(3,5),(3,1),(3,9),(3,0),...])
-        image_slice_indices = {
-            image_index: {slice_index: None for slice_index in slices}
-            for image_index, slices in enumerated_slice_indices
-            if len(slices) > 0
-        }
+        image_slice_indices = self.manager.dict()
+
+        for image_index, slices in enumerated_slice_indices:
+            if len(slices) > 0:
+                image_slice_indices[image_index] = self.manager.dict()
+                for slice_index in slices:
+                    image_slice_indices[image_index][slice_index] = None
 
         # Concatenate the [image_index, slice_index] pairs for all images
         return image_slice_indices
@@ -297,9 +305,10 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         case_id_prefix: str = "train",
         random_state: Optional[int] = None,
     ):
+        self.manager = Manager()
 
-        self.image_paths = image_paths
-        self.annotation_paths = annotation_paths
+        self.image_paths = self.manager.list(image_paths)
+        self.annotation_paths = self.manager.list(annotation_paths)
         self.combine_foreground_classes = combine_foreground_classes
         self.mask_filter_values = mask_filter_values
 
@@ -312,15 +321,13 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         self._currently_loaded_image_index = None
         self.cache_size = cache_size
 
-        manager = Manager()
-
         # since the PyTorch dataloader uses multiple processes for data loading (if num_workers > 0),
         # a shared dict is used to share the cache between all processes have to use
         # see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py and
         # https://discuss.pytorch.org/t/reuse-of-dataloader-worker-process-and-caching-in-dataloader/30620/14
         # for more information
-        self.image_cache = manager.dict()
-        self.mask_cache = manager.dict()
+        self.image_cache = self.manager.dict()
+        self.mask_cache = self.manager.dict()
 
         self.shuffle = shuffle
 
@@ -331,14 +338,12 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
 
         self.case_id_prefix = case_id_prefix
 
-        self.image_slice_indices = (
-            DoublyShuffledNIfTIDataset.__arange_image_slice_indices(
-                filepaths=self.image_paths,
-                dim=self.dim,
-                shuffle=self.shuffle,
-                random_state=random_state,
-                slice_indices=slice_indices,
-            )
+        self.image_slice_indices = self.__arange_image_slice_indices(
+            filepaths=self.image_paths,
+            dim=self.dim,
+            shuffle=self.shuffle,
+            random_state=random_state,
+            slice_indices=slice_indices,
         )
 
         self.num_workers = 1
@@ -507,7 +512,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             raise ValueError("Slice of image already belongs to this dataset.")
 
         if image_index not in self.image_slice_indices:
-            self.image_slice_indices[image_index] = {}
+            self.image_slice_indices[image_index] = self.manager.dict()
 
         if (
             slice_index not in self.image_slice_indices[image_index]
@@ -530,7 +535,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         ):
             del self.image_slice_indices[image_index][slice_index]
             if len(self.image_slice_indices[image_index]) == 0:
-                del self.image_slice_indices[image_index]
+                self.image_slice_indices.pop(image_index)
 
     def get_images_by_id(
         self,
