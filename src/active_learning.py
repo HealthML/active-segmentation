@@ -17,6 +17,7 @@ from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
 from models import PytorchModel
 from functional.interpretation import HeatMaps
+from src.datasets.doubly_shuffled_nifti_dataset import get_image_slice_ids
 
 
 class ActiveLearningPipeline:
@@ -140,6 +141,9 @@ class ActiveLearningPipeline:
                         # label batch
                         self.data_module.label_items(items_to_label, pseudo_labels)
 
+                    # Log selected items to wandb table
+                    self.__log_selected_items(items_to_label, pseudo_labels)
+
                     if self.heatmaps_per_iteration > 0:
                         # Get latest added items from dataset
                         items_to_inspect = (
@@ -259,6 +263,19 @@ class ActiveLearningPipeline:
             callbacks=callbacks,
             num_sanity_val_steps=num_sanity_val_steps,
         )
+
+    def __log_selected_items(self, selected_items, pseudo_labels):
+        items = self.data_module._training_set.get_items_for_logging(selected_items)
+        items = [(*i, False) for i in items]
+        table = wandb.Table(columns=["case_id", "image_path", "image_id", "slice_index", "pseudo_label"], data=[[]])
+
+        if pseudo_labels is not None:
+            items = self.data_module._training_set.get_items_for_logging(pseudo_labels)
+            items = [(*i, True) for i in items]
+            table.add(*items)
+
+        wandb.log("Selected Items", table)
+
 
     def __generate_and_log_heatmaps(
         self, items_to_inspect: List[Tuple[np.ndarray, str]], iteration: int
