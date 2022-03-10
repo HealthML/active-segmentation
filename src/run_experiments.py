@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 import stat
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, Literal
 
 import fire
 
@@ -15,7 +15,8 @@ def _expand_config(
     experiment_config: Dict[str, Any], config_to_add: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
-    Updates experiment tags and experiment name of a config using a specific subobject of the config, e.g. the loss config or the strategy config.
+    Updates experiment tags and experiment name of a config using a specific subobject of the config, e.g. the loss
+    config or the strategy config.
 
     Args:
         experiment_config (Dict[str, Any]): Full config object.
