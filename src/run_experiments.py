@@ -6,9 +6,55 @@ import os
 import shutil
 import subprocess
 import stat
-from typing import Literal
+from typing import Any, Dict, List, Literal
 
 import fire
+
+
+def _expand_config(
+    experiment_config: Dict[str, Any], config_to_add: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Updates experiment tags and experiment name of a config using a specific subobject of the config, e.g. the loss config or the strategy config.
+
+    Args:
+        experiment_config (Dict[str, Any]): Full config object.
+        config_to_add (Dict[str, Any]): Subconfig object, e.g. loss config.
+
+    Returns:
+        Dict[str, Any]: Updated config object.
+    """
+
+    experiment_config = copy.deepcopy(experiment_config)
+
+    name = (
+        config_to_add["description"]
+        if "description" in config_to_add
+        else config_to_add["type"]
+    )
+
+    if "experiment_name" in experiment_config:
+        experiment_config[
+            "experiment_name"
+        ] = f"{experiment_config['experiment_name']}-{name}"
+    else:
+        experiment_config["experiment_name"] = name
+
+    if "experiment_tags" in config_to_add:
+        if "experiment_tags" in experiment_config:
+            if isinstance(config_to_add["experiment_tags"], str):
+                experiment_config["experiment_tags"].append(
+                    config_to_add["experiment_tags"]
+                )
+            else:
+                experiment_config["experiment_tags"].extend(
+                    config_to_add["experiment_tags"]
+                )
+        else:
+            experiment_config["experiment_tags"] = config_to_add["experiment_tags"]
+        config_to_add.pop("experiment_tags", None)
+
+    return experiment_config
 
 
 def create_config_files(config_file_path: str, output_dir: str) -> None:
@@ -67,39 +113,31 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
                 config["strategy_config"], list
             ):
                 for strategy_config in config["strategy_config"]:
-                    current_config = copy.deepcopy(config)
-
-                    strategy_name = strategy_config["type"]
-                    if "description" in strategy_config:
-                        strategy_name = (
-                            f"{strategy_name}-{strategy_config['description']}"
-                        )
-
-                    if "experiment_tags" in strategy_config:
-                        if "experiment_tags" in current_config:
-                            current_config["experiment_tags"].extend(
-                                strategy_config["experiment_tags"]
-                            )
-                        else:
-                            current_config["experiment_tags"] = strategy_config[
-                                "experiment_tags"
-                            ]
-                        del strategy_config["experiment_tags"]
-
+                    current_config = _expand_config(config, strategy_config)
                     current_config["strategy_config"] = strategy_config
-                    if "experiment_name" in current_config:
-                        current_config[
-                            "experiment_name"
-                        ] = f"{current_config['experiment_name']}-{strategy_name}"
-                    else:
-                        current_config["experiment_name"] = strategy_name
                     strategy_configs.append(current_config)
             else:
+
                 strategy_configs.append(config)
+
+        loss_configs = []
+
+        for config in strategy_configs:
+            if (
+                "model_config" in config
+                and "loss_config" in config["model_config"]
+                and isinstance(config["model_config"]["loss_config"], list)
+            ):
+                for loss_config in config["model_config"]["loss_config"]:
+                    current_config = _expand_config(config, loss_config)
+                    current_config["model_config"]["loss_config"] = loss_config
+                    loss_configs.append(current_config)
+            else:
+                loss_configs.append(config)
 
         random_state_configs = []
 
-        for config in strategy_configs:
+        for config in loss_configs:
             if "random_state" in config and isinstance(config["random_state"], list):
                 for random_state in config["random_state"]:
                     current_config = copy.deepcopy(config)
@@ -108,6 +146,8 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
                         current_config["strategy_config"]["random_state"] = random_state
 
                     random_state_configs.append(current_config)
+            else:
+                random_state_configs.append(config)
 
         for config in random_state_configs:
             file_name = f"{config['experiment_name']}-{config['random_state']}.json"
