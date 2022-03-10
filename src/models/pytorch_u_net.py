@@ -130,11 +130,11 @@ class PytorchUNet(PytorchModel):
         loss = self.loss_module(probabilities, y, weight=weight)
 
         for train_metric in self.get_train_metrics():
-            train_metric.update(probabilities, y, case_ids)
+            train_metric.update(probabilities.detach(), y, case_ids)
 
         self.logger.log_metrics(
             {
-                "train/loss": loss,
+                "train/loss": loss.detach(),
                 "trainer/iteration": self.iteration,
                 "trainer/epoch": self.current_epoch,
             }
@@ -161,10 +161,16 @@ class PytorchUNet(PytorchModel):
 
         if self.stage == "fit":
             # log to trainer for model selection
-            self.log("val/loss", loss, logger=False, on_epoch=True, on_step=False)
+            self.log(
+                "val/loss",
+                loss.detach(),
+                logger=False,
+                on_epoch=True,
+                on_step=False,
+            )
 
         for val_metric in self.get_val_metrics():
-            val_metric.update(probabilities, y, case_ids)
+            val_metric.update(probabilities.detach(), y, case_ids)
 
         return loss
 
@@ -201,14 +207,14 @@ class PytorchUNet(PytorchModel):
         loss = self.loss_module(probabilities, y)
         self.logger.log_metrics(
             {
-                "test/loss": loss,
+                "test/loss": loss.detach(),
                 "trainer/iteration": self.iteration,
                 "trainer/epoch": self.current_epoch,
             }
         )
 
         for test_metric in self.get_test_metrics():
-            test_metric.update(probabilities, y, case_ids)
+            test_metric.update(probabilities.detach(), y, case_ids)
 
     def reset_parameters(self) -> None:
         """
