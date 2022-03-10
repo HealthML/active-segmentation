@@ -38,13 +38,17 @@ class LossWeightScheduler:
 
         if self.algorithm in ["linear", "cosine"] and end_weight is None:
             raise ValueError(
-                f"The parameter `end_weight` must be specified when `algorithm` is {self.algorithm}"
+                f"The parameter `end_weight` must be specified when `algorithm` is {self.algorithm}. Make sure that in "
+                f"the config file the `iterations` parameter is set to a fixed value or the "
+                f"`weight_pseudo_labels_decay_steps` option is specified in the loss config."
             )
         self.end_weight = end_weight
 
         if self.algorithm in ["linear", "cosine"] and end_step is None:
             raise ValueError(
-                f"The parameter `end_step` must be specified when `algorithm` is {self.algorithm}"
+                f"The parameter `end_step` must be specified when `algorithm` is {self.algorithm}. Make sure that in "
+                f"the config file the `iterations` parameter is set to a fixed value or the "
+                f"`weight_pseudo_labels_decay_steps` option is specified in the loss config."
             )
         self.end_step = end_step
 
