@@ -42,12 +42,16 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         self.reduction = reduction
         self.epsilon = epsilon
 
-    def _reduce_loss(self, loss: torch.Tensor) -> torch.Tensor:
+    def _reduce_loss(
+        self, loss: torch.Tensor, weight: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         r"""
         Aggregates the loss values of the different classes of an image as well as the different images of a batch.
 
         Args:
             loss (Tensor): Loss to be aggregated.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
 
         Returns:
             Aggregated loss value.
@@ -55,8 +59,16 @@ class SegmentationLoss(torch.nn.Module, abc.ABC):
         Shape:
             - Loss: :math:`(N, C)`, where `N = batch size`, and `C = number of classes`, or `(N)` for binary
                 segmentation tasks.
+            - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
+
+        if weight is not None:
+            if loss.ndim > 1:
+                for _ in range(1, loss.ndim):
+                    weight = weight.unsqueeze(axis=-1)
+
+            loss = weight * loss
 
         # aggregate loss values for all class channels and the entire batch
         if self.reduction == "mean":
@@ -243,7 +255,7 @@ class DiceLoss(AbstractDiceLoss):
         )
         self.dice_loss = MonaiDiceLoss(
             include_background=include_background,
-            reduction=reduction,
+            reduction="none",
             smooth_nr=epsilon,
             smooth_dr=epsilon,
         )
@@ -256,13 +268,41 @@ class DiceLoss(AbstractDiceLoss):
 
         return self.dice_loss
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    # pylint: disable=arguments-differ
+    def forward(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        weight: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        r"""
+
+        Args:
+            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
+            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+                encoded.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
+        Returns:
+            Tensor: Dice loss.
+
+        Shape:
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+                in :math:`[0, 1]`
+            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding.
+            - Weight: :math:`(N)` where `N = batch size`.
+            - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
+        """
+
         dice_loss = super().forward(prediction, target)
-        if self.reduction == "none":
-            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
-            # set to "none"
-            # since the spatial dimensions only contain a single element, they are squeezed here
-            dice_loss = dice_loss.reshape((dice_loss.shape[0], dice_loss.shape[1]))
+        # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
+        # set to "none"
+        # since the spatial dimensions only contain a single element, they are squeezed here
+        dice_loss = dice_loss.reshape((dice_loss.shape[0], dice_loss.shape[1]))
+
+        dice_loss = self._reduce_loss(dice_loss, weight=weight)
 
         return dice_loss
 
@@ -315,7 +355,7 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
         self.generalized_dice_loss = MonaiGeneralizedDiceLoss(
             include_background=include_background,
             w_type=weight_type,
-            reduction=reduction,
+            reduction="none",
             smooth_nr=epsilon,
             smooth_dr=epsilon,
         )
@@ -328,13 +368,41 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
 
         return self.generalized_dice_loss
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    # pylint: disable=arguments-differ
+    def forward(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        weight: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        r"""
+
+        Args:
+            prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
+            target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
+                encoded.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
+        Returns:
+            Tensor: Generalized dice loss.
+
+        Shape:
+            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+                in :math:`[0, 1]`
+            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
+                encoding.
+            - Weight: :math:`(N)` where `N = batch size`.
+            - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
+        """
+
         dice_loss = super().forward(prediction, target)
-        if self.reduction == "none":
-            # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
-            # set to "none"
-            # since the class dimension and the spatial dimensions only contain a single element, they are squeezed here
-            dice_loss = dice_loss.reshape(dice_loss.shape[0])
+        # the MONAI Dice loss implementation returns a loss tensor of shape `(N, C, X, Y, ...)` when reduction is
+        # set to "none"
+        # since the class dimension and the spatial dimensions only contain a single element, they are squeezed here
+        dice_loss = dice_loss.reshape(dice_loss.shape[0])
+
+        dice_loss = self._reduce_loss(dice_loss, weight=weight)
 
         return dice_loss
 
@@ -368,13 +436,20 @@ class FalsePositiveLoss(SegmentationLoss):
             epsilon=epsilon,
         )
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        weight: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         r"""
 
         Args:
             prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
             target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
             encoded.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
         Returns:
             Tensor: False positive loss.
 
@@ -384,6 +459,7 @@ class FalsePositiveLoss(SegmentationLoss):
             - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
                 and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
                 encoding.
+            - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
@@ -407,7 +483,7 @@ class FalsePositiveLoss(SegmentationLoss):
         # if there are no positives at all, this will yield an optimal loss value of zero
         fp_loss = false_positives / (self.epsilon + positives)
 
-        return self._reduce_loss(fp_loss)
+        return self._reduce_loss(fp_loss, weight=weight)
 
 
 class FalsePositiveDiceLoss(SegmentationLoss):
@@ -446,13 +522,20 @@ class FalsePositiveDiceLoss(SegmentationLoss):
             epsilon=epsilon,
         )
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        weight: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         r"""
 
         Args:
             prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
             target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
                 encoded.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
         Returns:
             Tensor: Combined loss.
 
@@ -462,10 +545,13 @@ class FalsePositiveDiceLoss(SegmentationLoss):
             - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
                 and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
                 encoding.
+            - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
-        return self.fp_loss(prediction, target) + self.dice_loss(prediction, target)
+        return self.fp_loss(prediction, target, weight=weight) + self.dice_loss(
+            prediction, target, weight=weight
+        )
 
 
 class CrossEntropyLoss(SegmentationLoss):
@@ -509,13 +595,20 @@ class CrossEntropyLoss(SegmentationLoss):
     ) -> torch.Tensor:
         return self.cross_entropy_loss(prediction, target)
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        weight: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         r"""
 
         Args:
             prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
             target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
             encoded.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
         Returns:
             Tensor: Cross-entropy loss.
 
@@ -525,6 +618,7 @@ class CrossEntropyLoss(SegmentationLoss):
             - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
                 and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
                 encoding.
+            - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
@@ -555,7 +649,7 @@ class CrossEntropyLoss(SegmentationLoss):
             axis_to_reduce = tuple(range(1, loss.dim()))
             loss = loss.mean(dim=axis_to_reduce)
 
-        return self._reduce_loss(loss)
+        return self._reduce_loss(loss, weight=weight)
 
 
 class FocalLoss(CrossEntropyLoss):
@@ -633,13 +727,20 @@ class CrossEntropyDiceLoss(SegmentationLoss):
             epsilon=epsilon,
         )
 
-    def forward(self, prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        prediction: torch.Tensor,
+        target: torch.Tensor,
+        weight: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         r"""
 
         Args:
             prediction (Tensor): Predicted segmentation mask which is either the output of a softmax or a sigmoid layer.
             target (Tensor): Target segmentation mask which is either label encoded, one-hot encoded or multi-hot
                 encoded.
+            weight (Tensor, optional): Manual weight given to the loss of each image / slice. Defaults to `None`, which
+                means that all images are weighted equally.
         Returns:
             Tensor: Combined loss.
 
@@ -649,9 +750,10 @@ class CrossEntropyDiceLoss(SegmentationLoss):
             - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
                 and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
                 encoding.
+            - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
-        return self.cross_entropy_loss(prediction, target) + self.dice_loss(
-            prediction, target
-        )
+        return self.cross_entropy_loss(
+            prediction, target, weight=weight
+        ) + self.dice_loss(prediction, target, weight=weight)
