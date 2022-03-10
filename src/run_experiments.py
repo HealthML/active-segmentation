@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import stat
+from typing import Literal
 
 import fire
 
@@ -121,7 +122,11 @@ def create_config_files(config_file_path: str, output_dir: str) -> None:
 
 
 def create_sbatch_jobs_from_config_files(
-    config_dir: str, sbatch_dir: str, run_scripts: bool = True
+    config_dir: str,
+    sbatch_dir: str,
+    run_scripts: bool = True,
+    partition: Literal["gpu", "gpupro", "gpua100"] = "gpu",
+    memory: int = 50,
 ) -> None:
     """
     This function takes folder containing multiple config files, creates an sbatch script for each config file and
@@ -132,6 +137,8 @@ def create_sbatch_jobs_from_config_files(
             started.
         sbatch_dir (string): Directory in which the sbatch scripts are to be saved.
         run_scripts (bool, optional): Whether the sbatch runs should be started by this function. Defaults to `True`.
+        partition (string, optional): Partition on which the slurm job is to be run. Defaults to `"gpu"`.
+        memory (int, optional): Memory to be requested for the slurm job in giga bytes. Defaults to 50.
     """
 
     os.makedirs(sbatch_dir, exist_ok=True)
@@ -141,8 +148,8 @@ def create_sbatch_jobs_from_config_files(
     for config_file in os.listdir(config_dir):
         sbatch_script = (
             "#!/bin/sh \n\n"
-            + "#SBATCH --mem=50gb"
-            + "\n#SBATCH --partition=gpu"
+            + f"#SBATCH --mem={memory}gb"
+            + f"\n#SBATCH --partition={partition}"
             + "\n#SBATCH --gpus=1 \n\n"
             + f"python3 src/main.py {config_dir}/{config_file}"
         )
