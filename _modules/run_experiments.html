@@ -188,8 +188,56 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">stat</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span> <span class="nn">fire</span>
+
+
+<span class="k">def</span> <span class="nf">_expand_config</span><span class="p">(</span>
+    <span class="n">experiment_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">config_to_add</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates experiment tags and experiment name of a config using a specific subobject of the config, e.g. the loss</span>
+<span class="sd">    config or the strategy config.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        experiment_config (Dict[str, Any]): Full config object.</span>
+<span class="sd">        config_to_add (Dict[str, Any]): Subconfig object, e.g. loss config.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Updated config object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">experiment_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">experiment_config</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">config_to_add</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">config_to_add</span>
+        <span class="k">else</span> <span class="n">config_to_add</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;experiment_name&quot;</span> <span class="ow">in</span> <span class="n">experiment_config</span><span class="p">:</span>
+        <span class="n">experiment_config</span><span class="p">[</span>
+            <span class="s2">&quot;experiment_name&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">experiment_config</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">experiment_config</span><span class="p">[</span><span class="s2">&quot;experiment_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">if</span> <span class="s2">&quot;experiment_tags&quot;</span> <span class="ow">in</span> <span class="n">config_to_add</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;experiment_tags&quot;</span> <span class="ow">in</span> <span class="n">experiment_config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_to_add</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">experiment_config</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">config_to_add</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">experiment_config</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">config_to_add</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">experiment_config</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_to_add</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span>
+        <span class="n">config_to_add</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">experiment_config</span>
 
 
 <div class="viewcode-block" id="create_config_files"><a class="viewcode-back" href="../run_experiments.html#run_experiments.create_config_files">[docs]</a><span class="k">def</span> <span class="nf">create_config_files</span><span class="p">(</span><span class="n">config_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -248,39 +296,31 @@
                 <span class="n">config</span><span class="p">[</span><span class="s2">&quot;strategy_config&quot;</span><span class="p">],</span> <span class="nb">list</span>
             <span class="p">):</span>
                 <span class="k">for</span> <span class="n">strategy_config</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;strategy_config&quot;</span><span class="p">]:</span>
-                    <span class="n">current_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-
-                    <span class="n">strategy_name</span> <span class="o">=</span> <span class="n">strategy_config</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">strategy_config</span><span class="p">:</span>
-                        <span class="n">strategy_name</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">strategy_name</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">strategy_config</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="p">)</span>
-
-                    <span class="k">if</span> <span class="s2">&quot;experiment_tags&quot;</span> <span class="ow">in</span> <span class="n">strategy_config</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="s2">&quot;experiment_tags&quot;</span> <span class="ow">in</span> <span class="n">current_config</span><span class="p">:</span>
-                            <span class="n">current_config</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                                <span class="n">strategy_config</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span>
-                            <span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">current_config</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strategy_config</span><span class="p">[</span>
-                                <span class="s2">&quot;experiment_tags&quot;</span>
-                            <span class="p">]</span>
-                        <span class="k">del</span> <span class="n">strategy_config</span><span class="p">[</span><span class="s2">&quot;experiment_tags&quot;</span><span class="p">]</span>
-
+                    <span class="n">current_config</span> <span class="o">=</span> <span class="n">_expand_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">strategy_config</span><span class="p">)</span>
                     <span class="n">current_config</span><span class="p">[</span><span class="s2">&quot;strategy_config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strategy_config</span>
-                    <span class="k">if</span> <span class="s2">&quot;experiment_name&quot;</span> <span class="ow">in</span> <span class="n">current_config</span><span class="p">:</span>
-                        <span class="n">current_config</span><span class="p">[</span>
-                            <span class="s2">&quot;experiment_name&quot;</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">current_config</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">strategy_name</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">current_config</span><span class="p">[</span><span class="s2">&quot;experiment_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strategy_name</span>
                     <span class="n">strategy_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_config</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
+
                 <span class="n">strategy_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="n">loss_configs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">strategy_configs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="s2">&quot;model_config&quot;</span> <span class="ow">in</span> <span class="n">config</span>
+                <span class="ow">and</span> <span class="s2">&quot;loss_config&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;loss_config&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">for</span> <span class="n">loss_config</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;loss_config&quot;</span><span class="p">]:</span>
+                    <span class="n">current_config</span> <span class="o">=</span> <span class="n">_expand_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">loss_config</span><span class="p">)</span>
+                    <span class="n">current_config</span><span class="p">[</span><span class="s2">&quot;model_config&quot;</span><span class="p">][</span><span class="s2">&quot;loss_config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_config</span>
+                    <span class="n">loss_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_config</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">loss_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
         <span class="n">random_state_configs</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">strategy_configs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">loss_configs</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;random_state&quot;</span> <span class="ow">in</span> <span class="n">config</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;random_state&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;random_state&quot;</span><span class="p">]:</span>
                     <span class="n">current_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
@@ -289,6 +329,8 @@
                         <span class="n">current_config</span><span class="p">[</span><span class="s2">&quot;strategy_config&quot;</span><span class="p">][</span><span class="s2">&quot;random_state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_state</span>
 
                     <span class="n">random_state_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_config</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">random_state_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">random_state_configs</span><span class="p">:</span>
             <span class="n">file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;random_state&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.json&quot;</span>
@@ -303,7 +345,11 @@
 
 
 <div class="viewcode-block" id="create_sbatch_jobs_from_config_files"><a class="viewcode-back" href="../run_experiments.html#run_experiments.create_sbatch_jobs_from_config_files">[docs]</a><span class="k">def</span> <span class="nf">create_sbatch_jobs_from_config_files</span><span class="p">(</span>
-    <span class="n">config_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sbatch_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">run_scripts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">config_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">sbatch_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">run_scripts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">partition</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;gpu&quot;</span><span class="p">,</span> <span class="s2">&quot;gpupro&quot;</span><span class="p">,</span> <span class="s2">&quot;gpua100&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gpu&quot;</span><span class="p">,</span>
+    <span class="n">memory</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function takes folder containing multiple config files, creates an sbatch script for each config file and</span>
@@ -314,6 +360,8 @@
 <span class="sd">            started.</span>
 <span class="sd">        sbatch_dir (string): Directory in which the sbatch scripts are to be saved.</span>
 <span class="sd">        run_scripts (bool, optional): Whether the sbatch runs should be started by this function. Defaults to `True`.</span>
+<span class="sd">        partition (string, optional): Partition on which the slurm job is to be run. Defaults to `&quot;gpu&quot;`.</span>
+<span class="sd">        memory (int, optional): Memory to be requested for the slurm job in giga bytes. Defaults to 50.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">sbatch_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -323,8 +371,8 @@
     <span class="k">for</span> <span class="n">config_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">config_dir</span><span class="p">):</span>
         <span class="n">sbatch_script</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;#!/bin/sh </span><span class="se">\n\n</span><span class="s2">&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;#SBATCH --mem=50gb&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">#SBATCH --partition=gpu&quot;</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;#SBATCH --mem=</span><span class="si">{</span><span class="n">memory</span><span class="si">}</span><span class="s2">gb&quot;</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">#SBATCH --partition=</span><span class="si">{</span><span class="n">partition</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">#SBATCH --gpus=1 </span><span class="se">\n\n</span><span class="s2">&quot;</span>
             <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;python3 src/main.py </span><span class="si">{</span><span class="n">config_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>

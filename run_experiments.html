@@ -203,7 +203,7 @@ datasets, strategies and random states, this function will create a separate con
 
 <dl class="py function">
 <dt class="sig sig-object py" id="run_experiments.create_sbatch_jobs_from_config_files">
-<span class="sig-prename descclassname"><span class="pre">run_experiments.</span></span><span class="sig-name descname"><span class="pre">create_sbatch_jobs_from_config_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sbatch_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_scripts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_experiments.html#create_sbatch_jobs_from_config_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_experiments.create_sbatch_jobs_from_config_files" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">run_experiments.</span></span><span class="sig-name descname"><span class="pre">create_sbatch_jobs_from_config_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sbatch_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_scripts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_experiments.html#create_sbatch_jobs_from_config_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_experiments.create_sbatch_jobs_from_config_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function takes folder containing multiple config files, creates an sbatch script for each config file and
 optionally starts the sbatch runs.</p>
 <dl class="field-list simple">
@@ -213,6 +213,8 @@ optionally starts the sbatch runs.</p>
 started.</p></li>
 <li><p><strong>sbatch_dir</strong> (<em>string</em>) – Directory in which the sbatch scripts are to be saved.</p></li>
 <li><p><strong>run_scripts</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the sbatch runs should be started by this function. Defaults to <cite>True</cite>.</p></li>
+<li><p><strong>partition</strong> (<em>string</em><em>, </em><em>optional</em>) – Partition on which the slurm job is to be run. Defaults to <cite>“gpu”</cite>.</p></li>
+<li><p><strong>memory</strong> (<em>int</em><em>, </em><em>optional</em>) – Memory to be requested for the slurm job in giga bytes. Defaults to 50.</p></li>
 </ul>
 </dd>
 </dl>
