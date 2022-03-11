@@ -17,7 +17,6 @@ from query_strategies import QueryStrategy
 from datasets import ActiveLearningDataModule
 from models import PytorchModel
 from functional.interpretation import HeatMaps
-from src.datasets.doubly_shuffled_nifti_dataset import get_image_slice_ids
 
 
 class ActiveLearningPipeline:
@@ -89,6 +88,17 @@ class ActiveLearningPipeline:
         # log gradients, parameter histogram and model topology
         logger.watch(self.model, log="all")
 
+        self.selected_items_table = wandb.Table(
+            columns=[
+                "iteration",
+                "case_id",
+                "image_path",
+                "image_id",
+                "slice_index",
+                "pseudo_label",
+            ]
+        )
+
         self.strategy = strategy
         self.epochs = epochs
         self.logger = logger
@@ -142,14 +152,12 @@ class ActiveLearningPipeline:
                         self.data_module.label_items(items_to_label, pseudo_labels)
 
                     # Log selected items to wandb table
-                    self.__log_selected_items(items_to_label, pseudo_labels)
+                    self.__log_selected_items(iteration, items_to_label, pseudo_labels)
 
                     if self.heatmaps_per_iteration > 0:
                         # Get latest added items from dataset
-                        items_to_inspect = (
-                            self.data_module._training_set.get_images_by_id(
-                                case_ids=items_to_label[: self.heatmaps_per_iteration],
-                            )
+                        items_to_inspect = self.data_module.training_set.get_images_by_id(
+                            case_ids=items_to_label[: self.heatmaps_per_iteration],
                         )
                         # Generate heatmaps using final predictions and heatmaps
                         if len(items_to_inspect) > 0:
@@ -264,18 +272,33 @@ class ActiveLearningPipeline:
             num_sanity_val_steps=num_sanity_val_steps,
         )
 
-    def __log_selected_items(self, selected_items, pseudo_labels):
-        items = self.data_module._training_set.get_items_for_logging(selected_items)
-        items = [(*i, False) for i in items]
-        table = wandb.Table(columns=["case_id", "image_path", "image_id", "slice_index", "pseudo_label"], data=[[]])
+    def __log_selected_items(
+        self, iteration: int,
+        selected_items: List[str],
+        pseudo_labels: List[str],
+    )-> None:
+        """
+        Log the iteration, case_id, image_path, image_id, slice_index and pseudo_label for all slices selected in an iteration.
+
+        Args:
+            iteration (int): The current active learning iteration.
+            selected_items (List[str]): A list of all case_ids selected by the strategy in this iteration.
+            pseudo_labels (List[str]): A list of all case_ids selected by the strategy as pseudo labels in this iteration.
+        """
+        items = self.data_module.training_set.get_items_for_logging(selected_items)
+        items = [[iteration, *i, False] for i in items]
 
         if pseudo_labels is not None:
-            items = self.data_module._training_set.get_items_for_logging(pseudo_labels)
-            items = [(*i, True) for i in items]
-            table.add(*items)
+            pseudo_items = self.data_module.training_set.get_items_for_logging(
+                pseudo_labels
+            )
+            pseudo_items = [[iteration, *i, True] for i in pseudo_items]
+            items.extend(pseudo_items)
 
-        wandb.log("Selected Items", table)
+        for row in items:
+            self.selected_items_table.add_data(*row)
 
+        wandb.log({"selected_items": self.selected_items_table})
 
     def __generate_and_log_heatmaps(
         self, items_to_inspect: List[Tuple[np.ndarray, str]], iteration: int
@@ -310,10 +333,7 @@ class ActiveLearningPipeline:
         wandb.log({"Logit heatmaps": logit_images})
 
     def __generate_heatmaps(
-        self,
-        img: np.ndarray,
-        case_id: str,
-        target_category: int = 1,
+        self, img: np.ndarray, case_id: str, target_category: int = 1,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Generates two heatmaps: One based on the GradCam method and one based on the predictions of the last layer.
