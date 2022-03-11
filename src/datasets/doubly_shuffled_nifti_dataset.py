@@ -567,7 +567,9 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             all_images.append((current_image[slice_index, :, :], case_id))
         return all_images
 
-    def get_items_for_logging(self, case_ids: List[str]) -> List[Tuple[str, str, Optional[int], str]]:
+    def get_items_for_logging(
+        self, case_ids: List[str]
+    ) -> List[Tuple[str, str, Optional[int], str]]:
         """
         Creates a list of files as tuple of image id and slice index
         Args:
