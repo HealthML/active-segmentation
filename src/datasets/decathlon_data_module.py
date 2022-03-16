@@ -14,6 +14,7 @@ from .doubly_shuffled_nifti_dataset import DoublyShuffledNIfTIDataset
 class DecathlonDataModule(ActiveLearningDataModule):
     """
     Initializes the Decathlon data module.
+
     Args:
         data_dir (string): Path of the directory that contains the data.
         batch_size (int): Batch size.
@@ -27,7 +28,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is
             activated.
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
-        shuffle (boolean): Flag if the data should be shuffled.
+        shuffle (bool, optional): Flag if the data should be shuffled.
         dim (int): 2 or 3 to define if the datsets should return 2d slices of whole 3d images.
         combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.
             (default = False)
@@ -41,13 +42,13 @@ class DecathlonDataModule(ActiveLearningDataModule):
     @staticmethod
     def __open_dataset_file(dir_path: str) -> TextIOWrapper:
         """
-        Open the dataset JSON file.
+        Open the dataset ``.json`` file.
 
         Args:
             dir_path (str): Directory the dataset is inside.
 
         Returns:
-            The openend file.
+            The opened file.
         """
         dataset_file_name = os.path.join(dir_path, "dataset.json")
 
@@ -60,7 +61,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
     @staticmethod
     def __read_data_channels(dir_path: str) -> int:
         """
-        Read the amount of data channels from the dataset JSON file.
+        Read the amount of data channels from the dataset ``.json`` file.
 
         Args:
             dir_path (str): Directory the dataset is inside.
@@ -80,7 +81,7 @@ class DecathlonDataModule(ActiveLearningDataModule):
         random_state: Optional[int] = None,
     ) -> Tuple[List[str], List[str]]:
         """
-        Discover the .nii file paths from the corresponding JSON file.
+        Discover the ``.nii.gz`` file paths from the corresponding JSON file.
 
         Args:
             dir_path (str): Directory the dataset is inside.

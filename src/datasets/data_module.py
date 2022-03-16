@@ -15,17 +15,18 @@ warnings.filterwarnings(
 class ActiveLearningDataModule(LightningDataModule, ABC):
     """
     Abstract base class to structure the dataset creation for active learning
+
     Args:
-        data_dir: Path of the directory that contains the data.
-        batch_size: Batch size.
-        num_workers: Number of workers for DataLoader.
+        data_dir (str): Path of the directory that contains the data.
+        batch_size (int): Batch size.
+        num_workers (int): Number of workers for DataLoader.
         batch_size_unlabeled_set (int, optional): Batch size for the unlabeled set. Defaults to `batch_size`.
         active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for
             conventional model training (default = False).
         initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is
             activated.
         pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.
-        shuffle: Flag if the data should be shuffled.
+        shuffle (bool, optional): Flag if the data should be shuffled.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -65,6 +66,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
     def setup(self, stage: Optional[str] = None) -> None:
         """
         Creates the datasets managed by this data module.
+
         Args:
             stage: Current training stage.
         """
@@ -144,6 +146,7 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
     ) -> None:
         """
         Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
+
         Args:
             ids (List[str]): IDs of the items to be labeled.
             pseudo_labels (Dict[str, Any], optional): Optional pseudo labels for (some of the) the selected data items.

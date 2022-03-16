@@ -42,9 +42,10 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     def normalize(img: np.ndarray) -> np.ndarray:
         """
         Normalizes an image by
-            1. Dividing by the maximum value
-            2. Subtracting the mean, zeros will be ignored while calculating the mean
-            3. Dividing by the negative minimum value
+            #. Dividing by the maximum value
+            #. Subtracting the mean, zeros will be ignored while calculating the mean
+            #. Dividing by the negative minimum value
+
         Args:
             img: The input image that should be normalized.
 
@@ -67,6 +68,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     def __read_image(filepath: str) -> Any:
         """
         Reads image or annotation.
+
         Args:
             filepath (str): Path of the image file.
 
@@ -79,6 +81,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     def __read_slice_count(filepath: str, dim: int = 2) -> int:
         """
         Reads image or annotation.
+
         Args:
             filepath (str): Path of the image file.
             dim (int, optional): The dimensionality of the dataset. Defaults to 2.
@@ -101,6 +104,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     ) -> Tuple[List[np.array]]:
         """
         Generates a split between initial training set and initially unlabeled set for active learning.
+
         Args:
             filepaths (List[str]): The file paths to the Nifti files.
             dim (int): The dimensionality of the dataset. (2 or 3.)
@@ -172,7 +176,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     @staticmethod
     def __align_axes(img: np.ndarray) -> np.ndarray:
         """
-        Aligns the axes to (slice, x, y) or (channel, slice, x, y), depending on if there is a channel dimension
+        Aligns the axes to (slice, x, y) or (channel, slice, x, y), depending on if there is a channel dimension.
+
         Args:
             img (np.ndarray): The image
 
@@ -195,6 +200,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     ) -> np.ndarray:
         """
         Reads image or annotation as numpy array.
+
         Args:
             filepath: Path of the image file.
             norm: Whether the image should be normalized.
@@ -493,6 +499,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     ) -> None:
         """
         Adds an image to this dataset.
+
         Args:
             image_id (str): The id of the image.
             slice_index (int): Index of the slice to be added.
@@ -524,6 +531,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     def remove_image(self, image_id: str, slice_index: int = 0) -> None:
         """
         Removes an image from this dataset.
+
         Args:
             image_id (str): The id of the image.
             slice_index (int): Index of the slice to be removed.
@@ -544,6 +552,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
     ) -> List[Tuple[np.ndarray, str]]:
         """
         Retrieves the last n images and corresponding case ids from the images that were last added to the dataset.
+
         Args:
             case_ids (List[str]): List with case_ids to get.
 
