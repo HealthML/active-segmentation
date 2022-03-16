@@ -37,14 +37,14 @@ class PytorchModel(LightningModule, ABC):
             ``"sensitivity"`` | ``"specificity"`` | ``"hausdorff95"``. Defaults to `["dice_score"]`.
         train_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
             specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`). This
-            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.
+            parameter is used only for multi-label classification tasks. Defaults to `[0.5]`.
         test_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged
             in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Available options:
             ``"dice_score"`` | ``"sensitivity"`` | ``"specificity"`` | ``"hausdorff95"`` Defaults to
             `["dice_score", "sensitivity", "specificity", "hausdorff95"]`.
         test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
             specified in the `test_metrics` parameter should be computed in the validation or testing loop. This
-            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.
+            parameter is used only for multi-label classification tasks. Defaults to `[0.5]`.
         **kwargs: Further, dataset specific parameters.
     """
 

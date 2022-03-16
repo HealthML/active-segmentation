@@ -1,4 +1,4 @@
-active_learning_framework
+Active Learning Framework
 =================================
 
 Subpackages
@@ -7,6 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   run_experiments
+   main
    active_learning
    inferencing
 
