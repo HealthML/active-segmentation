@@ -95,7 +95,7 @@ General
 .. _model_config-label:
 
 [model_config] section
---------------
+-------------------------
 
 The ``model_config`` section specifies parameters to setup the segmentation model architecture and losses.
 
@@ -108,7 +108,7 @@ The ``model_config`` section specifies parameters to setup the segmentation mode
 
 .. note::
     If the model architecture of your choice is not yet included in the framework,
-    you can add it by subclassing :py:meth:`models.pytorch_model.PytorchModel`.
+    it can be added by subclassing :py:meth:`models.pytorch_model.PytorchModel`.
 
 .. _optimizer-label:
 
@@ -122,7 +122,11 @@ The ``model_config`` section specifies parameters to setup the segmentation mode
 .. index:: ! loss_config
 
 * *loss_config*
-    TBD
+    Dictionary with loss parameters. Mandatory is the key ``"type"`` with one of the allowable values:
+    ``"cross_entropy"``, ``"dice"``, ``"cross_entropy_dice"``, ``"general_dice"``, ``"fp"``, ``"fp_dice"``,
+    ``"focal"``.
+    More detailed documentation and configuration options of the losses can be looked up in
+    :py:mod:`functional.losses<functional.losses>`.
 
 .. _learning_rate-label:
 
@@ -192,7 +196,7 @@ The ``model_config`` section specifies parameters to setup the segmentation mode
 .. _dataset_config-label:
 
 [dataset_config] section
---------------
+-------------------------
 
 The ``dataset_config`` section specifies parameters to setup the dataset and data loading.
 
@@ -226,7 +230,7 @@ The ``dataset_config`` section specifies parameters to setup the dataset and dat
 .. _active_learning_config-label:
 
 [active_learning_config] section
---------------
+---------------------------------
 
 The ``active_learning_config`` section specifies parameters to run the active learning loop.
 
@@ -281,10 +285,10 @@ The ``active_learning_config`` section specifies parameters to run the active le
     Number of heatmaps that should be generated per iteration. Defaults to ``0``.
 
 
-.. _active_learning_config-label:
+.. _strategy_config-label:
 
 [strategy_config] section
---------------
+--------------------------
 
 The ``strategy_config`` section specifies parameters to setup the strategy to query for new examples.
 
