@@ -12,7 +12,7 @@ import wandb
 
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
-from models import PytorchFCNResnet50, PytorchUNet
+from models import PytorchUNet
 from datasets import (
     BraTSDataModule,
     DecathlonDataModule,
@@ -302,16 +302,7 @@ def create_model(
             "weight_pseudo_labels_decay_steps"
         ] = loss_weight_scheduler_max_steps
 
-    if architecture == "fcn_resnet50":
-        if data_module.data_channels() != 1:
-            raise ValueError(
-                f"{architecture} does not support multiple input channels."
-            )
-
-        model = PytorchFCNResnet50(
-            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
-        )
-    elif architecture == "u_net":
+    if architecture == "u_net":
         model = PytorchUNet(
             learning_rate=learning_rate,
             lr_scheduler=lr_scheduler,

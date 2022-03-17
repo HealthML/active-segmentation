@@ -104,7 +104,7 @@ The ``model_config`` section specifies parameters to setup the segmentation mode
 .. index:: ! architecture
 
 * *architecture*
-    The name of the architecture to use.  Allowable values are: ``"u_net"`` and ``"fcn_resnet50"``.
+    The name of the architecture to use.  Allowable values are: ``"u_net"``.
 
 .. note::
     If the model architecture of your choice is not yet included in the framework,
