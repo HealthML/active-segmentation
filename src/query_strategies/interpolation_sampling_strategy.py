@@ -434,7 +434,7 @@ def morphological_contour_interpolation(
 ) -> np.array:
     """
     Interpolates between top and bottom slices using the `morphological_contour_interpolator
-    <https://www.researchgate.net/publication/307942551_ND_morphological_contour_interpolation>`_ from itk.
+    <https://www.researchgate.net/publication/307942551_ND_morphological_contour_interpolation>`_ from ITK.
 
     Args:
         top (np.array): The top slice of the block.

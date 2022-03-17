@@ -1,4 +1,4 @@
-""" Module to load and batch the bcss dataset """
+""" Module to load and batch the BCSS dataset """
 from typing import List, Optional, Tuple, Union
 from pathlib import Path
 import math

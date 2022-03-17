@@ -27,7 +27,7 @@ General
 .. index:: ! experiment_name
 
 * *experiment_name*
-    The name of the `weights and biases <https://wandb.ai/>`_ project.
+    The name of the `weights and biases <https://wandb.ai/>`_ experiment.
 
 .. _experiment_tags-label:
 
@@ -48,7 +48,7 @@ General
 .. index:: ! batch_size
 
 * *batch_size*
-    Size of training examples passed in one training step.
+    Number of training examples passed in one training step.
 
 .. _epochs-label:
 
@@ -62,28 +62,28 @@ General
 .. index:: ! num_workers
 
 * *num_workers*
-    Number of workers for the data loading.
+    Number of workers processes for the data loading. If ``0``, multi-process data loading is disabled.
 
 .. _gpus-label:
 
 .. index:: ! gpus
 
 * *gpus*
-    The number of gpus to be used. If ``0`` the training runs on CPU.
+    The number of gpus to be used. If ``0``, the training runs on CPU.
 
 .. _prediction_count-label:
 
 .. index:: ! prediction_count
 
 * *prediction_count*
-    The amount of predictions to be generated.
+    The number of sample predictions to be generated for the validation set. This option is intended for use cases where you want to assess a model's quality using sample predictions. 
 
 .. _prediction_dir-label:
 
 .. index:: ! prediction_dir
 
 * *prediction_dir*
-    The local directory to store the predictions.
+    The local directory to store the sample predictions.
 
 .. _random_state-label:
 
@@ -115,7 +115,7 @@ The ``model_config`` section specifies parameters to setup the segmentation mode
 .. index:: ! optimizer
 
 * *optimizer*
-    The name of the algorithm used to calculate the loss and update the weights. Allowable values are: ``"adam"`` and ``"sgd"``.
+    The name of the algorithm used to calculate the loss and update the weights. Allowable values are: ``"adam"`` and ``"sgd"`` (gradient descent).
 
 .. _loss_config-label:
 
@@ -147,14 +147,14 @@ The ``model_config`` section specifies parameters to setup the segmentation mode
 .. index:: ! dim
 
 * *dim*
-    The dimensionality of the U-Net. Defaults to ``2``.
+    The dimensionality of the U-Net. Allowable values are: ``2`` and ``3``. Defaults to ``2``.
 
 .. _model_selection_criterion-label:
 
 .. index:: ! model_selection_criterion
 
 * *model_selection_criterion*
-    The criterion for saving the best model checkpoint. Defaults to ``"loss"``.
+    The criterion for selecting the best model for checkpointing. Defaults to ``"loss"``.
 
 .. _train_metrics-label:
 
@@ -239,21 +239,21 @@ The ``active_learning_config`` section specifies parameters to run the active le
 .. index:: ! active_learning_mode
 
 * *active_learning_mode*
-    Enable/Disabled Active Learning Pipeline. Defaults to ``False``.
+    Enable/Disabled Active Learning Pipeline. Defaults to ``False``. If ``False``, the model is trained on the full training dataset.
 
 .. _reset_weights-label:
 
 .. index:: ! reset_weights
 
 * *reset_weights*
-    Enable/Disable resetting of weights after every active learning run. Defaults to ``False``.
+    Enable/Disable resetting of weights after every active learning iteration. Defaults to ``False``.
 
 .. _initial_training_set_size-label:
 
 .. index:: ! initial_training_set_size
 
 * *initial_training_set_size*
-    Initial size of the training set if the active learning mode is activated.. Defaults to ``1``.
+    Initial size of the training set if the active learning mode is activated. Defaults to ``1``.
 
 .. _iterations-label:
 
@@ -268,7 +268,7 @@ The ``active_learning_config`` section specifies parameters to run the active le
 .. index:: ! items_to_label
 
 * *items_to_label*
-    Number of items that should be selected for labeling in the active learning run. Defaults to ``1``.
+    Number of items that should be selected for labeling in each active learning iteration. Defaults to ``1``.
 
 .. _batch_size_unlabeled_set-label:
 
@@ -282,7 +282,7 @@ The ``active_learning_config`` section specifies parameters to run the active le
 .. index:: ! heatmaps_per_iteration
 
 * *heatmaps_per_iteration*
-    Number of heatmaps that should be generated per iteration. Defaults to ``0``.
+    Number of heatmaps to be generated per active learning iteration. This option is intended for uses cases where you want to assess the quality of a sampling strategy using heatmaps of the model's predictions. Defaults to ``0``.
 
 
 .. _strategy_config-label:
@@ -290,7 +290,7 @@ The ``active_learning_config`` section specifies parameters to run the active le
 [strategy_config] section
 --------------------------
 
-The ``strategy_config`` section specifies parameters to setup the strategy to query for new examples.
+The ``strategy_config`` section specifies parameters to setup the strategy to query for new examples to be labeled.
 
 .. _type-label:
 
