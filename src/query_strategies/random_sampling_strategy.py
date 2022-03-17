@@ -32,6 +32,7 @@ class RandomSamplingStrategy(QueryStrategy):
         """
         Selects random subset of the unlabeled data that should be labeled next. We are using
         the shuffling of the dataset for randomisation.
+
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
@@ -40,7 +41,7 @@ class RandomSamplingStrategy(QueryStrategy):
 
         Returns:
             Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
-                generated.
+            generated.
         """
         # randomly select ids to query
 

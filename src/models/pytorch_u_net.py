@@ -12,7 +12,8 @@ from .u_net import UNet
 class PytorchUNet(PytorchModel):
     """
     U-Net architecture wrapped as PytorchModel.
-    Details about the architecture: https://arxiv.org/pdf/1505.04597.pdf
+    Details about the architecture can be found in `this paper <https://arxiv.org/pdf/1505.04597.pdf>`_.
+
     Args:
         num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
         dim (int, optional): The dimensionality of the U-Net. Defaults to 2.

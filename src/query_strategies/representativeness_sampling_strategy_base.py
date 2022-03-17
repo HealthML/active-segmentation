@@ -20,10 +20,11 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
     Args:
         feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
             Defaults to 10.
-        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` | `"image_features"`:
-            - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
-            - `"image_features"`: The input images are used as feature vectors.
-            Defaults to `model_features`.
+        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` |
+            `"image_features"`:
+                - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
+                - `"image_features"`: The input images are used as feature vectors.
+            Defaults to `"model_features"`.
         feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
             Defaults to 10.
     """
@@ -185,7 +186,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
 
         Returns:
             Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
-                generated.
+            generated.
         """
 
         if isinstance(models, List):
@@ -332,7 +333,6 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
         Can be overridden in subclasses to perform global computations on all feature vectors before item selection
         starts.
 
-
         Args:
             feature_vectors_training_set (numpy.ndarray): Feature vectors of the items in the training set.
             case_ids_training_set (List[str]): Case IDs of the items in the training set.
@@ -361,5 +361,5 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in
-                the training set should receive higher scores.
+            the training set should receive higher scores.
         """

@@ -20,6 +20,7 @@ class QueryStrategy(ABC):
     ) -> Tuple[List[str], Optional[Dict[str, Any]]]:
         """
         Selects subset of the unlabeled data that should be labeled next.
+
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             dataloader: Pytorch dataloader representing the unlabeled dataset.

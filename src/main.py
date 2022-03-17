@@ -140,8 +140,8 @@ def run_active_learning_pipeline(
     clear_wandb_cache: bool = False,
 ) -> None:
     """
-    Main function to execute an active learning pipeline run, or start an active learning
-        simulation.
+    Main function to execute an active learning pipeline run, or start an active learning simulation.
+
     Args:
         architecture (string): Name of the desired model architecture. E.g. 'u_net'.
         dataset (string): Name of the dataset. E.g. 'brats'
@@ -328,7 +328,8 @@ def create_model(
 
 def create_query_strategy(strategy_config: dict):
     """
-    Initialises the chosen query strategy
+    Initialises the chosen query strategy.
+
     Args:
         strategy_config (dict): Configuration of the query strategy
     """
@@ -354,6 +355,7 @@ def run_active_learning_pipeline_from_config(
 ) -> None:
     """
     Runs the active learning pipeline based on a config file.
+
     Args:
         config_file_name: Name of or path to the config file.
         hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based

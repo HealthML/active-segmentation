@@ -10,9 +10,9 @@ import torch.nn.functional as F
 
 class UNet(nn.Module):
     """
-    This U-Net implementation was originally taken from
-    https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py
-    and adapted to a flexible number of levels and for optinal 3d mode.
+    This U-Net implementation was originally taken from `this implementation
+    <https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py>`_
+    and adapted to a flexible number of levels and for optional 3d mode.
 
     Args:
         in_channels (int): Number of input channels.
@@ -56,7 +56,7 @@ class UNet(nn.Module):
             [
                 UNet._block(
                     in_channels if level == 0 else features * (2 ** (level - 1)),
-                    features * (2 ** level),
+                    features * (2**level),
                     name=f"enc{level + 1}",
                     dim=dim,
                     p_dropout=p_dropout,
@@ -70,7 +70,7 @@ class UNet(nn.Module):
 
         self.bottleneck = UNet._block(
             features * (2 ** (num_levels - 1)),
-            features * (2 ** num_levels),
+            features * (2**num_levels),
             name="bottleneck",
             dim=dim,
         )
@@ -79,7 +79,7 @@ class UNet(nn.Module):
             [
                 ConvTranspose(
                     features * (2 ** (level + 1)),
-                    features * (2 ** level),
+                    features * (2**level),
                     kernel_size=2,
                     stride=2,
                 )
@@ -90,7 +90,7 @@ class UNet(nn.Module):
             [
                 UNet._block(
                     features * (2 ** (level + 1)),
-                    features * (2 ** level),
+                    features * (2**level),
                     name=f"dec{level + 1}",
                     dim=dim,
                 )

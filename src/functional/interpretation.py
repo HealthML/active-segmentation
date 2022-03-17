@@ -12,7 +12,8 @@ class SemanticSegmentationTarget:
     """
     Wraps the target for generating heat maps.
     All pixels belonging to the given prediction of the category will be summed up.
-    More details can be found here: https://arxiv.org/abs/2002.11434
+    More details can be found `here <https://arxiv.org/abs/2002.11434>`_ .
+
     Args:
         category (int): The category or class of the predicted mask.
         mask (np.ndarray): The predicted mask as numpy array.
@@ -35,7 +36,8 @@ class HeatMaps:
     """
     Generates heat maps for a trained model with respect to given layers.
     SegGradCam (Gradient Based Activation Methods) are used to calculate relevance values of individual pixels.
-    Details can be found here: https://arxiv.org/abs/2002.11434
+    Details can be found `here <https://arxiv.org/abs/2002.11434>`_ .
+
     Args:
         model (PytorchModel): A trained segmentation model.
     """
@@ -46,6 +48,7 @@ class HeatMaps:
     ):
         """
         Maps the calculated grayscale relevance values to a given image.
+
         Args:
             image (np.ndarray): The image to map the pixel relevance values against.
             grayscale_heatmap (np.ndarray): The calculated relevance values in grayscale format.
@@ -79,6 +82,7 @@ class HeatMaps:
     ) -> np.ndarray:
         """
         Calculates the grayscale representation of the relevance of individual pixel values using GradCam.
+
         Args:
             input_tensor (torch.Tensor): The tensor to calculate the desired values for.
             target_category (int): The category or class of the predicted mask.
@@ -105,6 +109,7 @@ class HeatMaps:
     ) -> np.ndarray:
         """
         Calculates the grayscale representation of the relevance of individual pixel values using the model prediction.
+
         Args:
             input_tensor (torch.Tensor): The tensor to calculate the desired values for.
             target_category (int): The category or class of the predicted mask.
@@ -126,6 +131,7 @@ class HeatMaps:
     ) -> List[SemanticSegmentationTarget]:
         """
         Builds a list of targets wrapped up to be used when calculating pixel relevance values.
+
         Args:
             input_tensor (torch.Tensor): The tensor to calculate the desired values for.
             category (int): The category or class of the predicted mask.
@@ -144,7 +150,8 @@ class HeatMaps:
 
     def __prepare_tensor_for_model(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """
-        Brings the tensor in correct shape to be used by the model
+        Brings the tensor in correct shape to be used by the model.
+
         Args:
             input_tensor (torch.Tensor): The tensor to use for the model later on.
 

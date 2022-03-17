@@ -55,8 +55,8 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         predictions and to have the shape :math:`(N, C, X, Y)` or :math:`(N, C, X, Y, Z)`.
 
     Shape:
-        - Prediction: :math:`(N, C, X, Y, ...)` or :math:`(N, X, Y, ...)`, where `N = batch size` and `C = number of
-             classes` (see Notes above).
+        - | Prediction: :math:`(N, C, X, Y, ...)` or :math:`(N, X, Y, ...)`, where `N = batch size` and `C = number of
+          | classes` (see Notes above).
         - Target: :math:`(N, C, X, Y, ...)`, or :math:`(N, X, Y, ...)` (see Notes above).
         - Image_ids: :math:`(N)`, where `N = batch size`.
     """
@@ -105,16 +105,12 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         )
         self.metrics_to_compute = set()
 
-        if (
-            reduction_across_classes
-            not in [
-                "mean",
-                "max",
-                "min",
-                "none",
-            ]
-            or reduction_across_images not in ["mean", "max", "min", "none"]
-        ):
+        if reduction_across_classes not in [
+            "mean",
+            "max",
+            "min",
+            "none",
+        ] or reduction_across_images not in ["mean", "max", "min", "none"]:
             raise ValueError("Invalid reduction method.")
 
         self.reduction_across_classes = reduction_across_classes
@@ -205,11 +201,11 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
 
         Returns:
             Dict[string, Tensor]: Mapping of metric names to metric values.
-                If `reduction` is `"none"`, the keys have the form
-                `<metric name>_<confidence_level>_<image ID>`.
-                Otherwise the keys have the form `<reduction>_<metric name>_<confidence_level>`
-                If `"metrics_to_aggregate"` is provided and `reduction` is not `"none"`, the dictionary additionally
-                contains the keys `<reduction>_aggregated_<confidence_level>`.
+            If `reduction` is `"none"`, the keys have the form
+            `<metric name>_<confidence_level>_<image ID>`.
+            Otherwise the keys have the form `<reduction>_<metric name>_<confidence_level>`
+            If `"metrics_to_aggregate"` is provided and `reduction` is not `"none"`, the dictionary additionally
+            contains the keys `<reduction>_aggregated_<confidence_level>`.
         """
 
         per_image_metrics = {}
@@ -288,7 +284,7 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         """
         Returns:
             List[string]: A list containing the keys of the dictionary returned by the `compute()` method of this
-                    module.
+            module.
         """
 
         metric_names = []

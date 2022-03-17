@@ -25,8 +25,8 @@ def flatten_tensors(
     Shape:
         - Prediction: :math:`(C, X, Y, ...)`, where `C = number of classes` and each value is in :math:`\{0, 1\}`.
         - Target: Must have same shape and type as prediction.
-        - Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /
-            presence of the respective class (one-hot or multi-hot encoding).
+        - | Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /
+          | presence of the respective class (one-hot or multi-hot encoding).
     """
 
     if not include_background:
@@ -75,9 +75,10 @@ def mask_tensor(
         Tensor: Masked tensor.
 
     Shape:
-        Tensor: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)`.
-        Mask: :math:`(N, 1, X, Y, ...)` / :math:`(N, C, X, Y, ...)` or :math:`(1, X, Y, ...)` / :math:`(C, X, Y, ...)`.
-        Output: Same shape as input.
+        - Tensor: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)`.
+        - | Mask: :math:`(N, 1, X, Y, ...)` / :math:`(N, C, X, Y, ...)` or :math:`(1, X, Y, ...)` /
+          | :math:`(C, X, Y, ...)`.
+        - Output: Same shape as input.
     """
 
     if ignore_index is not None:
@@ -104,10 +105,11 @@ def one_hot_encode(
         Tensor: One-hot encoded tensor.
 
     Shape:
-        - Tensor: :math:`(N, X, Y, ...)` or :math:`(X, Y, ...)` where each element represents a class index of integer
-            type and `N = batch size`.
-        - Output: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element represent a binary class label
-            and :math:`C` is the number of classes (excluding the ignored class labeled with :attr:`ignore_label`).
+        - | Tensor: :math:`(N, X, Y, ...)` or :math:`(X, Y, ...)` where each element represents a class index of integer
+          | type and `N = batch size`.
+        - | Output: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element represent a binary class
+          | label and :math:`C` is the number of classes (excluding the ignored class labeled with
+          | :attr:`ignore_label`).
     """
 
     tensor = tensor.clone()
@@ -155,11 +157,11 @@ def remove_padding(
         Tuple[Tensor, Tensor]: Prediction and target tensors without padding areas.
 
     Shape:
-        - Prediction: :math:`(X, Y, ...)` in case of label encoding and :math:`(C, X, Y, ...)`, in case of one-hot
-            or multi-hot encoding (`C = number of classes`).
+        - | Prediction: :math:`(X, Y, ...)` in case of label encoding and :math:`(C, X, Y, ...)`, in case of one-hot
+          | or multi-hot encoding (`C = number of classes`).
         - Target: Same shape as prediction.
-        - Output: :math:`(X - P_x, Y - P_y, ...)` in case of label encoding and :math:`(C, X - P_x, Y - P_y, ...)`,
-            in case of one-hot or multi-hot encoding (`C = number of classes`, `P_x = padding width on x-axis`).
+        - | Output: :math:`(X - P_x, Y - P_y, ...)` in case of label encoding and :math:`(C, X - P_x, Y - P_y, ...)`,
+          | in case of one-hot or multi-hot encoding (`C = number of classes`, `P_x = padding width on x-axis`).
     """
 
     if ignore_index is None:

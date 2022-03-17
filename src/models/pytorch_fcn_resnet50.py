@@ -8,8 +8,10 @@ from .pytorch_model import PytorchModel
 class PytorchFCNResnet50(PytorchModel):
     """
     Resnet50 model class for segmentation tasks.
-    Documentation: http://pytorch.org/vision/master/generated/torchvision.models.segmentation.fcn_resnet50.html
-    Details about the Resnet50 architecture: https://arxiv.org/pdf/1512.03385.pdf
+    For detailed information, see the
+    `documentation <http://pytorch.org/vision/master/generated/torchvision.models.segmentation.fcn_resnet50.html>`_.
+    Details about the Resnet50 architecture can be found in `this paper <https://arxiv.org/pdf/1512.03385.pdf>`_.
+
     Args:
         **kwargs: Further, model specific parameters.
     """

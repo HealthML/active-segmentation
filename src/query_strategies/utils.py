@@ -11,9 +11,9 @@ def select_uncertainty_calculation(
 ) -> Callable:
     """
     Selects the calculation function based on the provided name.
+
     Args:
-        calculation_method (str): Name of the calculation method.
-            values: `"distance"` |  `"entropy"`.
+        calculation_method (str): Name of the calculation method. Allowable values: `"distance"` |  `"entropy"`.
 
     Returns:
         A callable function to calculate uncertainty based on predictions.
@@ -33,8 +33,10 @@ def distance_to_max_uncertainty(
 ) -> np.ndarray:
     r"""
     Calculates the uncertainties based on the distance to a maximum uncertainty value:
-        .. math::
-            \sum | max\_uncertainty\_value - predictions |
+
+    .. math::
+        \sum | max\_uncertainty\_value - predictions |
+
     Args:
         predictions (torch.Tensor): The predictions of the model.
         max_uncertainty_value (float, optional): The maximum value of uncertainty in the predictions.
@@ -59,15 +61,17 @@ def entropy(
 ) -> np.ndarray:
     r"""
     Calculates the uncertainties based on the entropy of the distance to a maximum uncertainty value:
-        .. math::
-            - \sum | max\_uncertainty\_value - predictions | \cdot | \log({max\_uncertainty\_value - predictions}) |
+
+    .. math::
+        - \sum | max\_uncertainty\_value - predictions | \cdot | \log({max\_uncertainty\_value - predictions}) |
+
     Args:
         predictions (torch.Tensor): The predictions of the model.
         max_uncertainty_value (float, optional): The maximum value of uncertainty in the predictions.
           (default = 0.5)
-        **kwargs: Keyword arguments specific for this calculation.
-            epsilon (float): The smoothing value to avoid the magic number.
-                (default = 1e-10)
+        **kwargs: Keyword arguments specific for this calculation:
+
+            - epsilon (float): The smoothing value to avoid the magic number. (default = 1e-10)
 
     Returns:
         Uncertainty value for each image in the batch of predictions.
@@ -96,6 +100,7 @@ def clean_duplicate_scans(
     """
     Cleans the list from duplicate scans if possible. If minimum number of samples can't be reached without
     duplicates, duplicates are kept.
+
     Args:
         uncertainties (List[Tuple[float, str]]): List with tuples of uncertainty value and case id.
         items_to_label (int): Number of items that should be selected for labeling.
