@@ -1,4 +1,4 @@
-inferencing
+inferencing module
 ==================
 
 .. automodule:: inferencing

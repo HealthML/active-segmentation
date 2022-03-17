@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -246,9 +249,9 @@
 <span class="sd">        Tensor: Dice similarity coefficient.</span>
 
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and</span>
-<span class="sd">            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
-<span class="sd">            (`C = number of classes`).</span>
+<span class="sd">        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
+<span class="sd">          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
+<span class="sd">          | (`C = number of classes`).</span>
 <span class="sd">        - Target: Same shape and type as prediction.</span>
 <span class="sd">        - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(C)`. Otherwise, scalar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -315,9 +318,9 @@
 <span class="sd">        Tensor: Sensitivity.</span>
 
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and</span>
-<span class="sd">            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
-<span class="sd">            (`C = number of classes`).</span>
+<span class="sd">        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
+<span class="sd">          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
+<span class="sd">          | (`C = number of classes`).</span>
 <span class="sd">        - Target: Same shape and type as prediction.</span>
 <span class="sd">        - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(C)`. Otherwise, scalar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -386,9 +389,9 @@
 <span class="sd">        Tensor: Specificity.</span>
 
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and</span>
-<span class="sd">            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
-<span class="sd">            (`C = number of classes`).</span>
+<span class="sd">        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
+<span class="sd">          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
+<span class="sd">          | (`C = number of classes`).</span>
 <span class="sd">        - Target: Same shape and type as prediction.</span>
 <span class="sd">        - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(C)`. Otherwise, scalar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -425,6 +428,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes shortest Euclidean distance from all points in the first tensor to any point in the second tensor.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        first_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d)</span>
 <span class="sd">        second_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d).</span>
@@ -469,6 +473,7 @@
 <span class="k">def</span> <span class="nf">_compute_all_image_locations</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes a tensor of points corresponding to all pixel locations of a 2d or a 3d image in Euclidean space.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        shape (Tuple[int]): The shape of the image for which the pixel locations are to be computed.</span>
 <span class="sd">        device (str, optional): Device as defined by PyTorch.</span>
@@ -487,6 +492,7 @@
 <span class="k">def</span> <span class="nf">_binary_erosion</span><span class="p">(</span><span class="n">input_image</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies an erosion filter to a tensor representing a binary 2d or 3d image.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        input_image (Tensor): Binary image to be eroded.</span>
 <span class="sd">    Returns:</span>
@@ -544,6 +550,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the Hausdorff distance between a predicted segmentation mask and the target mask.</span>
+
 <span class="sd">    Note:</span>
 <span class="sd">        In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a</span>
 <span class="sd">        given class and thus the distances are calculated over all channels and dimensions.</span>
@@ -562,12 +569,12 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Tensor: Hausdorff distance.</span>
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,</span>
-<span class="sd">          or `(height, width)` for single image segmentation tasks.</span>
+<span class="sd">        - | Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where</span>
+<span class="sd">          | `S = number of slices`, or `(height, width)` for single image segmentation tasks.</span>
 <span class="sd">        - Target: Must have the same dimensions as the prediction.</span>
-<span class="sd">        - All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an</span>
-<span class="sd">            n-dimensional point. Typically :math:`(S \cdot height \cdot width, 3)`, where `S = number of slices`, or</span>
-<span class="sd">            :math:`(height \cdot width, 2)`</span>
+<span class="sd">        - | All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an</span>
+<span class="sd">          | n-dimensional point. Typically :math:`(S \cdot height \cdot width, 3)`, where `S = number of slices`, or</span>
+<span class="sd">          | :math:`(height \cdot width, 2)`</span>
 <span class="sd">        - Output: Scalar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -675,9 +682,9 @@
 <span class="sd">        Tensor: Hausdorff distance.</span>
 
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and</span>
-<span class="sd">            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
-<span class="sd">            (`C = number of classes`).</span>
+<span class="sd">        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
+<span class="sd">          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding</span>
+<span class="sd">          | (`C = number of classes`).</span>
 <span class="sd">        - Target: Same shape and type as prediction.</span>
 <span class="sd">        - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(C)`. Otherwise, scalar.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -720,21 +727,21 @@
 <span class="sd">    Base class for segmentation metrics.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    num_classes (int): Number of classes (for single-label segmentation tasks including the background class).</span>
-<span class="sd">    convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot</span>
-<span class="sd">        encoding or not (default = `True`).</span>
-<span class="sd">    ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.</span>
-<span class="sd">        Defaults to `None`.</span>
-<span class="sd">    include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the</span>
-<span class="sd">        calculation (default = `True`).</span>
-<span class="sd">    ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to</span>
-<span class="sd">        `ignore_index`. Defaults to 0.</span>
-<span class="sd">    reduction (string, optional): A method to reduce metric scores of multiple classes.</span>
+<span class="sd">        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).</span>
+<span class="sd">        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot</span>
+<span class="sd">            encoding or not (default = `True`).</span>
+<span class="sd">        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.</span>
+<span class="sd">            Defaults to `None`.</span>
+<span class="sd">        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the</span>
+<span class="sd">            calculation (default = `True`).</span>
+<span class="sd">        ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to</span>
+<span class="sd">            `ignore_index`. Defaults to 0.</span>
+<span class="sd">        reduction (string, optional): A method to reduce metric scores of multiple classes.</span>
 
-<span class="sd">        - ``&quot;none&quot;``: no reduction will be applied (default)</span>
-<span class="sd">        - ``&quot;mean&quot;``: takes the mean</span>
-<span class="sd">        - ``&quot;min&quot;``: takes the minimum</span>
-<span class="sd">        - ``&quot;max&quot;``: takes the maximum</span>
+<span class="sd">            - ``&quot;none&quot;``: no reduction will be applied (default)</span>
+<span class="sd">            - ``&quot;mean&quot;``: takes the mean</span>
+<span class="sd">            - ``&quot;min&quot;``: takes the minimum</span>
+<span class="sd">            - ``&quot;max&quot;``: takes the maximum</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -771,12 +778,12 @@
 <span class="sd">            Tuple[Tensor]: Flattened prediction and target tensors (one-hot or multi-hot encoded).</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding (`C = number of classes`).</span>
+<span class="sd">            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding (`C = number of classes`).</span>
 <span class="sd">            - Target: Same shape and type as prediction.</span>
-<span class="sd">            - Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /</span>
-<span class="sd">                presence of the respective class (one-hot / multi-hot encoding).</span>
+<span class="sd">            - | Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /</span>
+<span class="sd">              | presence of the respective class (one-hot / multi-hot encoding).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">flatten_tensors</span><span class="p">(</span>
@@ -868,9 +875,9 @@
 <span class="sd">            target (Tensor): The target tensor.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding (`C = number of classes`).</span>
+<span class="sd">            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding (`C = number of classes`).</span>
 <span class="sd">            - Target: Same shape and type as prediction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -957,9 +964,9 @@
 <span class="sd">            target (Tensor): The target tensor.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding (`C = number of classes`).</span>
+<span class="sd">            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding (`C = number of classes`).</span>
 <span class="sd">            - Target: Same shape and type as prediction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1045,9 +1052,9 @@
 <span class="sd">            target (Tensor): The target tensor.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding (`C = number of classes`).</span>
+<span class="sd">            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding (`C = number of classes`).</span>
 <span class="sd">            - Target: Same shape and type as prediction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1169,9 +1176,9 @@
 <span class="sd">                Must be provided if `target` is a single slice or a subset of slices taken from a 3d image.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding (`C = number of classes`).</span>
+<span class="sd">            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding (`C = number of classes`).</span>
 <span class="sd">            - Target: Same shape and type as prediction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 

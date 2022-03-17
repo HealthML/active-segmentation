@@ -1,19 +1,45 @@
-functional
-======================
+functional package
+==================
 
-losses
-----------------------------
+Submodules
+----------
+
+functional.interpretation module
+--------------------------------
+
+.. automodule:: functional.interpretation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+functional.losses module
+------------------------
 
 .. automodule:: functional.losses
    :members:
    :undoc-members:
    :show-inheritance:
 
-metrics
------------------------------
+functional.metrics module
+-------------------------
 
 .. automodule:: functional.metrics
    :members:
    :undoc-members:
    :show-inheritance:
 
+functional.utils module
+-----------------------
+
+.. automodule:: functional.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: functional
+   :members:
+   :undoc-members:
+   :show-inheritance:

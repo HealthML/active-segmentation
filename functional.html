@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>functional &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>functional package &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -39,8 +39,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
-  <link rel="next" title="metric_tracking" href="metric_tracking.html" />
-  <link rel="prev" title="datasets" href="datasets.html" /> 
+  <link rel="next" title="metric_tracking package" href="metric_tracking.html" />
+  <link rel="prev" title="datasets package" href="datasets.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -136,16 +136,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -161,8 +164,8 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
-      <li>functional</li>
+          <li><a href="active_segmentation.html">Active Learning Framework</a> &gt;</li>
+      <li>functional package</li>
       <li class="sphinx-template-breadcrumbs-aside">
             <a href="_sources/functional.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
@@ -183,10 +186,101 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="functional">
-<h1>functional<a class="headerlink" href="#functional" title="Permalink to this headline">¶</a></h1>
+  <section id="functional-package">
+<h1>functional package<a class="headerlink" href="#functional-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-functional.interpretation">
+<span id="functional-interpretation-module"></span><h2>functional.interpretation module<a class="headerlink" href="#module-functional.interpretation" title="Permalink to this headline">¶</a></h2>
+<p>Module to generate heat maps for trained model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="functional.interpretation.HeatMaps">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.interpretation.</span></span><span class="sig-name descname"><span class="pre">HeatMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Generates heat maps for a trained model with respect to given layers.
+SegGradCam (Gradient Based Activation Methods) are used to calculate relevance values of individual pixels.
+Details can be found <a class="reference external" href="https://arxiv.org/abs/2002.11434">here</a> .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – A trained segmentation model.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.interpretation.HeatMaps.generate_grayscale_cam">
+<span class="sig-name descname"><span class="pre">generate_grayscale_cam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_layers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps.generate_grayscale_cam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps.generate_grayscale_cam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the grayscale representation of the relevance of individual pixel values using GradCam.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_tensor</strong> (<em>torch.Tensor</em>) – The tensor to calculate the desired values for.</p></li>
+<li><p><strong>target_category</strong> (<em>int</em>) – The category or class of the predicted mask.</p></li>
+<li><p><strong>target_layers</strong> (<em>List</em><em>[</em><em>torch.nn.Module</em><em>]</em>) – A list of layers of the given model architecture.
+Used for calculating the gradient of the GradCam method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An array with the grayscale pixel importance values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.interpretation.HeatMaps.generate_grayscale_logits">
+<span class="sig-name descname"><span class="pre">generate_grayscale_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_category</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps.generate_grayscale_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps.generate_grayscale_logits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the grayscale representation of the relevance of individual pixel values using the model prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_tensor</strong> (<em>torch.Tensor</em>) – The tensor to calculate the desired values for.</p></li>
+<li><p><strong>target_category</strong> (<em>int</em>) – The category or class of the predicted mask.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An array with the grayscale pixel importance values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="functional.interpretation.HeatMaps.show_grayscale_heatmap_on_image">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">show_grayscale_heatmap_on_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grayscale_heatmap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps.show_grayscale_heatmap_on_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps.show_grayscale_heatmap_on_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps the calculated grayscale relevance values to a given image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>np.ndarray</em>) – The image to map the pixel relevance values against.</p></li>
+<li><p><strong>grayscale_heatmap</strong> (<em>np.ndarray</em>) – The calculated relevance values in grayscale format.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The input image in RGB format with mapped heatmap.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="functional.interpretation.SemanticSegmentationTarget">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.interpretation.</span></span><span class="sig-name descname"><span class="pre">SemanticSegmentationTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#SemanticSegmentationTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.SemanticSegmentationTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Wraps the target for generating heat maps.
+All pixels belonging to the given prediction of the category will be summed up.
+More details can be found <a class="reference external" href="https://arxiv.org/abs/2002.11434">here</a> .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>category</strong> (<em>int</em>) – The category or class of the predicted mask.</p></li>
+<li><p><strong>mask</strong> (<em>np.ndarray</em>) – The predicted mask as numpy array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-functional.losses">
-<span id="losses"></span><h2>losses<a class="headerlink" href="#module-functional.losses" title="Permalink to this headline">¶</a></h2>
+<span id="functional-losses-module"></span><h2>functional.losses module<a class="headerlink" href="#module-functional.losses" title="Permalink to this headline">¶</a></h2>
 <p>Module containing segmentation losses</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="functional.losses.AbstractDiceLoss">
@@ -225,18 +319,18 @@ encoded.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</div>
+<div class="line">in <span class="math">\([0, 1]\)</span></div>
+</div>
 </li>
-<li><dl class="simple">
-<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>or <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding.</p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding or <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding.</div>
+</div>
 </li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
 </ul>
@@ -304,18 +398,18 @@ means that all images are weighted equally.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</div>
+<div class="line">in <span class="math">\([0, 1]\)</span></div>
+</div>
 </li>
-<li><dl class="simple">
-<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding.</p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding.</div>
+</div>
 </li>
 <li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
@@ -369,18 +463,18 @@ means that all images are weighted equally.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</div>
+<div class="line">in <span class="math">\([0, 1]\)</span></div>
+</div>
 </li>
-<li><dl class="simple">
-<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding.</p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding.</div>
+</div>
 </li>
 <li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
@@ -406,17 +500,18 @@ formulated in:</p>
 <div><p><a class="reference external" href="https://arxiv.org/pdf/1606.04797.pdf">Fausto Milletari, Nassir Navab, and Seyed-Ahmad Ahmadi. V-net: Fully convolutional neural networks for
 volumetric medical image segmentation, 2016</a>.</p>
 </div></blockquote>
-<p>In this implementation an adapted version of the Dice loss is used that a includes an epsilon term :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>epsilon`to
+<p>In this implementation an adapted version of the Dice loss is used that a includes an epsilon term :math:<a href="#id2"><span class="problematic" id="id3">`</span></a>epsilon`to
 avoid divisions by zero and does not square the terms in the denominator. Additionally, the loss formulation is
 generalized to multi-class classification tasks by averaging dice losses over the class and batch dimension:</p>
 <blockquote>
-<div><dl class="simple">
-<dt>:math:<a href="#id3"><span class="problematic" id="id4">`</span></a>DL = 1 - frac{1}{N cdot L} cdot sum_{n=1}^N sum_{l=1}^L 2 cdot frac{sum_{i} r_{nli} p_{nli} +</dt><dd><p>epsilon}{sum_{n=1}^N sum_{l=1}^L sum_{i} (r_{nli} + p_{nli}) + epsilon}` where <span class="math">\(N\)</span> is the batch
-size, <span class="math">\(L\)</span> is the number of classes, <span class="math">\(r_{nli}\)</span> are the ground-truth labels for class <span class="math">\(l\)</span> in
-the <span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image. Analogously, <span class="math">\(p\)</span> is the predicted probability for
-class <span class="math">\(l\)</span> in the <span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image.</p>
-</dd>
-</dl>
+<div><div class="math">
+\[DL = 1 - \frac{1}{N \cdot L} \cdot \sum_{n=1}^N \sum_{l=1}^L 2 \cdot \frac{\sum_{i} r_{nli} p_{nli} +
+\epsilon}{\sum_{n=1}^N \sum_{l=1}^L \sum_{i} (r_{nli} + p_{nli}) + \epsilon}
+
+\]</div>
+<p>where <span class="math">\(N\)</span> is the batch size, <span class="math">\(L\)</span> is the number of classes, <span class="math">\(r_{nli}\)</span> are the ground-truth
+labels for class <span class="math">\(l\)</span> in the <span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image. Analogously, <span class="math">\(p\)</span> is the
+predicted probability for class <span class="math">\(l\)</span> in the <span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image.</p>
 </div></blockquote>
 <p>This implementation is a wrapper of the Dice loss implementation from the <a class="reference external" href="https://docs.monai.io/en/stable/losses.html#diceloss">MONAI package</a> that adapts the reduction behaviour. It supports both
 single-label and multi-label segmentation tasks. For a discussion on different dice loss implementations, see
@@ -455,18 +550,18 @@ means that all images are weighted equally.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</div>
+<div class="line">in <span class="math">\([0, 1]\)</span></div>
+</div>
 </li>
-<li><dl class="simple">
-<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding.</p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding.</div>
+</div>
 </li>
 <li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
@@ -534,18 +629,18 @@ means that all images are weighted equally.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</div>
+<div class="line">in <span class="math">\([0, 1]\)</span></div>
+</div>
 </li>
-<li><dl class="simple">
-<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding.</p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding.</div>
+</div>
 </li>
 <li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
@@ -600,18 +695,18 @@ means that all images are weighted equally.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</div>
+<div class="line">in <span class="math">\([0, 1]\)</span></div>
+</div>
 </li>
-<li><dl class="simple">
-<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding.</p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding.</div>
+</div>
 </li>
 <li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
@@ -631,7 +726,7 @@ encoding.</p>
 <dt class="sig sig-object py" id="functional.losses.FocalLoss">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.losses.</span></span><span class="sig-name descname"><span class="pre">FocalLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/losses.html#FocalLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.losses.FocalLoss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#functional.losses.CrossEntropyLoss" title="functional.losses.CrossEntropyLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">functional.losses.CrossEntropyLoss</span></code></a></p>
-<p>Wrapper for the <cite>CrossEntropyLoss</cite> to perform some addtional computations to turn it into focal loss.</p>
+<p>Wrapper for the <cite>CrossEntropyLoss</cite> to perform some additional computations to turn it into focal loss.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -664,14 +759,15 @@ as a deep learning loss function for highly unbalanced segmentations, 2017.</a><
 </div></blockquote>
 <p>It is formulated as:</p>
 <blockquote>
-<div><dl class="simple">
-<dt>:math:<a href="#id5"><span class="problematic" id="id6">`</span></a>GDL = frac{1}{N} cdot sum_{n=1}^N (1 - 2 frac{sum_{l=1}^L w_l cdot sum_{i} r_{nli} p_{nli} +</dt><dd><p>epsilon}{sum_{l=1}^L w_l cdot sum_{i} (r_{nli} + p_{nli}) + epsilon})` where
-<span class="math">\(N\)</span> is the batch size, <span class="math">\(L\)</span> is the number of classes, <span class="math">\(w_l\)</span> is a class weight,
+<div><div class="math">
+\[GDL = \frac{1}{N} \cdot \sum_{n=1}^N (1 - 2 \frac{\sum_{l=1}^L w_l \cdot \sum_{i} r_{nli} p_{nli} +
+\epsilon}{\sum_{l=1}^L w_l \cdot \sum_{i} (r_{nli} + p_{nli}) + \epsilon})
+
+\]</div>
+<p>where <span class="math">\(N\)</span> is the batch size, <span class="math">\(L\)</span> is the number of classes, <span class="math">\(w_l\)</span> is a class weight,
 <span class="math">\(r_{nli}\)</span> are the ground-truth labels for class <span class="math">\(l\)</span> in the <span class="math">\(i\)</span>-th voxel of the
 <span class="math">\(n\)</span>-th image. Analogously, <span class="math">\(p\)</span> is the predicted probability for class <span class="math">\(l\)</span> in the
 <span class="math">\(i\)</span>-th voxel of the <span class="math">\(n\)</span>-th image.</p>
-</dd>
-</dl>
 </div></blockquote>
 <p>This implementation is a wrapper of the Generalized Dice loss implementation from the <a class="reference external" href="https://docs.monai.io/en/stable/losses.html#generalizeddiceloss">MONAI package</a> that adapts the reduction behaviour. It supports
 both single-label and multi-label segmentation tasks.</p>
@@ -711,18 +807,18 @@ means that all images are weighted equally.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</dt><dd><p>in <span class="math">\([0, 1]\)</span></p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span>, where <cite>N = batch size</cite>, <cite>C = number of classes</cite> and each value is</div>
+<div class="line">in <span class="math">\([0, 1]\)</span></div>
+</div>
 </li>
-<li><dl class="simple">
-<dt>Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding.</p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">Target: <span class="math">\((N, X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((N, C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding.</div>
+</div>
 </li>
 <li><p>Weight: <span class="math">\((N)\)</span> where <cite>N = batch size</cite>.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((N, C)\)</span>. Otherwise, scalar.</p></li>
@@ -779,7 +875,7 @@ of the output is taken, <cite>“sum”</cite>: the output will be summed (defau
 
 </section>
 <section id="module-functional.metrics">
-<span id="metrics"></span><h2>metrics<a class="headerlink" href="#module-functional.metrics" title="Permalink to this headline">¶</a></h2>
+<span id="functional-metrics-module"></span><h2>functional.metrics module<a class="headerlink" href="#module-functional.metrics" title="Permalink to this headline">¶</a></h2>
 <p>Module containing model evaluation metrics.</p>
 <p>The metric implementations are based on the TorchMetrics framework. For instructions on how to implement custom metrics
 with this framework, see <a class="reference external" href="https://torchmetrics.readthedocs.io/en/latest/pages/implement.html">https://torchmetrics.readthedocs.io/en/latest/pages/implement.html</a>.</p>
@@ -843,13 +939,13 @@ calculation (default = <cite>True</cite>).</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding (<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding (<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 </ul>
@@ -931,13 +1027,13 @@ Must be provided if <cite>target</cite> is a single slice or a subset of slices 
 </ul>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding (<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding (<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 </ul>
@@ -952,29 +1048,29 @@ encoding (<cite>C = number of classes</cite>).</p>
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">SegmentationMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#SegmentationMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.SegmentationMetric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torchmetrics.metric.Metric</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Base class for segmentation metrics.</p>
-<p>Args:
-num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
-convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot</p>
-<blockquote>
-<div><p>encoding or not (default = <cite>True</cite>).</p>
-</div></blockquote>
-<dl class="simple">
-<dt>ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.</dt><dd><p>Defaults to <cite>None</cite>.</p>
-</dd>
-<dt>include_background (bool, optional): if <cite>False</cite>, class channel index 0 (background class) is excluded from the</dt><dd><p>calculation (default = <cite>True</cite>).</p>
-</dd>
-<dt>ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to</dt><dd><p><cite>ignore_index</cite>. Defaults to 0.</p>
-</dd>
-</dl>
-<p>reduction (string, optional): A method to reduce metric scores of multiple classes.</p>
-<blockquote>
-<div><ul class="simple">
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+<li><p><strong>ignore_value</strong> (<em>float</em><em>, </em><em>optional</em>) – Value that should be inserted at the positions where the target is equal to
+<cite>ignore_index</cite>. Defaults to 0.</p></li>
+<li><p><strong>reduction</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>A method to reduce metric scores of multiple classes.</p>
+<ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied (default)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
 </ul>
-</div></blockquote>
+</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
@@ -1036,13 +1132,13 @@ calculation (default = <cite>True</cite>).</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding (<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding (<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 </ul>
@@ -1111,13 +1207,13 @@ calculation (default = <cite>True</cite>).</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</dt><dd><p>and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot
-encoding (<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label</div>
+<div class="line">encoding and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or</div>
+<div class="line">multi-hot encoding (<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 </ul>
@@ -1166,13 +1262,13 @@ calculation (default = <cite>True</cite>).</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
-(<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</div>
+<div class="line">and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding</div>
+<div class="line">(<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
@@ -1219,13 +1315,13 @@ distance.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
-(<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</div>
+<div class="line">and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding</div>
+<div class="line">(<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
@@ -1273,13 +1369,13 @@ calculation (default = <cite>True</cite>).</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
-(<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</div>
+<div class="line">and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding</div>
+<div class="line">(<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
@@ -1291,13 +1387,13 @@ calculation (default = <cite>True</cite>).</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="functional.metrics.single_class_hausdorff_distance">
 <span class="sig-prename descclassname"><span class="pre">functional.metrics.</span></span><span class="sig-name descname"><span class="pre">single_class_hausdorff_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_image_locations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/metrics.html#single_class_hausdorff_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.metrics.single_class_hausdorff_distance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
-.. note:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
+<dd><p>Computes the Hausdorff distance between a predicted segmentation mask and the target mask.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In this method, the <cite>prediction</cite> tensor is considered as a segmentation mask of a single 2D or 3D image for a
 given class and thus the distances are calculated over all channels and dimensions.
 As this method is implemented using the scipy package, the returned value is not differentiable in PyTorch and
-can therefore not be used in loss functions.
-</pre></div>
+can therefore not be used in loss functions.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1320,16 +1416,19 @@ this parameter can be used to speed up computation.</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><p>Prediction: Can have arbitrary dimensions. Typically <span class="math">\((S, height, width)\)</span>, where <cite>S = number of slices</cite>,
-or <cite>(height, width)</cite> for single image segmentation tasks.</p></li>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: Can have arbitrary dimensions. Typically <span class="math">\((S, height, width)\)</span>, where</div>
+<div class="line"><cite>S = number of slices</cite>, or <cite>(height, width)</cite> for single image segmentation tasks.</div>
+</div>
+</li>
 <li><p>Target: Must have the same dimensions as the prediction.</p></li>
-<li><dl class="simple">
-<dt>All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an</dt><dd><p>n-dimensional point. Typically <span class="math">\((S \cdot height \cdot width, 3)\)</span>, where <cite>S = number of slices</cite>, or
-<span class="math">\((height \cdot width, 2)\)</span></p>
-</dd>
-</dl>
+<li><div class="line-block">
+<div class="line">All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an</div>
+<div class="line">n-dimensional point. Typically <span class="math">\((S \cdot height \cdot width, 3)\)</span>, where <cite>S = number of slices</cite>, or</div>
+<div class="line"><span class="math">\((height \cdot width, 2)\)</span></div>
+</div>
 </li>
 <li><p>Output: Scalar.</p></li>
 </ul>
@@ -1376,13 +1475,13 @@ calculation (default = <cite>True</cite>).</p></li>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding and</dt><dd><p><span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding
-(<cite>C = number of classes</cite>).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> where each value is in <span class="math">\(\{0, ..., C - 1\}\)</span> in case of label encoding</div>
+<div class="line">and <span class="math">\((C, X, Y, ...)\)</span>, where each value is in <span class="math">\(\{0, 1\}\)</span> in case of one-hot or multi-hot encoding</div>
+<div class="line">(<cite>C = number of classes</cite>).</div>
+</div>
 </li>
 <li><p>Target: Same shape and type as prediction.</p></li>
 <li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
@@ -1391,6 +1490,264 @@ calculation (default = <cite>True</cite>).</p></li>
 </dl>
 </dd></dl>
 
+</section>
+<section id="module-functional.utils">
+<span id="functional-utils-module"></span><h2>functional.utils module<a class="headerlink" href="#module-functional.utils" title="Permalink to this headline">¶</a></h2>
+<p>Utilities for metric and loss computations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.flatten_tensors">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">flatten_tensors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#flatten_tensors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.flatten_tensors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reshapes and flattens prediction and target tensors except for the first dimension (class dimension).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor (one-hot encoded or multi-hot encoded).</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor (one-hot encoded or multi-hot encoded).</p></li>
+<li><p><strong>include_background</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <cite>False</cite>, class channel index 0 (background class) is excluded from the
+calculation (default = <cite>True</cite>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Flattened prediction and target tensors (one-hot or multi-hot encoded).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[Tensor]</p>
+</dd>
+</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><p>Prediction: <span class="math">\((C, X, Y, ...)\)</span>, where <cite>C = number of classes</cite> and each value is in <span class="math">\(\{0, 1\}\)</span>.</p></li>
+<li><p>Target: Must have same shape and type as prediction.</p></li>
+<li><div class="line-block">
+<div class="line">Output: <span class="math">\((C, X * Y * ...)\)</span> where each element is in <span class="math">\(\{0, 1\}\)</span> indicating the absence /</div>
+<div class="line">presence of the respective class (one-hot or multi-hot encoding).</div>
+</div>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.is_binary">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">is_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_to_check</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#is_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.is_binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the input contains only zeros and ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tensor_to_check</strong> (<em>Tensor</em>) – tensor to check.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if contains only zeros and ones, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.mask_tensor">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">mask_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#mask_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.mask_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the tensor’s values in the positions where the mask is equal to <cite>ignore_index</cite> with <cite>mask_value</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> (<em>Tensor</em>) – A tensor in which is to be masked.</p></li>
+<li><p><strong>mask</strong> (<em>Tensor</em>) – A mask tensor containing the <code class="xref py py-attr docutils literal notranslate"><span class="pre">ignore_index</span></code> at the positions to be masked.</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Label index indicating the positions to be masked.</p></li>
+<li><p><strong>mask_value</strong> (<em>float</em><em>, </em><em>optional</em>) – Value that should be inserted at the masked positions. Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Masked tensor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><p>Tensor: <span class="math">\((N, C, X, Y, ...)\)</span> or <span class="math">\((C, X, Y, ...)\)</span>.</p></li>
+<li><div class="line-block">
+<div class="line">Mask: <span class="math">\((N, 1, X, Y, ...)\)</span> / <span class="math">\((N, C, X, Y, ...)\)</span> or <span class="math">\((1, X, Y, ...)\)</span> /</div>
+<div class="line"><span class="math">\((C, X, Y, ...)\)</span>.</div>
+</div>
+</li>
+<li><p>Output: Same shape as input.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.one_hot_encode">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">one_hot_encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#one_hot_encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.one_hot_encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a label encoded tensor to a one-hot encoded tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor</strong> (<em>Tensor</em>) – Label encoded tensor that is to be converted to one-hot encoding.</p></li>
+<li><p><strong>dim</strong> (<em>int</em>) – Dimensionality of the input. Either 2 or 3.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (excluding the class labeled with <code class="xref py py-attr docutils literal notranslate"><span class="pre">ignore_label</span></code>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Class value for which no one-hot encoded channel should be created in the output.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>One-hot encoded tensor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Tensor: <span class="math">\((N, X, Y, ...)\)</span> or <span class="math">\((X, Y, ...)\)</span> where each element represents a class index of integer</div>
+<div class="line">type and <cite>N = batch size</cite>.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">Output: <span class="math">\((N, C, X, Y, ...)\)</span> or <span class="math">\((C, X, Y, ...)\)</span> where each element represent a binary class</div>
+<div class="line">label and <span class="math">\(C\)</span> is the number of classes (excluding the ignored class labeled with</div>
+<div class="line"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ignore_label</span></code>).</div>
+</div>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.preprocess_metric_inputs">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">preprocess_metric_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#preprocess_metric_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.preprocess_metric_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method implements preprocessing steps that are needed for most segmentation metrics:</p>
+<ol class="arabic simple">
+<li><p>Validation of input shape and type</p></li>
+<li><p>Conversion from label encoding to one-hot encoding if necessary</p></li>
+<li><p>Mapping of pixels/voxels labeled with the <code class="xref py py-attr docutils literal notranslate"><span class="pre">ignore_index</span></code> to true negatives or true positives</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor to be preprocessed.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor to be preprocessed.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes (for single-label segmentation tasks including the background class).</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and needs to be converted to one-hot
+encoding or not (default = <cite>True</cite>).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies a target value that is ignored and does not contribute to the metric.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>ignore_value</strong> (<em>float</em><em>, </em><em>optional</em>) – Value that should be inserted at the positions where the target is equal to
+<cite>ignore_index</cite>. Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The preprocessed prediction and target tensors.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[Tensor, Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.reduce_metric">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">reduce_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#reduce_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.reduce_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregates the metric values of the different classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric</strong> (<em>Tensor</em>) – Metrics to be aggregated.</p></li>
+<li><p><strong>reduction</strong> (<em>string</em>) – A method to reduce metric scores of multiple classes.
+- <code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code>: no reduction will be applied
+- <code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code>: takes the mean
+- <code class="docutils literal notranslate"><span class="pre">&quot;min&quot;</span></code>: takes the minimum
+- <code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code>: takes the maximum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Aggregated metric value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Shape:</dt><dd><ul class="simple">
+<li><p>Metric: <span class="math">\((C)\)</span>, where <cite>C = number of classes</cite>.</p></li>
+<li><p>Output: If <code class="xref py py-attr docutils literal notranslate"><span class="pre">reduction</span></code> is <cite>“none”</cite>, shape <span class="math">\((C)\)</span>. Otherwise, scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.remove_padding">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">remove_padding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_label_encoded</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#remove_padding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.remove_padding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes padding from prediction and target tensor. For this purpose, the areas where the target tensor is
+equal to <code class="xref py py-attr docutils literal notranslate"><span class="pre">ignore_index</span></code> are removed from both tensors. It is assumed that whole rows or columns are padded
+always.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – A prediction tensor (label-encoded, one-hot encoded, or multi-hot encoded).</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – A target tensor (with same encoding as prediction tensor).</p></li>
+<li><p><strong>ignore_index</strong> (<em>int</em>) – Specifies the target value that is used as label for padded areas.</p></li>
+<li><p><strong>is_label_encoded</strong> (<em>bool</em>) – Whether the input data are label encoded or one-hot / multi-hot encoded.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Prediction and target tensors without padding areas.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[Tensor, Tensor]</p>
+</dd>
+</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((X, Y, ...)\)</span> in case of label encoding and <span class="math">\((C, X, Y, ...)\)</span>, in case of one-hot</div>
+<div class="line">or multi-hot encoding (<cite>C = number of classes</cite>).</div>
+</div>
+</li>
+<li><p>Target: Same shape as prediction.</p></li>
+<li><div class="line-block">
+<div class="line">Output: <span class="math">\((X - P_x, Y - P_y, ...)\)</span> in case of label encoding and <span class="math">\((C, X - P_x, Y - P_y, ...)\)</span>,</div>
+<div class="line">in case of one-hot or multi-hot encoding (<cite>C = number of classes</cite>, <cite>P_x = padding width on x-axis</cite>).</div>
+</div>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functional.utils.validate_metric_inputs">
+<span class="sig-prename descclassname"><span class="pre">functional.utils.</span></span><span class="sig-name descname"><span class="pre">validate_metric_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_to_one_hot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/utils.html#validate_metric_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.utils.validate_metric_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Validates the inputs for segmentation metric computations:</dt><dd><ul class="simple">
+<li><p>Checks that prediction and target are both on the same device.</p></li>
+<li><p>Checks that prediction and target have the correct shape and type.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prediction</strong> (<em>Tensor</em>) – The prediction tensor to be validated.</p></li>
+<li><p><strong>target</strong> (<em>Tensor</em>) – The target tensor to be validated.</p></li>
+<li><p><strong>convert_to_one_hot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is label encoded and is intended to be converted to
+one-hot encoding or not (default = <cite>True</cite>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – if input tensors violate any of the validation criteria.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-functional">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-functional" title="Permalink to this headline">¶</a></h2>
 </section>
 </section>
 
@@ -1402,10 +1759,10 @@ calculation (default = <cite>True</cite>).</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="metric_tracking.html" class="btn btn-neutral float-right" title="metric_tracking" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="metric_tracking.html" class="btn btn-neutral float-right" title="metric_tracking package" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="datasets.html" class="btn btn-neutral" title="datasets" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="datasets.html" class="btn btn-neutral" title="datasets package" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -1433,9 +1790,13 @@ calculation (default = <cite>True</cite>).</p></li>
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">functional</a><ul>
-<li><a class="reference internal" href="#module-functional.losses">losses</a></li>
-<li><a class="reference internal" href="#module-functional.metrics">metrics</a></li>
+<li><a class="reference internal" href="#">functional package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-functional.interpretation">functional.interpretation module</a></li>
+<li><a class="reference internal" href="#module-functional.losses">functional.losses module</a></li>
+<li><a class="reference internal" href="#module-functional.metrics">functional.metrics module</a></li>
+<li><a class="reference internal" href="#module-functional.utils">functional.utils module</a></li>
+<li><a class="reference internal" href="#module-functional">Module contents</a></li>
 </ul>
 </li>
 </ul>

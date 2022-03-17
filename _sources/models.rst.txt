@@ -1,34 +1,45 @@
-models
-===================================
+models package
+==============
 
-PytorchFCNResnet50
----------------------------------------------------------
+Submodules
+----------
 
-.. automodule:: models.pytorch_fcn_resnet50
+models.loss\_weight\_scheduler module
+-------------------------------------
+
+.. automodule:: models.loss_weight_scheduler
    :members:
    :undoc-members:
    :show-inheritance:
 
-PytorchModel
--------------------------------------------------
+models.pytorch\_model module
+----------------------------
 
 .. automodule:: models.pytorch_model
    :members:
    :undoc-members:
    :show-inheritance:
 
-PytorchUNet
---------------------------------------------------
+models.pytorch\_u\_net module
+-----------------------------
 
 .. automodule:: models.pytorch_u_net
    :members:
    :undoc-members:
    :show-inheritance:
 
-UNet
------------------------------------------
+models.u\_net module
+--------------------
 
 .. automodule:: models.u_net
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: models
    :members:
    :undoc-members:
    :show-inheritance:

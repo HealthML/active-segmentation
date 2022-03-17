@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -194,7 +197,8 @@
 <div class="viewcode-block" id="PytorchUNet"><a class="viewcode-back" href="../../models.html#models.pytorch_u_net.PytorchUNet">[docs]</a><span class="k">class</span> <span class="nc">PytorchUNet</span><span class="p">(</span><span class="n">PytorchModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    U-Net architecture wrapped as PytorchModel.</span>
-<span class="sd">    Details about the architecture: https://arxiv.org/pdf/1505.04597.pdf</span>
+<span class="sd">    Details about the architecture can be found in `this paper &lt;https://arxiv.org/pdf/1505.04597.pdf&gt;`_.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</span>
 <span class="sd">        dim (int, optional): The dimensionality of the U-Net. Defaults to 2.</span>

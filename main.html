@@ -38,7 +38,9 @@
   <link rel="stylesheet" href="_static/katex-math.css" type="text/css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
-  <link rel="search" title="Search" href="search.html" /> 
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="next" title="active_learning module" href="active_learning.html" />
+  <link rel="prev" title="run_experiments module" href="run_experiments.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -133,17 +135,20 @@
         
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -159,6 +164,7 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="active_segmentation.html">Active Learning Framework</a> &gt;</li>
       <li>main module</li>
       <li class="sphinx-template-breadcrumbs-aside">
             <a href="_sources/main.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
@@ -231,18 +237,18 @@ E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="main.create_query_strategy">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">create_query_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#create_query_strategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.create_query_strategy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialises the chosen query strategy
-:param strategy_config: Configuration of the query strategy
-:type strategy_config: dict</p>
+<dd><p>Initialises the chosen query strategy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>strategy_config</strong> (<em>dict</em>) – Configuration of the query strategy</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.run_active_learning_pipeline">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">run_active_learning_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">architecture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selection_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean_dice_score_0.5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_learning_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./predictions'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_project_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'active-segmentation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_model_every_epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_wandb_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#run_active_learning_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.run_active_learning_pipeline" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Main function to execute an active learning pipeline run, or start an active learning</dt><dd><p>simulation.</p>
-</dd>
-</dl>
+<dd><p>Main function to execute an active learning pipeline run, or start an active learning simulation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -285,12 +291,16 @@ is finished. Should only be used when no other runs are running in parallel. Def
 <dl class="py function">
 <dt class="sig sig-object py" id="main.run_active_learning_pipeline_from_config">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">run_active_learning_pipeline_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hp_optimisation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#run_active_learning_pipeline_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.run_active_learning_pipeline_from_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs the active learning pipeline based on a config file.
-:param config_file_name: Name of or path to the config file.
-:param hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based</p>
-<blockquote>
-<div><p>on the configured sweep file</p>
-</div></blockquote>
+<dd><p>Runs the active learning pipeline based on a config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file_name</strong> – Name of or path to the config file.</p></li>
+<li><p><strong>hp_optimisation</strong> – If this flag is set, run the pipeline with different hyperparameters based
+on the configured sweep file</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -300,6 +310,15 @@ is finished. Should only be used when no other runs are running in parallel. Def
               
             </div>
             <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="active_learning.html" class="btn btn-neutral float-right" title="active_learning module" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="run_experiments.html" class="btn btn-neutral" title="run_experiments module" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
   
   
   <hr>

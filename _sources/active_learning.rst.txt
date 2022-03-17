@@ -1,4 +1,4 @@
-active\_learning
+active\_learning module
 =======================
 
 .. automodule:: active_learning

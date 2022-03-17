@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -197,17 +200,18 @@
 <div class="viewcode-block" id="ActiveLearningDataModule"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule">[docs]</a><span class="k">class</span> <span class="nc">ActiveLearningDataModule</span><span class="p">(</span><span class="n">LightningDataModule</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class to structure the dataset creation for active learning</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        data_dir: Path of the directory that contains the data.</span>
-<span class="sd">        batch_size: Batch size.</span>
-<span class="sd">        num_workers: Number of workers for DataLoader.</span>
+<span class="sd">        data_dir (str): Path of the directory that contains the data.</span>
+<span class="sd">        batch_size (int): Batch size.</span>
+<span class="sd">        num_workers (int): Number of workers for DataLoader.</span>
 <span class="sd">        batch_size_unlabeled_set (int, optional): Batch size for the unlabeled set. Defaults to `batch_size`.</span>
 <span class="sd">        active_learning_mode (bool, optional): Whether the datamodule should be configured for active learning or for</span>
 <span class="sd">            conventional model training (default = False).</span>
 <span class="sd">        initial_training_set_size (int, optional): Initial size of the training set if the active learning mode is</span>
 <span class="sd">            activated.</span>
 <span class="sd">        pin_memory (bool, optional): `pin_memory` parameter as defined by the PyTorch `DataLoader` class.</span>
-<span class="sd">        shuffle: Flag if the data should be shuffled.</span>
+<span class="sd">        shuffle (bool, optional): Flag if the data should be shuffled.</span>
 <span class="sd">        **kwargs: Further, dataset specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -247,6 +251,7 @@
 <div class="viewcode-block" id="ActiveLearningDataModule.setup"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the datasets managed by this data module.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            stage: Current training stage.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -326,6 +331,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            ids (List[str]): IDs of the items to be labeled.</span>
 <span class="sd">            pseudo_labels (Dict[str, Any], optional): Optional pseudo labels for (some of the) the selected data items.</span>

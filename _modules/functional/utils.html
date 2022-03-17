@@ -1,0 +1,734 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>functional.utils &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="../../genindex.html" />
+  <link rel="search" title="Search" href="../../search.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="../../">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="../../index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="../index.html">Module code</a> &gt;</li>
+      <li>functional.utils</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <h1>Source code for functional.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Utilities for metric and loss computations.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+
+
+<div class="viewcode-block" id="flatten_tensors"><a class="viewcode-back" href="../../functional.html#functional.utils.flatten_tensors">[docs]</a><span class="k">def</span> <span class="nf">flatten_tensors</span><span class="p">(</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">include_background</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reshapes and flattens prediction and target tensors except for the first dimension (class dimension).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        prediction (Tensor): The prediction tensor (one-hot encoded or multi-hot encoded).</span>
+<span class="sd">        target (Tensor): The target tensor (one-hot encoded or multi-hot encoded).</span>
+<span class="sd">        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the</span>
+<span class="sd">            calculation (default = `True`).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[Tensor]: Flattened prediction and target tensors (one-hot or multi-hot encoded).</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - Prediction: :math:`(C, X, Y, ...)`, where `C = number of classes` and each value is in :math:`\{0, 1\}`.</span>
+<span class="sd">        - Target: Must have same shape and type as prediction.</span>
+<span class="sd">        - | Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /</span>
+<span class="sd">          | presence of the respective class (one-hot or multi-hot encoding).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">include_background</span><span class="p">:</span>
+        <span class="c1"># drop the channel of the background class</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># flatten tensors except for the first channel (class dimension)</span>
+    <span class="n">flattened_prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">flattened_target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">flattened_prediction</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">flattened_target</span><span class="o">.</span><span class="n">float</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="is_binary"><a class="viewcode-back" href="../../functional.html#functional.utils.is_binary">[docs]</a><span class="k">def</span> <span class="nf">is_binary</span><span class="p">(</span><span class="n">tensor_to_check</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks whether the input contains only zeros and ones.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tensor_to_check (Tensor): tensor to check.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if contains only zeros and ones, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span>
+        <span class="n">tensor_to_check</span><span class="p">,</span> <span class="n">tensor_to_check</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">tensor_to_check</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mask_tensor"><a class="viewcode-back" href="../../functional.html#functional.utils.mask_tensor">[docs]</a><span class="k">def</span> <span class="nf">mask_tensor</span><span class="p">(</span>
+    <span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replaces the tensor&#39;s values in the positions where the mask is equal to `ignore_index` with `mask_value`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tensor (Tensor): A tensor in which is to be masked.</span>
+<span class="sd">        mask (Tensor): A mask tensor containing the :attr:`ignore_index` at the positions to be masked.</span>
+<span class="sd">        ignore_index (int, optional): Label index indicating the positions to be masked.</span>
+<span class="sd">        mask_value (float, optional): Value that should be inserted at the masked positions. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor: Masked tensor.</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - Tensor: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)`.</span>
+<span class="sd">        - | Mask: :math:`(N, 1, X, Y, ...)` / :math:`(N, C, X, Y, ...)` or :math:`(1, X, Y, ...)` /</span>
+<span class="sd">          | :math:`(C, X, Y, ...)`.</span>
+<span class="sd">        - Output: Same shape as input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ignore_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># set positions where tensor is equal to ignore_index to mask_value</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="p">(</span><span class="n">mask</span> <span class="o">!=</span> <span class="n">ignore_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">tensor</span> <span class="o">+</span> <span class="p">(</span><span class="n">mask</span> <span class="o">==</span> <span class="n">ignore_index</span><span class="p">)</span> <span class="o">*</span> <span class="n">mask_value</span>
+
+    <span class="k">return</span> <span class="n">tensor</span></div>
+
+
+<div class="viewcode-block" id="one_hot_encode"><a class="viewcode-back" href="../../functional.html#functional.utils.one_hot_encode">[docs]</a><span class="k">def</span> <span class="nf">one_hot_encode</span><span class="p">(</span>
+    <span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a label encoded tensor to a one-hot encoded tensor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tensor (Tensor): Label encoded tensor that is to be converted to one-hot encoding.</span>
+<span class="sd">        dim (int): Dimensionality of the input. Either 2 or 3.</span>
+<span class="sd">        num_classes (int): Number of classes (excluding the class labeled with :attr:`ignore_label`).</span>
+<span class="sd">        ignore_index (int, optional): Class value for which no one-hot encoded channel should be created in the output.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor: One-hot encoded tensor.</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - | Tensor: :math:`(N, X, Y, ...)` or :math:`(X, Y, ...)` where each element represents a class index of integer</span>
+<span class="sd">          | type and `N = batch size`.</span>
+<span class="sd">        - | Output: :math:`(N, C, X, Y, ...)` or :math:`(C, X, Y, ...)` where each element represent a binary class</span>
+<span class="sd">          | label and :math:`C` is the number of classes (excluding the ignored class labeled with</span>
+<span class="sd">          | :attr:`ignore_label`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">ignore_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># shift labels since `torch.nn.functional.one_hot` only accepts positive labels</span>
+        <span class="n">tensor</span><span class="p">[</span><span class="n">tensor</span> <span class="o">==</span> <span class="n">ignore_index</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">tensor</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">num_classes</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">tensor_one_hot</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span> <span class="n">num_classes</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">ignore_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># drop ignored channel</span>
+        <span class="n">tensor_one_hot</span> <span class="o">=</span> <span class="n">tensor_one_hot</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># one_hot outputs a tensor of shape (N, X, Y, ..., C) or (X, Y, ..., C)</span>
+    <span class="c1"># this tensor is converted to a tensor of shape (N, C, X, Y, ...) or (C, X, Y, ...)</span>
+    <span class="k">if</span> <span class="n">tensor</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="n">dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># tensor has a batch dimension</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">tensor_one_hot</span><span class="p">,</span> <span class="n">tensor_one_hot</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># tensor has no batch dimension</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">tensor_one_hot</span><span class="p">,</span> <span class="n">tensor_one_hot</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="remove_padding"><a class="viewcode-back" href="../../functional.html#functional.utils.remove_padding">[docs]</a><span class="k">def</span> <span class="nf">remove_padding</span><span class="p">(</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">is_label_encoded</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes padding from prediction and target tensor. For this purpose, the areas where the target tensor is</span>
+<span class="sd">    equal to :attr:`ignore_index` are removed from both tensors. It is assumed that whole rows or columns are padded</span>
+<span class="sd">    always.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        prediction (Tensor): A prediction tensor (label-encoded, one-hot encoded, or multi-hot encoded).</span>
+<span class="sd">        target (Tensor): A target tensor (with same encoding as prediction tensor).</span>
+<span class="sd">        ignore_index (int): Specifies the target value that is used as label for padded areas.</span>
+<span class="sd">        is_label_encoded (bool): Whether the input data are label encoded or one-hot / multi-hot encoded.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[Tensor, Tensor]: Prediction and target tensors without padding areas.</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - | Prediction: :math:`(X, Y, ...)` in case of label encoding and :math:`(C, X, Y, ...)`, in case of one-hot</span>
+<span class="sd">          | or multi-hot encoding (`C = number of classes`).</span>
+<span class="sd">        - Target: Same shape as prediction.</span>
+<span class="sd">        - | Output: :math:`(X - P_x, Y - P_y, ...)` in case of label encoding and :math:`(C, X - P_x, Y - P_y, ...)`,</span>
+<span class="sd">          | in case of one-hot or multi-hot encoding (`C = number of classes`, `P_x = padding width on x-axis`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ignore_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">target</span>
+
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">prediction</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span>
+    <span class="p">),</span> <span class="s2">&quot;Prediction and target must have the same shape&quot;</span>
+
+    <span class="k">if</span> <span class="n">is_label_encoded</span><span class="p">:</span>
+        <span class="n">first_spatial_dim</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">dimensionality</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">first_spatial_dim</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">dimensionality</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># for 3d images, first slices that only contain padding are removed</span>
+    <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">is_padding</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">target</span> <span class="o">==</span> <span class="n">ignore_index</span> <span class="k">if</span> <span class="n">is_label_encoded</span> <span class="k">else</span> <span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ignore_index</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_label_encoded</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ignore_index</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">target</span> <span class="o">==</span> <span class="n">ignore_index</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
+            <span class="p">),</span> <span class="s2">&quot;All class channels have the same padding size&quot;</span>
+
+        <span class="n">is_padding_slice</span> <span class="o">=</span> <span class="n">is_padding</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">start_dim</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">all_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">is_padding</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">prediction</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">indices_to_keep</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="o">~</span><span class="n">is_padding_slice</span><span class="p">)</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">first_spatial_dim</span><span class="p">,</span> <span class="n">indices_to_keep</span><span class="p">)</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">first_spatial_dim</span><span class="p">,</span> <span class="n">indices_to_keep</span><span class="p">)</span>
+
+    <span class="c1"># afterwards single padded rows and columns are removed</span>
+
+    <span class="c1"># the first 2d slice is selected and it is assumed that all other slices have the same padding size</span>
+    <span class="n">all_target_slices</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
+    <span class="n">first_slice</span> <span class="o">=</span> <span class="n">all_target_slices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">first_slice</span> <span class="o">==</span> <span class="n">ignore_index</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_target_slices</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">all_target_slices</span> <span class="o">==</span> <span class="n">ignore_index</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
+        <span class="p">),</span> <span class="s2">&quot;All slices have the same padding size.&quot;</span>
+
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+        <span class="n">is_padding</span> <span class="o">=</span> <span class="p">(</span><span class="n">first_slice</span> <span class="o">==</span> <span class="n">ignore_index</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
+        <span class="n">all_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">is_padding</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">prediction</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">indices_to_keep</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">all_indices</span><span class="p">,</span> <span class="o">~</span><span class="n">is_padding</span><span class="p">)</span>
+
+        <span class="c1"># if dim == 0, `is_padding` is reduced over all rows</span>
+        <span class="c1"># thus `indices_to_keep` is a tensor that indicates for each column whether it is padding or not</span>
+        <span class="c1"># therefore we the selection dim is -1 in this case</span>
+        <span class="n">select_dim</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">2</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">select_dim</span><span class="p">,</span> <span class="n">indices_to_keep</span><span class="p">)</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">select_dim</span><span class="p">,</span> <span class="n">indices_to_keep</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">prediction</span> <span class="o">!=</span> <span class="n">ignore_index</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;Prediction does not contain padded areas after padding removal.&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">target</span> <span class="o">!=</span> <span class="n">ignore_index</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;Target does not contain padded areas after padding removal.&quot;</span>
+
+    <span class="k">return</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">target</span></div>
+
+
+<div class="viewcode-block" id="validate_metric_inputs"><a class="viewcode-back" href="../../functional.html#functional.utils.validate_metric_inputs">[docs]</a><span class="k">def</span> <span class="nf">validate_metric_inputs</span><span class="p">(</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">convert_to_one_hot</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates the inputs for segmentation metric computations:</span>
+<span class="sd">        - Checks that prediction and target are both on the same device.</span>
+<span class="sd">        - Checks that prediction and target have the correct shape and type.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        prediction (Tensor): The prediction tensor to be validated.</span>
+<span class="sd">        target (Tensor): The target tensor to be validated.</span>
+<span class="sd">        convert_to_one_hot (bool, optional): Determines if data is label encoded and is intended to be converted to</span>
+<span class="sd">            one-hot encoding or not (default = `True`).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: if input tensors violate any of the validation criteria.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">assert</span> <span class="n">prediction</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">device</span>
+
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">prediction</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span>
+    <span class="p">),</span> <span class="s2">&quot;Prediction and target need to have the same shape.&quot;</span>
+
+    <span class="k">assert</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int8</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+    <span class="p">],</span> <span class="s2">&quot;Prediction has to be of integer type.&quot;</span>
+    <span class="k">assert</span> <span class="n">target</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int8</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+    <span class="p">],</span> <span class="s2">&quot;Target has to be of integer type.&quot;</span>
+
+    <span class="k">if</span> <span class="n">convert_to_one_hot</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># for single-label segmentation tasks, prediction and target are expected be label encoded</span>
+        <span class="c1"># they are expected to have the shape (X, Y, ...)</span>
+
+        <span class="k">assert</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="mi">2</span><span class="p">,</span>
+            <span class="mi">3</span><span class="p">,</span>
+        <span class="p">],</span> <span class="s2">&quot;Prediction and target need to be either two- or three-dimensional if `convert_to_one_hot` is True.&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># for single-label segmentation tasks, prediction and target are expected to be one-hot or multi-hot encoded</span>
+        <span class="c1"># they are expected to have the shape (C, X, Y, ...)</span>
+
+        <span class="k">assert</span> <span class="n">is_binary</span><span class="p">(</span>
+            <span class="n">prediction</span>
+        <span class="p">),</span> <span class="s2">&quot;Prediction needs to be binary if `convert_to_one_hot` is False.&quot;</span>
+        <span class="k">assert</span> <span class="n">is_binary</span><span class="p">(</span>
+            <span class="n">target</span> <span class="o">*</span> <span class="p">(</span><span class="n">target</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># target excluding ignore index</span>
+        <span class="p">),</span> <span class="s2">&quot;Target needs to be binary if `convert_to_one_hot` is False.&quot;</span>
+
+        <span class="k">assert</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="mi">3</span><span class="p">,</span>
+            <span class="mi">4</span><span class="p">,</span>
+        <span class="p">],</span> <span class="s2">&quot;Prediction and target need to be either three- or four-dimensional if `convert_to_one_hot` is False.&quot;</span></div>
+
+
+<div class="viewcode-block" id="preprocess_metric_inputs"><a class="viewcode-back" href="../../functional.html#functional.utils.preprocess_metric_inputs">[docs]</a><span class="k">def</span> <span class="nf">preprocess_metric_inputs</span><span class="p">(</span>
+    <span class="n">prediction</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">convert_to_one_hot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ignore_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method implements preprocessing steps that are needed for most segmentation metrics:</span>
+
+<span class="sd">    1. Validation of input shape and type</span>
+<span class="sd">    2. Conversion from label encoding to one-hot encoding if necessary</span>
+<span class="sd">    3. Mapping of pixels/voxels labeled with the :attr:`ignore_index` to true negatives or true positives</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        prediction (Tensor): The prediction tensor to be preprocessed.</span>
+<span class="sd">        target (Tensor): The target tensor to be preprocessed.</span>
+<span class="sd">        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).</span>
+<span class="sd">        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot</span>
+<span class="sd">            encoding or not (default = `True`).</span>
+<span class="sd">        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.</span>
+<span class="sd">            Defaults to `None`.</span>
+<span class="sd">        ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to</span>
+<span class="sd">            `ignore_index`. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[Tensor, Tensor]: The preprocessed prediction and target tensors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">validate_metric_inputs</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">convert_to_one_hot</span><span class="p">)</span>
+
+    <span class="c1"># during one-hot encoding the ignore index is removed, therefore the original target including the ignore index</span>
+    <span class="c1"># is copied</span>
+    <span class="n">target_including_ignore_index</span> <span class="o">=</span> <span class="n">target</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">convert_to_one_hot</span><span class="p">:</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">one_hot_encode</span><span class="p">(</span>
+            <span class="n">prediction</span><span class="p">,</span> <span class="n">prediction</span><span class="o">.</span><span class="n">dim</span><span class="p">(),</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span>
+        <span class="p">)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">one_hot_encode</span><span class="p">(</span>
+            <span class="n">target</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">dim</span><span class="p">(),</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span>
+        <span class="p">)</span>
+
+    <span class="c1"># map values where the target is set to `ignore_index` to zero</span>
+
+    <span class="n">prediction</span> <span class="o">=</span> <span class="n">mask_tensor</span><span class="p">(</span>
+        <span class="n">prediction</span><span class="p">,</span>
+        <span class="n">target_including_ignore_index</span><span class="p">,</span>
+        <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span>
+        <span class="n">mask_value</span><span class="o">=</span><span class="n">ignore_value</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="n">mask_tensor</span><span class="p">(</span>
+        <span class="n">target</span><span class="p">,</span>
+        <span class="n">target_including_ignore_index</span><span class="p">,</span>
+        <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span>
+        <span class="n">mask_value</span><span class="o">=</span><span class="n">ignore_value</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">target</span></div>
+
+
+<div class="viewcode-block" id="reduce_metric"><a class="viewcode-back" href="../../functional.html#functional.utils.reduce_metric">[docs]</a><span class="k">def</span> <span class="nf">reduce_metric</span><span class="p">(</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">reduction</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Aggregates the metric values of the different classes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        metric (Tensor): Metrics to be aggregated.</span>
+<span class="sd">        reduction (string): A method to reduce metric scores of multiple classes.</span>
+<span class="sd">            - ``&quot;none&quot;``: no reduction will be applied</span>
+<span class="sd">            - ``&quot;mean&quot;``: takes the mean</span>
+<span class="sd">            - ``&quot;min&quot;``: takes the minimum</span>
+<span class="sd">            - ``&quot;max&quot;``: takes the maximum</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor: Aggregated metric value.</span>
+
+<span class="sd">    Shape:</span>
+<span class="sd">        - Metric: :math:`(C)`, where `C = number of classes`.</span>
+<span class="sd">        - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(C)`. Otherwise, scalar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">metric</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">metric</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">metric</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">reduction</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">metric</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid reduction method.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+  <script src="../../_static/jquery.js"></script>
+  <script src="../../_static/underscore.js"></script>
+  <script src="../../_static/doctools.js"></script>
+  <script src="../../_static/clipboard.min.js"></script>
+  <script src="../../_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="../../_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="../../index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="../../">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

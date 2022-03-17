@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -194,7 +197,7 @@
 
 <span class="kn">from</span> <span class="nn">active_learning</span> <span class="kn">import</span> <span class="n">ActiveLearningPipeline</span>
 <span class="kn">from</span> <span class="nn">inferencing</span> <span class="kn">import</span> <span class="n">Inferencer</span>
-<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">PytorchFCNResnet50</span><span class="p">,</span> <span class="n">PytorchUNet</span>
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">PytorchUNet</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BraTSDataModule</span><span class="p">,</span>
     <span class="n">DecathlonDataModule</span><span class="p">,</span>
@@ -322,8 +325,8 @@
     <span class="n">clear_wandb_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Main function to execute an active learning pipeline run, or start an active learning</span>
-<span class="sd">        simulation.</span>
+<span class="sd">    Main function to execute an active learning pipeline run, or start an active learning simulation.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        architecture (string): Name of the desired model architecture. E.g. &#39;u_net&#39;.</span>
 <span class="sd">        dataset (string): Name of the dataset. E.g. &#39;brats&#39;</span>
@@ -484,16 +487,7 @@
             <span class="s2">&quot;weight_pseudo_labels_decay_steps&quot;</span>
         <span class="p">]</span> <span class="o">=</span> <span class="n">loss_weight_scheduler_max_steps</span>
 
-    <span class="k">if</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;fcn_resnet50&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">data_module</span><span class="o">.</span><span class="n">data_channels</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">architecture</span><span class="si">}</span><span class="s2"> does not support multiple input channels.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchFCNResnet50</span><span class="p">(</span>
-            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span> <span class="o">**</span><span class="n">model_config</span>
-        <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;u_net&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">architecture</span> <span class="o">==</span> <span class="s2">&quot;u_net&quot;</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">PytorchUNet</span><span class="p">(</span>
             <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
             <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
@@ -510,7 +504,8 @@
 
 <div class="viewcode-block" id="create_query_strategy"><a class="viewcode-back" href="../main.html#main.create_query_strategy">[docs]</a><span class="k">def</span> <span class="nf">create_query_strategy</span><span class="p">(</span><span class="n">strategy_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialises the chosen query strategy</span>
+<span class="sd">    Initialises the chosen query strategy.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        strategy_config (dict): Configuration of the query strategy</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -536,6 +531,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runs the active learning pipeline based on a config file.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        config_file_name: Name of or path to the config file.</span>
 <span class="sd">        hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based</span>

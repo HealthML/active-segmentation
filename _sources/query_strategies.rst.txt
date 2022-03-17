@@ -1,10 +1,85 @@
-query\_strategies
-==============================================
+query\_strategies package
+=========================
 
-QueryStrategy
--------------------------------------------------------------
+Submodules
+----------
+
+query\_strategies.interpolation\_sampling\_strategy module
+----------------------------------------------------------
+
+.. automodule:: query_strategies.interpolation_sampling_strategy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.query\_strategy module
+----------------------------------------
 
 .. automodule:: query_strategies.query_strategy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.random\_sampling\_strategy module
+---------------------------------------------------
+
+.. automodule:: query_strategies.random_sampling_strategy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.representativeness\_sampling\_clustering module
+-----------------------------------------------------------------
+
+.. automodule:: query_strategies.representativeness_sampling_clustering
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.representativeness\_sampling\_distances module
+----------------------------------------------------------------
+
+.. automodule:: query_strategies.representativeness_sampling_distances
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.representativeness\_sampling\_strategy\_base module
+---------------------------------------------------------------------
+
+.. automodule:: query_strategies.representativeness_sampling_strategy_base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.representativeness\_sampling\_uncertainty module
+------------------------------------------------------------------
+
+.. automodule:: query_strategies.representativeness_sampling_uncertainty
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.uncertainty\_sampling\_strategy module
+--------------------------------------------------------
+
+.. automodule:: query_strategies.uncertainty_sampling_strategy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+query\_strategies.utils module
+------------------------------
+
+.. automodule:: query_strategies.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: query_strategies
    :members:
    :undoc-members:
    :show-inheritance:

@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -237,8 +240,8 @@
 <span class="sd">        predictions and to have the shape :math:`(N, C, X, Y)` or :math:`(N, C, X, Y, Z)`.</span>
 
 <span class="sd">    Shape:</span>
-<span class="sd">        - Prediction: :math:`(N, C, X, Y, ...)` or :math:`(N, X, Y, ...)`, where `N = batch size` and `C = number of</span>
-<span class="sd">             classes` (see Notes above).</span>
+<span class="sd">        - | Prediction: :math:`(N, C, X, Y, ...)` or :math:`(N, X, Y, ...)`, where `N = batch size` and `C = number of</span>
+<span class="sd">          | classes` (see Notes above).</span>
 <span class="sd">        - Target: :math:`(N, C, X, Y, ...)`, or :math:`(N, X, Y, ...)` (see Notes above).</span>
 <span class="sd">        - Image_ids: :math:`(N)`, where `N = batch size`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -387,11 +390,11 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict[string, Tensor]: Mapping of metric names to metric values.</span>
-<span class="sd">                If `reduction` is `&quot;none&quot;`, the keys have the form</span>
-<span class="sd">                `&lt;metric name&gt;_&lt;confidence_level&gt;_&lt;image ID&gt;`.</span>
-<span class="sd">                Otherwise the keys have the form `&lt;reduction&gt;_&lt;metric name&gt;_&lt;confidence_level&gt;`</span>
-<span class="sd">                If `&quot;metrics_to_aggregate&quot;` is provided and `reduction` is not `&quot;none&quot;`, the dictionary additionally</span>
-<span class="sd">                contains the keys `&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;`.</span>
+<span class="sd">            If `reduction` is `&quot;none&quot;`, the keys have the form</span>
+<span class="sd">            `&lt;metric name&gt;_&lt;confidence_level&gt;_&lt;image ID&gt;`.</span>
+<span class="sd">            Otherwise the keys have the form `&lt;reduction&gt;_&lt;metric name&gt;_&lt;confidence_level&gt;`</span>
+<span class="sd">            If `&quot;metrics_to_aggregate&quot;` is provided and `reduction` is not `&quot;none&quot;`, the dictionary additionally</span>
+<span class="sd">            contains the keys `&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">per_image_metrics</span> <span class="o">=</span> <span class="p">{}</span>
@@ -470,7 +473,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            List[string]: A list containing the keys of the dictionary returned by the `compute()` method of this</span>
-<span class="sd">                    module.</span>
+<span class="sd">            module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">metric_names</span> <span class="o">=</span> <span class="p">[]</span>

@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>query_strategies.query_strategy &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>query_strategies.random_sampling_strategy &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -162,7 +162,7 @@
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="../../index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
           <li><a href="../index.html">Module code</a> &gt;</li>
-      <li>query_strategies.query_strategy</li>
+      <li>query_strategies.random_sampling_strategy</li>
       <li class="sphinx-template-breadcrumbs-aside">
       </li>
   </ul>
@@ -182,42 +182,67 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <h1>Source code for query_strategies.query_strategy</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module containing abstract superclass for query strategies.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+  <h1>Source code for query_strategies.random_sampling_strategy</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module for random sampling strategy &quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">ActiveLearningDataModule</span>
 <span class="kn">from</span> <span class="nn">models.pytorch_model</span> <span class="kn">import</span> <span class="n">PytorchModel</span>
+<span class="kn">from</span> <span class="nn">.query_strategy</span> <span class="kn">import</span> <span class="n">QueryStrategy</span>
 
 
 <span class="c1"># pylint: disable=too-few-public-methods</span>
-<div class="viewcode-block" id="QueryStrategy"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.query_strategy.QueryStrategy">[docs]</a><span class="k">class</span> <span class="nc">QueryStrategy</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Abstract superclass for query strategies.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="RandomSamplingStrategy"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.random_sampling_strategy.RandomSamplingStrategy">[docs]</a><span class="k">class</span> <span class="nc">RandomSamplingStrategy</span><span class="p">(</span><span class="n">QueryStrategy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for selecting items via a random sampling strategy</span>
 
-<div class="viewcode-block" id="QueryStrategy.select_items_to_label"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.query_strategy.QueryStrategy.select_items_to_label">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">select_items_to_label</span><span class="p">(</span>
+<span class="sd">    Args:</span>
+<span class="sd">        random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible outputs</span>
+<span class="sd">            across multiple runs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+
+<div class="viewcode-block" id="RandomSamplingStrategy.select_items_to_label"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.random_sampling_strategy.RandomSamplingStrategy.select_items_to_label">[docs]</a>    <span class="k">def</span> <span class="nf">select_items_to_label</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">]],</span>
         <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
         <span class="n">items_to_label</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Selects subset of the unlabeled data that should be labeled next.</span>
+<span class="sd">        Selects random subset of the unlabeled data that should be labeled next. We are using</span>
+<span class="sd">        the shuffling of the dataset for randomisation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            models: Current models that should be improved by selecting additional data for labeling.</span>
-<span class="sd">            dataloader: Pytorch dataloader representing the unlabeled dataset.</span>
-<span class="sd">            items_to_label: Number of items that should be selected for labeling.</span>
+<span class="sd">            data_module (ActiveLearningDataModule): A data module object providing data.</span>
+<span class="sd">            items_to_label (int): Number of items that should be selected for labeling.</span>
 <span class="sd">            **kwargs: Additional, strategy-specific parameters.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Tuple[List[str], Optional[Dict[str, np.array]]]: List of IDs of the data items to be labeled</span>
-<span class="sd">            and an optional dictonary of pseudo labels with the corresponding IDs as keys.</span>
+<span class="sd">            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are</span>
+<span class="sd">            generated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># randomly select ids to query</span>
 
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+        <span class="n">unlabeled_image_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">image_ids</span> <span class="ow">in</span> <span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_dataloader</span><span class="p">():</span>
+            <span class="n">unlabeled_image_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">image_ids</span><span class="p">)</span>
+
+        <span class="n">items_to_label</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">,</span> <span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_set_size</span><span class="p">())</span>
+
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">unlabeled_image_ids</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">items_to_label</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
               </article>

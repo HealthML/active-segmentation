@@ -1,0 +1,949 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>datasets.doubly_shuffled_nifti_dataset &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="../../genindex.html" />
+  <link rel="search" title="Search" href="../../search.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="../../">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="../../index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="../index.html">Module code</a> &gt;</li>
+      <li>datasets.doubly_shuffled_nifti_dataset</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <h1>Source code for datasets.doubly_shuffled_nifti_dataset</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module to load and batch nifti datasets &quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Manager</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">IterableDataset</span>
+
+<span class="kn">from</span> <span class="nn">datasets.dataset_hooks</span> <span class="kn">import</span> <span class="n">DatasetHooks</span>
+
+
+<span class="c1"># pylint: disable=too-many-instance-attributes,abstract-method</span>
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset">[docs]</a><span class="k">class</span> <span class="nc">DoublyShuffledNIfTIDataset</span><span class="p">(</span><span class="n">IterableDataset</span><span class="p">,</span> <span class="n">DatasetHooks</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This dataset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        image_paths (List[str]): List with the paths to the images. Has to contain paths of all images which can ever</span>
+<span class="sd">            become part of the dataset.</span>
+<span class="sd">        annotation_paths (List[str]): List with the paths to the annotations. Has to contain paths of all images which</span>
+<span class="sd">            can ever become part of the dataset.</span>
+<span class="sd">        cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.</span>
+<span class="sd">            Defaults to zero.</span>
+<span class="sd">        combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.</span>
+<span class="sd">            Defaults to False.</span>
+<span class="sd">        mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using</span>
+<span class="sd">            all values.</span>
+<span class="sd">        shuffle (bool, optional): Whether the data should be shuffled.</span>
+<span class="sd">        transform (Callable[[Any], Tensor], optional): Function to transform the images.</span>
+<span class="sd">        target_transform (Callable[[Any], Tensor], optional): Function to transform the annotations.</span>
+<span class="sd">        dim (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.</span>
+<span class="sd">            Defaults to 2.</span>
+<span class="sd">        slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.</span>
+<span class="sd">            Uses all slices if None. Defaults to None.</span>
+<span class="sd">        random_state (int, optional): Controls the data shuffling. Pass an int for reproducible output across multiple</span>
+<span class="sd">            runs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.normalize"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.normalize">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalizes an image by</span>
+<span class="sd">            #. Dividing by the maximum value</span>
+<span class="sd">            #. Subtracting the mean, zeros will be ignored while calculating the mean</span>
+<span class="sd">            #. Dividing by the negative minimum value</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            img: The input image that should be normalized.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Normalized image with background values normalized to -1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">img</span>
+
+        <span class="n">tmp</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+
+        <span class="c1"># ignore zero values for mean calculation because background dominates</span>
+        <span class="n">tmp</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="n">tmp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">tmp</span> <span class="o">/=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tmp</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__read_image</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads image or annotation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): Path of the image file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The image. See https://nipy.org/nibabel/reference/nibabel.spatialimages.html#module-nibabel.spatialimages</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">nib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__read_slice_count</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads image or annotation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): Path of the image file.</span>
+<span class="sd">            dim (int, optional): The dimensionality of the dataset. Defaults to 2.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The slice count of the image at the filepath or 1 if dim is not 2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">__read_image</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span>
+            <span class="k">else</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.generate_active_learning_split"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.generate_active_learning_split">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">generate_active_learning_split</span><span class="p">(</span>
+        <span class="n">filepaths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">initial_training_set_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a split between initial training set and initially unlabeled set for active learning.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepaths (List[str]): The file paths to the Nifti files.</span>
+<span class="sd">            dim (int): The dimensionality of the dataset. (2 or 3.)</span>
+<span class="sd">            initial_training_set_size (int): The number of samples in the initial training set.</span>
+<span class="sd">            random_state (int, optional): The random state used to generate the split. Pass an int for reproducibility</span>
+<span class="sd">                across runs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A tuple of two lists of np.arrays. The lists contain one array per filepath which contains the</span>
+<span class="sd">            slice indices of the slices which should be part of the training and unlabeled sets respectively.</span>
+<span class="sd">            The lists can be passed as `slice_indices` for initialization of a DoublyShuffledNIfTIDataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">image_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">initial_training_samples</span><span class="p">,</span> <span class="n">initial_unlabeled_samples</span><span class="p">,)</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+                <span class="n">image_indices</span><span class="p">,</span>
+                <span class="n">train_size</span><span class="o">=</span><span class="n">initial_training_set_size</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">image_index</span> <span class="ow">in</span> <span class="n">initial_training_samples</span> <span class="k">else</span> <span class="p">[])</span>
+                    <span class="k">for</span> <span class="n">image_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">))</span>
+                <span class="p">],</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">image_index</span> <span class="ow">in</span> <span class="n">initial_unlabeled_samples</span> <span class="k">else</span> <span class="p">[])</span>
+                    <span class="k">for</span> <span class="n">image_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">))</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="n">all_samples</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="n">image_index</span><span class="p">,</span> <span class="n">slice_index</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">image_index</span><span class="p">,</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">slice_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">__read_slice_count</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="p">(</span><span class="n">initial_training_samples</span><span class="p">,</span> <span class="n">initial_unlabeled_samples</span><span class="p">)</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">all_samples</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">initial_training_set_size</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">slice_index</span>
+                        <span class="k">for</span> <span class="n">image_index</span><span class="p">,</span> <span class="n">slice_index</span> <span class="ow">in</span> <span class="n">initial_training_samples</span>
+                        <span class="k">if</span> <span class="n">image_index</span> <span class="o">==</span> <span class="n">image_id</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">))</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">slice_index</span>
+                        <span class="k">for</span> <span class="n">image_index</span><span class="p">,</span> <span class="n">slice_index</span> <span class="ow">in</span> <span class="n">initial_unlabeled_samples</span>
+                        <span class="k">if</span> <span class="n">image_index</span> <span class="o">==</span> <span class="n">image_id</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">image_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">))</span>
+            <span class="p">],</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__align_axes</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Aligns the axes to (slice, x, y) or (channel, slice, x, y), depending on if there is a channel dimension.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            img (np.ndarray): The image</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The images with realigned axes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># slice dimension to front</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># channel dimension to front</span>
+
+        <span class="k">return</span> <span class="n">img</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__read_image_as_array</span><span class="p">(</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">norm</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">join_non_zero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">filter_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads image or annotation as numpy array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: Path of the image file.</span>
+<span class="sd">            norm: Whether the image should be normalized.</span>
+<span class="sd">            join_non_zero: Whether the non zero values of the image should be joined. Will set all non zero values to 1.</span>
+<span class="sd">            filter_values: Values to be filtered from the images. All other values will be set to zero.</span>
+<span class="sd">                Can be used togther with join_non_zero. Filtering will be applied befor joining.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The array representation of an image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">__read_image</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">filter_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">map_to_filtered_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filter_values</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="p">)</span>
+
+            <span class="n">img</span> <span class="o">=</span> <span class="n">map_to_filtered_value</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">join_non_zero</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">norm</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">__align_axes</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__ensure_channel_dim</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">img</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="n">dim</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__arange_image_slice_indices</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filepaths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">slice_indices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads the slice indices for the images at the provided slice paths and pairs them with their image index.</span>
+
+<span class="sd">        Implements efficient shuffling for 2D image datasets like the DoublyShuffledNIfTIDataset whose elements</span>
+<span class="sd">        represent the slices of multiple 3D images. To allow for efficient image pre-fetching, first the order of all 3D</span>
+<span class="sd">        images is shuffled and then the order of slices within each 3D image is shuffled. This way the 3D images can</span>
+<span class="sd">        still be loaded as a whole.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepaths (List[str]): The paths of the images.</span>
+<span class="sd">            dim (int, optional): The dimensionality of the dataset. Defaults to 2.</span>
+<span class="sd">            shuffle (boolean, optional): Flag indicating wether to shuffle the slices. Defaults to False.</span>
+<span class="sd">            random_state (int, optional): Random seed for shuffling.</span>
+<span class="sd">            slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.</span>
+<span class="sd">                Uses all slices if None. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A dictionary of per-image dictionaries which contain slice indices as keys. If a slice index is not part of</span>
+<span class="sd">            the per-image dictionary, it is not part of the dataset. If its value is None, it does not have a pseudo</span>
+<span class="sd">            label. If its value is a np.array, this is the pseudo label for that slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">slice_indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">slice_indices</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                    <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">__read_slice_count</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">filepaths</span>
+            <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+
+            <span class="c1"># Shuffle the slices within the images</span>
+            <span class="k">for</span> <span class="n">slices</span> <span class="ow">in</span> <span class="n">slice_indices</span><span class="p">:</span>
+                <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span>
+
+            <span class="c1"># Shuffle the images</span>
+            <span class="n">enumerated_slice_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">slice_indices</span><span class="p">))</span>
+            <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">enumerated_slice_indices</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">enumerated_slice_indices</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slice_indices</span><span class="p">)</span>
+
+        <span class="c1"># Pair up the slices indices with their image index and concatenate for all images</span>
+        <span class="c1"># (e.g. [5,1,9,0,...] for image index 3 becomes [(3,5),(3,1),(3,9),(3,0),...])</span>
+        <span class="n">image_slice_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">image_index</span><span class="p">,</span> <span class="n">slices</span> <span class="ow">in</span> <span class="n">enumerated_slice_indices</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">slice_index</span> <span class="ow">in</span> <span class="n">slices</span><span class="p">:</span>
+                    <span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Concatenate the [image_index, slice_index] pairs for all images</span>
+        <span class="k">return</span> <span class="n">image_slice_indices</span>
+
+    <span class="c1"># pylint: disable=too-many-arguments</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">image_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">annotation_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">cache_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">combine_foreground_classes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">mask_filter_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">is_unlabeled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">target_transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">slice_indices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">case_id_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">image_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">annotation_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combine_foreground_classes</span> <span class="o">=</span> <span class="n">combine_foreground_classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_filter_values</span> <span class="o">=</span> <span class="n">mask_filter_values</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_paths</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_paths</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_unlabeled</span> <span class="o">=</span> <span class="n">is_unlabeled</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_mask</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currently_loaded_image_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_size</span> <span class="o">=</span> <span class="n">cache_size</span>
+
+        <span class="c1"># since the PyTorch dataloader uses multiple processes for data loading (if num_workers &gt; 0),</span>
+        <span class="c1"># a shared dict is used to share the cache between all processes have to use</span>
+        <span class="c1"># see https://github.com/ptrblck/pytorch_misc/blob/master/shared_dict.py and</span>
+        <span class="c1"># https://discuss.pytorch.org/t/reuse-of-dataloader-worker-process-and-caching-in-dataloader/30620/14</span>
+        <span class="c1"># for more information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span> <span class="o">=</span> <span class="n">target_transform</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">case_id_prefix</span> <span class="o">=</span> <span class="n">case_id_prefix</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__arange_image_slice_indices</span><span class="p">(</span>
+            <span class="n">filepaths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">image_paths</span><span class="p">,</span>
+            <span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">slice_indices</span><span class="o">=</span><span class="n">slice_indices</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_image_key_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_slice_key_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__get_case_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">case_id_prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_index</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__get_image_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">case_id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">case_id_prefix</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterator: Iterator that yields the whole dataset if a single process is used for data loading</span>
+<span class="sd">                or a subset of the dataset if the dataloading is split across multiple worker processes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">worker_info</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get_worker_info</span><span class="p">()</span>
+
+        <span class="c1"># check whether data loading is split across multiple workers</span>
+        <span class="k">if</span> <span class="n">worker_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="n">worker_info</span><span class="o">.</span><span class="n">num_workers</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_image_key_index</span> <span class="o">=</span> <span class="n">worker_info</span><span class="o">.</span><span class="n">id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_slice_key_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_image_key_index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_slice_key_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.read_mask_for_image"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.read_mask_for_image">[docs]</a>    <span class="k">def</span> <span class="nf">read_mask_for_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads the mask for the image from file. Uses correct mask specific parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image_index (int): Index of the image to load.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read_image_as_array</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">annotation_paths</span><span class="p">[</span><span class="n">image_index</span><span class="p">],</span>
+            <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">join_non_zero</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">combine_foreground_classes</span><span class="p">,</span>
+            <span class="n">filter_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_filter_values</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__load_image_and_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads image with the given index either from cache or from disk.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image_index (int): Index of the image to load.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currently_loaded_image_index</span> <span class="o">=</span> <span class="n">image_index</span>
+
+        <span class="c1"># check if image and mask are in cache</span>
+        <span class="k">if</span> <span class="n">image_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_cache</span> <span class="ow">and</span> <span class="n">image_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_cache</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_cache</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+        <span class="c1"># read image and mask from disk otherwise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read_image_as_array</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">image_paths</span><span class="p">[</span><span class="n">image_index</span><span class="p">],</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_mask_for_image</span><span class="p">(</span><span class="n">image_index</span><span class="p">)</span>
+
+        <span class="c1"># cache image and mask if there is still space in cache</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_cache</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">image_cache</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_cache</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_mask</span>
+
+    <span class="c1"># pylint: disable=too-many-branches</span>
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span>
+    <span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_image_key_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+        <span class="n">image_index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_image_key_index</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">image_index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currently_loaded_image_index</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_image_and_mask</span><span class="p">(</span><span class="n">image_index</span><span class="p">)</span>
+
+        <span class="n">case_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_case_id</span><span class="p">(</span><span class="n">image_index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">slice_index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_slice_key_index</span>
+            <span class="p">]</span>
+            <span class="n">case_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">case_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">slice_index</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span><span class="p">[:,</span> <span class="n">slice_index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span><span class="p">[</span><span class="n">slice_index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+            <span class="n">pseudo_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_index</span><span class="p">]</span>
+            <span class="n">is_pseudo_label</span> <span class="o">=</span> <span class="n">pseudo_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">pseudo_label</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">is_pseudo_label</span>
+                <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_mask</span><span class="p">[</span><span class="n">slice_index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_slice_key_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_slice_key_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_image_key_index</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_slice_key_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_image</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_mask</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">slice_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">slice_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]:</span>
+                    <span class="n">y</span><span class="p">[</span><span class="n">slice_id</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_id</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">y</span><span class="p">[</span><span class="n">slice_id</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_id</span><span class="p">]</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_image_key_index</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">__ensure_channel_dim</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_unlabeled</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">case_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">is_pseudo_label</span><span class="p">,</span> <span class="n">case_id</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.add_image"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.add_image">[docs]</a>    <span class="k">def</span> <span class="nf">add_image</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">image_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">slice_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">pseudo_label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an image to this dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image_id (str): The id of the image.</span>
+<span class="sd">            slice_index (int): Index of the slice to be added.</span>
+<span class="sd">            pseudo_label (np.array, optional): An optional pseudo label for the slice. If no pseudo label is provided,</span>
+<span class="sd">                the actual label from the corresponding file is used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">image_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_image_index</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">image_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span>
+            <span class="ow">and</span> <span class="n">slice_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_index</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">pseudo_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># If a pseudo label is added even though the real label already exists it should be ignored</span>
+                <span class="k">return</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Slice of image already belongs to this dataset.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">image_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">slice_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_index</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">pseudo_label</span></div>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.remove_image"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.remove_image">[docs]</a>    <span class="k">def</span> <span class="nf">remove_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">slice_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes an image from this dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image_id (str): The id of the image.</span>
+<span class="sd">            slice_index (int): Index of the slice to be removed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">image_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_image_index</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">image_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span>
+            <span class="ow">and</span> <span class="n">slice_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">][</span><span class="n">slice_index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="p">[</span><span class="n">image_index</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">image_index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.get_images_by_id"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.get_images_by_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_images_by_id</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">case_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the last n images and corresponding case ids from the images that were last added to the dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            case_ids (List[str]): List with case_ids to get.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of all the images with provided case ids.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># create list of files as tuple of image id and slice index</span>
+        <span class="n">image_slice_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">case_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">case_ids</span><span class="p">]</span>
+        <span class="n">image_slice_ids</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">split_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">split_id</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_id</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">split_id</span> <span class="ow">in</span> <span class="n">image_slice_ids</span>
+        <span class="p">]</span>
+        <span class="n">all_images</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">case_id</span><span class="p">,</span> <span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">case_ids</span><span class="p">,</span> <span class="n">image_slice_ids</span><span class="p">):</span>
+            <span class="n">image_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_image_index</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+            <span class="c1"># check if image and mask are in cache</span>
+            <span class="k">if</span> <span class="n">image_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_cache</span><span class="p">:</span>
+                <span class="n">current_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_cache</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+            <span class="c1"># read image and mask from disk otherwise</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read_image_as_array</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">image_paths</span><span class="p">[</span><span class="n">image_index</span><span class="p">],</span> <span class="n">norm</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+            <span class="n">all_images</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_image</span><span class="p">[</span><span class="n">slice_index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">case_id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">all_images</span></div>
+
+    <span class="k">def</span> <span class="nf">__image_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.image_ids"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.image_ids">[docs]</a>    <span class="k">def</span> <span class="nf">image_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_case_id</span><span class="p">(</span><span class="n">image_idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">image_idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image_indices</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.slices_per_image"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.slices_per_image">[docs]</a>    <span class="k">def</span> <span class="nf">slices_per_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">DoublyShuffledNIfTIDataset</span><span class="o">.</span><span class="n">__read_slice_count</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_paths</span><span class="p">[</span><span class="n">image_idx</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">image_idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image_indices</span><span class="p">()</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.size"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Size of the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">for</span> <span class="n">inner_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inner_dict</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">size</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span></div></div>
+</pre></div>
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+  <script src="../../_static/jquery.js"></script>
+  <script src="../../_static/underscore.js"></script>
+  <script src="../../_static/doctools.js"></script>
+  <script src="../../_static/clipboard.min.js"></script>
+  <script src="../../_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="../../_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="../../index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="../../">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

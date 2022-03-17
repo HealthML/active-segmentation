@@ -1,0 +1,659 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Configuration &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="genindex.html" />
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="next" title="The BraTS Dataset" href="brats.html" />
+  <link rel="prev" title="query_strategies package" href="query_strategies.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="./">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+      <li>Configuration</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+            <a href="_sources/configuration.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <section id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>The configuration file is in the format of a <cite>.json</cite> file.
+Most settings must be set explicitly in the configuration file.</p>
+<p id="config-section-label">The configuration file is split in several sections. There are no requirements for ordering within
+these sections, or for ordering of the sections themselves.</p>
+<section id="general">
+<span id="general-config-label"></span><h2>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="wandb-project-name-label"></span><ul class="simple" id="index-0">
+<li><dl class="simple">
+<dt><em>wandb_project_name</em></dt><dd><p>The name of the <a class="reference external" href="https://wandb.ai/">weights and biases</a> project.
+Weights and biases is setup in the project for experiment tracking and logging.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="experiment-name-label"></span><ul class="simple" id="index-1">
+<li><dl class="simple">
+<dt><em>experiment_name</em></dt><dd><p>The name of the <a class="reference external" href="https://wandb.ai/">weights and biases</a> experiment.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="experiment-tags-label"></span><ul class="simple" id="index-2">
+<li><dl class="simple">
+<dt><em>experiment_tags</em></dt><dd><p>List of tags to place on the run in <a class="reference external" href="https://wandb.ai/">weights and biases</a>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="checkpoint-dir-label"></span><ul class="simple" id="index-3">
+<li><dl class="simple">
+<dt><em>checkpoint_dir</em></dt><dd><p>The local directory where the model checkpoints are stored.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="batch-size-label"></span><ul class="simple" id="index-4">
+<li><dl class="simple">
+<dt><em>batch_size</em></dt><dd><p>Number of training examples passed in one training step.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="epochs-label"></span><ul class="simple" id="index-5">
+<li><dl class="simple">
+<dt><em>epochs</em></dt><dd><p>The number of full dataset forward iterations the model should be trained with.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="num-workers-label"></span><ul class="simple" id="index-6">
+<li><dl class="simple">
+<dt><em>num_workers</em></dt><dd><p>Number of workers processes for the data loading. If <code class="docutils literal notranslate"><span class="pre">0</span></code>, multi-process data loading is disabled.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="gpus-label"></span><ul class="simple" id="index-7">
+<li><dl class="simple">
+<dt><em>gpus</em></dt><dd><p>The number of gpus to be used. If <code class="docutils literal notranslate"><span class="pre">0</span></code>, the training runs on CPU.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="prediction-count-label"></span><ul class="simple" id="index-8">
+<li><dl class="simple">
+<dt><em>prediction_count</em></dt><dd><p>The number of sample predictions to be generated for the validation set. This option is intended for use cases where you want to assess a model’s quality using sample predictions.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="prediction-dir-label"></span><ul class="simple" id="index-9">
+<li><dl class="simple">
+<dt><em>prediction_dir</em></dt><dd><p>The local directory to store the sample predictions.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="random-state-label"></span><ul class="simple" id="index-10">
+<li><dl class="simple">
+<dt><em>random_state</em></dt><dd><p>Constant to ensure reproducibility of random operations.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="model-config-section">
+<span id="model-config-label"></span><h2>[model_config] section<a class="headerlink" href="#model-config-section" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">model_config</span></code> section specifies parameters to setup the segmentation model architecture and losses.</p>
+<span class="target" id="architecture-label"></span><ul class="simple" id="index-11">
+<li><dl class="simple">
+<dt><em>architecture</em></dt><dd><p>The name of the architecture to use.  Allowable values are: <code class="docutils literal notranslate"><span class="pre">&quot;u_net&quot;</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the model architecture of your choice is not yet included in the framework,
+it can be added by subclassing <a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">models.pytorch_model.PytorchModel()</span></code></a>.</p>
+</div>
+<span class="target" id="optimizer-label"></span><ul class="simple" id="index-12">
+<li><dl class="simple">
+<dt><em>optimizer</em></dt><dd><p>The name of the algorithm used to calculate the loss and update the weights. Allowable values are: <code class="docutils literal notranslate"><span class="pre">&quot;adam&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;sgd&quot;</span></code> (gradient descent).</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="loss-config-label"></span><ul class="simple" id="index-13">
+<li><dl class="simple">
+<dt><em>loss_config</em></dt><dd><p>Dictionary with loss parameters. Mandatory is the key <code class="docutils literal notranslate"><span class="pre">&quot;type&quot;</span></code> with one of the allowable values:
+<code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;dice&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy_dice&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;general_dice&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;fp&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;fp_dice&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;focal&quot;</span></code>.
+More detailed documentation and configuration options of the losses can be looked up in
+<a class="reference internal" href="functional.html#module-functional.losses" title="functional.losses"><code class="xref py py-mod docutils literal notranslate"><span class="pre">functional.losses</span></code></a>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="learning-rate-label"></span><ul class="simple" id="index-14">
+<li><dl class="simple">
+<dt><em>learning_rate</em></dt><dd><p>The step size at each iteration while moving towards a minimum of the loss. Defaults to <code class="docutils literal notranslate"><span class="pre">0.0001</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="num-levels-label"></span><ul class="simple" id="index-15">
+<li><dl class="simple">
+<dt><em>num_levels</em></dt><dd><p>Number of levels (encoder and decoder blocks) in the U-Net. Defaults to <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="dim-label"></span><ul class="simple" id="index-16">
+<li><dl class="simple">
+<dt><em>dim</em></dt><dd><p>The dimensionality of the U-Net. Allowable values are: <code class="docutils literal notranslate"><span class="pre">2</span></code> and <code class="docutils literal notranslate"><span class="pre">3</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="model-selection-criterion-label"></span><ul class="simple" id="index-17">
+<li><dl class="simple">
+<dt><em>model_selection_criterion</em></dt><dd><p>The criterion for selecting the best model for checkpointing. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;loss&quot;</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="train-metrics-label"></span><ul class="simple" id="index-18">
+<li><dl class="simple">
+<dt><em>train_metrics</em></dt><dd><p>A list with the names of the metrics that should be computed and logged in each training and
+validation epoch of the training loop. Available options: <code class="docutils literal notranslate"><span class="pre">&quot;dice_score&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;specificity&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">[&quot;dice_score&quot;]</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="train-metric-confidence-levels-label"></span><ul class="simple" id="index-19">
+<li><dl class="simple">
+<dt><em>train_metric_confidence_levels</em></dt><dd><p>A list of confidence levels for which the metrics specified in the <a class="reference internal" href="#train-metrics-label"><span class="std std-ref">train_metrics</span></a> parameter
+should be computed in the training loop (<code class="docutils literal notranslate"><span class="pre">trainer.fit()</span></code>). This parameter is used only for
+multi-label classification tasks. Defaults to <code class="docutils literal notranslate"><span class="pre">[0.5]</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="test-metrics-label"></span><ul class="simple" id="index-20">
+<li><dl class="simple">
+<dt><em>test_metrics</em></dt><dd><p>A list with the names of the metrics that should be computed and logged in the model validation
+or testing loop (<code class="docutils literal notranslate"><span class="pre">trainer.validate()</span></code>, <code class="docutils literal notranslate"><span class="pre">trainer.test()</span></code>). Available options:
+<code class="docutils literal notranslate"><span class="pre">&quot;dice_score&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;specificity&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code>.
+Defaults to <code class="docutils literal notranslate"><span class="pre">[&quot;dice_score&quot;,</span> <span class="pre">&quot;sensitivity&quot;,</span> <span class="pre">&quot;specificity&quot;,</span> <span class="pre">&quot;hausdorff95&quot;]</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="test-metric-confidence-levels-label"></span><ul class="simple" id="index-21">
+<li><dl class="simple">
+<dt><em>test_metric_confidence_levels</em></dt><dd><p>A list of confidence levels for which the metrics specified in the <a class="reference internal" href="#test-metrics-label"><span class="std std-ref">test_metrics</span></a> parameter
+should be computed in the validation or testing loop. This parameter is used only for
+multi-label classification tasks. Defaults to <code class="docutils literal notranslate"><span class="pre">[0.5]</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="dataset-config-section">
+<span id="dataset-config-label"></span><h2>[dataset_config] section<a class="headerlink" href="#dataset-config-section" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dataset_config</span></code> section specifies parameters to setup the dataset and data loading.</p>
+<span class="target" id="dataset-label"></span><ul class="simple" id="index-22">
+<li><dl class="simple">
+<dt><em>dataset</em></dt><dd><p>The name of the dataset to use. Allowable values are: <code class="docutils literal notranslate"><span class="pre">&quot;brats&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;decathlon&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;bcss&quot;</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="data-dir-label"></span><ul class="simple" id="index-23">
+<li><dl class="simple">
+<dt><em>data_dir</em></dt><dd><p>The directory where the data of the selected <a class="reference internal" href="#dataset-label"><span class="std std-ref">dataset</span></a> resides.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="cache-size-label"></span><ul class="simple" id="index-24">
+<li><dl class="simple">
+<dt><em>cache_size</em></dt><dd><p>Number of images to keep in memory between epochs to speed-up data loading. Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Further mandatory or optional fields can be found in the documentation of the respective data module.
+Available data modules as of now are <a class="reference internal" href="datasets.html#datasets.decathlon_data_module.DecathlonDataModule" title="datasets.decathlon_data_module.DecathlonDataModule"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datasets.decathlon_data_module.DecathlonDataModule()</span></code></a>,
+<a class="reference internal" href="datasets.html#datasets.brats_data_module.BraTSDataModule" title="datasets.brats_data_module.BraTSDataModule"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datasets.brats_data_module.BraTSDataModule()</span></code></a> and <a class="reference internal" href="datasets.html#datasets.bcss_data_module.BCSSDataModule" title="datasets.bcss_data_module.BCSSDataModule"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datasets.bcss_data_module.BCSSDataModule()</span></code></a>.</p>
+</div>
+</section>
+<section id="active-learning-config-section">
+<span id="active-learning-config-label"></span><h2>[active_learning_config] section<a class="headerlink" href="#active-learning-config-section" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">active_learning_config</span></code> section specifies parameters to run the active learning loop.</p>
+<span class="target" id="active-learning-mode-label"></span><ul class="simple" id="index-25">
+<li><dl class="simple">
+<dt><em>active_learning_mode</em></dt><dd><p>Enable/Disabled Active Learning Pipeline. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the model is trained on the full training dataset.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="reset-weights-label"></span><ul class="simple" id="index-26">
+<li><dl class="simple">
+<dt><em>reset_weights</em></dt><dd><p>Enable/Disable resetting of weights after every active learning iteration. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="initial-training-set-size-label"></span><ul class="simple" id="index-27">
+<li><dl class="simple">
+<dt><em>initial_training_set_size</em></dt><dd><p>Initial size of the training set if the active learning mode is activated. Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="iterations-label"></span><ul class="simple" id="index-28">
+<li><dl class="simple">
+<dt><em>iterations</em></dt><dd><p>Iteration times how often the active learning pipeline should be executed.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the active learning pipeline is run until the whole dataset is labeled. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="items-to-label-label"></span><ul class="simple" id="index-29">
+<li><dl class="simple">
+<dt><em>items_to_label</em></dt><dd><p>Number of items that should be selected for labeling in each active learning iteration. Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="batch-size-unlabeled-set-label"></span><ul class="simple" id="index-30">
+<li><dl class="simple">
+<dt><em>batch_size_unlabeled_set</em></dt><dd><p>Batch size for the unlabeled set. Defaults to <a class="reference internal" href="#batch-size-label"><span class="std std-ref">batch_size</span></a>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="heatmaps-per-iteration-label"></span><ul class="simple" id="index-31">
+<li><dl class="simple">
+<dt><em>heatmaps_per_iteration</em></dt><dd><p>Number of heatmaps to be generated per active learning iteration. This option is intended for uses cases where you want to assess the quality of a sampling strategy using heatmaps of the model’s predictions. Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="strategy-config-section">
+<span id="strategy-config-label"></span><h2>[strategy_config] section<a class="headerlink" href="#strategy-config-section" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">strategy_config</span></code> section specifies parameters to setup the strategy to query for new examples to be labeled.</p>
+<span class="target" id="type-label"></span><ul class="simple" id="index-32">
+<li><dl class="simple">
+<dt><em>type</em></dt><dd><p>Name of the sampling strategy to use. Allowable values are: <code class="docutils literal notranslate"><span class="pre">&quot;random&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;interpolation&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;uncertainty&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;representativeness_distance&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;representativeness_clustering&quot;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">&quot;representativeness_uncertainty&quot;</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<span class="target" id="description-label"></span><ul class="simple" id="index-33">
+<li><dl class="simple">
+<dt><em>description</em></dt><dd><p>Detailed description about the configuration of the strategy.
+The information is logged to make experiments clearer.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Further mandatory or optional fields can be found in the documentation of the respective strategy.
+Available strategies and their documentations can be found in the <a class="reference internal" href="query_strategies.html"><span class="doc">query_strategies package</span></a>.</p>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="brats.html" class="btn btn-neutral float-right" title="The BraTS Dataset" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="query_strategies.html" class="btn btn-neutral" title="query_strategies package" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#general">General</a></li>
+<li><a class="reference internal" href="#model-config-section">[model_config] section</a></li>
+<li><a class="reference internal" href="#dataset-config-section">[dataset_config] section</a></li>
+<li><a class="reference internal" href="#active-learning-config-section">[active_learning_config] section</a></li>
+<li><a class="reference internal" href="#strategy-config-section">[strategy_config] section</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+  <script src="_static/jquery.js"></script>
+  <script src="_static/underscore.js"></script>
+  <script src="_static/doctools.js"></script>
+  <script src="_static/clipboard.min.js"></script>
+  <script src="_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="./">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

@@ -1,35 +1,77 @@
-datasets
-=====================================
+datasets package
+================
 
+Submodules
+----------
 
-BraTSDataModule
---------------------------------------------------------
+datasets.bcss\_data\_module module
+----------------------------------
+
+.. automodule:: datasets.bcss_data_module
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+datasets.bcss\_dataset module
+-----------------------------
+
+.. automodule:: datasets.bcss_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+datasets.brats\_data\_module module
+-----------------------------------
 
 .. automodule:: datasets.brats_data_module
    :members:
    :undoc-members:
    :show-inheritance:
 
-BraTSDataset
----------------------------------------------------
+datasets.collate module
+-----------------------
 
-.. automodule:: datasets.brats_dataset
+.. automodule:: datasets.collate
    :members:
    :undoc-members:
    :show-inheritance:
 
-DataModule
--------------------------------------------------
+datasets.data\_module module
+----------------------------
 
 .. automodule:: datasets.data_module
    :members:
    :undoc-members:
    :show-inheritance:
 
-PascalVocDataModule
---------------------------------------------------------------
+datasets.dataset\_hooks module
+------------------------------
 
-.. automodule:: datasets.pascal_voc_data_module
+.. automodule:: datasets.dataset_hooks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+datasets.decathlon\_data\_module module
+---------------------------------------
+
+.. automodule:: datasets.decathlon_data_module
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+datasets.doubly\_shuffled\_nifti\_dataset module
+------------------------------------------------
+
+.. automodule:: datasets.doubly_shuffled_nifti_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: datasets
    :members:
    :undoc-members:
    :show-inheritance:

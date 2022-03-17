@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -373,11 +376,11 @@
 <span class="sd">            Tensor: Dice loss.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
-<span class="sd">                in :math:`[0, 1]`</span>
-<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                or :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding.</span>
+<span class="sd">            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">              | in :math:`[0, 1]`</span>
+<span class="sd">            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding or :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -403,11 +406,12 @@
 <span class="sd">    avoid divisions by zero and does not square the terms in the denominator. Additionally, the loss formulation is</span>
 <span class="sd">    generalized to multi-class classification tasks by averaging dice losses over the class and batch dimension:</span>
 
-<span class="sd">        :math:`DL = 1 - \frac{1}{N \cdot L} \cdot \sum_{n=1}^N \sum_{l=1}^L 2 \cdot \frac{\sum_{i} r_{nli} p_{nli} +</span>
-<span class="sd">            \epsilon}{\sum_{n=1}^N \sum_{l=1}^L \sum_{i} (r_{nli} + p_{nli}) + \epsilon}` where :math:`N` is the batch</span>
-<span class="sd">            size, :math:`L` is the number of classes, :math:`r_{nli}` are the ground-truth labels for class :math:`l` in</span>
-<span class="sd">            the :math:`i`-th voxel of the :math:`n`-th image. Analogously, :math:`p` is the predicted probability for</span>
-<span class="sd">            class :math:`l` in the :math:`i`-th voxel of the :math:`n`-th image.</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            DL = 1 - \frac{1}{N \cdot L} \cdot \sum_{n=1}^N \sum_{l=1}^L 2 \cdot \frac{\sum_{i} r_{nli} p_{nli} +</span>
+<span class="sd">            \epsilon}{\sum_{n=1}^N \sum_{l=1}^L \sum_{i} (r_{nli} + p_{nli}) + \epsilon}</span>
+<span class="sd">        where :math:`N` is the batch size, :math:`L` is the number of classes, :math:`r_{nli}` are the ground-truth</span>
+<span class="sd">        labels for class :math:`l` in the :math:`i`-th voxel of the :math:`n`-th image. Analogously, :math:`p` is the</span>
+<span class="sd">        predicted probability for class :math:`l` in the :math:`i`-th voxel of the :math:`n`-th image.</span>
 
 <span class="sd">    This implementation is a wrapper of the Dice loss implementation from the `MONAI package</span>
 <span class="sd">    &lt;https://docs.monai.io/en/stable/losses.html#diceloss&gt;`_ that adapts the reduction behaviour. It supports both</span>
@@ -469,11 +473,11 @@
 <span class="sd">            Tensor: Dice loss.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
-<span class="sd">                in :math:`[0, 1]`</span>
-<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding.</span>
+<span class="sd">            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">              | in :math:`[0, 1]`</span>
+<span class="sd">            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding.</span>
 <span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -499,12 +503,13 @@
 
 <span class="sd">    It is formulated as:</span>
 
-<span class="sd">        :math:`GDL = \frac{1}{N} \cdot \sum_{n=1}^N (1 - 2 \frac{\sum_{l=1}^L w_l \cdot \sum_{i} r_{nli} p_{nli} +</span>
-<span class="sd">            \epsilon}{\sum_{l=1}^L w_l \cdot \sum_{i} (r_{nli} + p_{nli}) + \epsilon})` where</span>
-<span class="sd">            :math:`N` is the batch size, :math:`L` is the number of classes, :math:`w_l` is a class weight,</span>
-<span class="sd">            :math:`r_{nli}` are the ground-truth labels for class :math:`l` in the :math:`i`-th voxel of the</span>
-<span class="sd">            :math:`n`-th image. Analogously, :math:`p` is the predicted probability for class :math:`l` in the</span>
-<span class="sd">            :math:`i`-th voxel of the :math:`n`-th image.</span>
+<span class="sd">        .. math::</span>
+<span class="sd">            GDL = \frac{1}{N} \cdot \sum_{n=1}^N (1 - 2 \frac{\sum_{l=1}^L w_l \cdot \sum_{i} r_{nli} p_{nli} +</span>
+<span class="sd">            \epsilon}{\sum_{l=1}^L w_l \cdot \sum_{i} (r_{nli} + p_{nli}) + \epsilon})</span>
+<span class="sd">        where :math:`N` is the batch size, :math:`L` is the number of classes, :math:`w_l` is a class weight,</span>
+<span class="sd">        :math:`r_{nli}` are the ground-truth labels for class :math:`l` in the :math:`i`-th voxel of the</span>
+<span class="sd">        :math:`n`-th image. Analogously, :math:`p` is the predicted probability for class :math:`l` in the</span>
+<span class="sd">        :math:`i`-th voxel of the :math:`n`-th image.</span>
 
 <span class="sd">    This implementation is a wrapper of the Generalized Dice loss implementation from the `MONAI package</span>
 <span class="sd">    &lt;https://docs.monai.io/en/stable/losses.html#generalizeddiceloss&gt;`_ that adapts the reduction behaviour. It supports</span>
@@ -569,11 +574,11 @@
 <span class="sd">            Tensor: Generalized dice loss.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
-<span class="sd">                in :math:`[0, 1]`</span>
-<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding.</span>
+<span class="sd">            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">              | in :math:`[0, 1]`</span>
+<span class="sd">            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding.</span>
 <span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -636,11 +641,11 @@
 <span class="sd">            Tensor: False positive loss.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
-<span class="sd">                in :math:`[0, 1]`</span>
-<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding.</span>
+<span class="sd">            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">              | in :math:`[0, 1]`</span>
+<span class="sd">            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding.</span>
 <span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -722,11 +727,11 @@
 <span class="sd">            Tensor: Combined loss.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
-<span class="sd">                in :math:`[0, 1]`</span>
-<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding.</span>
+<span class="sd">            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">              | in :math:`[0, 1]`</span>
+<span class="sd">            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding.</span>
 <span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -795,11 +800,11 @@
 <span class="sd">            Tensor: Cross-entropy loss.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
-<span class="sd">                in :math:`[0, 1]`</span>
-<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding.</span>
+<span class="sd">            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">              | in :math:`[0, 1]`</span>
+<span class="sd">            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding.</span>
 <span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -836,7 +841,7 @@
 
 <div class="viewcode-block" id="FocalLoss"><a class="viewcode-back" href="../../functional.html#functional.losses.FocalLoss">[docs]</a><span class="k">class</span> <span class="nc">FocalLoss</span><span class="p">(</span><span class="n">CrossEntropyLoss</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Wrapper for the `CrossEntropyLoss` to perform some addtional computations to turn it into focal loss.</span>
+<span class="sd">    Wrapper for the `CrossEntropyLoss` to perform some additional computations to turn it into focal loss.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).</span>
@@ -927,11 +932,11 @@
 <span class="sd">            Tensor: Combined loss.</span>
 
 <span class="sd">        Shape:</span>
-<span class="sd">            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
-<span class="sd">                in :math:`[0, 1]`</span>
-<span class="sd">            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding</span>
-<span class="sd">                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot</span>
-<span class="sd">                encoding.</span>
+<span class="sd">            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is</span>
+<span class="sd">              | in :math:`[0, 1]`</span>
+<span class="sd">            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label</span>
+<span class="sd">              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or</span>
+<span class="sd">              | multi-hot encoding.</span>
 <span class="sd">            - Weight: :math:`(N)` where `N = batch size`.</span>
 <span class="sd">            - Output: If :attr:`reduction` is `&quot;none&quot;`, shape :math:`(N, C)`. Otherwise, scalar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

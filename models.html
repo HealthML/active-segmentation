@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>models &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>models package &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -39,8 +39,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
-  <link rel="next" title="query_strategies" href="query_strategies.html" />
-  <link rel="prev" title="metric_tracking" href="metric_tracking.html" /> 
+  <link rel="next" title="query_strategies package" href="query_strategies.html" />
+  <link rel="prev" title="metric_tracking package" href="metric_tracking.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -136,16 +136,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -161,8 +164,8 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
-      <li>models</li>
+          <li><a href="active_segmentation.html">Active Learning Framework</a> &gt;</li>
+      <li>models package</li>
       <li class="sphinx-template-breadcrumbs-aside">
             <a href="_sources/models.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
@@ -183,96 +186,59 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="models">
-<h1>models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
-<section id="module-models.pytorch_fcn_resnet50">
-<span id="pytorchfcnresnet50"></span><h2>PytorchFCNResnet50<a class="headerlink" href="#module-models.pytorch_fcn_resnet50" title="Permalink to this headline">¶</a></h2>
-<p>Resnet 50 from pytorch</p>
+  <section id="models-package">
+<h1>models package<a class="headerlink" href="#models-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-models.loss_weight_scheduler">
+<span id="models-loss-weight-scheduler-module"></span><h2>models.loss_weight_scheduler module<a class="headerlink" href="#module-models.loss_weight_scheduler" title="Permalink to this headline">¶</a></h2>
+<p>Scheduler to reduce pseudo-label loss weights as training progresses.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.pytorch_fcn_resnet50.</span></span><span class="sig-name descname"><span class="pre">PytorchFCNResnet50</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">models.pytorch_model.PytorchModel</span></code></a></p>
-<p>Resnet50 model class for segmentation tasks.
-Documentation: <a class="reference external" href="http://pytorch.org/vision/master/generated/torchvision.models.segmentation.fcn_resnet50.html">http://pytorch.org/vision/master/generated/torchvision.models.segmentation.fcn_resnet50.html</a>
-Details about the Resnet50 architecture: <a class="reference external" href="https://arxiv.org/pdf/1512.03385.pdf">https://arxiv.org/pdf/1512.03385.pdf</a>
-:param **kwargs: Further, model specific parameters.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluates the model.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute one forward pass.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.input_dimensionality">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">input_dimensionality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.input_dimensionality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.input_dimensionality" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Number of dimensions this model takes as an input.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.parameters">
-<span class="sig-name descname"><span class="pre">parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.parameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get model parameters.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.reset_parameters">
-<span class="sig-name descname"><span class="pre">reset_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.reset_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.reset_parameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is called when resetting the weights is activated for the active learing loop</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.test_step">
-<span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.test_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests the model on a given batch of input images.</p>
+<dt class="sig sig-object py" id="models.loss_weight_scheduler.LossWeightScheduler">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.loss_weight_scheduler.</span></span><span class="sig-name descname"><span class="pre">LossWeightScheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/loss_weight_scheduler.html#LossWeightScheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.loss_weight_scheduler.LossWeightScheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scheduler to reduce pseudo-label loss weights as training progresses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>batch</strong> (<em>Tensor</em>) – Batch of prediction images.</p></li>
-<li><p><strong>batch_idx</strong> – Index of the prediction batch.</p></li>
-<li><p><strong>dataloader_idx</strong> – Index of the dataloader.</p></li>
+<li><p><strong>algorithm</strong> (<em>string</em>) – Scheduling algorithm to be used: <cite>“fixed”</cite> | <cite>“linear”</cite> | <cite>“cosine”</cite>:
+- <cite>“fixed”</cite>: the pseudo-label loss weight is not changed.
+- <cite>“linear”</cite>: the pseudo-label loss weight is reduced by the same value in each step.
+- <cite>“cosine”</cite>: the decay of the pseudo-label loss weight follows a cosine curve.</p></li>
+<li><p><strong>start_weight</strong> (<em>float</em>) – Initial pseudo-label loss weight.</p></li>
+<li><p><strong>end_weight</strong> (<em>float</em><em>, </em><em>optional</em>) – Final pseudo-label loss weight. Must be specified when <code class="xref py py-attr docutils literal notranslate"><span class="pre">algorithm</span></code> is set to
+<cite>“linear”</cite> or <cite>“cosine”</cite>. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>start_step</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial step index. Defaults to 0.</p></li>
+<li><p><strong>end_step</strong> (<em>int</em><em>, </em><em>optional</em>) – Final step index. Must be specified when <code class="xref py py-attr docutils literal notranslate"><span class="pre">algorithm</span></code> is set to <cite>“linear”</cite> or
+<cite>“cosine”</cite>. Defaults to <cite>None</cite>.</p></li>
 </ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.loss_weight_scheduler.LossWeightScheduler.current_weight">
+<span class="sig-name descname"><span class="pre">current_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/loss_weight_scheduler.html#LossWeightScheduler.current_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.loss_weight_scheduler.LossWeightScheduler.current_weight" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Current pseudo-label loss weight.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.train">
-<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trains the model.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.training">
-<span class="sig-name descname"><span class="pre">training</span></span><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.training_step">
-<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.training_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.training_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute one training step.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="models.pytorch_fcn_resnet50.PytorchFCNResnet50.validation_step">
-<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_fcn_resnet50.html#PytorchFCNResnet50.validation_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_fcn_resnet50.PytorchFCNResnet50.validation_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute one validation step.</p>
+<dt class="sig sig-object py" id="models.loss_weight_scheduler.LossWeightScheduler.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/loss_weight_scheduler.html#LossWeightScheduler.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.loss_weight_scheduler.LossWeightScheduler.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increases scheduler step.</p>
 </dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="module-models.pytorch_model">
-<span id="pytorchmodel"></span><h2>PytorchModel<a class="headerlink" href="#module-models.pytorch_model" title="Permalink to this headline">¶</a></h2>
+<span id="models-pytorch-model-module"></span><h2>models.pytorch_model module<a class="headerlink" href="#module-models.pytorch_model" title="Permalink to this headline">¶</a></h2>
 <p>Base classes to implement models with pytorch</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel">
@@ -294,14 +260,14 @@ in each training and validation epoch of the training loop. Available options: <
 <code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;specificity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code>. Defaults to <cite>[“dice_score”]</cite>.</p></li>
 <li><p><strong>train_metric_confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – A list of confidence levels for which the metrics
 specified in the <cite>train_metrics</cite> parameter should be computed in the training loop (<cite>trainer.fit()</cite>). This
-parameter is used only for mulit-label classification tasks. Defaults to <cite>[0.5]</cite>.</p></li>
+parameter is used only for multi-label classification tasks. Defaults to <cite>[0.5]</cite>.</p></li>
 <li><p><strong>test_metrics</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A list with the names of the metrics that should be computed and logged
 in the model validation or testing loop (<cite>trainer.validate()</cite>, <cite>trainer.test()</cite>). Available options:
 <code class="docutils literal notranslate"><span class="pre">&quot;dice_score&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;sensitivity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;specificity&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;hausdorff95&quot;</span></code> Defaults to
 <cite>[“dice_score”, “sensitivity”, “specificity”, “hausdorff95”]</cite>.</p></li>
 <li><p><strong>test_metric_confidence_levels</strong> (<em>Iterable</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – A list of confidence levels for which the metrics
 specified in the <cite>test_metrics</cite> parameter should be computed in the validation or testing loop. This
-parameter is used only for mulit-label classification tasks. Defaults to <cite>[0.5]</cite>.</p></li>
+parameter is used only for multi-label classification tasks. Defaults to <cite>[0.5]</cite>.</p></li>
 <li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
 </ul>
 </dd>
@@ -309,14 +275,12 @@ parameter is used only for mulit-label classification tasks. Defaults to <cite>[
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.configure_loss">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">configure_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.configure_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.configure_loss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configures the loss.
-:param loss: The optimization criterion: <code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;dice&quot;</span></code> |</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;general_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;focal&quot;</span></code>.</p>
-</div></blockquote>
+<dd><p>Configures the loss.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>loss</strong> (<em>string</em>) – The optimization criterion: <code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;dice&quot;</span></code> |
+<code class="docutils literal notranslate"><span class="pre">&quot;cross_entropy_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;general_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;fp_dice&quot;</span></code> | <code class="docutils literal notranslate"><span class="pre">&quot;focal&quot;</span></code>.</p></li>
 <li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines if data is multilabel or not (default = <cite>False</cite>).</p></li>
 <li><p><strong>kwargs</strong> – Additional parameters for the loss.</p></li>
 </ul>
@@ -398,11 +362,13 @@ Union[float, None]: Pseudo-label loss weight if <code class="xref py py-attr doc
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes predictions for a given batch of model inputs.
-:param batch: A batch of model inputs.</p>
+<dd><p>Computes predictions for a given batch of model inputs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Predictions for the given inputs.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch</strong> – A batch of model inputs.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Predictions for the given inputs.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -411,8 +377,8 @@ Union[float, None]: Pseudo-label loss weight if <code class="xref py py-attr doc
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.predict_step">
 <span class="sig-name descname"><span class="pre">predict_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.predict_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.predict_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the model’s predictions on a given batch of model inputs.
-# this method should match the requirements of the pytorch lightning framework.
-# see <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</a></p>
+This method should match the requirements of the pytorch lightning framework. See the
+<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">pytorch lightning documentation</a> for more details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -434,10 +400,8 @@ Union[float, None]: Pseudo-label loss weight if <code class="xref py py-attr doc
 <dl class="py method">
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.setup">
 <span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.setup" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,</dt><dd><p>or predict.</p>
-</dd>
-</dl>
+<dd><p>Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
+or predict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>stage</strong> (<em>string</em><em>, </em><em>optional</em>) – Either ‘fit’, ‘validate’, ‘test’, or ‘predict’.</p>
@@ -499,13 +463,17 @@ Union[float, None]: Pseudo-label loss weight if <code class="xref py py-attr doc
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.training_step">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.training_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.training_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trains the model on a given batch of model inputs.
-# this method should match the requirements of the pytorch lightning framework.
-# see <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</a>
-:param batch: A batch of model inputs.
-:param batch_idx: Index of the current batch.</p>
+This method should match the requirements of the pytorch lightning framework. See the
+<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">pytorch lighting documentation</a> for more details.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Training loss.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> – A batch of model inputs.</p></li>
+<li><p><strong>batch_idx</strong> – Index of the current batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Training loss.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -525,13 +493,17 @@ Union[float, None]: Pseudo-label loss weight if <code class="xref py py-attr doc
 <dt class="sig sig-object py" id="models.pytorch_model.PytorchModel.validation_step">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_model.html#PytorchModel.validation_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_model.PytorchModel.validation_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Validates the model on a given batch of model inputs.
-# this method should match the requirements of the pytorch lightning framework.
-# see <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</a>
-:param batch: A batch of model inputs.
-:param batch_idx: Index of the current batch.</p>
+This method should match the requirements of the pytorch lightning framework. See the
+<a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html">pytorch lightning documentation</a> for more details.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Validation loss.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> – A batch of model inputs.</p></li>
+<li><p><strong>batch_idx</strong> – Index of the current batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Validation loss.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -540,27 +512,22 @@ Union[float, None]: Pseudo-label loss weight if <code class="xref py py-attr doc
 
 </section>
 <section id="module-models.pytorch_u_net">
-<span id="pytorchunet"></span><h2>PytorchUNet<a class="headerlink" href="#module-models.pytorch_u_net" title="Permalink to this headline">¶</a></h2>
+<span id="models-pytorch-u-net-module"></span><h2>models.pytorch_u_net module<a class="headerlink" href="#module-models.pytorch_u_net" title="Permalink to this headline">¶</a></h2>
 <p>U-Net architecture wrapped as PytorchModel</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.pytorch_u_net.PytorchUNet">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.pytorch_u_net.</span></span><span class="sig-name descname"><span class="pre">PytorchUNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/pytorch_u_net.html#PytorchUNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.pytorch_u_net.PytorchUNet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">models.pytorch_model.PytorchModel</span></code></a></p>
 <p>U-Net architecture wrapped as PytorchModel.
-Details about the architecture: <a class="reference external" href="https://arxiv.org/pdf/1505.04597.pdf">https://arxiv.org/pdf/1505.04597.pdf</a>
-:param num_levels: Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.
-:type num_levels: int, optional
-:param dim: The dimensionality of the U-Net. Defaults to 2.
-:type dim: int, optional
-:param in_channels: Number of input channels. Defaults to 1
-:type in_channels: int, optional
-:param out_channels: Number of output channels. Should be equal to the number of classes (for</p>
-<blockquote>
-<div><p>multi-label segmentation tasks excluding the background class). Defaults to 2.</p>
-</div></blockquote>
+Details about the architecture can be found in <a class="reference external" href="https://arxiv.org/pdf/1505.04597.pdf">this paper</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>num_levels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – The dimensionality of the U-Net. Defaults to 2.</p></li>
+<li><p><strong>in_channels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of input channels. Defaults to 1</p></li>
+<li><p><strong>out_channels</strong> (<em>int</em>) – Number of output channels. Should be equal to the number of classes (for
+multi-label segmentation tasks excluding the background class). Defaults to 2.</p></li>
 <li><p><strong>multi_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the model should produce single-label or multi-label outputs. If set to
 <cite>False</cite>, the model’s predictions are computed using a Softmax activation layer. to If set to <cite>True</cite>, sigmoid
 activation layers are used to compute the model’s predicitions. Defaults to False.</p></li>
@@ -705,15 +672,14 @@ activation layers are used to compute the model’s predicitions. Defaults to Fa
 
 </section>
 <section id="module-models.u_net">
-<span id="unet"></span><h2>UNet<a class="headerlink" href="#module-models.u_net" title="Permalink to this headline">¶</a></h2>
+<span id="models-u-net-module"></span><h2>models.u_net module<a class="headerlink" href="#module-models.u_net" title="Permalink to this headline">¶</a></h2>
 <p>U-Net architecture.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.u_net.UNet">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">models.u_net.</span></span><span class="sig-name descname"><span class="pre">UNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/u_net.html#UNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.u_net.UNet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
-<p>This U-Net implementation was originally taken from
-<a class="reference external" href="https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py">https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py</a>
-and adapted to a flexible number of levels and for optinal 3d mode.</p>
+<p>This U-Net implementation was originally taken from <a class="reference external" href="https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py">this implementation</a>
+and adapted to a flexible number of levels and for optional 3d mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -756,6 +722,9 @@ in each down-sampling block, the number of feature channels is doubled. Defaults
 </dd></dl>
 
 </section>
+<section id="module-models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-models" title="Permalink to this headline">¶</a></h2>
+</section>
 </section>
 
 
@@ -766,10 +735,10 @@ in each down-sampling block, the number of feature channels is doubled. Defaults
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="query_strategies.html" class="btn btn-neutral float-right" title="query_strategies" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="query_strategies.html" class="btn btn-neutral float-right" title="query_strategies package" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="metric_tracking.html" class="btn btn-neutral" title="metric_tracking" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="metric_tracking.html" class="btn btn-neutral" title="metric_tracking package" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -797,11 +766,13 @@ in each down-sampling block, the number of feature channels is doubled. Defaults
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">models</a><ul>
-<li><a class="reference internal" href="#module-models.pytorch_fcn_resnet50">PytorchFCNResnet50</a></li>
-<li><a class="reference internal" href="#module-models.pytorch_model">PytorchModel</a></li>
-<li><a class="reference internal" href="#module-models.pytorch_u_net">PytorchUNet</a></li>
-<li><a class="reference internal" href="#module-models.u_net">UNet</a></li>
+<li><a class="reference internal" href="#">models package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-models.loss_weight_scheduler">models.loss_weight_scheduler module</a></li>
+<li><a class="reference internal" href="#module-models.pytorch_model">models.pytorch_model module</a></li>
+<li><a class="reference internal" href="#module-models.pytorch_u_net">models.pytorch_u_net module</a></li>
+<li><a class="reference internal" href="#module-models.u_net">models.u_net module</a></li>
+<li><a class="reference internal" href="#module-models">Module contents</a></li>
 </ul>
 </li>
 </ul>

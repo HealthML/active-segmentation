@@ -1,7 +1,10 @@
-metric_tracking
+metric\_tracking package
 ========================
 
-combined\_per\_epoch\_metric
+Submodules
+----------
+
+metric\_tracking.combined\_per\_epoch\_metric module
 ----------------------------------------------------
 
 .. automodule:: metric_tracking.combined_per_epoch_metric
@@ -9,10 +12,18 @@ combined\_per\_epoch\_metric
    :undoc-members:
    :show-inheritance:
 
-combined\_per\_image\_metric
+metric\_tracking.combined\_per\_image\_metric module
 ----------------------------------------------------
 
 .. automodule:: metric_tracking.combined_per_image_metric
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: metric_tracking
    :members:
    :undoc-members:
    :show-inheritance:

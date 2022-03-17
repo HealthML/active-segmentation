@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>query_strategies.query_strategy &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>models.loss_weight_scheduler &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -162,7 +162,7 @@
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="../../index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
           <li><a href="../index.html">Module code</a> &gt;</li>
-      <li>query_strategies.query_strategy</li>
+      <li>models.loss_weight_scheduler</li>
       <li class="sphinx-template-breadcrumbs-aside">
       </li>
   </ul>
@@ -182,42 +182,91 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <h1>Source code for query_strategies.query_strategy</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module containing abstract superclass for query strategies.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+  <h1>Source code for models.loss_weight_scheduler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Scheduler to reduce pseudo-label loss weights as training progresses.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">ActiveLearningDataModule</span>
-<span class="kn">from</span> <span class="nn">models.pytorch_model</span> <span class="kn">import</span> <span class="n">PytorchModel</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
 
-<span class="c1"># pylint: disable=too-few-public-methods</span>
-<div class="viewcode-block" id="QueryStrategy"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.query_strategy.QueryStrategy">[docs]</a><span class="k">class</span> <span class="nc">QueryStrategy</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Abstract superclass for query strategies.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LossWeightScheduler"><a class="viewcode-back" href="../../models.html#models.loss_weight_scheduler.LossWeightScheduler">[docs]</a><span class="k">class</span> <span class="nc">LossWeightScheduler</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scheduler to reduce pseudo-label loss weights as training progresses.</span>
 
-<div class="viewcode-block" id="QueryStrategy.select_items_to_label"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.query_strategy.QueryStrategy.select_items_to_label">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">select_items_to_label</span><span class="p">(</span>
+<span class="sd">    Args:</span>
+<span class="sd">        algorithm (string): Scheduling algorithm to be used: `&quot;fixed&quot;` | `&quot;linear&quot;` | `&quot;cosine&quot;`:</span>
+<span class="sd">            - `&quot;fixed&quot;`: the pseudo-label loss weight is not changed.</span>
+<span class="sd">            - `&quot;linear&quot;`: the pseudo-label loss weight is reduced by the same value in each step.</span>
+<span class="sd">            - `&quot;cosine&quot;`: the decay of the pseudo-label loss weight follows a cosine curve.</span>
+<span class="sd">        start_weight (float): Initial pseudo-label loss weight.</span>
+<span class="sd">        end_weight (float, optional): Final pseudo-label loss weight. Must be specified when :attr:`algorithm` is set to</span>
+<span class="sd">            `&quot;linear&quot;` or `&quot;cosine&quot;`. Defaults to `None`.</span>
+<span class="sd">        start_step (int, optional): Initial step index. Defaults to 0.</span>
+<span class="sd">        end_step (int, optional): Final step index. Must be specified when :attr:`algorithm` is set to `&quot;linear&quot;` or</span>
+<span class="sd">            `&quot;cosine&quot;`. Defaults to `None`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">]],</span>
-        <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
-        <span class="n">items_to_label</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
+        <span class="n">algorithm</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">],</span>
+        <span class="n">start_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">end_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">end_step</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid loss weight scheduling algorithm: </span><span class="si">{</span><span class="n">algorithm</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_weight</span> <span class="o">=</span> <span class="n">start_weight</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">end_weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The parameter `end_weight` must be specified when `algorithm` is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="si">}</span><span class="s2">. Make sure that in &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;the config file the `iterations` parameter is set to a fixed value or the &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;`weight_pseudo_labels_decay_steps` option is specified in the loss config.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_weight</span> <span class="o">=</span> <span class="n">end_weight</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">end_step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The parameter `end_step` must be specified when `algorithm` is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="si">}</span><span class="s2">. Make sure that in &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;the config file the `iterations` parameter is set to a fixed value or the &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;`weight_pseudo_labels_decay_steps` option is specified in the loss config.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_step</span> <span class="o">=</span> <span class="n">end_step</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">=</span> <span class="n">start_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_weigt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_weight</span>
+
+<div class="viewcode-block" id="LossWeightScheduler.step"><a class="viewcode-back" href="../../models.html#models.loss_weight_scheduler.LossWeightScheduler.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Selects subset of the unlabeled data that should be labeled next.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            models: Current models that should be improved by selecting additional data for labeling.</span>
-<span class="sd">            dataloader: Pytorch dataloader representing the unlabeled dataset.</span>
-<span class="sd">            items_to_label: Number of items that should be selected for labeling.</span>
-<span class="sd">            **kwargs: Additional, strategy-specific parameters.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Tuple[List[str], Optional[Dict[str, np.array]]]: List of IDs of the data items to be labeled</span>
-<span class="sd">            and an optional dictonary of pseudo labels with the corresponding IDs as keys.</span>
+<span class="sd">        Increases scheduler step.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="LossWeightScheduler.current_weight"><a class="viewcode-back" href="../../models.html#models.loss_weight_scheduler.LossWeightScheduler.current_weight">[docs]</a>    <span class="k">def</span> <span class="nf">current_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Current pseudo-label loss weight.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;fixed&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_weigt</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_weight</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_weight</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_weight</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_step</span>
+            <span class="p">)</span>
+
+        <span class="c1"># cosine scheduling</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_weight</span>
+            <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_weight</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_weight</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_step</span><span class="p">))</span>
+            <span class="o">/</span> <span class="mi">2</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
               </article>

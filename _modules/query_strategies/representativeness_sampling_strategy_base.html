@@ -1,0 +1,705 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>query_strategies.representativeness_sampling_strategy_base &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="../../genindex.html" />
+  <link rel="search" title="Search" href="../../search.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="../../">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="../../index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="../index.html">Module code</a> &gt;</li>
+      <li>query_strategies.representativeness_sampling_strategy_base</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <h1>Source code for query_strategies.representativeness_sampling_strategy_base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Base class for implementing representativeness sampling strategies &quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">ActiveLearningDataModule</span>
+<span class="kn">from</span> <span class="nn">models.pytorch_model</span> <span class="kn">import</span> <span class="n">PytorchModel</span>
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">PytorchUNet</span>
+<span class="kn">from</span> <span class="nn">.query_strategy</span> <span class="kn">import</span> <span class="n">QueryStrategy</span>
+
+<span class="c1"># pylint: disable=too-few-public-methods</span>
+<div class="viewcode-block" id="RepresentativenessSamplingStrategyBase"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase">[docs]</a><span class="k">class</span> <span class="nc">RepresentativenessSamplingStrategyBase</span><span class="p">(</span><span class="n">QueryStrategy</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for implementing representativeness sampling strategies</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.</span>
+<span class="sd">            Defaults to 10.</span>
+<span class="sd">        feature_type (string, optional): Type of feature vectors to be used: `&quot;model_features&quot;` |</span>
+<span class="sd">            `&quot;image_features&quot;`:</span>
+<span class="sd">                - `&quot;model_features&quot;`: Feature vectors retrieved from the inner layers of the model are used.</span>
+<span class="sd">                - `&quot;image_features&quot;`: The input images are used as feature vectors.</span>
+<span class="sd">            Defaults to `&quot;model_features&quot;`.</span>
+<span class="sd">        feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.</span>
+<span class="sd">            Defaults to 10.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;model_features&quot;</span><span class="p">,</span> <span class="s2">&quot;image_features&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;model_features&quot;</span><span class="p">,</span>
+        <span class="n">feature_dimensionality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">feature_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;model_features&quot;</span><span class="p">,</span> <span class="s2">&quot;image_features&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid feature type: </span><span class="si">{</span><span class="n">feature_type</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_type</span> <span class="o">=</span> <span class="n">feature_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_dimensionality</span> <span class="o">=</span> <span class="n">feature_dimensionality</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_type</span> <span class="o">==</span> <span class="s2">&quot;model_features&quot;</span><span class="p">:</span>
+            <span class="c1"># variable for storing feature vectors in the forward hook</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda:0&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;random_state&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span> <span class="nf">__interception_hook</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to be registered as forward hook in the module from which the feature vectors are to be retrieved.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            module (torch.nn.Module): Module in which the forward hook was registered.</span>
+<span class="sd">            inputs (torch.Tensor): Inputs of the forward method in which the hook was registered.</span>
+<span class="sd">            output (torch.Tensor): Outputs of the forward method of the module in which the hook was registered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span><span class="o">.</span><span class="n">view</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">max_values</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span> <span class="o">=</span> <span class="n">max_values</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve_model_feature_vectors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">dataloader</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a feature vector from the model&#39;s intermediate layers for each data item in the provided dataloader.</span>
+<span class="sd">        The feature vectors are retrieved using the method `__interception_hook` that needs to be registered as forward</span>
+<span class="sd">        hook before calling this method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (torch.nn.Module): A model.</span>
+<span class="sd">            dataloader (torch.utils.data.DataLoader): A dataloader.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[List[numpy.array], List[str]]: List of feature vectors and list of corresponding case IDs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">feature_vectors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">case_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">images</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">batch</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">images</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">batch</span>
+
+                <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+
+                <span class="n">case_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+                <span class="n">feature_vectors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_vector</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="n">feature_vectors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">feature_vector</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">feature_vector</span> <span class="ow">in</span> <span class="n">feature_vectors</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">feature_vectors</span><span class="p">,</span> <span class="n">case_ids</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_retrieve_image_feature_vectors</span><span class="p">(</span>
+        <span class="n">dataloader</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves images from dataloader and uses the images as feature vectors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataloader (torch.utils.data.DataLoader): A dataloader.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[List[numpy.array], List[str]]: List of feature vectors and list of corresponding case IDs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">feature_vectors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">case_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">images</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">images</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">batch</span>
+
+            <span class="n">case_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+            <span class="n">feature_vectors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="n">feature_vectors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">feature_vector</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">feature_vector</span> <span class="ow">in</span> <span class="n">feature_vectors</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">feature_vectors</span><span class="p">,</span> <span class="n">case_ids</span>
+
+<div class="viewcode-block" id="RepresentativenessSamplingStrategyBase.reduce_features"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.reduce_features">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_features</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_vectors</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduces the dimensionality of feature vectors using a principle component analysis.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_vectors (numpy.array): Feature vectors to be reduced.</span>
+<span class="sd">            epsilon (float, optional): Smoothing operator.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array: Reduced feature vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">min_values</span> <span class="o">=</span> <span class="n">feature_vectors</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">max_values</span> <span class="o">=</span> <span class="n">feature_vectors</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">normalized_feature_vectors</span> <span class="o">=</span> <span class="p">(</span><span class="n">feature_vectors</span> <span class="o">-</span> <span class="n">min_values</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">max_values</span> <span class="o">-</span> <span class="n">min_values</span> <span class="o">+</span> <span class="n">epsilon</span>
+        <span class="p">)</span>
+
+        <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_dimensionality</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">normalized_feature_vectors</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">feature_vectors</span><span class="p">)</span></div>
+
+    <span class="c1"># pylint: disable=too-many-locals</span>
+<div class="viewcode-block" id="RepresentativenessSamplingStrategyBase.select_items_to_label"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.select_items_to_label">[docs]</a>    <span class="k">def</span> <span class="nf">select_items_to_label</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">]],</span>
+        <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
+        <span class="n">items_to_label</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects a subset of the unlabeled data that increases the representativeness of the training set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            models (PytorchModel): Current models that should be improved by selecting additional data for labeling.</span>
+<span class="sd">            data_module (ActiveLearningDataModule): A data module object providing data.</span>
+<span class="sd">            items_to_label (int): Number of items that should be selected for labeling.</span>
+<span class="sd">            **kwargs: Additional, strategy-specific parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are</span>
+<span class="sd">            generated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Uncertainty sampling is only implemented for one model. You passed a list.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_type</span> <span class="o">==</span> <span class="s2">&quot;model_features&quot;</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">PytorchUNet</span><span class="p">):</span>
+                <span class="n">interception_module</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">bottleneck</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Representativeness sampling is not implemented for the provided model architecture.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">models</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">interception_hook</span> <span class="o">=</span> <span class="n">interception_module</span><span class="o">.</span><span class="n">register_forward_hook</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__interception_hook</span>
+            <span class="p">)</span>
+
+            <span class="p">(</span>
+                <span class="n">feature_vectors_training_set</span><span class="p">,</span>
+                <span class="n">case_ids_training_set</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_model_feature_vectors</span><span class="p">(</span>
+                <span class="n">models</span><span class="p">,</span> <span class="n">data_module</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="p">(</span>
+                <span class="n">feature_vectors_unlabeled_set</span><span class="p">,</span>
+                <span class="n">case_ids_unlabeled_set</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_model_feature_vectors</span><span class="p">(</span>
+                <span class="n">models</span><span class="p">,</span> <span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_dataloader</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span>
+                <span class="n">feature_vectors_training_set</span><span class="p">,</span>
+                <span class="n">case_ids_training_set</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_image_feature_vectors</span><span class="p">(</span><span class="n">data_module</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">())</span>
+            <span class="p">(</span>
+                <span class="n">feature_vectors_unlabeled_set</span><span class="p">,</span>
+                <span class="n">case_ids_unlabeled_set</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_image_feature_vectors</span><span class="p">(</span><span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_dataloader</span><span class="p">())</span>
+
+        <span class="n">all_feature_vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">feature_vectors_training_set</span><span class="p">,</span> <span class="n">feature_vectors_unlabeled_set</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">max_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_vector</span><span class="p">)</span> <span class="k">for</span> <span class="n">feature_vector</span> <span class="ow">in</span> <span class="n">all_feature_vectors</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">all_feature_vectors_padded</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">all_feature_vectors</span><span class="p">),</span> <span class="n">max_size</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">feature_vector</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_feature_vectors</span><span class="p">):</span>
+            <span class="n">pad_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_vector</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">pad_width_front</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">pad_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">pad_width_back</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">pad_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">all_feature_vectors_padded</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                <span class="n">feature_vector</span><span class="p">,</span>
+                <span class="n">pad_width</span><span class="o">=</span><span class="p">(</span><span class="n">pad_width_front</span><span class="p">,</span> <span class="n">pad_width_back</span><span class="p">),</span>
+                <span class="n">constant_values</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">reduced_feature_vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_features</span><span class="p">(</span><span class="n">all_feature_vectors_padded</span><span class="p">)</span>
+        <span class="n">feature_vectors_training_set</span> <span class="o">=</span> <span class="n">reduced_feature_vectors</span><span class="p">[</span>
+            <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_vectors_training_set</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">feature_vectors_unlabeled_set</span> <span class="o">=</span> <span class="n">reduced_feature_vectors</span><span class="p">[</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">feature_vectors_training_set</span><span class="p">)</span> <span class="p">:</span>
+        <span class="p">]</span>
+
+        <span class="n">selected_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prepare_representativeness_computation</span><span class="p">(</span>
+            <span class="n">feature_vectors_training_set</span><span class="p">,</span>
+            <span class="n">case_ids_training_set</span><span class="p">,</span>
+            <span class="n">feature_vectors_unlabeled_set</span><span class="p">,</span>
+            <span class="n">case_ids_unlabeled_set</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_vectors_unlabeled_set</span><span class="p">))):</span>
+            <span class="n">representativeness_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_representativeness_scores</span><span class="p">(</span>
+                <span class="n">models</span><span class="p">,</span>
+                <span class="n">data_module</span><span class="p">,</span>
+                <span class="n">feature_vectors_training_set</span><span class="p">,</span>
+                <span class="n">feature_vectors_unlabeled_set</span><span class="p">,</span>
+                <span class="n">case_ids_unlabeled_set</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># sort unlabeled items by their representativeness score</span>
+            <span class="n">unlabeled_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">case_ids_unlabeled_set</span><span class="p">))</span>
+            <span class="n">representativeness_scores</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">zip</span><span class="p">(</span><span class="n">representativeness_scores</span><span class="p">,</span> <span class="n">unlabeled_indices</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># shuffle list before sorting so that among items with the same score one is randomly selected</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+            <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">representativeness_scores</span><span class="p">)</span>
+
+            <span class="n">representativeness_scores</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># select the sample with the highest representativeness score</span>
+            <span class="n">index_of_most_representative_sample</span> <span class="o">=</span> <span class="n">representativeness_scores</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">case_id_of_most_representative_sample</span> <span class="o">=</span> <span class="n">case_ids_unlabeled_set</span><span class="p">[</span>
+                <span class="n">index_of_most_representative_sample</span>
+            <span class="p">]</span>
+            <span class="n">selected_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">case_id_of_most_representative_sample</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_select_item</span><span class="p">(</span><span class="n">case_id_of_most_representative_sample</span><span class="p">)</span>
+
+            <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">feature_vectors_training_set</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="n">feature_vectors_unlabeled_set</span><span class="p">[</span><span class="n">index_of_most_representative_sample</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+                <span class="n">feature_vectors_unlabeled_set</span><span class="p">,</span>
+                <span class="n">index_of_most_representative_sample</span><span class="p">,</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">del</span> <span class="n">case_ids_unlabeled_set</span><span class="p">[</span><span class="n">index_of_most_representative_sample</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_type</span> <span class="o">==</span> <span class="s2">&quot;model_features&quot;</span><span class="p">:</span>
+            <span class="n">interception_hook</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">selected_ids</span><span class="p">,</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="RepresentativenessSamplingStrategyBase.on_select_item"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.on_select_item">[docs]</a>    <span class="k">def</span> <span class="nf">on_select_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback that is called when an item is selected for labeling.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            case_id (string): Case ID of the selected item.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="RepresentativenessSamplingStrategyBase.prepare_representativeness_computation"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.prepare_representativeness_computation">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_representativeness_computation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_vectors_training_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">case_ids_training_set</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">feature_vectors_unlabeled_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">case_ids_unlabeled_set</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Can be overridden in subclasses to perform global computations on all feature vectors before item selection</span>
+<span class="sd">        starts.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_vectors_training_set (numpy.ndarray): Feature vectors of the items in the training set.</span>
+<span class="sd">            case_ids_training_set (List[str]): Case IDs of the items in the training set.</span>
+<span class="sd">            feature_vectors_unlabeled_set (numpy.ndarray): Feature vectors of the items in the unlabeled set.</span>
+<span class="sd">            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="RepresentativenessSamplingStrategyBase.compute_representativeness_scores"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.compute_representativeness_scores">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">compute_representativeness_scores</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">PytorchModel</span><span class="p">,</span>
+        <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
+        <span class="n">feature_vectors_training_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">feature_vectors_unlabeled_set</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">case_ids_unlabeled_set</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Must be overridden in subclasses to compute the representativeness scores for the items in the unlabeled set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (PytorchModel): Current model that should be improved by selecting additional data for labeling.</span>
+<span class="sd">            data_module (ActiveLearningDataModule): A data module object providing data.</span>
+<span class="sd">            feature_vectors_training_set (np.ndarray): Feature vectors of the items in the training set.</span>
+<span class="sd">            feature_vectors_unlabeled_set (np.ndarray): Feature vectors of the items in the unlabeled set.</span>
+<span class="sd">            case_ids_unlabeled_set (List[str]): Case IDs of the items in the unlabeled set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in</span>
+<span class="sd">            the training set should receive higher scores.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+</pre></div>
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+  <script src="../../_static/jquery.js"></script>
+  <script src="../../_static/underscore.js"></script>
+  <script src="../../_static/doctools.js"></script>
+  <script src="../../_static/clipboard.min.js"></script>
+  <script src="../../_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="../../_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="../../index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="../../">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

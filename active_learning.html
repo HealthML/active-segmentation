@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>active_learning &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>active_learning module &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -39,8 +39,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
-  <link rel="next" title="inferencing" href="inferencing.html" />
-  <link rel="prev" title="active_learning_framework" href="active_segmentation.html" /> 
+  <link rel="next" title="inferencing module" href="inferencing.html" />
+  <link rel="prev" title="main module" href="main.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -136,16 +136,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -161,8 +164,8 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
-      <li>active_learning</li>
+          <li><a href="active_segmentation.html">Active Learning Framework</a> &gt;</li>
+      <li>active_learning module</li>
       <li class="sphinx-template-breadcrumbs-aside">
             <a href="_sources/active_learning.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
@@ -184,7 +187,7 @@
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
   <section id="module-active_learning">
-<span id="active-learning"></span><h1>active_learning<a class="headerlink" href="#module-active_learning" title="Permalink to this headline">¶</a></h1>
+<span id="active-learning-module"></span><h1>active_learning module<a class="headerlink" href="#module-active_learning" title="Permalink to this headline">¶</a></h1>
 <p>Module containing the active learning pipeline</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="active_learning.ActiveLearningPipeline">
@@ -230,7 +233,8 @@ is finished. Should only be used when no other runs are running in parallel. Def
 <dt class="sig sig-object py" id="active_learning.ActiveLearningPipeline.remove_wandb_cache">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">remove_wandb_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/active_learning.html#ActiveLearningPipeline.remove_wandb_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#active_learning.ActiveLearningPipeline.remove_wandb_cache" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes Weights and Biases cache directory. This is necessary since the Weights and Biases client currently does
-not implement proper cache cleanup itself. See <a class="reference external" href="https://github.com/wandb/client/issues/1193">https://github.com/wandb/client/issues/1193</a> for more details.</p>
+not implement proper cache cleanup itself. See
+<a class="reference external" href="https://github.com/wandb/client/issues/1193">this github issue</a> for more details.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -271,10 +275,10 @@ not implement proper cache cleanup itself. See <a class="reference external" hre
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="inferencing.html" class="btn btn-neutral float-right" title="inferencing" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="inferencing.html" class="btn btn-neutral float-right" title="inferencing module" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="active_segmentation.html" class="btn btn-neutral" title="active_learning_framework" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="main.html" class="btn btn-neutral" title="main module" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -302,7 +306,7 @@ not implement proper cache cleanup itself. See <a class="reference external" hre
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">active_learning</a></li>
+<li><a class="reference internal" href="#">active_learning module</a></li>
 </ul>
 
             </div>

@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>metric_tracking &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>metric_tracking package &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -39,8 +39,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
-  <link rel="next" title="models" href="models.html" />
-  <link rel="prev" title="functional" href="functional.html" /> 
+  <link rel="next" title="models package" href="models.html" />
+  <link rel="prev" title="functional package" href="functional.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -136,16 +136,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -161,8 +164,8 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
-      <li>metric_tracking</li>
+          <li><a href="active_segmentation.html">Active Learning Framework</a> &gt;</li>
+      <li>metric_tracking package</li>
       <li class="sphinx-template-breadcrumbs-aside">
             <a href="_sources/metric_tracking.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
@@ -183,10 +186,13 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="metric-tracking">
-<h1>metric_tracking<a class="headerlink" href="#metric-tracking" title="Permalink to this headline">¶</a></h1>
+  <section id="metric-tracking-package">
+<h1>metric_tracking package<a class="headerlink" href="#metric-tracking-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
 <section id="module-metric_tracking.combined_per_epoch_metric">
-<span id="combined-per-epoch-metric"></span><h2>combined_per_epoch_metric<a class="headerlink" href="#module-metric_tracking.combined_per_epoch_metric" title="Permalink to this headline">¶</a></h2>
+<span id="metric-tracking-combined-per-epoch-metric-module"></span><h2>metric_tracking.combined_per_epoch_metric module<a class="headerlink" href="#module-metric_tracking.combined_per_epoch_metric" title="Permalink to this headline">¶</a></h2>
 <p>Module containing a metrics class for tracking and aggregating several metrics related to multiple 3D MRT scans
 whose slices may be scattered across different batches.</p>
 <dl class="py class">
@@ -230,12 +236,12 @@ floating point type and in the second type of integer type. the In both cases th
 have the shape <span class="math">\((N, C, X, Y)\)</span> or <span class="math">\((N, C, X, Y, Z)\)</span>. The target tensor is expected to contain sharp
 predictions and to have the shape <span class="math">\((N, C, X, Y)\)</span> or <span class="math">\((N, C, X, Y, Z)\)</span>.</p>
 </div>
-<dl class="simple">
-<dt>Shape:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Prediction: <span class="math">\((N, C, X, Y, ...)\)</span> or <span class="math">\((N, X, Y, ...)\)</span>, where <cite>N = batch size</cite> and <a href="#id1"><span class="problematic" id="id2">`</span></a>C = number of</dt><dd><p>classes` (see Notes above).</p>
-</dd>
-</dl>
+<dl>
+<dt>Shape:</dt><dd><ul>
+<li><div class="line-block">
+<div class="line">Prediction: <span class="math">\((N, C, X, Y, ...)\)</span> or <span class="math">\((N, X, Y, ...)\)</span>, where <cite>N = batch size</cite> and <a href="#id1"><span class="problematic" id="id2">`</span></a>C = number of</div>
+<div class="line">classes` (see Notes above).</div>
+</div>
 </li>
 <li><p>Target: <span class="math">\((N, C, X, Y, ...)\)</span>, or <span class="math">\((N, X, Y, ...)\)</span> (see Notes above).</p></li>
 <li><p>Image_ids: <span class="math">\((N)\)</span>, where <cite>N = batch size</cite>.</p></li>
@@ -248,15 +254,12 @@ predictions and to have the shape <span class="math">\((N, C, X, Y)\)</span> or 
 <dd><p>Computes the metrics for each scan and aggregates them if <cite>reduction</cite> is not <cite>“none”</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>Mapping of metric names to metric values.</dt><dd><p>If <cite>reduction</cite> is <cite>“none”</cite>, the keys have the form
+<dd class="field-odd"><p>Mapping of metric names to metric values.
+If <cite>reduction</cite> is <cite>“none”</cite>, the keys have the form
 <cite>&lt;metric name&gt;_&lt;confidence_level&gt;_&lt;image ID&gt;</cite>.
 Otherwise the keys have the form <cite>&lt;reduction&gt;_&lt;metric name&gt;_&lt;confidence_level&gt;</cite>
 If <cite>“metrics_to_aggregate”</cite> is provided and <cite>reduction</cite> is not <cite>“none”</cite>, the dictionary additionally
 contains the keys <cite>&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;</cite>.</p>
-</dd>
-</dl>
-</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Dict[string, Tensor]</p>
@@ -269,11 +272,8 @@ contains the keys <cite>&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;</c
 <span class="sig-name descname"><span class="pre">get_metric_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metric_tracking/combined_per_epoch_metric.html#CombinedPerEpochMetric.get_metric_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.get_metric_names" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>A list containing the keys of the dictionary returned by the <cite>compute()</cite> method of this</dt><dd><p>module.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p>A list containing the keys of the dictionary returned by the <cite>compute()</cite> method of this
+module.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>List[string]</p>
@@ -306,7 +306,7 @@ contains the keys <cite>&lt;reduction&gt;_aggregated_&lt;confidence_level&gt;</c
 
 </section>
 <section id="module-metric_tracking.combined_per_image_metric">
-<span id="combined-per-image-metric"></span><h2>combined_per_image_metric<a class="headerlink" href="#module-metric_tracking.combined_per_image_metric" title="Permalink to this headline">¶</a></h2>
+<span id="metric-tracking-combined-per-image-metric-module"></span><h2>metric_tracking.combined_per_image_metric module<a class="headerlink" href="#module-metric_tracking.combined_per_image_metric" title="Permalink to this headline">¶</a></h2>
 <p>Module containing a metrics class for tracking several metrics related to one 3d image</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="metric_tracking.combined_per_image_metric.CombinedPerImageMetric">
@@ -356,12 +356,9 @@ predictions and to have the shape <span class="math">\((C, X, Y)\)</span> or <sp
 <dd><p>Computes the metrics for the image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>Mapping of metric names to metric values.</dt><dd><p>The keys have the form <cite>&lt;metric name&gt;_&lt;class_name&gt;_&lt;confidence_level&gt;</cite> for multi-label segmentation
+<dd class="field-odd"><p>Mapping of metric names to metric values.
+The keys have the form <cite>&lt;metric name&gt;_&lt;class_name&gt;_&lt;confidence_level&gt;</cite> for multi-label segmentation
 tasks and <cite>&lt;metric name&gt;_&lt;class_name&gt;</cite> for single-label segmentation tasks.</p>
-</dd>
-</dl>
-</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Dict[string, Tensor]</p>
@@ -394,6 +391,9 @@ Must be provided if <cite>target</cite> is a single slice or a subset of slices 
 </dd></dl>
 
 </section>
+<section id="module-metric_tracking">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-metric_tracking" title="Permalink to this headline">¶</a></h2>
+</section>
 </section>
 
 
@@ -404,10 +404,10 @@ Must be provided if <cite>target</cite> is a single slice or a subset of slices 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="models.html" class="btn btn-neutral float-right" title="models" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="models.html" class="btn btn-neutral float-right" title="models package" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="functional.html" class="btn btn-neutral" title="functional" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="functional.html" class="btn btn-neutral" title="functional package" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -435,9 +435,11 @@ Must be provided if <cite>target</cite> is a single slice or a subset of slices 
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">metric_tracking</a><ul>
-<li><a class="reference internal" href="#module-metric_tracking.combined_per_epoch_metric">combined_per_epoch_metric</a></li>
-<li><a class="reference internal" href="#module-metric_tracking.combined_per_image_metric">combined_per_image_metric</a></li>
+<li><a class="reference internal" href="#">metric_tracking package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-metric_tracking.combined_per_epoch_metric">metric_tracking.combined_per_epoch_metric module</a></li>
+<li><a class="reference internal" href="#module-metric_tracking.combined_per_image_metric">metric_tracking.combined_per_image_metric module</a></li>
+<li><a class="reference internal" href="#module-metric_tracking">Module contents</a></li>
 </ul>
 </li>
 </ul>

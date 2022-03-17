@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -219,14 +222,14 @@
 <span class="sd">            ``&quot;sensitivity&quot;`` | ``&quot;specificity&quot;`` | ``&quot;hausdorff95&quot;``. Defaults to `[&quot;dice_score&quot;]`.</span>
 <span class="sd">        train_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics</span>
 <span class="sd">            specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`). This</span>
-<span class="sd">            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.</span>
+<span class="sd">            parameter is used only for multi-label classification tasks. Defaults to `[0.5]`.</span>
 <span class="sd">        test_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged</span>
 <span class="sd">            in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Available options:</span>
 <span class="sd">            ``&quot;dice_score&quot;`` | ``&quot;sensitivity&quot;`` | ``&quot;specificity&quot;`` | ``&quot;hausdorff95&quot;`` Defaults to</span>
 <span class="sd">            `[&quot;dice_score&quot;, &quot;sensitivity&quot;, &quot;specificity&quot;, &quot;hausdorff95&quot;]`.</span>
 <span class="sd">        test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics</span>
 <span class="sd">            specified in the `test_metrics` parameter should be computed in the validation or testing loop. This</span>
-<span class="sd">            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.</span>
+<span class="sd">            parameter is used only for multi-label classification tasks. Defaults to `[0.5]`.</span>
 <span class="sd">        **kwargs: Further, dataset specific parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -298,7 +301,7 @@
 <div class="viewcode-block" id="PytorchModel.setup"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,</span>
-<span class="sd">            or predict.</span>
+<span class="sd">        or predict.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            stage(string, optional): Either &#39;fit&#39;, &#39;validate&#39;, &#39;test&#39;, or &#39;predict&#39;.</span>
@@ -320,8 +323,10 @@
     <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trains the model on a given batch of model inputs.</span>
-<span class="sd">        # this method should match the requirements of the pytorch lightning framework.</span>
-<span class="sd">        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</span>
+<span class="sd">        This method should match the requirements of the pytorch lightning framework. See the</span>
+<span class="sd">        `pytorch lighting documentation</span>
+<span class="sd">        &lt;https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html&gt;`_ for more details.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            batch: A batch of model inputs.</span>
 <span class="sd">            batch_idx: Index of the current batch.</span>
@@ -334,8 +339,10 @@
     <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates the model on a given batch of model inputs.</span>
-<span class="sd">        # this method should match the requirements of the pytorch lightning framework.</span>
-<span class="sd">        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</span>
+<span class="sd">        This method should match the requirements of the pytorch lightning framework. See the</span>
+<span class="sd">        `pytorch lightning documentation</span>
+<span class="sd">        &lt;https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html&gt;`_ for more details.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            batch: A batch of model inputs.</span>
 <span class="sd">            batch_idx: Index of the current batch.</span>
@@ -349,8 +356,9 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the model&#39;s predictions on a given batch of model inputs.</span>
-<span class="sd">        # this method should match the requirements of the pytorch lightning framework.</span>
-<span class="sd">        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html</span>
+<span class="sd">        This method should match the requirements of the pytorch lightning framework. See the</span>
+<span class="sd">        `pytorch lightning documentation</span>
+<span class="sd">        &lt;https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html&gt;`_ for more details.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            batch: A batch of model inputs.</span>
@@ -431,6 +439,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">functional</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">SegmentationLoss</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Configures the loss.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            loss (string): The optimization criterion: ``&quot;cross_entropy&quot;`` | ``&quot;dice&quot;`` |</span>
 <span class="sd">                ``&quot;cross_entropy_dice&quot;`` | ``&quot;general_dice&quot;`` | ``&quot;fp&quot;`` | ``&quot;fp_dice&quot;`` | ``&quot;focal&quot;``.</span>
@@ -569,6 +578,7 @@
 <div class="viewcode-block" id="PytorchModel.predict"><a class="viewcode-back" href="../../models.html#models.pytorch_model.PytorchModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes predictions for a given batch of model inputs.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            batch: A batch of model inputs.</span>
 

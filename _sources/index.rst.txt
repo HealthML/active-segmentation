@@ -11,6 +11,7 @@ Welcome to Active Segmentation's documentation!
    :caption: Contents:
 
    active_segmentation
+   configuration
    brats
 
 Indices and tables

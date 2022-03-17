@@ -133,16 +133,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../active_segmentation.html">active_learning_framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../inferencing.html">inferencing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../datasets.html">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -447,6 +450,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates heatmaps using gradient based method and the prediction of the last layer of the model.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            items_to_inspect (List[Tuple[np.ndarray, str]]): A list with the items to generate heatmaps for.</span>
 <span class="sd">            iteration (int): The iteration of the active learning loop.</span>
@@ -482,6 +486,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates two heatmaps: One based on the GradCam method and one based on the predictions of the last layer.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            img (np.ndarray): The image as numpy array.</span>
 <span class="sd">            case_id (str): The id of the current image.</span>
@@ -515,7 +520,8 @@
     <span class="k">def</span> <span class="nf">remove_wandb_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deletes Weights and Biases cache directory. This is necessary since the Weights and Biases client currently does</span>
-<span class="sd">        not implement proper cache cleanup itself. See https://github.com/wandb/client/issues/1193 for more details.</span>
+<span class="sd">        not implement proper cache cleanup itself. See</span>
+<span class="sd">        `this github issue &lt;https://github.com/wandb/client/issues/1193&gt;`_ for more details.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">wandb_cache_dir</span> <span class="o">=</span> <span class="n">wandb</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_cache_dir</span><span class="p">()</span>

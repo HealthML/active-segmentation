@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>datasets &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>datasets package &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -39,8 +39,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
-  <link rel="next" title="functional" href="functional.html" />
-  <link rel="prev" title="inferencing" href="inferencing.html" /> 
+  <link rel="next" title="functional package" href="functional.html" />
+  <link rel="prev" title="inferencing module" href="inferencing.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -136,16 +136,19 @@
         
         <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">active_learning_framework</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functional.html">functional</a></li>
-<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="models.html">models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inferencing.html">inferencing module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
 </ul>
 
@@ -161,8 +164,8 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
-          <li><a href="active_segmentation.html">active_learning_framework</a> &gt;</li>
-      <li>datasets</li>
+          <li><a href="active_segmentation.html">Active Learning Framework</a> &gt;</li>
+      <li>datasets package</li>
       <li class="sphinx-template-breadcrumbs-aside">
             <a href="_sources/datasets.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
@@ -183,10 +186,291 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="datasets">
-<h1>datasets<a class="headerlink" href="#datasets" title="Permalink to this headline">¶</a></h1>
+  <section id="datasets-package">
+<h1>datasets package<a class="headerlink" href="#datasets-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-datasets.bcss_data_module">
+<span id="datasets-bcss-data-module-module"></span><h2>datasets.bcss_data_module module<a class="headerlink" href="#module-datasets.bcss_data_module" title="Permalink to this headline">¶</a></h2>
+<p>Module containing the data module for the BCSS dataset</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.bcss_data_module.</span></span><span class="sig-name descname"><span class="pre">BCSSDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.data_module.ActiveLearningDataModule</span></code></a></p>
+<p>Initializes the BCSS data module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> – Path of the directory that contains the data.</p></li>
+<li><p><strong>batch_size</strong> – Batch size.</p></li>
+<li><p><strong>num_workers</strong> – Number of workers for DataLoader.</p></li>
+<li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
+(default = 0).</p></li>
+<li><p><strong>active_learning_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the datamodule should be configured for active learning or for
+conventional model training (default = False).</p></li>
+<li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
+activated.</p></li>
+<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the data should be shuffled.</p></li>
+<li><p><strong>channels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of channels of the images. 3 means RGB, 2 means greyscale.</p></li>
+<li><p><strong>image_shape</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Shape of the image.</p></li>
+<li><p><strong>target_label</strong> (<em>int</em><em>, </em><em>optional</em>) – The label to use for learning. Details are in BCSSDataset.</p></li>
+<li><p><strong>combine_foreground_classes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the non zero values of the annotations should be merged.
+(default = False)</p></li>
+<li><p><strong>val_set_size</strong> (<em>float</em><em>, </em><em>optional</em>) – The size of the validation set (default = 0.3).</p></li>
+<li><p><strong>stratify</strong> (<em>bool</em><em>, </em><em>optional</em>) – The option to stratify the train val split by the institutes.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – Controls the data splitting and shuffling. Pass an int for reproducible output
+across multiple runs.</p></li>
+<li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule.build_stratification_labels">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">build_stratification_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule.build_stratification_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule.build_stratification_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a list with class labels used for a stratified split</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule.data_channels">
+<span class="sig-name descname"><span class="pre">data_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule.data_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule.data_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of channels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule.discover_paths">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">discover_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule.discover_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule.discover_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discover the <code class="docutils literal notranslate"><span class="pre">.png</span></code> files in a given directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_dir</strong> – The directory to the images.</p></li>
+<li><p><strong>mask_dir</strong> – The directory to the annotations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of file paths as tuple of image paths, annotation paths</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule.id_to_class_names">
+<span class="sig-name descname"><span class="pre">id_to_class_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule.id_to_class_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule.id_to_class_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A mapping of class indices to descriptive class names.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[int, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule.label_items">
+<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudo_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule.label_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the given samples from the unlabeled dataset to the labeled dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule.multi_label">
+<span class="sig-name descname"><span class="pre">multi_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule.multi_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule.multi_label" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether the dataset is a multi-label or a single-label dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.BCSSDataModule.train_dataloader">
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#BCSSDataModule.train_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.BCSSDataModule.train_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pytorch dataloader or Keras sequence representing the training set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="datasets.bcss_data_module.copy_test_set_to_separate_folder">
+<span class="sig-prename descclassname"><span class="pre">datasets.bcss_data_module.</span></span><span class="sig-name descname"><span class="pre">copy_test_set_to_separate_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_data_module.html#copy_test_set_to_separate_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_data_module.copy_test_set_to_separate_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reproduces the test set used in the baseline implementation of the challenge, by copying the scans of the
+respective institution into a separate folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_dir</strong> (<em>str</em>) – Directory where all the downloaded images and masks are stored.</p></li>
+<li><p><strong>target_dir</strong> (<em>str</em>) – Directory where to store the test data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-datasets.bcss_dataset">
+<span id="datasets-bcss-dataset-module"></span><h2>datasets.bcss_dataset module<a class="headerlink" href="#module-datasets.bcss_dataset" title="Permalink to this headline">¶</a></h2>
+<p>Module to load and batch the BCSS dataset</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.bcss_dataset.</span></span><span class="sig-name descname"><span class="pre">BCSSDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unlabeled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(300,</span> <span class="pre">300)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<p>The BCSS dataset contains over 20,000 segmentation annotations of tissue region from breast cancer images from TCGA.
+Detailed description can be found either <a class="reference external" href="https://bcsegmentation.grand-challenge.org">at the challenge website</a>
+or on <a class="reference external" href="https://github.com/PathologyDataScience/BCSS">github</a> .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_paths</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – List with all images to load, can be obtained by
+<a class="reference internal" href="#datasets.bcss_data_module.BCSSDataModule.discover_paths" title="datasets.bcss_data_module.BCSSDataModule.discover_paths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datasets.bcss_data_module.BCSSDataModule.discover_paths()</span></code></a> .</p></li>
+<li><p><strong>annotation_paths</strong> (<em>List</em><em>[</em><em>Path</em><em>]</em>) – List with all annotations to load, can be obtained by
+<a class="reference internal" href="#datasets.bcss_data_module.BCSSDataModule.discover_paths" title="datasets.bcss_data_module.BCSSDataModule.discover_paths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datasets.bcss_data_module.BCSSDataModule.discover_paths()</span></code></a> .</p></li>
+<li><p><strong>target_label</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>The label to use for learning. Following labels are in the annotations:</p>
+<ul>
+<li><p>outside_roi       0</p></li>
+<li><p>tumor     1</p></li>
+<li><p>stroma    2</p></li>
+<li><p>lymphocytic_infiltrate    3</p></li>
+<li><p>necrosis_or_debris        4</p></li>
+<li><p>glandular_secretions      5</p></li>
+<li><p>blood     6</p></li>
+<li><p>exclude   7</p></li>
+<li><p>metaplasia_NOS    8</p></li>
+<li><p>fat       9</p></li>
+<li><p>plasma_cells      10</p></li>
+<li><p>other_immune_infiltrate   11</p></li>
+<li><p>mucoid_material   12</p></li>
+<li><p>normal_acinus_or_duct     13</p></li>
+<li><p>lymphatics        14</p></li>
+<li><p>undetermined      15</p></li>
+<li><p>nerve     16</p></li>
+<li><p>skin_adnexa       17</p></li>
+<li><p>blood_vessel      18</p></li>
+<li><p>angioinvasion     19</p></li>
+<li><p>dcis      20</p></li>
+<li><p>other     21</p></li>
+</ul>
+</p></li>
+<li><p><strong>is_unlabeled</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the dataset is used as “unlabeled” for the active learning loop.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the data should be shuffled.</p></li>
+<li><p><strong>channels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of channels of the images. 3 means RGB, 2 means greyscale.</p></li>
+<li><p><strong>image_shape</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Shape of the image.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – Controls the data shuffling. Pass an int for reproducible output across
+multiple runs.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.add_image">
+<span class="sig-name descname"><span class="pre">add_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.add_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.add_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an image to this dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_path</strong> – Path of the image to be added.</p></li>
+<li><p><strong>annotation_path</strong> – Path of the annotation of the image to be added.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None. Raises ValueError if image already exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.get_case_id">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_case_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.get_case_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.get_case_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the case ID for a given filepath.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.get_institute_name">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_institute_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.get_institute_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.get_institute_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the name of the institute which donated the image.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.image_ids">
+<span class="sig-name descname"><span class="pre">image_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.image_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.image_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each image returns the case ID’s</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.normalize">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes an image by:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Dividing by the mean value</p></li>
+<li><p>Subtracting the std</p></li>
+</ol>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> – The input image that should be normalized.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Normalized image with background values normalized to -1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.reinforce_type">
+<span class="sig-name descname"><span class="pre">reinforce_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.reinforce_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reinforce the type for DataPipe instance. And the ‘expected_type’ is required
+to be a subtype of the original type hint to restrict the type requirement
+of DataPipe instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.remove_image">
+<span class="sig-name descname"><span class="pre">remove_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.remove_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.remove_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes an image from this dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_path</strong> – Path of the image to be removed.</p></li>
+<li><p><strong>annotation_path</strong> – Path of the annotation of the image to be removed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None. Raises ValueError if image already exists.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.size">
+<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size of the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.slices_per_image">
+<span class="sig-name descname"><span class="pre">slices_per_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.slices_per_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.slices_per_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each image returns the number of slices</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-datasets.brats_data_module">
-<span id="bratsdatamodule"></span><h2>BraTSDataModule<a class="headerlink" href="#module-datasets.brats_data_module" title="Permalink to this headline">¶</a></h2>
+<span id="datasets-brats-data-module-module"></span><h2>datasets.brats_data_module module<a class="headerlink" href="#module-datasets.brats_data_module" title="Permalink to this headline">¶</a></h2>
 <p>Module containing the data module for brats data</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule">
@@ -201,7 +485,7 @@
 <li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers for DataLoader.</p></li>
 <li><p><strong>active_learning_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the datamodule should be configured for active learning or for
 conventional model training (default = False).</p></li>
-<li><p><strong>batch_size_unlabeled_set</strong> (<em>int</em><em>, </em><em>optional</em>) – Batch size for the unlabeled set. Defaults ot <code class="xref py py-attr docutils literal notranslate"><span class="pre">batch_size</span></code>.</p></li>
+<li><p><strong>batch_size_unlabeled_set</strong> (<em>int</em><em>, </em><em>optional</em>) – Batch size for the unlabeled set. Defaults to <code class="xref py py-attr docutils literal notranslate"><span class="pre">batch_size</span></code>.</p></li>
 <li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
 (default = 0).</p></li>
 <li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
@@ -222,7 +506,7 @@ set and for shuffling the data. Pass an int for reproducibility across runs.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.brats_data_module.BraTSDataModule.discover_paths">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">discover_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flair'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/brats_data_module.html#BraTSDataModule.discover_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.brats_data_module.BraTSDataModule.discover_paths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Discover the .nii.gz file paths with a given modality</p>
+<dd><p>Discover the <code class="docutils literal notranslate"><span class="pre">.nii.gz</span></code> file paths with a given modality</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -282,33 +566,45 @@ set and for shuffling the data. Pass an int for reproducibility across runs.</p>
 </dd></dl>
 
 </section>
-<section id="bratsdataset">
-<h2>BraTSDataset<a class="headerlink" href="#bratsdataset" title="Permalink to this headline">¶</a></h2>
+<section id="module-datasets.collate">
+<span id="datasets-collate-module"></span><h2>datasets.collate module<a class="headerlink" href="#module-datasets.collate" title="Permalink to this headline">¶</a></h2>
+<p>Module to collate batches</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="datasets.collate.batch_padding_collate_fn">
+<span class="sig-prename descclassname"><span class="pre">datasets.collate.</span></span><span class="sig-name descname"><span class="pre">batch_padding_collate_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/collate.html#batch_padding_collate_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.collate.batch_padding_collate_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collates a batch and padds tensors to the same size before stacking them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch</strong> (<em>List</em><em>[</em><em>Union</em><em>[</em><em>tuple</em><em>, </em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em><em>]</em>) – The batch in List form.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The batch collated.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-datasets.data_module">
-<span id="datamodule"></span><h2>DataModule<a class="headerlink" href="#module-datasets.data_module" title="Permalink to this headline">¶</a></h2>
+<span id="datasets-data-module-module"></span><h2>datasets.data_module module<a class="headerlink" href="#module-datasets.data_module" title="Permalink to this headline">¶</a></h2>
 <p>Module containing abstract classes for the data modules</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.data_module.</span></span><span class="sig-name descname"><span class="pre">ActiveLearningDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.datamodule.LightningDataModule</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>Abstract base class to structure the dataset creation for active learning
-:param data_dir: Path of the directory that contains the data.
-:param batch_size: Batch size.
-:param num_workers: Number of workers for DataLoader.
-:param batch_size_unlabeled_set: Batch size for the unlabeled set. Defaults to <cite>batch_size</cite>.
-:type batch_size_unlabeled_set: int, optional
-:param active_learning_mode: Whether the datamodule should be configured for active learning or for</p>
-<blockquote>
-<div><p>conventional model training (default = False).</p>
-</div></blockquote>
+<p>Abstract base class to structure the dataset creation for active learning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<em>str</em>) – Path of the directory that contains the data.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers for DataLoader.</p></li>
+<li><p><strong>batch_size_unlabeled_set</strong> (<em>int</em><em>, </em><em>optional</em>) – Batch size for the unlabeled set. Defaults to <cite>batch_size</cite>.</p></li>
+<li><p><strong>active_learning_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the datamodule should be configured for active learning or for
+conventional model training (default = False).</p></li>
 <li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
 activated.</p></li>
 <li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
-<li><p><strong>shuffle</strong> – Flag if the data should be shuffled.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the data should be shuffled.</p></li>
 <li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
 </ul>
 </dd>
@@ -340,14 +636,16 @@ activated.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.label_items">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudo_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.label_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).
-:param ids: IDs of the items to be labeled.
-:type ids: List[str]
-:param pseudo_labels: Optional pseudo labels for (some of the) the selected data items.
-:type pseudo_labels: Dict[str, Any], optional</p>
+<dd><p>Moves data items from the unlabeled set to one of the labeled sets (training, validation or test set).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ids</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – IDs of the items to be labeled.</p></li>
+<li><p><strong>pseudo_labels</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Optional pseudo labels for (some of the) the selected data items.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -378,8 +676,12 @@ activated.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.setup">
 <span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.setup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates the datasets managed by this data module.
-:param stage: Current training stage.</p>
+<dd><p>Creates the datasets managed by this data module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stage</strong> – Current training stage.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -465,8 +767,331 @@ activated.</p></li>
 </dd></dl>
 
 </section>
-<section id="pascalvocdatamodule">
-<h2>PascalVocDataModule<a class="headerlink" href="#pascalvocdatamodule" title="Permalink to this headline">¶</a></h2>
+<section id="module-datasets.dataset_hooks">
+<span id="datasets-dataset-hooks-module"></span><h2>datasets.dataset_hooks module<a class="headerlink" href="#module-datasets.dataset_hooks" title="Permalink to this headline">¶</a></h2>
+<p>Module defining hooks that each dataset class should implement</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.dataset_hooks.DatasetHooks">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.dataset_hooks.</span></span><span class="sig-name descname"><span class="pre">DatasetHooks</span></span><a class="reference internal" href="_modules/datasets/dataset_hooks.html#DatasetHooks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.dataset_hooks.DatasetHooks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Class that defines hooks that should be implemented by each dataset class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.dataset_hooks.DatasetHooks.image_ids">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">image_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/dataset_hooks.html#DatasetHooks.image_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.dataset_hooks.DatasetHooks.image_ids" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of all image IDs included in the dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.dataset_hooks.DatasetHooks.size">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/dataset_hooks.html#DatasetHooks.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.dataset_hooks.DatasetHooks.size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size of the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.dataset_hooks.DatasetHooks.slices_per_image">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">slices_per_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/dataset_hooks.html#DatasetHooks.slices_per_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.dataset_hooks.DatasetHooks.slices_per_image" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – Dataset specific parameters.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Number of slices that each image of the dataset contains. If a single integer</dt><dd><p>value is provided, it is assumed that all images of the dataset have the same number of slices.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Union[int, List[int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-datasets.decathlon_data_module">
+<span id="datasets-decathlon-data-module-module"></span><h2>datasets.decathlon_data_module module<a class="headerlink" href="#module-datasets.decathlon_data_module" title="Permalink to this headline">¶</a></h2>
+<p>Module containing the data module for decathlon data</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.decathlon_data_module.DecathlonDataModule">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.decathlon_data_module.</span></span><span class="sig-name descname"><span class="pre">DecathlonDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/decathlon_data_module.html#DecathlonDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.decathlon_data_module.DecathlonDataModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">datasets.data_module.ActiveLearningDataModule</span></code></a></p>
+<p>Initializes the Decathlon data module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<em>string</em>) – Path of the directory that contains the data.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em>) – Number of workers for DataLoader.</p></li>
+<li><p><strong>task</strong> (<em>str</em><em>, </em><em>optional</em>) – The task from the medical segmentation decathlon.</p></li>
+<li><p><strong>active_learning_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the datamodule should be configured for active learning or for
+conventional model training (default = False).</p></li>
+<li><p><strong>batch_size_unlabeled_set</strong> (<em>int</em><em>, </em><em>optional</em>) – Batch size for the unlabeled set. Defaults to <code class="xref py py-attr docutils literal notranslate"><span class="pre">batch_size</span></code>.</p></li>
+<li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory between epochs to speed-up data loading
+(default = 0).</p></li>
+<li><p><strong>initial_training_set_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Initial size of the training set if the active learning mode is
+activated.</p></li>
+<li><p><strong>pin_memory</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>pin_memory</cite> parameter as defined by the PyTorch <cite>DataLoader</cite> class.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the data should be shuffled.</p></li>
+<li><p><strong>dim</strong> (<em>int</em>) – 2 or 3 to define if the datsets should return 2d slices of whole 3d images.</p></li>
+<li><p><strong>combine_foreground_classes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the non zero values of the annotations should be merged.
+(default = False)</p></li>
+<li><p><strong>mask_filter_values</strong> (<em>Tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Values from the annotations which should be used. Defaults to using
+all values.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – Random state for splitting the data into an initial training set and an unlabeled
+set and for shuffling the data. Pass an int for reproducibility across runs.</p></li>
+<li><p><strong>**kwargs</strong> – Further, dataset specific parameters.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.decathlon_data_module.DecathlonDataModule.data_channels">
+<span class="sig-name descname"><span class="pre">data_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/decathlon_data_module.html#DecathlonDataModule.data_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.decathlon_data_module.DecathlonDataModule.data_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the amount of data channels.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.decathlon_data_module.DecathlonDataModule.discover_paths">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">discover_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/decathlon_data_module.html#DecathlonDataModule.discover_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.decathlon_data_module.DecathlonDataModule.discover_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discover the <code class="docutils literal notranslate"><span class="pre">.nii.gz</span></code> file paths from the corresponding JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dir_path</strong> (<em>str</em>) – Directory the dataset is inside.</p></li>
+<li><p><strong>subset</strong> (<em>Literal</em><em>[</em><em>&quot;train&quot;</em><em>, </em><em>&quot;val&quot;</em><em>, </em><em>&quot;test&quot;</em><em>]</em>) – The subset of paths of the whole dataset.</p></li>
+<li><p><strong>random_samples</strong> (<em>int</em><em>, </em><em>optional</em>) – The amount of random samples from the data set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of files as tuple of image paths, annotation paths</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.decathlon_data_module.DecathlonDataModule.id_to_class_names">
+<span class="sig-name descname"><span class="pre">id_to_class_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/decathlon_data_module.html#DecathlonDataModule.id_to_class_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.decathlon_data_module.DecathlonDataModule.id_to_class_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A mapping of class indices to descriptive class names.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[int, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.decathlon_data_module.DecathlonDataModule.label_items">
+<span class="sig-name descname"><span class="pre">label_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudo_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/decathlon_data_module.html#DecathlonDataModule.label_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.decathlon_data_module.DecathlonDataModule.label_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the given samples from the unlabeled dataset to the labeled dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.decathlon_data_module.DecathlonDataModule.multi_label">
+<span class="sig-name descname"><span class="pre">multi_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/decathlon_data_module.html#DecathlonDataModule.multi_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.decathlon_data_module.DecathlonDataModule.multi_label" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether the dataset is a multi-label or a single-label dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.decathlon_data_module.DecathlonDataModule.train_dataloader">
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/decathlon_data_module.html#DecathlonDataModule.train_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.decathlon_data_module.DecathlonDataModule.train_dataloader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pytorch dataloader or Keras sequence representing the training set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-datasets.doubly_shuffled_nifti_dataset">
+<span id="datasets-doubly-shuffled-nifti-dataset-module"></span><h2>datasets.doubly_shuffled_nifti_dataset module<a class="headerlink" href="#module-datasets.doubly_shuffled_nifti_dataset" title="Permalink to this headline">¶</a></h2>
+<p>Module to load and batch nifti datasets</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">datasets.doubly_shuffled_nifti_dataset.</span></span><span class="sig-name descname"><span class="pre">DoublyShuffledNIfTIDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combine_foreground_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_filter_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unlabeled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_id_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'train'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.dataset.T_co</span></code>]</p>
+<p>This dataset can be used with NIfTI images. It is iterable and can return both 2D and 3D images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_paths</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List with the paths to the images. Has to contain paths of all images which can ever
+become part of the dataset.</p></li>
+<li><p><strong>annotation_paths</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List with the paths to the annotations. Has to contain paths of all images which
+can ever become part of the dataset.</p></li>
+<li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory to speed-up data loading in subsequent epochs.
+Defaults to zero.</p></li>
+<li><p><strong>combine_foreground_classes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the non zero values of the annotations should be merged.
+Defaults to False.</p></li>
+<li><p><strong>mask_filter_values</strong> (<em>Tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Values from the annotations which should be used. Defaults to using
+all values.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the data should be shuffled.</p></li>
+<li><p><strong>transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the images.</p></li>
+<li><p><strong>target_transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the annotations.</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+Defaults to 2.</p></li>
+<li><p><strong>slice_indices</strong> (<em>List</em><em>[</em><em>np.array</em><em>]</em><em>, </em><em>optional</em>) – Array of indices per image which should be part of the dataset.
+Uses all slices if None. Defaults to None.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – Controls the data shuffling. Pass an int for reproducible output across multiple
+runs.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.add_image">
+<span class="sig-name descname"><span class="pre">add_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudo_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.add_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.add_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an image to this dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_id</strong> (<em>str</em>) – The id of the image.</p></li>
+<li><p><strong>slice_index</strong> (<em>int</em>) – Index of the slice to be added.</p></li>
+<li><p><strong>pseudo_label</strong> (<em>np.array</em><em>, </em><em>optional</em>) – An optional pseudo label for the slice. If no pseudo label is provided,
+the actual label from the corresponding file is used.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.generate_active_learning_split">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_active_learning_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepaths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_training_set_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.generate_active_learning_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.generate_active_learning_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a split between initial training set and initially unlabeled set for active learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – The file paths to the Nifti files.</p></li>
+<li><p><strong>dim</strong> (<em>int</em>) – The dimensionality of the dataset. (2 or 3.)</p></li>
+<li><p><strong>initial_training_set_size</strong> (<em>int</em>) – The number of samples in the initial training set.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – The random state used to generate the split. Pass an int for reproducibility
+across runs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of two lists of np.arrays. The lists contain one array per filepath which contains the
+slice indices of the slices which should be part of the training and unlabeled sets respectively.
+The lists can be passed as <cite>slice_indices</cite> for initialization of a DoublyShuffledNIfTIDataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.get_images_by_id">
+<span class="sig-name descname"><span class="pre">get_images_by_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_ids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.get_images_by_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.get_images_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the last n images and corresponding case ids from the images that were last added to the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>case_ids</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List with case_ids to get.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of all the images with provided case ids.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.image_ids">
+<span class="sig-name descname"><span class="pre">image_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.image_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.image_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.normalize">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Normalizes an image by</dt><dd><ol class="arabic simple">
+<li><p>Dividing by the maximum value</p></li>
+<li><p>Subtracting the mean, zeros will be ignored while calculating the mean</p></li>
+<li><p>Dividing by the negative minimum value</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>img</strong> – The input image that should be normalized.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Normalized image with background values normalized to -1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.read_mask_for_image">
+<span class="sig-name descname"><span class="pre">read_mask_for_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.read_mask_for_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.read_mask_for_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the mask for the image from file. Uses correct mask specific parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image_index</strong> (<em>int</em>) – Index of the image to load.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.reinforce_type">
+<span class="sig-name descname"><span class="pre">reinforce_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.reinforce_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reinforce the type for DataPipe instance. And the ‘expected_type’ is required
+to be a subtype of the original type hint to restrict the type requirement
+of DataPipe instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.remove_image">
+<span class="sig-name descname"><span class="pre">remove_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.remove_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.remove_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes an image from this dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_id</strong> (<em>str</em>) – The id of the image.</p></li>
+<li><p><strong>slice_index</strong> (<em>int</em>) – Index of the slice to be removed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.size">
+<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.size" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size of the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.slices_per_image">
+<span class="sig-name descname"><span class="pre">slices_per_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.slices_per_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.slices_per_image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-datasets">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-datasets" title="Permalink to this headline">¶</a></h2>
 </section>
 </section>
 
@@ -478,10 +1103,10 @@ activated.</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="functional.html" class="btn btn-neutral float-right" title="functional" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="functional.html" class="btn btn-neutral float-right" title="functional package" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="inferencing.html" class="btn btn-neutral" title="inferencing" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="inferencing.html" class="btn btn-neutral" title="inferencing module" accesskey="p" rel="prev"><img src="_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -509,11 +1134,17 @@ activated.</p></li>
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">datasets</a><ul>
-<li><a class="reference internal" href="#module-datasets.brats_data_module">BraTSDataModule</a></li>
-<li><a class="reference internal" href="#bratsdataset">BraTSDataset</a></li>
-<li><a class="reference internal" href="#module-datasets.data_module">DataModule</a></li>
-<li><a class="reference internal" href="#pascalvocdatamodule">PascalVocDataModule</a></li>
+<li><a class="reference internal" href="#">datasets package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-datasets.bcss_data_module">datasets.bcss_data_module module</a></li>
+<li><a class="reference internal" href="#module-datasets.bcss_dataset">datasets.bcss_dataset module</a></li>
+<li><a class="reference internal" href="#module-datasets.brats_data_module">datasets.brats_data_module module</a></li>
+<li><a class="reference internal" href="#module-datasets.collate">datasets.collate module</a></li>
+<li><a class="reference internal" href="#module-datasets.data_module">datasets.data_module module</a></li>
+<li><a class="reference internal" href="#module-datasets.dataset_hooks">datasets.dataset_hooks module</a></li>
+<li><a class="reference internal" href="#module-datasets.decathlon_data_module">datasets.decathlon_data_module module</a></li>
+<li><a class="reference internal" href="#module-datasets.doubly_shuffled_nifti_dataset">datasets.doubly_shuffled_nifti_dataset module</a></li>
+<li><a class="reference internal" href="#module-datasets">Module contents</a></li>
 </ul>
 </li>
 </ul>
