@@ -56,7 +56,7 @@ class UNet(nn.Module):
             [
                 UNet._block(
                     in_channels if level == 0 else features * (2 ** (level - 1)),
-                    features * (2**level),
+                    features * (2 ** level),
                     name=f"enc{level + 1}",
                     dim=dim,
                     p_dropout=p_dropout,
@@ -70,7 +70,7 @@ class UNet(nn.Module):
 
         self.bottleneck = UNet._block(
             features * (2 ** (num_levels - 1)),
-            features * (2**num_levels),
+            features * (2 ** num_levels),
             name="bottleneck",
             dim=dim,
         )
@@ -79,7 +79,7 @@ class UNet(nn.Module):
             [
                 ConvTranspose(
                     features * (2 ** (level + 1)),
-                    features * (2**level),
+                    features * (2 ** level),
                     kernel_size=2,
                     stride=2,
                 )
@@ -90,7 +90,7 @@ class UNet(nn.Module):
             [
                 UNet._block(
                     features * (2 ** (level + 1)),
-                    features * (2**level),
+                    features * (2 ** level),
                     name=f"dec{level + 1}",
                     dim=dim,
                 )

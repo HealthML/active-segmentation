@@ -105,12 +105,16 @@ class CombinedPerEpochMetric(torchmetrics.Metric):
         )
         self.metrics_to_compute = set()
 
-        if reduction_across_classes not in [
-            "mean",
-            "max",
-            "min",
-            "none",
-        ] or reduction_across_images not in ["mean", "max", "min", "none"]:
+        if (
+            reduction_across_classes
+            not in [
+                "mean",
+                "max",
+                "min",
+                "none",
+            ]
+            or reduction_across_images not in ["mean", "max", "min", "none"]
+        ):
             raise ValueError("Invalid reduction method.")
 
         self.reduction_across_classes = reduction_across_classes
