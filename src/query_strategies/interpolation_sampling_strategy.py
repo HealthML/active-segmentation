@@ -19,24 +19,26 @@ from .query_strategy import QueryStrategy
 class InterpolationSamplingStrategy(QueryStrategy):
     """
     Class for selecting blocks to label by highest uncertainty and then interpolating within those
-    blocks to generate additonal pseudo labels.
+    blocks to generate additional pseudo labels.
+
     Args:
         **kwargs: Optional keyword arguments:
-            block_selection (str): The selection strategy for the blocks to interpolate: `"uncertainty"` | `"random"`.
-            block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
-            calculation_method (str): Specification of the method used to calculate the uncertainty
-                values: `"distance"` |  `"entropy"`.
-            exclude_background (bool): Whether to exclude the background dimension in calculating the
-                uncertainty value.
-            epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
-                metric.
-            block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
-            interpolation_type (str): The interpolation algorithm to use.
-                values: `"signed-distance"` | `"morph-contour"`.
-            interpolation_quality_metric (str): The metric used for evaluating the performance of the interpolation
-                e.g. "dice"
-            random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
-                outputs across multiple runs.
+
+            - block_selection (str): The selection strategy for the blocks to interpolate: `"uncertainty"` | `"random"`.
+            - block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
+            - | calculation_method (str): Specification of the method used to calculate the uncertainty
+              | values: `"distance"` |  `"entropy"`.
+            - | exclude_background (bool): Whether to exclude the background dimension in calculating the
+              | uncertainty value.
+            - | epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
+              | metric.
+            - block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
+            - | interpolation_type (str): The interpolation algorithm to use.
+              | values: `"signed-distance"` | `"morph-contour"`.
+            - | interpolation_quality_metric (str): The metric used for evaluating the performance of the interpolation
+              | e.g. "dice"
+            - | random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
+              | outputs across multiple runs.
 
     """
 
@@ -50,6 +52,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
     ) -> Iterator[Tuple[str, int, int]]:
         """
         Randomly selects blocks of the unlabeled data that should be labeled next.
+
         Args:
             data_module (ActiveLearningDataModule): A data module object providing data.
             block_thickness (int): The thickness of the blocks.
@@ -95,6 +98,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
     ) -> Iterator[Tuple[str, int, int]]:
         """
         Selects blocks of the unlabeled data with the highest uncertainty that should be labeled next.
+
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
@@ -354,6 +358,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
     ) -> float:
         """
         Calculates a quality score for the interpolations and logs them on wandb.
+
         Args:
             interpolation (np.ndarray): The interpolated slices.
             ground_truth (np.ndarray): The ground truth slices.
@@ -428,8 +433,8 @@ def morphological_contour_interpolation(
     block_thickness: int,
 ) -> np.array:
     """
-    Interpolates between top and bottom slices using the morphological_contour_interpolator from itk.
-    https://www.researchgate.net/publication/307942551_ND_morphological_contour_interpolation
+    Interpolates between top and bottom slices using the `morphological_contour_interpolator
+    <https://www.researchgate.net/publication/307942551_ND_morphological_contour_interpolation>`_ from ITK.
 
     Args:
         top (np.array): The top slice of the block.

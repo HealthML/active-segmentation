@@ -22,26 +22,28 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
     Args:
         clustering_algorithm (string, optional): Clustering algorithm to be used: `"mean_shift"` | `"k_means"` |
             `"scans"`:
-            - `"mean_shift"`: the mean shift clustering algorithm is used, allowing a variable number of clusters.
-            - `"k_means"`: the k-means clustering algorithm is used, with a fixed number of clusters.
-            -  `"scans"`: all slices from one scan are considered to represent one cluster.
+                - `"mean_shift"`: the mean shift clustering algorithm is used, allowing a variable number of clusters.
+                - `"k_means"`: the k-means clustering algorithm is used, with a fixed number of clusters.
+                -  `"scans"`: all slices from one scan are considered to represent one cluster.
             Defaults to `"mean_shift"`.
-        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` | `"image_features"`:
-            - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
-            - `"image_features"`: The input images are used as feature vectors.
-            Defaults to `model_features`.
+        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` |
+            `"image_features"`:
+                - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
+                - `"image_features"`: The input images are used as feature vectors.
+            Defaults to `"model_features"`.
         feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
             Defaults to 10.
 
         **kwargs: Optional keyword arguments:
-            bandwidth (float, optional): Kernel bandwidth of the mean shift clustering algorithm. Defaults to 5. Only
-                used if `clustering_algorithm = "mean_shift"`.
-            cluster_all (bool, optional): Whether all data items including outliers should be assigned to a cluster.
-                Defaults to `False`. Only used if `clustering_algorithm = "mean_shift"`.
-            n_clusters (int, optional): Number of clusters. Defaults to 10.  Only used if
-                `clustering_algorithm = "k_means"`.
-            random_state (int, optional): Random state for centroid initialization of k-means algorithm. Defaults to
-                `None`. Only used if `clustering_algorithm = "k_means"`.
+
+            - | bandwidth (float, optional): Kernel bandwidth of the mean shift clustering algorithm. Defaults to 5.
+              | Only used if `clustering_algorithm = "mean_shift"`.
+            - | cluster_all (bool, optional): Whether all data items including outliers should be assigned to a cluster.
+              | Defaults to `False`. Only used if `clustering_algorithm = "mean_shift"`.
+            - | n_clusters (int, optional): Number of clusters. Defaults to 10.  Only used if
+              | `clustering_algorithm = "k_means"`.
+            - | random_state (int, optional): Random state for centroid initialization of k-means algorithm. Defaults to
+              | `None`. Only used if `clustering_algorithm = "k_means"`.
     """
 
     def __init__(
@@ -142,7 +144,7 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
 
         Returns:
             Tuple[Dict[str, float], Dict[str, float]]: Cluster sizes for the training set, cluster sizes for the total
-                dataset.
+            dataset.
         """
         total_cluster_sizes = {}
         cluster_sizes_training_set = {}
@@ -192,7 +194,7 @@ class ClusteringBasedRepresentativenessSamplingStrategy(
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in
-                the training receive higher scores.
+            the training receive higher scores.
         """
 
         relative_cluster_sizes_training_set = {}

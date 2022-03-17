@@ -19,6 +19,7 @@ from datasets import (
 class Inferencer:
     """
     The inferencer to use a given model for inferencing.
+
     Args:
         model: A model object to be used for inferencing.
         dataset: Name of the dataset. E.g. 'brats'

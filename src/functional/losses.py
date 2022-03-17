@@ -191,11 +191,11 @@ class AbstractDiceLoss(SegmentationLoss, abc.ABC):
             Tensor: Dice loss.
 
         Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                or :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
+            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+              | in :math:`[0, 1]`
+            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding or :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
 
@@ -221,11 +221,12 @@ class DiceLoss(AbstractDiceLoss):
     avoid divisions by zero and does not square the terms in the denominator. Additionally, the loss formulation is
     generalized to multi-class classification tasks by averaging dice losses over the class and batch dimension:
 
-        :math:`DL = 1 - \frac{1}{N \cdot L} \cdot \sum_{n=1}^N \sum_{l=1}^L 2 \cdot \frac{\sum_{i} r_{nli} p_{nli} +
-            \epsilon}{\sum_{n=1}^N \sum_{l=1}^L \sum_{i} (r_{nli} + p_{nli}) + \epsilon}` where :math:`N` is the batch
-            size, :math:`L` is the number of classes, :math:`r_{nli}` are the ground-truth labels for class :math:`l` in
-            the :math:`i`-th voxel of the :math:`n`-th image. Analogously, :math:`p` is the predicted probability for
-            class :math:`l` in the :math:`i`-th voxel of the :math:`n`-th image.
+        .. math::
+            DL = 1 - \frac{1}{N \cdot L} \cdot \sum_{n=1}^N \sum_{l=1}^L 2 \cdot \frac{\sum_{i} r_{nli} p_{nli} +
+            \epsilon}{\sum_{n=1}^N \sum_{l=1}^L \sum_{i} (r_{nli} + p_{nli}) + \epsilon}
+        where :math:`N` is the batch size, :math:`L` is the number of classes, :math:`r_{nli}` are the ground-truth
+        labels for class :math:`l` in the :math:`i`-th voxel of the :math:`n`-th image. Analogously, :math:`p` is the
+        predicted probability for class :math:`l` in the :math:`i`-th voxel of the :math:`n`-th image.
 
     This implementation is a wrapper of the Dice loss implementation from the `MONAI package
     <https://docs.monai.io/en/stable/losses.html#diceloss>`_ that adapts the reduction behaviour. It supports both
@@ -287,11 +288,11 @@ class DiceLoss(AbstractDiceLoss):
             Tensor: Dice loss.
 
         Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
+            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+              | in :math:`[0, 1]`
+            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding.
             - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
@@ -317,12 +318,13 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
 
     It is formulated as:
 
-        :math:`GDL = \frac{1}{N} \cdot \sum_{n=1}^N (1 - 2 \frac{\sum_{l=1}^L w_l \cdot \sum_{i} r_{nli} p_{nli} +
-            \epsilon}{\sum_{l=1}^L w_l \cdot \sum_{i} (r_{nli} + p_{nli}) + \epsilon})` where
-            :math:`N` is the batch size, :math:`L` is the number of classes, :math:`w_l` is a class weight,
-            :math:`r_{nli}` are the ground-truth labels for class :math:`l` in the :math:`i`-th voxel of the
-            :math:`n`-th image. Analogously, :math:`p` is the predicted probability for class :math:`l` in the
-            :math:`i`-th voxel of the :math:`n`-th image.
+        .. math::
+            GDL = \frac{1}{N} \cdot \sum_{n=1}^N (1 - 2 \frac{\sum_{l=1}^L w_l \cdot \sum_{i} r_{nli} p_{nli} +
+            \epsilon}{\sum_{l=1}^L w_l \cdot \sum_{i} (r_{nli} + p_{nli}) + \epsilon})
+        where :math:`N` is the batch size, :math:`L` is the number of classes, :math:`w_l` is a class weight,
+        :math:`r_{nli}` are the ground-truth labels for class :math:`l` in the :math:`i`-th voxel of the
+        :math:`n`-th image. Analogously, :math:`p` is the predicted probability for class :math:`l` in the
+        :math:`i`-th voxel of the :math:`n`-th image.
 
     This implementation is a wrapper of the Generalized Dice loss implementation from the `MONAI package
     <https://docs.monai.io/en/stable/losses.html#generalizeddiceloss>`_ that adapts the reduction behaviour. It supports
@@ -387,11 +389,11 @@ class GeneralizedDiceLoss(AbstractDiceLoss):
             Tensor: Generalized dice loss.
 
         Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
+            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+              | in :math:`[0, 1]`
+            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding.
             - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
@@ -454,11 +456,11 @@ class FalsePositiveLoss(SegmentationLoss):
             Tensor: False positive loss.
 
         Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
+            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+              | in :math:`[0, 1]`
+            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding.
             - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
@@ -540,11 +542,11 @@ class FalsePositiveDiceLoss(SegmentationLoss):
             Tensor: Combined loss.
 
         Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
+            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+              | in :math:`[0, 1]`
+            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding.
             - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
@@ -613,11 +615,11 @@ class CrossEntropyLoss(SegmentationLoss):
             Tensor: Cross-entropy loss.
 
         Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
+            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+              | in :math:`[0, 1]`
+            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding.
             - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """
@@ -654,7 +656,7 @@ class CrossEntropyLoss(SegmentationLoss):
 
 class FocalLoss(CrossEntropyLoss):
     """
-    Wrapper for the `CrossEntropyLoss` to perform some addtional computations to turn it into focal loss.
+    Wrapper for the `CrossEntropyLoss` to perform some additional computations to turn it into focal loss.
 
     Args:
         multi_label (bool, optional): Determines if data is multilabel or not (default = `False`).
@@ -745,11 +747,11 @@ class CrossEntropyDiceLoss(SegmentationLoss):
             Tensor: Combined loss.
 
         Shape:
-            - Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
-                in :math:`[0, 1]`
-            - Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding.
+            - | Prediction: :math:`(N, C, X, Y, ...)`, where `N = batch size`, `C = number of classes` and each value is
+              | in :math:`[0, 1]`
+            - | Target: :math:`(N, X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(N, C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding.
             - Weight: :math:`(N)` where `N = batch size`.
             - Output: If :attr:`reduction` is `"none"`, shape :math:`(N, C)`. Otherwise, scalar.
         """

@@ -265,6 +265,7 @@ class ActiveLearningPipeline:
     ) -> None:
         """
         Generates heatmaps using gradient based method and the prediction of the last layer of the model.
+
         Args:
             items_to_inspect (List[Tuple[np.ndarray, str]]): A list with the items to generate heatmaps for.
             iteration (int): The iteration of the active learning loop.
@@ -300,6 +301,7 @@ class ActiveLearningPipeline:
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Generates two heatmaps: One based on the GradCam method and one based on the predictions of the last layer.
+
         Args:
             img (np.ndarray): The image as numpy array.
             case_id (str): The id of the current image.
@@ -333,7 +335,8 @@ class ActiveLearningPipeline:
     def remove_wandb_cache() -> None:
         """
         Deletes Weights and Biases cache directory. This is necessary since the Weights and Biases client currently does
-        not implement proper cache cleanup itself. See https://github.com/wandb/client/issues/1193 for more details.
+        not implement proper cache cleanup itself. See
+        `this github issue <https://github.com/wandb/client/issues/1193>`_ for more details.
         """
 
         wandb_cache_dir = wandb.env.get_cache_dir()

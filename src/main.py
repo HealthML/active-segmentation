@@ -12,7 +12,7 @@ import wandb
 
 from active_learning import ActiveLearningPipeline
 from inferencing import Inferencer
-from models import PytorchFCNResnet50, PytorchUNet
+from models import PytorchUNet
 from datasets import (
     BraTSDataModule,
     DecathlonDataModule,
@@ -140,8 +140,8 @@ def run_active_learning_pipeline(
     clear_wandb_cache: bool = False,
 ) -> None:
     """
-    Main function to execute an active learning pipeline run, or start an active learning
-        simulation.
+    Main function to execute an active learning pipeline run, or start an active learning simulation.
+
     Args:
         architecture (string): Name of the desired model architecture. E.g. 'u_net'.
         dataset (string): Name of the dataset. E.g. 'brats'
@@ -302,16 +302,7 @@ def create_model(
             "weight_pseudo_labels_decay_steps"
         ] = loss_weight_scheduler_max_steps
 
-    if architecture == "fcn_resnet50":
-        if data_module.data_channels() != 1:
-            raise ValueError(
-                f"{architecture} does not support multiple input channels."
-            )
-
-        model = PytorchFCNResnet50(
-            learning_rate=learning_rate, lr_scheduler=lr_scheduler, **model_config
-        )
-    elif architecture == "u_net":
+    if architecture == "u_net":
         model = PytorchUNet(
             learning_rate=learning_rate,
             lr_scheduler=lr_scheduler,
@@ -328,7 +319,8 @@ def create_model(
 
 def create_query_strategy(strategy_config: dict):
     """
-    Initialises the chosen query strategy
+    Initialises the chosen query strategy.
+
     Args:
         strategy_config (dict): Configuration of the query strategy
     """
@@ -354,6 +346,7 @@ def run_active_learning_pipeline_from_config(
 ) -> None:
     """
     Runs the active learning pipeline based on a config file.
+
     Args:
         config_file_name: Name of or path to the config file.
         hp_optimisation: If this flag is set, run the pipeline with different hyperparameters based

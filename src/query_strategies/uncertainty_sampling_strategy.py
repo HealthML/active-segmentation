@@ -13,18 +13,18 @@ from .query_strategy import QueryStrategy
 class UncertaintySamplingStrategy(QueryStrategy):
     """
     Class for selecting items to label by highest uncertainty
-        Args:
+
+    Args:
         **kwargs: Optional keyword arguments:
-            calculation_method (str): Specification of the method used to calculate the uncertainty
-                values: `"distance"` |  `"entropy"`.
-            exclude_background (bool): Whether to exclude the background dimension in calculating the
-                uncertainty value.
-            prefer_unique_scans (bool): Whether to prefer among the uncertain scan-slice combinations unique
-                scans, if possible.
-                E.g. with items_to_label set to 2:
-                ['slice_1-32', 'slice_1-33', 'slice_2-50'] -> ['slice_1-32', 'slice_2-50']
-            epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty
-                metric.
+
+            - | calculation_method (str): Specification of the method used to calculate the uncertainty
+              | values: `"distance"` |  `"entropy"`.
+            - | exclude_background (bool): Whether to exclude the background dimension in calculating the
+              | uncertainty value.
+            - | prefer_unique_scans (bool): Whether to prefer among the uncertain scan-slice combinations unique
+              | scans, if possible. E.g. with items_to_label set to 2:
+                `['slice_1-32', 'slice_1-33', 'slice_2-50'] -> ['slice_1-32', 'slice_2-50']`
+            - epsilon (float): Small numerical value used for smoothing when using "entropy" as the uncertainty metric.
     """
 
     def compute_uncertainties(
@@ -83,6 +83,7 @@ class UncertaintySamplingStrategy(QueryStrategy):
     ) -> Tuple[List[str], None]:
         """
         Selects subset of the unlabeled data with the highest uncertainty that should be labeled next.
+
         Args:
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
@@ -90,13 +91,10 @@ class UncertaintySamplingStrategy(QueryStrategy):
             calculation_method (str, optional): Specification of the method used to calculate the uncertainty values.
                 (default = 'distance')
             **kwargs: Additional, strategy-specific parameters.
-                Keyword Args:
-                    exclude_background (bool): Whether to exclude the background dimension in calculating the
-                        uncertainty value.
 
         Returns:
             Tuple[List[str], None]: List of IDs of the data items to be labeled and None because no pseudo labels are
-                generated.
+            generated.
         """
 
         if isinstance(models, List):

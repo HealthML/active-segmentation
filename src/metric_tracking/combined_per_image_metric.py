@@ -206,8 +206,8 @@ class CombinedPerImageMetric(torchmetrics.Metric):
 
         Returns:
             Dict[string, Tensor]: Mapping of metric names to metric values.
-                The keys have the form `<metric name>_<class_name>_<confidence_level>` for multi-label segmentation
-                tasks and `<metric name>_<class_name>` for single-label segmentation tasks.
+            The keys have the form `<metric name>_<class_name>_<confidence_level>` for multi-label segmentation
+            tasks and `<metric name>_<class_name>` for single-label segmentation tasks.
         """
         metric_results = {}
 

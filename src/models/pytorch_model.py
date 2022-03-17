@@ -37,14 +37,14 @@ class PytorchModel(LightningModule, ABC):
             ``"sensitivity"`` | ``"specificity"`` | ``"hausdorff95"``. Defaults to `["dice_score"]`.
         train_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
             specified in the `train_metrics` parameter should be computed in the training loop (`trainer.fit()`). This
-            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.
+            parameter is used only for multi-label classification tasks. Defaults to `[0.5]`.
         test_metrics (Iterable[str], optional): A list with the names of the metrics that should be computed and logged
             in the model validation or testing loop (`trainer.validate()`, `trainer.test()`). Available options:
             ``"dice_score"`` | ``"sensitivity"`` | ``"specificity"`` | ``"hausdorff95"`` Defaults to
             `["dice_score", "sensitivity", "specificity", "hausdorff95"]`.
         test_metric_confidence_levels (Iterable[float], optional): A list of confidence levels for which the metrics
             specified in the `test_metrics` parameter should be computed in the validation or testing loop. This
-            parameter is used only for mulit-label classification tasks. Defaults to `[0.5]`.
+            parameter is used only for multi-label classification tasks. Defaults to `[0.5]`.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -116,7 +116,7 @@ class PytorchModel(LightningModule, ABC):
     def setup(self, stage: Optional[str] = None) -> None:
         """
         Setup hook as defined by PyTorch Lightning. Called at the beginning of fit (train + validate), validate, test,
-            or predict.
+        or predict.
 
         Args:
             stage(string, optional): Either 'fit', 'validate', 'test', or 'predict'.
@@ -138,8 +138,10 @@ class PytorchModel(LightningModule, ABC):
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> float:
         """
         Trains the model on a given batch of model inputs.
-        # this method should match the requirements of the pytorch lightning framework.
-        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html
+        This method should match the requirements of the pytorch lightning framework. See the
+        `pytorch lighting documentation
+        <https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html>`_ for more details.
+
         Args:
             batch: A batch of model inputs.
             batch_idx: Index of the current batch.
@@ -152,8 +154,10 @@ class PytorchModel(LightningModule, ABC):
     def validation_step(self, batch: torch.Tensor, batch_idx: int) -> float:
         """
         Validates the model on a given batch of model inputs.
-        # this method should match the requirements of the pytorch lightning framework.
-        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html
+        This method should match the requirements of the pytorch lightning framework. See the
+        `pytorch lightning documentation
+        <https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html>`_ for more details.
+
         Args:
             batch: A batch of model inputs.
             batch_idx: Index of the current batch.
@@ -167,8 +171,9 @@ class PytorchModel(LightningModule, ABC):
     ) -> Any:
         """
         Compute the model's predictions on a given batch of model inputs.
-        # this method should match the requirements of the pytorch lightning framework.
-        # see https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html
+        This method should match the requirements of the pytorch lightning framework. See the
+        `pytorch lightning documentation
+        <https://pytorch-lightning.readthedocs.io/en/latest/starter/introduction_guide.html>`_ for more details.
 
         Args:
             batch: A batch of model inputs.
@@ -249,6 +254,7 @@ class PytorchModel(LightningModule, ABC):
     ) -> functional.losses.SegmentationLoss:
         """
         Configures the loss.
+
         Args:
             loss (string): The optimization criterion: ``"cross_entropy"`` | ``"dice"`` |
                 ``"cross_entropy_dice"`` | ``"general_dice"`` | ``"fp"`` | ``"fp_dice"`` | ``"focal"``.
@@ -387,6 +393,7 @@ class PytorchModel(LightningModule, ABC):
     def predict(self, batch: torch.Tensor) -> numpy.ndarray:
         """
         Computes predictions for a given batch of model inputs.
+
         Args:
             batch: A batch of model inputs.
 

@@ -10,9 +10,9 @@ import torch.nn.functional as F
 
 class UNet(nn.Module):
     """
-    This U-Net implementation was originally taken from
-    https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py
-    and adapted to a flexible number of levels and for optinal 3d mode.
+    This U-Net implementation was originally taken from `this implementation
+    <https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py>`_
+    and adapted to a flexible number of levels and for optional 3d mode.
 
     Args:
         in_channels (int): Number of input channels.

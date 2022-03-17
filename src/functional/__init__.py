@@ -1,4 +1,4 @@
-""" modules to import when initializing module """
+# pylint: disable=missing-module-docstring
 
 from functional.metrics import *
 from functional.losses import (

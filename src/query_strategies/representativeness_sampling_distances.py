@@ -24,10 +24,11 @@ class DistanceBasedRepresentativenessSamplingStrategy(
     in the training set.
 
     Args:
-        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` | `"image_features"`:
-            - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
-            - `"image_features"`: The input images are used as feature vectors.
-            Defaults to `model_features`.
+        feature_type (string, optional): Type of feature vectors to be used: `"model_features"` |
+            `"image_features"`:
+                - `"model_features"`: Feature vectors retrieved from the inner layers of the model are used.
+                - `"image_features"`: The input images are used as feature vectors.
+            Defaults to `"model_features"`.
         feature_dimensionality (int, optional): Number of dimensions the reduced feature vector should have.
             Defaults to 10.
         distance_metric (string, optional):  Metric to be used for calculation the distance between feature vectors:
@@ -67,7 +68,7 @@ class DistanceBasedRepresentativenessSamplingStrategy(
 
         Returns:
             np.array: For each feature vector from the unlabeled set, average distance to the feature vectors from the
-                training set
+            training set
         """
 
         # as the feature vectors possibly might be large, the feature vectors from the unlabeled set are split into
@@ -137,7 +138,7 @@ class DistanceBasedRepresentativenessSamplingStrategy(
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in
-                the training receive higher scores.
+            the training receive higher scores.
         """
 
         return self._average_feature_distances(

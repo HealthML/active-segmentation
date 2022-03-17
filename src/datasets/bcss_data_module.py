@@ -15,6 +15,7 @@ from datasets.bcss_dataset import BCSSDataset
 class BCSSDataModule(ActiveLearningDataModule):
     """
     Initializes the BCSS data module.
+
     Args:
         data_dir: Path of the directory that contains the data.
         batch_size: Batch size.
@@ -42,7 +43,8 @@ class BCSSDataModule(ActiveLearningDataModule):
     @staticmethod
     def discover_paths(image_dir: str, mask_dir: str) -> Tuple[List[Path], List[Path]]:
         """
-        Discover the '.png' files in a given directory.
+        Discover the ``.png`` files in a given directory.
+
         Args:
             image_dir: The directory to the images.
             mask_dir: The directory to the annotations.
@@ -346,6 +348,7 @@ def copy_test_set_to_separate_folder(source_dir: str, target_dir: str) -> None:
     """
     Reproduces the test set used in the baseline implementation of the challenge, by copying the scans of the
     respective institution into a separate folder.
+
     Args:
         source_dir (str): Directory where all the downloaded images and masks are stored.
         target_dir (str): Directory where to store the test data.

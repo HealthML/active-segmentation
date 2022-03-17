@@ -1,4 +1,4 @@
-""" Module to load and batch bcss dataset """
+""" Module to load and batch the BCSS dataset """
 from typing import List, Optional, Tuple, Union
 from pathlib import Path
 import math
@@ -14,41 +14,45 @@ from torch.utils.data import IterableDataset
 class BCSSDataset(IterableDataset):
     """
     The BCSS dataset contains over 20,000 segmentation annotations of tissue region from breast cancer images from TCGA.
-    Detailed description can be found either here: https://github.com/PathologyDataScience/BCSS
-    or here: https://bcsegmentation.grand-challenge.org
-        Args:
-            image_paths (List[Path]): List with all images to load, can be obtained by BCSSDataModule.discover_paths.
-            annotation_paths (List[Path]): List with all annotations to load,
-                can be obtained by BCSSDataModule.discover_paths.
-            target_label (int, optional): The label to use for learning. Following labels are in the annotations:
-                outside_roi	0
-                tumor	1
-                stroma	2
-                lymphocytic_infiltrate	3
-                necrosis_or_debris	4
-                glandular_secretions	5
-                blood	6
-                exclude	7
-                metaplasia_NOS	8
-                fat	9
-                plasma_cells	10
-                other_immune_infiltrate	11
-                mucoid_material	12
-                normal_acinus_or_duct	13
-                lymphatics	14
-                undetermined	15
-                nerve	16
-                skin_adnexa	17
-                blood_vessel	18
-                angioinvasion	19
-                dcis	20
-                other	21
-            is_unlabeled (bool, optional): Whether the dataset is used as "unlabeled" for the active learning loop.
-            shuffle (bool, optional): Whether the data should be shuffled.
-            channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
-            image_shape (tuple, optional): Shape of the image.
-            random_state (int, optional): Controls the data shuffling. Pass an int for reproducible output across
-                multiple runs.
+    Detailed description can be found either `at the challenge website <https://bcsegmentation.grand-challenge.org>`_
+    or on `github <https://github.com/PathologyDataScience/BCSS>`_ .
+
+    Args:
+        image_paths (List[Path]): List with all images to load, can be obtained by
+            :py:meth:`datasets.bcss_data_module.BCSSDataModule.discover_paths` .
+        annotation_paths (List[Path]): List with all annotations to load, can be obtained by
+            :py:meth:`datasets.bcss_data_module.BCSSDataModule.discover_paths` .
+        target_label (int, optional): The label to use for learning. Following labels are in the annotations:
+
+            * outside_roi	0
+            * tumor	1
+            * stroma	2
+            * lymphocytic_infiltrate	3
+            * necrosis_or_debris	4
+            * glandular_secretions	5
+            * blood	6
+            * exclude	7
+            * metaplasia_NOS	8
+            * fat	9
+            * plasma_cells	10
+            * other_immune_infiltrate	11
+            * mucoid_material	12
+            * normal_acinus_or_duct	13
+            * lymphatics	14
+            * undetermined	15
+            * nerve	16
+            * skin_adnexa	17
+            * blood_vessel	18
+            * angioinvasion	19
+            * dcis	20
+            * other	21
+
+        is_unlabeled (bool, optional): Whether the dataset is used as "unlabeled" for the active learning loop.
+        shuffle (bool, optional): Whether the data should be shuffled.
+        channels (int, optional): Number of channels of the images. 3 means RGB, 2 means greyscale.
+        image_shape (tuple, optional): Shape of the image.
+        random_state (int, optional): Controls the data shuffling. Pass an int for reproducible output across
+            multiple runs.
     """
 
     # pylint: disable=too-many-instance-attributes,abstract-method
@@ -56,9 +60,11 @@ class BCSSDataset(IterableDataset):
     @staticmethod
     def normalize(img: np.ndarray) -> np.ndarray:
         """
-        Normalizes an image by
-            1. Dividing by the mean value
-            2. Subtracting the std
+        Normalizes an image by:
+
+            #. Dividing by the mean value
+            #. Subtracting the std
+
         Args:
             img: The input image that should be normalized.
 
@@ -233,6 +239,7 @@ class BCSSDataset(IterableDataset):
     def add_image(self, image_path: Path, annotation_path: Path) -> None:
         """
         Adds an image to this dataset.
+
         Args:
             image_path: Path of the image to be added.
             annotation_path: Path of the annotation of the image to be added.
@@ -257,6 +264,7 @@ class BCSSDataset(IterableDataset):
     def remove_image(self, image_path: Path, annotation_path: Path) -> None:
         """
         Removes an image from this dataset.
+
         Args:
             image_path: Path of the image to be removed.
             annotation_path: Path of the annotation of the image to be removed.

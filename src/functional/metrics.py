@@ -64,9 +64,9 @@ def dice_score(
         Tensor: Dice similarity coefficient.
 
     Shape:
-        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
-            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
-            (`C = number of classes`).
+        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+          | (`C = number of classes`).
         - Target: Same shape and type as prediction.
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
@@ -133,9 +133,9 @@ def sensitivity(
         Tensor: Sensitivity.
 
     Shape:
-        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
-            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
-            (`C = number of classes`).
+        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+          | (`C = number of classes`).
         - Target: Same shape and type as prediction.
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
@@ -204,9 +204,9 @@ def specificity(
         Tensor: Specificity.
 
     Shape:
-        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
-            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
-            (`C = number of classes`).
+        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+          | (`C = number of classes`).
         - Target: Same shape and type as prediction.
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
@@ -243,6 +243,7 @@ def _distance_matrix(
 ) -> torch.Tensor:
     r"""
     Computes shortest Euclidean distance from all points in the first tensor to any point in the second tensor.
+
     Args:
         first_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d)
         second_point_set (Tensor): A tensor representing a list of points in an Euclidean space (typically 2d or 3d).
@@ -287,6 +288,7 @@ def _distance_matrix(
 def _compute_all_image_locations(shape: Tuple[int], device: Optional[str] = None):
     r"""
     Computes a tensor of points corresponding to all pixel locations of a 2d or a 3d image in Euclidean space.
+
     Args:
         shape (Tuple[int]): The shape of the image for which the pixel locations are to be computed.
         device (str, optional): Device as defined by PyTorch.
@@ -305,6 +307,7 @@ def _compute_all_image_locations(shape: Tuple[int], device: Optional[str] = None
 def _binary_erosion(input_image: torch.Tensor) -> torch.Tensor:
     r"""
     Applies an erosion filter to a tensor representing a binary 2d or 3d image.
+
     Args:
         input_image (Tensor): Binary image to be eroded.
     Returns:
@@ -362,6 +365,7 @@ def single_class_hausdorff_distance(
 ) -> torch.Tensor:
     r"""
     Computes the Hausdorff distance between a predicted segmentation mask and the target mask.
+
     Note:
         In this method, the `prediction` tensor is considered as a segmentation mask of a single 2D or 3D image for a
         given class and thus the distances are calculated over all channels and dimensions.
@@ -380,12 +384,12 @@ def single_class_hausdorff_distance(
     Returns:
         Tensor: Hausdorff distance.
     Shape:
-        - Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where `S = number of slices`,
-          or `(height, width)` for single image segmentation tasks.
+        - | Prediction: Can have arbitrary dimensions. Typically :math:`(S, height, width)`, where
+          | `S = number of slices`, or `(height, width)` for single image segmentation tasks.
         - Target: Must have the same dimensions as the prediction.
-        - All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an
-            n-dimensional point. Typically :math:`(S \cdot height \cdot width, 3)`, where `S = number of slices`, or
-            :math:`(height \cdot width, 2)`
+        - | All_image_locations: Must contain one element per-pixel in the prediction. Each element represents an
+          | n-dimensional point. Typically :math:`(S \cdot height \cdot width, 3)`, where `S = number of slices`, or
+          | :math:`(height \cdot width, 2)`
         - Output: Scalar.
     """
 
@@ -493,9 +497,9 @@ def hausdorff_distance(
         Tensor: Hausdorff distance.
 
     Shape:
-        - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding and
-            :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
-            (`C = number of classes`).
+        - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
+          | and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot encoding
+          | (`C = number of classes`).
         - Target: Same shape and type as prediction.
         - Output: If :attr:`reduction` is `"none"`, shape :math:`(C)`. Otherwise, scalar.
     """
@@ -538,21 +542,21 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
     Base class for segmentation metrics.
 
     Args:
-    num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
-    convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
-        encoding or not (default = `True`).
-    ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
-        Defaults to `None`.
-    include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
-        calculation (default = `True`).
-    ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to
-        `ignore_index`. Defaults to 0.
-    reduction (string, optional): A method to reduce metric scores of multiple classes.
+        num_classes (int): Number of classes (for single-label segmentation tasks including the background class).
+        convert_to_one_hot (bool, optional): Determines if data is label encoded and needs to be converted to one-hot
+            encoding or not (default = `True`).
+        ignore_index (int, optional): Specifies a target value that is ignored and does not contribute to the metric.
+            Defaults to `None`.
+        include_background (bool, optional): if `False`, class channel index 0 (background class) is excluded from the
+            calculation (default = `True`).
+        ignore_value (float, optional): Value that should be inserted at the positions where the target is equal to
+            `ignore_index`. Defaults to 0.
+        reduction (string, optional): A method to reduce metric scores of multiple classes.
 
-        - ``"none"``: no reduction will be applied (default)
-        - ``"mean"``: takes the mean
-        - ``"min"``: takes the minimum
-        - ``"max"``: takes the maximum
+            - ``"none"``: no reduction will be applied (default)
+            - ``"mean"``: takes the mean
+            - ``"min"``: takes the minimum
+            - ``"max"``: takes the maximum
     """
 
     def __init__(
@@ -589,12 +593,12 @@ class SegmentationMetric(torchmetrics.Metric, abc.ABC):
             Tuple[Tensor]: Flattened prediction and target tensors (one-hot or multi-hot encoded).
 
         Shape:
-            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding (`C = number of classes`).
+            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding (`C = number of classes`).
             - Target: Same shape and type as prediction.
-            - Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /
-                presence of the respective class (one-hot / multi-hot encoding).
+            - | Output: :math:`(C, X * Y * ...)` where each element is in :math:`\{0, 1\}` indicating the absence /
+              | presence of the respective class (one-hot / multi-hot encoding).
         """
 
         return flatten_tensors(
@@ -686,9 +690,9 @@ class DiceScore(SegmentationMetric):
             target (Tensor): The target tensor.
 
         Shape:
-            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding (`C = number of classes`).
+            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding (`C = number of classes`).
             - Target: Same shape and type as prediction.
         """
 
@@ -775,9 +779,9 @@ class Sensitivity(SegmentationMetric):
             target (Tensor): The target tensor.
 
         Shape:
-            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding (`C = number of classes`).
+            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding (`C = number of classes`).
             - Target: Same shape and type as prediction.
         """
 
@@ -863,9 +867,9 @@ class Specificity(SegmentationMetric):
             target (Tensor): The target tensor.
 
         Shape:
-            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding (`C = number of classes`).
+            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding (`C = number of classes`).
             - Target: Same shape and type as prediction.
         """
 
@@ -987,9 +991,9 @@ class HausdorffDistance(SegmentationMetric):
                 Must be provided if `target` is a single slice or a subset of slices taken from a 3d image.
 
         Shape:
-            - Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label encoding
-                and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or multi-hot
-                encoding (`C = number of classes`).
+            - | Prediction: :math:`(X, Y, ...)` where each value is in :math:`\{0, ..., C - 1\}` in case of label
+              | encoding and :math:`(C, X, Y, ...)`, where each value is in :math:`\{0, 1\}` in case of one-hot or
+              | multi-hot encoding (`C = number of classes`).
             - Target: Same shape and type as prediction.
         """
 

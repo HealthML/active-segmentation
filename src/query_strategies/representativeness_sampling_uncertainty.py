@@ -28,10 +28,10 @@ class UncertaintyRepresentativenessSamplingStrategy(
     Args:
         representativeness_algorithm (string, optional): The algorithm to be used to select the most representative
             samples: `"most_distant_sample"` | `"cluster_coverage"`. Defaults to `"cluster_coverage"`.
-                - `"most_distant_sample"`: The unlabeled item that has the highest feature distance to the labeled set
-                    is selected for labeling.
-                - `"cluster_coverage"`: The features of the unlabeled and labeled items are clustered and an item from
-                    the most underrepresented cluster is selected for labeling.
+                - | `"most_distant_sample"`: The unlabeled item that has the highest feature distance to the labeled set
+                  | is selected for labeling.
+                - | `"cluster_coverage"`: The features of the unlabeled and labeled items are clustered and an item from
+                  | the most underrepresented cluster is selected for labeling.
         calculation_method (string, optional): The algorithm to be used for computing the uncertainty: `"distance"` |
             "`entropy`".
     """
@@ -106,7 +106,7 @@ class UncertaintyRepresentativenessSamplingStrategy(
 
         Returns:
             List[float]: Representativeness score for each item in the unlabeled set. Items that are underrepresented in
-                the training receive higher scores.
+            the training receive higher scores.
         """
 
         representativeness_scores = (
