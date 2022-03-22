@@ -41,6 +41,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
               | e.g. "dice"
             - | random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
               | outputs across multiple runs.
+            - | disable_interpolation (bool, optional): Whether the block selection strategy should be run without
+              | actually interpolating slices. Defaults to `False`.
 
     """
 
@@ -359,31 +361,36 @@ class InterpolationSamplingStrategy(QueryStrategy):
             bottom_slice_id = top_slice_id - thickness + 1
             selected_ids.append(f"{prefix}_{image_id}-{bottom_slice_id}")
 
-            label = data_module.training_set.read_mask_for_image(image_id)
-            top = label[top_slice_id, :, :]
-            bottom = label[bottom_slice_id, :, :]
+            if not self.kwargs.get("disable_interpolation", False):
+                label = data_module.training_set.read_mask_for_image(image_id)
+                top = label[top_slice_id, :, :]
+                bottom = label[bottom_slice_id, :, :]
 
-            interpolation = self._interpolate_slices(
-                top,
-                bottom,
-                class_ids,
-                thickness,
-                self.kwargs.get("interpolation_type", None),
-            )
-            if interpolation is not None:
-                for i, pseudo_label in enumerate(interpolation):
-                    case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
-                    selected_ids.append(case_id)
-                    pseudo_labels[case_id] = pseudo_label
-                    num_interpolated_slices += 1
+                interpolation = self._interpolate_slices(
+                    top,
+                    bottom,
+                    class_ids,
+                    thickness,
+                    self.kwargs.get("interpolation_type", None),
+                )
+                if interpolation is not None:
+                    for i, pseudo_label in enumerate(interpolation):
+                        case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
+                        selected_ids.append(case_id)
+                        pseudo_labels[case_id] = pseudo_label
+                        num_interpolated_slices += 1
 
-                if self.kwargs.get("interpolation_quality_metric", None) in ["dice"]:
-                    _ = self._calculate_and_log_interpolation_quality_score(
-                        interpolation=interpolation,
-                        ground_truth=label[bottom_slice_id : top_slice_id - 1, :, :],
-                        num_classes=data_module.num_classes(),
-                        metric=self.kwargs.get("interpolation_quality_metric"),
-                    )
+                    if self.kwargs.get("interpolation_quality_metric", None) in [
+                        "dice"
+                    ]:
+                        _ = self._calculate_and_log_interpolation_quality_score(
+                            interpolation=interpolation,
+                            ground_truth=label[
+                                bottom_slice_id : top_slice_id - 1, :, :
+                            ],
+                            num_classes=data_module.num_classes(),
+                            metric=self.kwargs.get("interpolation_quality_metric"),
+                        )
 
         assert num_selected_slices == items_to_label
         assert len(selected_ids) >= items_to_label
