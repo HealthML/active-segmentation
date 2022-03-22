@@ -23,7 +23,9 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
     Args:
         **kwargs: Optional keyword arguments:
-
+            - | prefer_blocks_without_pseudo_labels (bool, optional): Whether blocks containing that do not contain
+              | existing pseudo-labels should always be labeled before starting labeling of blocks that contain
+              | pseudo-labels. Defaults to `False`.
             - block_selection (str): The selection strategy for the blocks to interpolate: `"uncertainty"` | `"random"`.
             - block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.
             - | calculation_method (str): Specification of the method used to calculate the uncertainty
@@ -47,8 +49,40 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         self.log_id = 0
 
+    @staticmethod
+    def _prefer_slices_without_pseudo_label(
+        slices: List[Tuple[str, int, int]], labeled_slices: List[Tuple[int, int]]
+    ) -> Iterator[Tuple[str, int, int]]:
+        """
+        Rearranges the `slices` list so that all slices without existing pseudo-labels are placed before slices with
+        existing pseudo-labels.
+
+        Args:
+            slices (List[Tuple[str, int, int]]): List of slice IDs
+            labeled_slices (List[Tuple[int, int]]): List of slice IDs that are already part of the training set
+                without ID prefix.
+
+        Returns:
+            Iterator[Tuple[str, int, int]]: Rearranged list of slice IDs.
+        """
+
+        slices_without_pseudo_labels = [
+            (prefix, image_id, top_slice_id)
+            for (prefix, image_id, top_slice_id) in slices
+            if (image_id, top_slice_id) not in labeled_slices
+        ]
+        slices_with_pseudo_labels = [
+            (prefix, image_id, top_slice_id)
+            for (prefix, image_id, top_slice_id) in slices
+            if (image_id, top_slice_id) in labeled_slices
+        ]
+
+        return [*slices_without_pseudo_labels, *slices_with_pseudo_labels]
+
     def _randomly_ranked_blocks(
-        self, data_module: ActiveLearningDataModule, block_thickness: int
+        self,
+        data_module: ActiveLearningDataModule,
+        block_thickness: int,
     ) -> Iterator[Tuple[str, int, int]]:
         """
         Randomly selects blocks of the unlabeled data that should be labeled next.
@@ -60,6 +94,13 @@ class InterpolationSamplingStrategy(QueryStrategy):
         Returns:
             A sorted iterator of blocks which should be labeled.
         """
+
+        labeled_case_ids = []
+        for _, _, _, case_ids in data_module.train_dataloader():
+            for case_id in case_ids:
+                _, image_slice_id = case_id.split("_")
+                image_id, slice_id = map(int, image_slice_id.split("-"))
+                labeled_case_ids.append((image_id, slice_id))
 
         unlabeled_case_ids = []
         for _, case_ids in data_module.unlabeled_dataloader():
@@ -79,6 +120,16 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 if (prefix, image_id, top_slice_id - i) not in unlabeled_case_ids:
                     # We only want blocks which are fully unlabeled
                     fully_unlabeled = False
+                if (
+                    (
+                        image_id,
+                        top_slice_id - i,
+                    )
+                    in labeled_case_ids
+                    and block_thickness > 1
+                    and self.kwargs.get("prefer_blocks_without_pseudo_labels", False)
+                ):
+                    fully_unlabeled = True
 
             if not fully_unlabeled:
                 continue
@@ -87,6 +138,14 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         rng = np.random.default_rng(self.kwargs.get("random_state", None))
         rng.shuffle(available_blocks)
+
+        if block_thickness == 1 and self.kwargs.get(
+            "prefer_blocks_without_pseudo_labels", False
+        ):
+            # first label slices without pseudo-labels
+            return self._prefer_slices_without_pseudo_label(
+                available_blocks, labeled_case_ids
+            )
 
         return available_blocks
 
@@ -140,6 +199,13 @@ class InterpolationSamplingStrategy(QueryStrategy):
             for idx, case_id in enumerate(case_ids):
                 slice_uncertainties[case_id] = uncertainty[idx]
 
+        labeled_case_ids = []
+        for _, _, _, case_ids in data_module.train_dataloader():
+            for case_id in case_ids:
+                _, image_slice_id = case_id.split("_")
+                image_id, slice_id = map(int, image_slice_id.split("-"))
+                labeled_case_ids.append((image_id, slice_id))
+
         block_uncertainties = []
         for case_id in slice_uncertainties:
             prefix, image_slice_id = case_id.split("_")
@@ -158,6 +224,20 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 # We only want blocks which are fully unlabeled
                 continue
 
+            contains_pseudo_label = False
+
+            for i in range(block_thickness):
+                if (image_id, top_slice_id - i) in labeled_case_ids:
+                    contains_pseudo_label = True
+                    break
+
+            if (
+                contains_pseudo_label
+                and block_thickness > 1
+                and self.kwargs.get("prefer_blocks_without_pseudo_labels", False)
+            ):
+                continue
+
             block_uncertainties.append(
                 (
                     sum(uncertainties),
@@ -167,7 +247,17 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         block_uncertainties.sort(key=lambda y: y[0])
 
-        return [id for _, id in block_uncertainties]
+        sorted_blocks = [id for _, id in block_uncertainties]
+
+        if block_thickness == 1 and self.kwargs.get(
+            "prefer_blocks_without_pseudo_labels", False
+        ):
+            # first label slices without pseudo-labels
+            return self._prefer_slices_without_pseudo_label(
+                sorted_blocks, labeled_case_ids
+            )
+
+        return sorted_blocks
 
     # pylint: disable=too-many-locals
     def select_items_to_label(
@@ -250,6 +340,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
         selected_ids = []
         pseudo_labels = {}
 
+        num_interpolated_slices = 0
+
         for (prefix, image_id, top_slice_id), thickness in block_ids:
             selected_ids.append(f"{prefix}_{image_id}-{top_slice_id}")
 
@@ -283,6 +375,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
                     case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
                     selected_ids.append(case_id)
                     pseudo_labels[case_id] = pseudo_label
+                    num_interpolated_slices += 1
 
                 if self.kwargs.get("interpolation_quality_metric", None) in ["dice"]:
                     _ = self._calculate_and_log_interpolation_quality_score(
@@ -291,6 +384,11 @@ class InterpolationSamplingStrategy(QueryStrategy):
                         num_classes=data_module.num_classes(),
                         metric=self.kwargs.get("interpolation_quality_metric"),
                     )
+
+        assert num_selected_slices == items_to_label
+        assert len(selected_ids) >= items_to_label
+        assert len(selected_ids) == items_to_label + num_interpolated_slices
+
         return selected_ids, pseudo_labels
 
     @staticmethod
