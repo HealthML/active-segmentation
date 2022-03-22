@@ -17,6 +17,13 @@ class DatasetHooks(ABC):
         """
 
     @abstractmethod
+    def num_pseudo_labels(self) -> int:
+        """
+        Returns:
+            int: Number of items with pseudo-labels in the dataset.
+        """
+
+    @abstractmethod
     def image_ids(self) -> Iterable[str]:
         """
         Returns:

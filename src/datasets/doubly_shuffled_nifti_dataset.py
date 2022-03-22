@@ -603,3 +603,16 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             return size
 
         return len(self.image_ids())
+
+    def num_pseudo_labels(self) -> int:
+        if self.dim == 2:
+            num_pseudo_labels = 0
+
+            for inner_dict in self.image_slice_indices.values():
+                for value in inner_dict.values():
+                    if value is not None:
+                        num_pseudo_labels += 1
+
+            return num_pseudo_labels
+
+        return 0

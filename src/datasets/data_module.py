@@ -229,6 +229,16 @@ class ActiveLearningDataModule(LightningDataModule, ABC):
             return self.training_set.size()
         return 0
 
+    def training_set_num_pseudo_labels(self) -> int:
+        """
+        Returns:
+            Number of pseudo-labels in training set.
+        """
+
+        if self.training_set:
+            return self.training_set.num_pseudo_labels()
+        return 0
+
     def validation_set_size(self) -> int:
         """
         Returns:

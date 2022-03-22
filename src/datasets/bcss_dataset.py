@@ -296,3 +296,6 @@ class BCSSDataset(IterableDataset):
         """
 
         return self.__len__()
+
+    def num_pseudo_labels(self) -> int:
+        return 0
