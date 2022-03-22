@@ -10,8 +10,10 @@ import numpy as np
 import torch
 from torch.utils.data import IterableDataset
 
+from .dataset_hooks import DatasetHooks
 
-class BCSSDataset(IterableDataset):
+
+class BCSSDataset(IterableDataset, DatasetHooks):
     """
     The BCSS dataset contains over 20,000 segmentation annotations of tissue region from breast cancer images from TCGA.
     Detailed description can be found either `at the challenge website <https://bcsegmentation.grand-challenge.org>`_
@@ -281,7 +283,7 @@ class BCSSDataset(IterableDataset):
         else:
             raise ValueError("Image does not belong to this dataset.")
 
-    def slices_per_image(self) -> List[int]:
+    def slices_per_image(self, **kwargs) -> List[int]:
         """For each image returns the number of slices"""
         return [1] * len(self.indices)
 
@@ -298,4 +300,8 @@ class BCSSDataset(IterableDataset):
         return self.__len__()
 
     def num_pseudo_labels(self) -> int:
+        """
+        Returns:
+            int: Number of items with pseudo-labels in the dataset.
+        """
         return 0

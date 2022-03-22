@@ -151,6 +151,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         return available_blocks
 
+    # pylint: disable=too-many-locals
     def _uncertainty_ranked_blocks(
         self,
         models: Union[PytorchModel, List[PytorchModel]],
