@@ -571,7 +571,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         self, case_ids: List[str]
     ) -> List[Tuple[str, str, Optional[int], str]]:
         """
-        Creates a list of files as tuple of image id and slice index
+        Creates a list of files as tuple of image id and slice index.
+
         Args:
             case_ids (List[str]): List with case_ids to get.
         """
