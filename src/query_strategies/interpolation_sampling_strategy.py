@@ -23,7 +23,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
     Args:
         **kwargs: Optional keyword arguments:
-            - | prefer_blocks_without_pseudo_labels (bool, optional): Whether blocks containing that do not contain
+            - | prefer_blocks_without_pseudo_labels (bool, optional): Whether blocks that do not contain
               | existing pseudo-labels should always be labeled before starting labeling of blocks that contain
               | pseudo-labels. Defaults to `False`.
             - block_selection (str): The selection strategy for the blocks to interpolate: `"uncertainty"` | `"random"`.
