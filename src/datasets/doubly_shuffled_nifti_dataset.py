@@ -522,11 +522,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         if image_index not in self.image_slice_indices:
             self.image_slice_indices[image_index] = self.manager.dict()
 
-        if (
-            slice_index not in self.image_slice_indices[image_index]
-            or self.image_slice_indices[image_index][slice_index] is not None
-        ):
-            self.image_slice_indices[image_index][slice_index] = pseudo_label
+        self.image_slice_indices[image_index][slice_index] = pseudo_label
 
     def remove_image(self, image_id: str, slice_index: int = 0) -> None:
         """
@@ -631,3 +627,21 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             return size
 
         return len(self.image_ids())
+
+    def num_pseudo_labels(self) -> int:
+        """
+        Returns:
+            int: Number of items with pseudo-labels in the dataset.
+        """
+
+        if self.dim == 2:
+            num_pseudo_labels = 0
+
+            for inner_dict in self.image_slice_indices.values():
+                for value in inner_dict.values():
+                    if value is not None:
+                        num_pseudo_labels += 1
+
+            return num_pseudo_labels
+
+        return 0

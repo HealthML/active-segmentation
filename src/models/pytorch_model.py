@@ -307,6 +307,9 @@ class PytorchModel(LightningModule, ABC):
             "trainer/training_set_size", step_metric="trainer/iteration"
         )
         wandb.define_metric(
+            "trainer/training_set_pseudo_labels", step_metric="trainer/iteration"
+        )
+        wandb.define_metric(
             "trainer/training_set_n_cases", step_metric="trainer/iteration"
         )
         wandb.define_metric(
@@ -444,6 +447,7 @@ class PytorchModel(LightningModule, ABC):
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
             "trainer/training_set_size": self.trainer.datamodule.training_set_size(),
+            "trainer/training_set_num_pseudo_labels": self.trainer.datamodule.training_set_num_pseudo_labels(),
             "trainer/training_set_n_cases": len(
                 set(self.trainer.datamodule.training_set.image_ids())
             ),
@@ -484,6 +488,7 @@ class PytorchModel(LightningModule, ABC):
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
             "trainer/training_set_size": self.trainer.datamodule.training_set_size(),
+            "trainer/training_set_num_pseudo_labels": self.trainer.datamodule.training_set_num_pseudo_labels(),
             "trainer/training_set_n_cases": len(
                 set(self.trainer.datamodule.training_set.image_ids())
             ),
@@ -529,6 +534,7 @@ class PytorchModel(LightningModule, ABC):
             "trainer/epoch": self.current_epoch,
             "trainer/iteration": self.iteration,
             "train/training_set_size": self.trainer.datamodule.training_set_size(),
+            "trainer/training_set_num_pseudo_labels": self.trainer.datamodule.training_set_num_pseudo_labels(),
             "train/training_set_n_cases": len(
                 set(self.trainer.datamodule.training_set.image_ids())
             ),
