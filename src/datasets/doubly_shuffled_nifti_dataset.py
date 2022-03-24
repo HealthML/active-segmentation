@@ -23,14 +23,14 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             can ever become part of the dataset.
         cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.
             Defaults to zero.
-        combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.
+        combine_foreground_classes (bool, optional): Flag if the non-zero values of the annotations should be merged.
             Defaults to False.
         mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using
             all values.
         shuffle (bool, optional): Whether the data should be shuffled.
         transform (Callable[[Any], Tensor], optional): Function to transform the images.
         target_transform (Callable[[Any], Tensor], optional): Function to transform the annotations.
-        dim (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+        dim (int, optional): 2 or 3 to define if the dataset should return 2d slices of whole 3d images.
             Defaults to 2.
         slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
             Uses all slices if None. Defaults to None.
@@ -204,9 +204,9 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         Args:
             filepath: Path of the image file.
             norm: Whether the image should be normalized.
-            join_non_zero: Whether the non zero values of the image should be joined. Will set all non zero values to 1.
+            join_non_zero: Whether the non-zero values of the image should be joined. Will set all non-zero values to 1.
             filter_values: Values to be filtered from the images. All other values will be set to zero.
-                Can be used togther with join_non_zero. Filtering will be applied befor joining.
+                Can be used together with join_non_zero. Filtering will be applied before joining.
 
         Returns:
             The array representation of an image.
@@ -250,7 +250,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         Args:
             filepaths (List[str]): The paths of the images.
             dim (int, optional): The dimensionality of the dataset. Defaults to 2.
-            shuffle (boolean, optional): Flag indicating wether to shuffle the slices. Defaults to False.
+            shuffle (boolean, optional): Flag indicating whether to shuffle the slices. Defaults to False.
             random_state (int, optional): Random seed for shuffling.
             slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.
                 Uses all slices if None. Defaults to None.
@@ -566,6 +566,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             (split_id[0], int(split_id[1]) if len(split_id) > 1 else None)
             for split_id in image_slice_ids
         ]
+
         all_images = []
         for case_id, (image_id, slice_index) in zip(case_ids, image_slice_ids):
             image_index = self.__get_image_index(image_id)
@@ -579,6 +580,29 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
                 )
             all_images.append((current_image[slice_index, :, :], case_id))
         return all_images
+
+    def get_items_for_logging(
+        self, case_ids: List[str]
+    ) -> List[Tuple[str, str, Optional[int], str]]:
+        """
+        Creates a list of files as tuple of image id and slice index.
+
+        Args:
+            case_ids (List[str]): List with case_ids to get.
+        """
+        image_slice_ids = [case_id.split("-") for case_id in case_ids]
+        image_slice_ids = [
+            (split_id[0], int(split_id[1]) if len(split_id) > 1 else None)
+            for split_id in image_slice_ids
+        ]
+
+        items = []
+        for case_id, (image_id, slice_index) in zip(case_ids, image_slice_ids):
+            image_index = self.__get_image_index(image_id)
+            image_path = self.image_paths[image_index]
+            items.append((case_id, image_path, image_id, slice_index))
+
+        return items
 
     def __image_indices(self) -> Iterable[str]:
         return self.image_slice_indices.keys()

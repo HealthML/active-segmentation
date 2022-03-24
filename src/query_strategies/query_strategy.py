@@ -29,7 +29,7 @@ class QueryStrategy(ABC):
 
         Returns:
             Tuple[List[str], Optional[Dict[str, np.array]]]: List of IDs of the data items to be labeled
-            and an optional dictonary of pseudo labels with the corresponding IDs as keys.
+            and an optional dictionary of pseudo labels with the corresponding IDs as keys.
         """
 
         raise NotImplementedError()
