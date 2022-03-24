@@ -208,14 +208,14 @@
 <span class="sd">            can ever become part of the dataset.</span>
 <span class="sd">        cache_size (int, optional): Number of images to keep in memory to speed-up data loading in subsequent epochs.</span>
 <span class="sd">            Defaults to zero.</span>
-<span class="sd">        combine_foreground_classes (bool, optional): Flag if the non zero values of the annotations should be merged.</span>
+<span class="sd">        combine_foreground_classes (bool, optional): Flag if the non-zero values of the annotations should be merged.</span>
 <span class="sd">            Defaults to False.</span>
 <span class="sd">        mask_filter_values (Tuple[int], optional): Values from the annotations which should be used. Defaults to using</span>
 <span class="sd">            all values.</span>
 <span class="sd">        shuffle (bool, optional): Whether the data should be shuffled.</span>
 <span class="sd">        transform (Callable[[Any], Tensor], optional): Function to transform the images.</span>
 <span class="sd">        target_transform (Callable[[Any], Tensor], optional): Function to transform the annotations.</span>
-<span class="sd">        dim (int, optional): 2 or 3 to define if the datset should return 2d slices of whole 3d images.</span>
+<span class="sd">        dim (int, optional): 2 or 3 to define if the dataset should return 2d slices of whole 3d images.</span>
 <span class="sd">            Defaults to 2.</span>
 <span class="sd">        slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.</span>
 <span class="sd">            Uses all slices if None. Defaults to None.</span>
@@ -389,9 +389,9 @@
 <span class="sd">        Args:</span>
 <span class="sd">            filepath: Path of the image file.</span>
 <span class="sd">            norm: Whether the image should be normalized.</span>
-<span class="sd">            join_non_zero: Whether the non zero values of the image should be joined. Will set all non zero values to 1.</span>
+<span class="sd">            join_non_zero: Whether the non-zero values of the image should be joined. Will set all non-zero values to 1.</span>
 <span class="sd">            filter_values: Values to be filtered from the images. All other values will be set to zero.</span>
-<span class="sd">                Can be used togther with join_non_zero. Filtering will be applied befor joining.</span>
+<span class="sd">                Can be used together with join_non_zero. Filtering will be applied before joining.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The array representation of an image.</span>
@@ -435,7 +435,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            filepaths (List[str]): The paths of the images.</span>
 <span class="sd">            dim (int, optional): The dimensionality of the dataset. Defaults to 2.</span>
-<span class="sd">            shuffle (boolean, optional): Flag indicating wether to shuffle the slices. Defaults to False.</span>
+<span class="sd">            shuffle (boolean, optional): Flag indicating whether to shuffle the slices. Defaults to False.</span>
 <span class="sd">            random_state (int, optional): Random seed for shuffling.</span>
 <span class="sd">            slice_indices (List[np.array], optional): Array of indices per image which should be part of the dataset.</span>
 <span class="sd">                Uses all slices if None. Defaults to None.</span>
@@ -751,6 +751,7 @@
             <span class="p">(</span><span class="n">split_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">split_id</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_id</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">split_id</span> <span class="ow">in</span> <span class="n">image_slice_ids</span>
         <span class="p">]</span>
+
         <span class="n">all_images</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">case_id</span><span class="p">,</span> <span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">case_ids</span><span class="p">,</span> <span class="n">image_slice_ids</span><span class="p">):</span>
             <span class="n">image_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_image_index</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
@@ -764,6 +765,29 @@
                 <span class="p">)</span>
             <span class="n">all_images</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_image</span><span class="p">[</span><span class="n">slice_index</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">case_id</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">all_images</span></div>
+
+<div class="viewcode-block" id="DoublyShuffledNIfTIDataset.get_items_for_logging"><a class="viewcode-back" href="../../datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.get_items_for_logging">[docs]</a>    <span class="k">def</span> <span class="nf">get_items_for_logging</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">case_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a list of files as tuple of image id and slice index.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            case_ids (List[str]): List with case_ids to get.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">image_slice_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">case_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">case_ids</span><span class="p">]</span>
+        <span class="n">image_slice_ids</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">split_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">split_id</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_id</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">split_id</span> <span class="ow">in</span> <span class="n">image_slice_ids</span>
+        <span class="p">]</span>
+
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">case_id</span><span class="p">,</span> <span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">case_ids</span><span class="p">,</span> <span class="n">image_slice_ids</span><span class="p">):</span>
+            <span class="n">image_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_image_index</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+            <span class="n">image_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_paths</span><span class="p">[</span><span class="n">image_index</span><span class="p">]</span>
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">case_id</span><span class="p">,</span> <span class="n">image_path</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">slice_index</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">items</span></div>
 
     <span class="k">def</span> <span class="nf">__image_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_slice_indices</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>

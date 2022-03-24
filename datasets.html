@@ -942,14 +942,14 @@ become part of the dataset.</p></li>
 can ever become part of the dataset.</p></li>
 <li><p><strong>cache_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of images to keep in memory to speed-up data loading in subsequent epochs.
 Defaults to zero.</p></li>
-<li><p><strong>combine_foreground_classes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the non zero values of the annotations should be merged.
+<li><p><strong>combine_foreground_classes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if the non-zero values of the annotations should be merged.
 Defaults to False.</p></li>
 <li><p><strong>mask_filter_values</strong> (<em>Tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Values from the annotations which should be used. Defaults to using
 all values.</p></li>
 <li><p><strong>shuffle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the data should be shuffled.</p></li>
 <li><p><strong>transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the images.</p></li>
 <li><p><strong>target_transform</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Tensor</em><em>]</em><em>, </em><em>optional</em>) – Function to transform the annotations.</p></li>
-<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – 2 or 3 to define if the datset should return 2d slices of whole 3d images.
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – 2 or 3 to define if the dataset should return 2d slices of whole 3d images.
 Defaults to 2.</p></li>
 <li><p><strong>slice_indices</strong> (<em>List</em><em>[</em><em>np.array</em><em>]</em><em>, </em><em>optional</em>) – Array of indices per image which should be part of the dataset.
 Uses all slices if None. Defaults to None.</p></li>
@@ -1006,6 +1006,17 @@ The lists can be passed as <cite>slice_indices</cite> for initialization of a Do
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list of all the images with provided case ids.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.get_items_for_logging">
+<span class="sig-name descname"><span class="pre">get_items_for_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_ids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.get_items_for_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.get_items_for_logging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a list of files as tuple of image id and slice index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>case_ids</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List with case_ids to get.</p>
 </dd>
 </dl>
 </dd></dl>

@@ -273,6 +273,8 @@
         <span class="c1"># log gradients, parameter histogram and model topology</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">watch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_items_table</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">strategy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
@@ -309,6 +311,17 @@
 
             <span class="c1"># run pipeline</span>
             <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selected_items_table</span> <span class="o">=</span> <span class="n">wandb</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span>
+                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+                        <span class="s2">&quot;iteration&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;case_id&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;image_path&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;slice_index&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;pseudo_label&quot;</span><span class="p">,</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+
                 <span class="c1"># skip labeling in the first iteration because the model hasn&#39;t trained yet</span>
                 <span class="k">if</span> <span class="n">iteration</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># query batch selection</span>
@@ -325,10 +338,13 @@
                         <span class="c1"># label batch</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">label_items</span><span class="p">(</span><span class="n">items_to_label</span><span class="p">,</span> <span class="n">pseudo_labels</span><span class="p">)</span>
 
+                    <span class="c1"># Log selected items to wandb table</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__log_selected_items</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">items_to_label</span><span class="p">,</span> <span class="n">pseudo_labels</span><span class="p">)</span>
+
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">heatmaps_per_iteration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="c1"># Get latest added items from dataset</span>
                         <span class="n">items_to_inspect</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">_training_set</span><span class="o">.</span><span class="n">get_images_by_id</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">get_images_by_id</span><span class="p">(</span>
                                 <span class="n">case_ids</span><span class="o">=</span><span class="n">items_to_label</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">heatmaps_per_iteration</span><span class="p">],</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
@@ -444,6 +460,37 @@
             <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
             <span class="n">num_sanity_val_steps</span><span class="o">=</span><span class="n">num_sanity_val_steps</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__log_selected_items</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">selected_items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">pseudo_labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log the iteration, case_id, image_path, image_id, slice_index and pseudo_label for all slices</span>
+<span class="sd">        selected in an iteration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            iteration (int): The current active learning iteration.</span>
+<span class="sd">            selected_items (List[str]): A list of all case_ids selected by the strategy in this iteration.</span>
+<span class="sd">            pseudo_labels (List[str]): A list of all case_ids selected as pseudo labels in this iteration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_items_table</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">get_items_for_logging</span><span class="p">(</span><span class="n">selected_items</span><span class="p">)</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">[[</span><span class="n">iteration</span><span class="p">,</span> <span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">pseudo_labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pseudo_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_module</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">get_items_for_logging</span><span class="p">(</span>
+                    <span class="n">pseudo_labels</span>
+                <span class="p">)</span>
+                <span class="n">pseudo_items</span> <span class="o">=</span> <span class="p">[[</span><span class="n">iteration</span><span class="p">,</span> <span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pseudo_items</span><span class="p">]</span>
+                <span class="n">items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pseudo_items</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selected_items_table</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="o">*</span><span class="n">row</span><span class="p">)</span>
+
+            <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="s2">&quot;selected_items&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_items_table</span><span class="p">})</span>
 
     <span class="k">def</span> <span class="nf">__generate_and_log_heatmaps</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">items_to_inspect</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span>
