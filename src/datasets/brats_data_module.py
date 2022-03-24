@@ -34,6 +34,8 @@ class BraTSDataModule(ActiveLearningDataModule):
             all values.
         random_state (int, optional): Random state for splitting the data into an initial training set and an unlabeled
             set and for shuffling the data. Pass an int for reproducibility across runs.
+        only_return_true_labels (bool, optional): Whether only true labels or also pseudo-labels are to be returned.
+            Defaults to `False`.
         **kwargs: Further, dataset specific parameters.
     """
 
@@ -93,6 +95,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         combine_foreground_classes: bool = False,
         mask_filter_values: Optional[Tuple[int]] = None,
         random_state: int = None,
+        only_return_true_labels: bool = False,
         **kwargs,
     ):
 
@@ -113,6 +116,7 @@ class BraTSDataModule(ActiveLearningDataModule):
         self.combine_foreground_classes = combine_foreground_classes
         self.mask_filter_values = mask_filter_values
         self.random_state = random_state
+        self.only_return_true_labels = only_return_true_labels
 
         if self.active_learning_mode:
             (
@@ -207,6 +211,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             mask_filter_values=self.mask_filter_values,
             slice_indices=self.initial_training_samples,
             random_state=self.random_state,
+            only_return_true_labels=self.only_return_true_labels,
         )
 
     def train_dataloader(self) -> Optional[DataLoader]:
@@ -241,6 +246,7 @@ class BraTSDataModule(ActiveLearningDataModule):
             mask_filter_values=self.mask_filter_values,
             case_id_prefix="val",
             random_state=self.random_state,
+            only_return_true_labels=self.only_return_true_labels,
         )
 
     def _create_test_set(self) -> Optional[Dataset]:
@@ -266,6 +272,7 @@ class BraTSDataModule(ActiveLearningDataModule):
                 mask_filter_values=self.mask_filter_values,
                 slice_indices=self.initial_unlabeled_samples,
                 random_state=self.random_state,
+                only_return_true_labels=self.only_return_true_labels,
             )
 
         # unlabeled set is empty
