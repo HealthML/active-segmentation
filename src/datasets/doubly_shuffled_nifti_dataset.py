@@ -605,6 +605,11 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         return len(self.image_ids())
 
     def num_pseudo_labels(self) -> int:
+        """
+        Returns:
+            int: Number of items with pseudo-labels in the dataset.
+        """
+
         if self.dim == 2:
             num_pseudo_labels = 0
 
