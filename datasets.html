@@ -423,6 +423,19 @@ multiple runs.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.num_pseudo_labels">
+<span class="sig-name descname"><span class="pre">num_pseudo_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.num_pseudo_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.num_pseudo_labels" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of items with pseudo-labels in the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.reinforce_type">
 <span class="sig-name descname"><span class="pre">reinforce_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.reinforce_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reinforce the type for DataPipe instance. And the ‘expected_type’ is required
@@ -462,7 +475,7 @@ of DataPipe instance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="datasets.bcss_dataset.BCSSDataset.slices_per_image">
-<span class="sig-name descname"><span class="pre">slices_per_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.slices_per_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.slices_per_image" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">slices_per_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/bcss_dataset.html#BCSSDataset.slices_per_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.bcss_dataset.BCSSDataset.slices_per_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>For each image returns the number of slices</p>
 </dd></dl>
 
@@ -715,6 +728,16 @@ activated.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.training_set_num_pseudo_labels">
+<span class="sig-name descname"><span class="pre">training_set_num_pseudo_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.training_set_num_pseudo_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.training_set_num_pseudo_labels" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of pseudo-labels in training set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="datasets.data_module.ActiveLearningDataModule.training_set_size">
 <span class="sig-name descname"><span class="pre">training_set_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/data_module.html#ActiveLearningDataModule.training_set_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.data_module.ActiveLearningDataModule.training_set_size" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -781,6 +804,19 @@ activated.</p></li>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>List of all image IDs included in the dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.dataset_hooks.DatasetHooks.num_pseudo_labels">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">num_pseudo_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/dataset_hooks.html#DatasetHooks.num_pseudo_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.dataset_hooks.DatasetHooks.num_pseudo_labels" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of items with pseudo-labels in the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1043,6 +1079,19 @@ The lists can be passed as <cite>slice_indices</cite> for initialization of a Do
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Normalized image with background values normalized to -1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.num_pseudo_labels">
+<span class="sig-name descname"><span class="pre">num_pseudo_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/datasets/doubly_shuffled_nifti_dataset.html#DoublyShuffledNIfTIDataset.num_pseudo_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.num_pseudo_labels" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of items with pseudo-labels in the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

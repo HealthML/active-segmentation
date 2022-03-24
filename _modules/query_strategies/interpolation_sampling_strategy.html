@@ -208,7 +208,9 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        **kwargs: Optional keyword arguments:</span>
-
+<span class="sd">            - | prefer_blocks_without_pseudo_labels (bool, optional): Whether blocks that do not contain</span>
+<span class="sd">              | existing pseudo-labels should always be labeled before starting labeling of blocks that contain</span>
+<span class="sd">              | pseudo-labels. Defaults to `False`.</span>
 <span class="sd">            - block_selection (str): The selection strategy for the blocks to interpolate: `&quot;uncertainty&quot;` | `&quot;random&quot;`.</span>
 <span class="sd">            - block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.</span>
 <span class="sd">            - | calculation_method (str): Specification of the method used to calculate the uncertainty</span>
@@ -224,6 +226,8 @@
 <span class="sd">              | e.g. &quot;dice&quot;</span>
 <span class="sd">            - | random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible</span>
 <span class="sd">              | outputs across multiple runs.</span>
+<span class="sd">            - | disable_interpolation (bool, optional): Whether the block selection strategy should be run without</span>
+<span class="sd">              | actually interpolating slices. Defaults to `False`.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -232,8 +236,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="mi">0</span>
 
+    <span class="c1"># pylint: disable=too-many-locals</span>
     <span class="k">def</span> <span class="nf">_randomly_ranked_blocks</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span> <span class="n">block_thickness</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
+        <span class="n">block_thickness</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">include_blocks_with_pseudo_labels</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Randomly selects blocks of the unlabeled data that should be labeled next.</span>
@@ -241,10 +249,19 @@
 <span class="sd">        Args:</span>
 <span class="sd">            data_module (ActiveLearningDataModule): A data module object providing data.</span>
 <span class="sd">            block_thickness (int): The thickness of the blocks.</span>
+<span class="sd">            include_blocks_with_pseudo_labels (bool): Whether blocks containing existing pseudo-labels</span>
+<span class="sd">                should be included.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A sorted iterator of blocks which should be labeled.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">labeled_case_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">case_ids</span> <span class="ow">in</span> <span class="n">data_module</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">case_ids</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">image_slice_id</span> <span class="o">=</span> <span class="n">case_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                <span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">image_slice_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span>
+                <span class="n">labeled_case_ids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">))</span>
 
         <span class="n">unlabeled_case_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">case_ids</span> <span class="ow">in</span> <span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_dataloader</span><span class="p">():</span>
@@ -253,33 +270,53 @@
                 <span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">image_slice_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span>
                 <span class="n">unlabeled_case_ids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">))</span>
 
-        <span class="n">available_blocks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">available_blocks_without_pseudo_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">available_blocks_with_pseudo_labels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span> <span class="ow">in</span> <span class="n">unlabeled_case_ids</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">top_slice_id</span> <span class="o">&lt;</span> <span class="n">block_thickness</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># We only want blocks which have the full thickness</span>
                 <span class="k">continue</span>
 
-            <span class="n">fully_unlabeled</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">contains_true_labels</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">contains_pseudo_labels</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">block_thickness</span><span class="p">):</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unlabeled_case_ids</span><span class="p">:</span>
-                    <span class="c1"># We only want blocks which are fully unlabeled</span>
-                    <span class="n">fully_unlabeled</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">contains_true_labels</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">image_id</span><span class="p">,</span>
+                    <span class="n">top_slice_id</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="n">labeled_case_ids</span><span class="p">:</span>
+                    <span class="n">contains_pseudo_labels</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">fully_unlabeled</span><span class="p">:</span>
-                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">contains_true_labels</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">contains_pseudo_labels</span><span class="p">:</span>
+                <span class="n">available_blocks_without_pseudo_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">contains_true_labels</span><span class="p">:</span>
+                <span class="n">available_blocks_with_pseudo_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">)</span>
+                <span class="p">)</span>
 
-            <span class="n">available_blocks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">include_blocks_with_pseudo_labels</span><span class="p">:</span>
+            <span class="n">available_blocks</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="o">*</span><span class="n">available_blocks_without_pseudo_labels</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">available_blocks_with_pseudo_labels</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">available_blocks</span> <span class="o">=</span> <span class="n">available_blocks_without_pseudo_labels</span>
 
         <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;random_state&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">available_blocks</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">available_blocks</span>
 
+    <span class="c1"># pylint: disable=too-many-locals</span>
     <span class="k">def</span> <span class="nf">_uncertainty_ranked_blocks</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PytorchModel</span><span class="p">]],</span>
         <span class="n">data_module</span><span class="p">:</span> <span class="n">ActiveLearningDataModule</span><span class="p">,</span>
         <span class="n">block_thickness</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">include_blocks_with_pseudo_labels</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects blocks of the unlabeled data with the highest uncertainty that should be labeled next.</span>
@@ -288,6 +325,8 @@
 <span class="sd">            models: Current models that should be improved by selecting additional data for labeling.</span>
 <span class="sd">            data_module (ActiveLearningDataModule): A data module object providing data.</span>
 <span class="sd">            block_thickness (int): The thickness of the blocks.</span>
+<span class="sd">            include_blocks_with_pseudo_labels (bool): Whether blocks containing existing pseudo-labels</span>
+<span class="sd">                should be included.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A sorted iterator of blocks which should be labeled.</span>
@@ -325,7 +364,15 @@
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">case_ids</span><span class="p">):</span>
                 <span class="n">slice_uncertainties</span><span class="p">[</span><span class="n">case_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">uncertainty</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 
-        <span class="n">block_uncertainties</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">labeled_case_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">case_ids</span> <span class="ow">in</span> <span class="n">data_module</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">case_ids</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">image_slice_id</span> <span class="o">=</span> <span class="n">case_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                <span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">image_slice_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span>
+                <span class="n">labeled_case_ids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">))</span>
+
+        <span class="n">block_uncertainties_without_pseudo_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">block_uncertainties_with_pseudo_labels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">slice_uncertainties</span><span class="p">:</span>
             <span class="n">prefix</span><span class="p">,</span> <span class="n">image_slice_id</span> <span class="o">=</span> <span class="n">case_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
             <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">image_slice_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span>
@@ -343,16 +390,41 @@
                 <span class="c1"># We only want blocks which are fully unlabeled</span>
                 <span class="k">continue</span>
 
-            <span class="n">block_uncertainties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="nb">sum</span><span class="p">(</span><span class="n">uncertainties</span><span class="p">),</span>
-                    <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">),</span>
+            <span class="n">contains_pseudo_label</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">block_thickness</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="n">labeled_case_ids</span><span class="p">:</span>
+                    <span class="n">contains_pseudo_label</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">contains_pseudo_label</span><span class="p">:</span>
+                <span class="n">block_uncertainties_with_pseudo_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="nb">sum</span><span class="p">(</span><span class="n">uncertainties</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">),</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">block_uncertainties_without_pseudo_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="nb">sum</span><span class="p">(</span><span class="n">uncertainties</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_blocks_with_pseudo_labels</span><span class="p">:</span>
+            <span class="n">block_uncertainties</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="o">*</span><span class="n">block_uncertainties_without_pseudo_labels</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">block_uncertainties_with_pseudo_labels</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">block_uncertainties</span> <span class="o">=</span> <span class="n">block_uncertainties_without_pseudo_labels</span>
 
         <span class="n">block_uncertainties</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="p">[</span><span class="nb">id</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">block_uncertainties</span><span class="p">]</span>
+        <span class="n">sorted_blocks</span> <span class="o">=</span> <span class="p">[</span><span class="nb">id</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">block_uncertainties</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">sorted_blocks</span>
 
     <span class="c1"># pylint: disable=too-many-locals</span>
 <div class="viewcode-block" id="InterpolationSamplingStrategy.select_items_to_label"><a class="viewcode-back" href="../../query_strategies.html#query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy.select_items_to_label">[docs]</a>    <span class="k">def</span> <span class="nf">select_items_to_label</span><span class="p">(</span>
@@ -383,49 +455,73 @@
         <span class="n">block_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">num_selected_slices</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">for</span> <span class="n">thickness</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">block_thickness</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">thickness</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="c1"># It doesn&#39;t make sense to use blocks with thickness 2 because there is nothing to interpolate.</span>
-                <span class="c1"># Instead skip to thickness 1 for single slices.</span>
-                <span class="k">continue</span>
+        <span class="n">prefer_blocks_without_pseudo_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;prefer_blocks_without_pseudo_labels&quot;</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="p">)</span>
 
-            <span class="n">ranked_ids</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_uncertainty_ranked_blocks</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">data_module</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">block_selection</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span>
-                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_randomly_ranked_blocks</span><span class="p">(</span><span class="n">data_module</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
-            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">include_blocks_with_pseudo_labels</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span> <span class="k">if</span> <span class="n">prefer_blocks_without_pseudo_labels</span> <span class="k">else</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">for</span> <span class="n">thickness</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">block_thickness</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">thickness</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># It doesn&#39;t make sense to use blocks with thickness 2 because there is nothing to interpolate.</span>
+                    <span class="c1"># Instead skip to thickness 1 for single slices.</span>
+                    <span class="k">continue</span>
 
-            <span class="k">for</span> <span class="p">(</span>
-                <span class="n">block_prefix</span><span class="p">,</span>
-                <span class="n">block_image_id</span><span class="p">,</span>
-                <span class="n">block_top_slice_id</span><span class="p">,</span>
-            <span class="p">)</span> <span class="ow">in</span> <span class="n">ranked_ids</span><span class="p">:</span>
+                <span class="n">ranked_ids</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_uncertainty_ranked_blocks</span><span class="p">(</span>
+                        <span class="n">models</span><span class="p">,</span>
+                        <span class="n">data_module</span><span class="p">,</span>
+                        <span class="n">thickness</span><span class="p">,</span>
+                        <span class="n">include_blocks_with_pseudo_labels</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">block_selection</span> <span class="o">==</span> <span class="s2">&quot;uncertainty&quot;</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_randomly_ranked_blocks</span><span class="p">(</span>
+                        <span class="n">data_module</span><span class="p">,</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">include_blocks_with_pseudo_labels</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
-                <span class="n">overlaps</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">prefix</span> <span class="o">==</span> <span class="n">block_prefix</span>
-                    <span class="ow">and</span> <span class="n">image_id</span> <span class="o">==</span> <span class="n">block_image_id</span>
-                    <span class="ow">and</span> <span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="n">block_top_slice_id</span>
-                            <span class="o">&gt;=</span> <span class="n">top_slice_id</span>
-                            <span class="o">&gt;</span> <span class="n">block_top_slice_id</span> <span class="o">-</span> <span class="n">thickness</span>
+                <span class="k">for</span> <span class="p">(</span>
+                    <span class="n">block_prefix</span><span class="p">,</span>
+                    <span class="n">block_image_id</span><span class="p">,</span>
+                    <span class="n">block_top_slice_id</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="n">ranked_ids</span><span class="p">:</span>
+
+                    <span class="n">overlaps</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">prefix</span> <span class="o">==</span> <span class="n">block_prefix</span>
+                        <span class="ow">and</span> <span class="n">image_id</span> <span class="o">==</span> <span class="n">block_image_id</span>
+                        <span class="ow">and</span> <span class="p">(</span>
+                            <span class="p">(</span>
+                                <span class="n">block_top_slice_id</span>
+                                <span class="o">&gt;=</span> <span class="n">top_slice_id</span>
+                                <span class="o">&gt;</span> <span class="n">block_top_slice_id</span> <span class="o">-</span> <span class="n">thickness</span>
+                            <span class="p">)</span>
+                            <span class="ow">or</span> <span class="p">(</span>
+                                <span class="n">top_slice_id</span>
+                                <span class="o">&gt;=</span> <span class="n">block_top_slice_id</span>
+                                <span class="o">&gt;</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="n">thick</span>
+                            <span class="p">)</span>
                         <span class="p">)</span>
-                        <span class="ow">or</span> <span class="p">(</span><span class="n">top_slice_id</span> <span class="o">&gt;=</span> <span class="n">block_top_slice_id</span> <span class="o">&gt;</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="n">thick</span><span class="p">)</span>
-                    <span class="p">)</span>
-                    <span class="k">for</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">),</span> <span class="n">thick</span> <span class="ow">in</span> <span class="n">block_ids</span>
-                <span class="p">]</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">),</span> <span class="n">thick</span> <span class="ow">in</span> <span class="n">block_ids</span>
+                    <span class="p">]</span>
 
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">overlaps</span><span class="p">):</span>
-                    <span class="n">block_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="p">((</span><span class="n">block_prefix</span><span class="p">,</span> <span class="n">block_image_id</span><span class="p">,</span> <span class="n">block_top_slice_id</span><span class="p">),</span> <span class="n">thickness</span><span class="p">)</span>
-                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">overlaps</span><span class="p">):</span>
+                        <span class="n">block_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">(</span>
+                                <span class="p">(</span><span class="n">block_prefix</span><span class="p">,</span> <span class="n">block_image_id</span><span class="p">,</span> <span class="n">block_top_slice_id</span><span class="p">),</span>
+                                <span class="n">thickness</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
 
-                    <span class="n">num_selected_slices</span> <span class="o">+=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">thickness</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span>
+                        <span class="n">num_selected_slices</span> <span class="o">+=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">thickness</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span>
 
-                <span class="k">if</span> <span class="n">num_selected_slices</span> <span class="o">&gt;=</span> <span class="n">items_to_label</span><span class="p">:</span>
-                    <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">num_selected_slices</span> <span class="o">&gt;=</span> <span class="n">items_to_label</span><span class="p">:</span>
+                        <span class="k">break</span>
 
-            <span class="c1"># only continue if the inner loop didn&#39;t break</span>
+                <span class="c1"># only continue if the inner loop didn&#39;t break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">break</span>
@@ -434,6 +530,8 @@
 
         <span class="n">selected_ids</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">pseudo_labels</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">num_interpolated_slices</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">for</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">),</span> <span class="n">thickness</span> <span class="ow">in</span> <span class="n">block_ids</span><span class="p">:</span>
             <span class="n">selected_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">top_slice_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -452,30 +550,41 @@
             <span class="n">bottom_slice_id</span> <span class="o">=</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="n">thickness</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">selected_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">bottom_slice_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">label</span> <span class="o">=</span> <span class="n">data_module</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">read_mask_for_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
-            <span class="n">top</span> <span class="o">=</span> <span class="n">label</span><span class="p">[</span><span class="n">top_slice_id</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
-            <span class="n">bottom</span> <span class="o">=</span> <span class="n">label</span><span class="p">[</span><span class="n">bottom_slice_id</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;disable_interpolation&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">data_module</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">read_mask_for_image</span><span class="p">(</span><span class="n">image_id</span><span class="p">)</span>
+                <span class="n">top</span> <span class="o">=</span> <span class="n">label</span><span class="p">[</span><span class="n">top_slice_id</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="n">bottom</span> <span class="o">=</span> <span class="n">label</span><span class="p">[</span><span class="n">bottom_slice_id</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
 
-            <span class="n">interpolation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_slices</span><span class="p">(</span>
-                <span class="n">top</span><span class="p">,</span>
-                <span class="n">bottom</span><span class="p">,</span>
-                <span class="n">class_ids</span><span class="p">,</span>
-                <span class="n">thickness</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">interpolation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pseudo_label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">interpolation</span><span class="p">):</span>
-                    <span class="n">case_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">top_slice_id</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="n">selected_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">case_id</span><span class="p">)</span>
-                    <span class="n">pseudo_labels</span><span class="p">[</span><span class="n">case_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">pseudo_label</span>
+                <span class="n">interpolation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_slices</span><span class="p">(</span>
+                    <span class="n">top</span><span class="p">,</span>
+                    <span class="n">bottom</span><span class="p">,</span>
+                    <span class="n">class_ids</span><span class="p">,</span>
+                    <span class="n">thickness</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">interpolation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pseudo_label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">interpolation</span><span class="p">):</span>
+                        <span class="n">case_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">top_slice_id</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">selected_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">case_id</span><span class="p">)</span>
+                        <span class="n">pseudo_labels</span><span class="p">[</span><span class="n">case_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">pseudo_label</span>
+                        <span class="n">num_interpolated_slices</span> <span class="o">+=</span> <span class="mi">1</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation_quality_metric&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;dice&quot;</span><span class="p">]:</span>
-                    <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_and_log_interpolation_quality_score</span><span class="p">(</span>
-                        <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
-                        <span class="n">ground_truth</span><span class="o">=</span><span class="n">label</span><span class="p">[</span><span class="n">bottom_slice_id</span> <span class="p">:</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span>
-                        <span class="n">num_classes</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">num_classes</span><span class="p">(),</span>
-                        <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation_quality_metric&quot;</span><span class="p">),</span>
-                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation_quality_metric&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span>
+                        <span class="s2">&quot;dice&quot;</span>
+                    <span class="p">]:</span>
+                        <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_and_log_interpolation_quality_score</span><span class="p">(</span>
+                            <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+                            <span class="n">ground_truth</span><span class="o">=</span><span class="n">label</span><span class="p">[</span>
+                                <span class="n">bottom_slice_id</span> <span class="p">:</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:</span>
+                            <span class="p">],</span>
+                            <span class="n">num_classes</span><span class="o">=</span><span class="n">data_module</span><span class="o">.</span><span class="n">num_classes</span><span class="p">(),</span>
+                            <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation_quality_metric&quot;</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">num_selected_slices</span> <span class="o">==</span> <span class="n">items_to_label</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">items_to_label</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span> <span class="o">==</span> <span class="n">items_to_label</span> <span class="o">+</span> <span class="n">num_interpolated_slices</span>
+
         <span class="k">return</span> <span class="n">selected_ids</span><span class="p">,</span> <span class="n">pseudo_labels</span></div>
 
     <span class="nd">@staticmethod</span>

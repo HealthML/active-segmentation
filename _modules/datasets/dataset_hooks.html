@@ -201,6 +201,13 @@
 <span class="sd">            int: Size of the dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
+<div class="viewcode-block" id="DatasetHooks.num_pseudo_labels"><a class="viewcode-back" href="../../datasets.html#datasets.dataset_hooks.DatasetHooks.num_pseudo_labels">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">num_pseudo_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of items with pseudo-labels in the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
 <div class="viewcode-block" id="DatasetHooks.image_ids"><a class="viewcode-back" href="../../datasets.html#datasets.dataset_hooks.DatasetHooks.image_ids">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">image_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>

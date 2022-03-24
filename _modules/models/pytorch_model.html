@@ -492,6 +492,9 @@
             <span class="s2">&quot;trainer/training_set_size&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span>
         <span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span>
+            <span class="s2">&quot;trainer/training_set_pseudo_labels&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span>
+        <span class="p">)</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span>
             <span class="s2">&quot;trainer/training_set_n_cases&quot;</span><span class="p">,</span> <span class="n">step_metric</span><span class="o">=</span><span class="s2">&quot;trainer/iteration&quot;</span>
         <span class="p">)</span>
         <span class="n">wandb</span><span class="o">.</span><span class="n">define_metric</span><span class="p">(</span>
@@ -629,6 +632,7 @@
             <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
             <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
             <span class="s2">&quot;trainer/training_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;trainer/training_set_num_pseudo_labels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_num_pseudo_labels</span><span class="p">(),</span>
             <span class="s2">&quot;trainer/training_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
             <span class="p">),</span>
@@ -669,6 +673,7 @@
             <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
             <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
             <span class="s2">&quot;trainer/training_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;trainer/training_set_num_pseudo_labels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_num_pseudo_labels</span><span class="p">(),</span>
             <span class="s2">&quot;trainer/training_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
             <span class="p">),</span>
@@ -714,6 +719,7 @@
             <span class="s2">&quot;trainer/epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span>
             <span class="s2">&quot;trainer/iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span>
             <span class="s2">&quot;train/training_set_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_size</span><span class="p">(),</span>
+            <span class="s2">&quot;trainer/training_set_num_pseudo_labels&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set_num_pseudo_labels</span><span class="p">(),</span>
             <span class="s2">&quot;train/training_set_n_cases&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">image_ids</span><span class="p">())</span>
             <span class="p">),</span>

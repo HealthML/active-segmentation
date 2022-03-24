@@ -414,6 +414,16 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
+<div class="viewcode-block" id="ActiveLearningDataModule.training_set_num_pseudo_labels"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.training_set_num_pseudo_labels">[docs]</a>    <span class="k">def</span> <span class="nf">training_set_num_pseudo_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Number of pseudo-labels in training set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">num_pseudo_labels</span><span class="p">()</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
 <div class="viewcode-block" id="ActiveLearningDataModule.validation_set_size"><a class="viewcode-back" href="../../datasets.html#datasets.data_module.ActiveLearningDataModule.validation_set_size">[docs]</a>    <span class="k">def</span> <span class="nf">validation_set_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>

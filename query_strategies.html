@@ -202,7 +202,14 @@
 blocks to generate additional pseudo labels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – <p>Optional keyword arguments:</p>
+<dd class="field-odd"><p><strong>**kwargs</strong> – <p>Optional keyword arguments:
+- | prefer_blocks_without_pseudo_labels (bool, optional): Whether blocks that do not contain</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">existing pseudo-labels should always be labeled before starting labeling of blocks that contain</div>
+<div class="line">pseudo-labels. Defaults to <cite>False</cite>.</div>
+</div>
+</div></blockquote>
 <ul>
 <li><p>block_selection (str): The selection strategy for the blocks to interpolate: <cite>“uncertainty”</cite> | <cite>“random”</cite>.</p></li>
 <li><p>block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.</p></li>
@@ -235,6 +242,11 @@ blocks to generate additional pseudo labels.</p>
 <li><div class="line-block">
 <div class="line">random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible</div>
 <div class="line">outputs across multiple runs.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">disable_interpolation (bool, optional): Whether the block selection strategy should be run without</div>
+<div class="line">actually interpolating slices. Defaults to <cite>False</cite>.</div>
 </div>
 </li>
 </ul>
