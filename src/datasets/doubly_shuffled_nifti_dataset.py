@@ -578,7 +578,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         """
         image_slice_ids = [case_id.split("-") for case_id in case_ids]
         image_slice_ids = [
-            (split_id[0], int(split_id[1]) if len(split_id) > 1 else split_id[0], None)
+            (split_id[0], int(split_id[1]) if len(split_id) > 1 else None)
             for split_id in image_slice_ids
         ]
 
