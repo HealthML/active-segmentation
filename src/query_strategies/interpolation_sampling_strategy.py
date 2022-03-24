@@ -131,7 +131,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
                     and block_thickness > 1
                     and self.kwargs.get("prefer_blocks_without_pseudo_labels", False)
                 ):
-                    fully_unlabeled = True
+                    # for block sizes > 1, skip blocks that contain existing pseudo-labels
+                    fully_unlabeled = False
 
             if not fully_unlabeled:
                 continue
