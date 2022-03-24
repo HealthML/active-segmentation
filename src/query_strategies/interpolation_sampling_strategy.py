@@ -51,40 +51,11 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         self.log_id = 0
 
-    @staticmethod
-    def _prefer_slices_without_pseudo_label(
-        slices: List[Tuple[str, int, int]], labeled_slices: List[Tuple[int, int]]
-    ) -> Iterator[Tuple[str, int, int]]:
-        """
-        Rearranges the `slices` list so that all slices without existing pseudo-labels are placed before slices with
-        existing pseudo-labels.
-
-        Args:
-            slices (List[Tuple[str, int, int]]): List of slice IDs
-            labeled_slices (List[Tuple[int, int]]): List of slice IDs that are already part of the training set
-                without ID prefix.
-
-        Returns:
-            Iterator[Tuple[str, int, int]]: Rearranged list of slice IDs.
-        """
-
-        slices_without_pseudo_labels = [
-            (prefix, image_id, top_slice_id)
-            for (prefix, image_id, top_slice_id) in slices
-            if (image_id, top_slice_id) not in labeled_slices
-        ]
-        slices_with_pseudo_labels = [
-            (prefix, image_id, top_slice_id)
-            for (prefix, image_id, top_slice_id) in slices
-            if (image_id, top_slice_id) in labeled_slices
-        ]
-
-        return [*slices_without_pseudo_labels, *slices_with_pseudo_labels]
-
     def _randomly_ranked_blocks(
         self,
         data_module: ActiveLearningDataModule,
         block_thickness: int,
+        include_blocks_with_pseudo_labels: bool,
     ) -> Iterator[Tuple[str, int, int]]:
         """
         Randomly selects blocks of the unlabeled data that should be labeled next.
@@ -92,6 +63,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
         Args:
             data_module (ActiveLearningDataModule): A data module object providing data.
             block_thickness (int): The thickness of the blocks.
+            include_blocks_with_pseudo_labels (bool): Whether blocks containing existing pseudo-labels
+                should be included.
 
         Returns:
             A sorted iterator of blocks which should be labeled.
@@ -111,44 +84,43 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 image_id, slice_id = map(int, image_slice_id.split("-"))
                 unlabeled_case_ids.append((prefix, image_id, slice_id))
 
-        available_blocks = []
+        available_blocks_without_pseudo_labels = []
+        available_blocks_with_pseudo_labels = []
         for prefix, image_id, top_slice_id in unlabeled_case_ids:
             if top_slice_id < block_thickness - 1:
                 # We only want blocks which have the full thickness
                 continue
 
-            fully_unlabeled = True
+            contains_true_labels = False
+            contains_pseudo_labels = False
             for i in range(block_thickness):
                 if (prefix, image_id, top_slice_id - i) not in unlabeled_case_ids:
-                    # We only want blocks which are fully unlabeled
-                    fully_unlabeled = False
+                    contains_true_labels = True
                 if (
-                    (
-                        image_id,
-                        top_slice_id - i,
-                    )
-                    in labeled_case_ids
-                    and block_thickness > 1
-                    and self.kwargs.get("prefer_blocks_without_pseudo_labels", False)
-                ):
-                    # for block sizes > 1, skip blocks that contain existing pseudo-labels
-                    fully_unlabeled = False
+                    image_id,
+                    top_slice_id - i,
+                ) in labeled_case_ids:
+                    contains_pseudo_labels = True
 
-            if not fully_unlabeled:
-                continue
+            if not contains_true_labels and not contains_pseudo_labels:
+                available_blocks_without_pseudo_labels.append(
+                    (prefix, image_id, top_slice_id)
+                )
+            elif not contains_true_labels:
+                available_blocks_with_pseudo_labels.append(
+                    (prefix, image_id, top_slice_id)
+                )
 
-            available_blocks.append((prefix, image_id, top_slice_id))
+        if include_blocks_with_pseudo_labels:
+            available_blocks = [
+                *available_blocks_without_pseudo_labels,
+                *available_blocks_with_pseudo_labels,
+            ]
+        else:
+            available_blocks = available_blocks_without_pseudo_labels
 
         rng = np.random.default_rng(self.kwargs.get("random_state", None))
         rng.shuffle(available_blocks)
-
-        if block_thickness == 1 and self.kwargs.get(
-            "prefer_blocks_without_pseudo_labels", False
-        ):
-            # first label slices without pseudo-labels
-            return self._prefer_slices_without_pseudo_label(
-                available_blocks, labeled_case_ids
-            )
 
         return available_blocks
 
@@ -158,6 +130,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
         models: Union[PytorchModel, List[PytorchModel]],
         data_module: ActiveLearningDataModule,
         block_thickness: int,
+        include_blocks_with_pseudo_labels: bool,
     ) -> Iterator[Tuple[str, int, int]]:
         """
         Selects blocks of the unlabeled data with the highest uncertainty that should be labeled next.
@@ -166,6 +139,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
             models: Current models that should be improved by selecting additional data for labeling.
             data_module (ActiveLearningDataModule): A data module object providing data.
             block_thickness (int): The thickness of the blocks.
+            include_blocks_with_pseudo_labels (bool): Whether blocks containing existing pseudo-labels
+                should be included.
 
         Returns:
             A sorted iterator of blocks which should be labeled.
@@ -210,7 +185,8 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 image_id, slice_id = map(int, image_slice_id.split("-"))
                 labeled_case_ids.append((image_id, slice_id))
 
-        block_uncertainties = []
+        block_uncertainties_without_pseudo_labels = []
+        block_uncertainties_with_pseudo_labels = []
         for case_id in slice_uncertainties:
             prefix, image_slice_id = case_id.split("_")
             image_id, top_slice_id = map(int, image_slice_id.split("-"))
@@ -235,31 +211,32 @@ class InterpolationSamplingStrategy(QueryStrategy):
                     contains_pseudo_label = True
                     break
 
-            if (
-                contains_pseudo_label
-                and block_thickness > 1
-                and self.kwargs.get("prefer_blocks_without_pseudo_labels", False)
-            ):
-                continue
-
-            block_uncertainties.append(
-                (
-                    sum(uncertainties),
-                    (prefix, image_id, top_slice_id),
+            if contains_pseudo_label:
+                block_uncertainties_with_pseudo_labels.append(
+                    (
+                        sum(uncertainties),
+                        (prefix, image_id, top_slice_id),
+                    )
                 )
-            )
+            else:
+                block_uncertainties_without_pseudo_labels.append(
+                    (
+                        sum(uncertainties),
+                        (prefix, image_id, top_slice_id),
+                    )
+                )
+
+        if include_blocks_with_pseudo_labels:
+            block_uncertainties = [
+                *block_uncertainties_without_pseudo_labels,
+                *block_uncertainties_with_pseudo_labels,
+            ]
+        else:
+            block_uncertainties = block_uncertainties_without_pseudo_labels
 
         block_uncertainties.sort(key=lambda y: y[0])
 
         sorted_blocks = [id for _, id in block_uncertainties]
-
-        if block_thickness == 1 and self.kwargs.get(
-            "prefer_blocks_without_pseudo_labels", False
-        ):
-            # first label slices without pseudo-labels
-            return self._prefer_slices_without_pseudo_label(
-                sorted_blocks, labeled_case_ids
-            )
 
         return sorted_blocks
 
@@ -292,49 +269,73 @@ class InterpolationSamplingStrategy(QueryStrategy):
         block_ids = []
         num_selected_slices = 0
 
-        for thickness in reversed(range(1, block_thickness + 1)):
-            if thickness == 2:
-                # It doesn't make sense to use blocks with thickness 2 because there is nothing to interpolate.
-                # Instead skip to thickness 1 for single slices.
-                continue
+        prefer_blocks_without_pseudo_labels = self.kwargs.get(
+            "prefer_blocks_without_pseudo_labels", False
+        )
 
-            ranked_ids = (
-                self._uncertainty_ranked_blocks(models, data_module, thickness)
-                if block_selection == "uncertainty"
-                else self._randomly_ranked_blocks(data_module, thickness)
-            )
+        for include_blocks_with_pseudo_labels in (
+            [False, True] if prefer_blocks_without_pseudo_labels else [True]
+        ):
+            for thickness in reversed(range(1, block_thickness + 1)):
+                if thickness == 2:
+                    # It doesn't make sense to use blocks with thickness 2 because there is nothing to interpolate.
+                    # Instead skip to thickness 1 for single slices.
+                    continue
 
-            for (
-                block_prefix,
-                block_image_id,
-                block_top_slice_id,
-            ) in ranked_ids:
+                ranked_ids = (
+                    self._uncertainty_ranked_blocks(
+                        models,
+                        data_module,
+                        thickness,
+                        include_blocks_with_pseudo_labels,
+                    )
+                    if block_selection == "uncertainty"
+                    else self._randomly_ranked_blocks(
+                        data_module, thickness, include_blocks_with_pseudo_labels
+                    )
+                )
 
-                overlaps = [
-                    prefix == block_prefix
-                    and image_id == block_image_id
-                    and (
-                        (
-                            block_top_slice_id
-                            >= top_slice_id
-                            > block_top_slice_id - thickness
+                for (
+                    block_prefix,
+                    block_image_id,
+                    block_top_slice_id,
+                ) in ranked_ids:
+
+                    overlaps = [
+                        prefix == block_prefix
+                        and image_id == block_image_id
+                        and (
+                            (
+                                block_top_slice_id
+                                >= top_slice_id
+                                > block_top_slice_id - thickness
+                            )
+                            or (
+                                top_slice_id
+                                >= block_top_slice_id
+                                > top_slice_id - thick
+                            )
                         )
-                        or (top_slice_id >= block_top_slice_id > top_slice_id - thick)
-                    )
-                    for (prefix, image_id, top_slice_id), thick in block_ids
-                ]
+                        for (prefix, image_id, top_slice_id), thick in block_ids
+                    ]
 
-                if not any(overlaps):
-                    block_ids.append(
-                        ((block_prefix, block_image_id, block_top_slice_id), thickness)
-                    )
+                    if not any(overlaps):
+                        block_ids.append(
+                            (
+                                (block_prefix, block_image_id, block_top_slice_id),
+                                thickness,
+                            )
+                        )
 
-                    num_selected_slices += 2 if thickness > 1 else 1
+                        num_selected_slices += 2 if thickness > 1 else 1
 
-                if num_selected_slices >= items_to_label:
-                    break
+                    if num_selected_slices >= items_to_label:
+                        break
 
-            # only continue if the inner loop didn't break
+                # only continue if the inner loop didn't break
+                else:
+                    continue
+                break
             else:
                 continue
             break
