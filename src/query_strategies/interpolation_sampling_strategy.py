@@ -51,6 +51,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
         self.log_id = 0
 
+    # pylint: disable=too-many-locals
     def _randomly_ranked_blocks(
         self,
         data_module: ActiveLearningDataModule,
