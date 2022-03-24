@@ -41,13 +41,14 @@ class InterpolationSamplingStrategy(QueryStrategy):
               | e.g. "dice"
             - | random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible
               | outputs across multiple runs.
-            - | log_interpolation_metrics (bool, optional): Whether the interpolation quality metrics are to be logged
-              | in Weights and Biases.
+            - | disable_interpolation (bool, optional): Whether the block selection strategy should be run without
+              | actually interpolating slices. Defaults to `False`.
 
     """
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+        self.disable_interpolation = kwargs.get("disable_interpolation", False)
 
         self.log_id = 0
 
@@ -71,12 +72,18 @@ class InterpolationSamplingStrategy(QueryStrategy):
             A sorted iterator of blocks which should be labeled.
         """
 
+        if self.disable_interpolation:
+            data_module.training_set.only_return_true_labels = False
+
         labeled_case_ids = []
         for _, _, _, case_ids in data_module.train_dataloader():
             for case_id in case_ids:
                 _, image_slice_id = case_id.split("_")
                 image_id, slice_id = map(int, image_slice_id.split("-"))
                 labeled_case_ids.append((image_id, slice_id))
+
+        if self.disable_interpolation:
+            data_module.training_set.only_return_true_labels = True
 
         unlabeled_case_ids = []
         for _, case_ids in data_module.unlabeled_dataloader():
@@ -180,11 +187,18 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 slice_uncertainties[case_id] = uncertainty[idx]
 
         labeled_case_ids = []
+
+        if self.disable_interpolation:
+            data_module.train_dataloader.only_return_true_labels = False
+
         for _, _, _, case_ids in data_module.train_dataloader():
             for case_id in case_ids:
                 _, image_slice_id = case_id.split("_")
                 image_id, slice_id = map(int, image_slice_id.split("-"))
                 labeled_case_ids.append((image_id, slice_id))
+
+        if self.disable_interpolation:
+            data_module.train_dataloader.only_return_true_labels = True
 
         block_uncertainties_without_pseudo_labels = []
         block_uncertainties_with_pseudo_labels = []
@@ -351,7 +365,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
         for (prefix, image_id, top_slice_id), thickness in block_ids:
             selected_ids.append(f"{prefix}_{image_id}-{top_slice_id}")
 
-            if thickness == 1 and self.kwargs.get("log_interpolation_metrics", True):
+            if thickness == 1 and not self.disable_interpolation:
                 wandb.log(
                     {
                         "val/interpolation_id": self.log_id,
@@ -483,7 +497,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 target=torch.from_numpy(ground_truth).int(),
             )
             mean_dice_score = dice.compute().item()
-            if self.kwargs.get("log_interpolation_metrics", True):
+            if not self.disable_interpolation:
                 wandb.log(
                     {
                         "val/interpolation_id": self.log_id,
