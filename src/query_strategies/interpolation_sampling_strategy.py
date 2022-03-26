@@ -48,6 +48,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+        self.disable_interpolation = kwargs.get("disable_interpolation", False)
 
         self.log_id = 0
 
@@ -71,12 +72,18 @@ class InterpolationSamplingStrategy(QueryStrategy):
             A sorted iterator of blocks which should be labeled.
         """
 
+        if self.disable_interpolation:
+            data_module.training_set.only_return_true_labels = False
+
         labeled_case_ids = []
         for _, _, _, case_ids in data_module.train_dataloader():
             for case_id in case_ids:
                 _, image_slice_id = case_id.split("_")
                 image_id, slice_id = map(int, image_slice_id.split("-"))
                 labeled_case_ids.append((image_id, slice_id))
+
+        if self.disable_interpolation:
+            data_module.training_set.only_return_true_labels = True
 
         unlabeled_case_ids = []
         for _, case_ids in data_module.unlabeled_dataloader():
@@ -180,11 +187,18 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 slice_uncertainties[case_id] = uncertainty[idx]
 
         labeled_case_ids = []
+
+        if self.disable_interpolation:
+            data_module.train_dataloader.only_return_true_labels = False
+
         for _, _, _, case_ids in data_module.train_dataloader():
             for case_id in case_ids:
                 _, image_slice_id = case_id.split("_")
                 image_id, slice_id = map(int, image_slice_id.split("-"))
                 labeled_case_ids.append((image_id, slice_id))
+
+        if self.disable_interpolation:
+            data_module.train_dataloader.only_return_true_labels = True
 
         block_uncertainties_without_pseudo_labels = []
         block_uncertainties_with_pseudo_labels = []
@@ -351,7 +365,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
         for (prefix, image_id, top_slice_id), thickness in block_ids:
             selected_ids.append(f"{prefix}_{image_id}-{top_slice_id}")
 
-            if thickness == 1:
+            if thickness == 1 and not self.disable_interpolation:
                 wandb.log(
                     {
                         "val/interpolation_id": self.log_id,
@@ -365,36 +379,31 @@ class InterpolationSamplingStrategy(QueryStrategy):
             bottom_slice_id = top_slice_id - thickness + 1
             selected_ids.append(f"{prefix}_{image_id}-{bottom_slice_id}")
 
-            if not self.kwargs.get("disable_interpolation", False):
-                label = data_module.training_set.read_mask_for_image(image_id)
-                top = label[top_slice_id, :, :]
-                bottom = label[bottom_slice_id, :, :]
+            label = data_module.training_set.read_mask_for_image(image_id)
+            top = label[top_slice_id, :, :]
+            bottom = label[bottom_slice_id, :, :]
 
-                interpolation = self._interpolate_slices(
-                    top,
-                    bottom,
-                    class_ids,
-                    thickness,
-                    self.kwargs.get("interpolation_type", None),
-                )
-                if interpolation is not None:
-                    for i, pseudo_label in enumerate(interpolation):
-                        case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
-                        selected_ids.append(case_id)
-                        pseudo_labels[case_id] = pseudo_label
-                        num_interpolated_slices += 1
+            interpolation = self._interpolate_slices(
+                top,
+                bottom,
+                class_ids,
+                thickness,
+                self.kwargs.get("interpolation_type", None),
+            )
+            if interpolation is not None:
+                for i, pseudo_label in enumerate(interpolation):
+                    case_id = f"{prefix}_{image_id}-{top_slice_id - 1 - i}"
+                    selected_ids.append(case_id)
+                    pseudo_labels[case_id] = pseudo_label
+                    num_interpolated_slices += 1
 
-                    if self.kwargs.get("interpolation_quality_metric", None) in [
-                        "dice"
-                    ]:
-                        _ = self._calculate_and_log_interpolation_quality_score(
-                            interpolation=interpolation,
-                            ground_truth=label[
-                                bottom_slice_id : top_slice_id - 1, :, :
-                            ],
-                            num_classes=data_module.num_classes(),
-                            metric=self.kwargs.get("interpolation_quality_metric"),
-                        )
+                if self.kwargs.get("interpolation_quality_metric", None) in ["dice"]:
+                    _ = self._calculate_and_log_interpolation_quality_score(
+                        interpolation=interpolation,
+                        ground_truth=label[bottom_slice_id : top_slice_id - 1, :, :],
+                        num_classes=data_module.num_classes(),
+                        metric=self.kwargs.get("interpolation_quality_metric"),
+                    )
 
         assert num_selected_slices == items_to_label
         assert len(selected_ids) >= items_to_label
@@ -488,16 +497,17 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 target=torch.from_numpy(ground_truth).int(),
             )
             mean_dice_score = dice.compute().item()
-            wandb.log(
-                {
-                    "val/interpolation_id": self.log_id,
-                    "val/mean_dice_score_interpolation": mean_dice_score
-                    if not math.isnan(mean_dice_score)
-                    # NaN means that neither the interpolation nor the ground truth include foreground pixels
-                    else 1,
-                    "val/interpolation_thickness": interpolation.shape[0] + 2,
-                }
-            )
+            if not self.disable_interpolation:
+                wandb.log(
+                    {
+                        "val/interpolation_id": self.log_id,
+                        "val/mean_dice_score_interpolation": mean_dice_score
+                        if not math.isnan(mean_dice_score)
+                        # NaN means that neither the interpolation nor the ground truth include foreground pixels
+                        else 1,
+                        "val/interpolation_thickness": interpolation.shape[0] + 2,
+                    }
+                )
             self.log_id += 1
             return mean_dice_score
         raise ValueError(f"Chosen metric {metric} not supported. Choose from: 'dice' .")

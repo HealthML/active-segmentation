@@ -36,6 +36,8 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             Uses all slices if None. Defaults to None.
         random_state (int, optional): Controls the data shuffling. Pass an int for reproducible output across multiple
             runs.
+        only_return_true_labels (bool, optional): Whether only true labels or also pseudo-labels are to be returned.
+            Defaults to `False`.
     """
 
     @staticmethod
@@ -310,6 +312,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         slice_indices: Optional[List[np.array]] = None,
         case_id_prefix: str = "train",
         random_state: Optional[int] = None,
+        only_return_true_labels: bool = False,
     ):
         self.manager = Manager()
 
@@ -317,6 +320,7 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         self.annotation_paths = self.manager.list(annotation_paths)
         self.combine_foreground_classes = combine_foreground_classes
         self.mask_filter_values = mask_filter_values
+        self.only_return_true_labels = only_return_true_labels
 
         assert len(image_paths) == len(annotation_paths)
 
@@ -465,6 +469,9 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             ):
                 self.current_image_key_index += self.num_workers
                 self.current_slice_key_index = 0
+
+            if is_pseudo_label and self.only_return_true_labels:
+                return self.__next__()
         else:
             x = torch.from_numpy(self._current_image)
             y = torch.from_numpy(self._current_mask).int()
@@ -622,7 +629,12 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
             size = 0
 
             for inner_dict in self.image_slice_indices.values():
-                size += len(inner_dict)
+                if self.only_return_true_labels:
+                    for value in inner_dict.values():
+                        if value is None:
+                            size += 1
+                else:
+                    size += len(inner_dict)
 
             return size
 
@@ -633,6 +645,9 @@ class DoublyShuffledNIfTIDataset(IterableDataset, DatasetHooks):
         Returns:
             int: Number of items with pseudo-labels in the dataset.
         """
+
+        if self.only_return_true_labels:
+            return 0
 
         if self.dim == 2:
             num_pseudo_labels = 0

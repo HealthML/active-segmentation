@@ -280,7 +280,7 @@ class ActiveLearningPipeline:
         self,
         iteration: int,
         selected_items: List[str],
-        pseudo_labels: List[str],
+        pseudo_labels: Optional[List[str]] = None,
     ) -> None:
         """
         Log the iteration, case_id, image_path, image_id, slice_index and pseudo_label for all slices
@@ -292,12 +292,23 @@ class ActiveLearningPipeline:
             pseudo_labels (List[str]): A list of all case_ids selected as pseudo labels in this iteration.
         """
         if self.selected_items_table is not None:
-            items = self.data_module.training_set.get_items_for_logging(selected_items)
+            if pseudo_labels is not None:
+                selected_items_with_true_labels = [
+                    item for item in selected_items if item not in pseudo_labels
+                ]
+            else:
+                selected_items_with_true_labels = selected_items
+            items = self.data_module.training_set.get_items_for_logging(
+                selected_items_with_true_labels
+            )
             items = [[iteration, *i, False] for i in items]
 
-            if pseudo_labels is not None:
+            if (
+                pseudo_labels is not None
+                and not self.data_module.training_set.only_return_true_labels
+            ):
                 pseudo_items = self.data_module.training_set.get_items_for_logging(
-                    pseudo_labels
+                    list(pseudo_labels.keys())
                 )
                 pseudo_items = [[iteration, *i, True] for i in pseudo_items]
                 items.extend(pseudo_items)
