@@ -189,7 +189,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
         labeled_case_ids = []
 
         if self.disable_interpolation:
-            data_module.train_dataloader.only_return_true_labels = False
+            data_module.training_set.only_return_true_labels = False
 
         for _, _, _, case_ids in data_module.train_dataloader():
             for case_id in case_ids:
@@ -198,7 +198,7 @@ class InterpolationSamplingStrategy(QueryStrategy):
                 labeled_case_ids.append((image_id, slice_id))
 
         if self.disable_interpolation:
-            data_module.train_dataloader.only_return_true_labels = True
+            data_module.training_set.only_return_true_labels = True
 
         block_uncertainties_without_pseudo_labels = []
         block_uncertainties_with_pseudo_labels = []
