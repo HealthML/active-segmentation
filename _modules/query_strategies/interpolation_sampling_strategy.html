@@ -374,7 +374,7 @@
         <span class="n">labeled_case_ids</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disable_interpolation</span><span class="p">:</span>
-            <span class="n">data_module</span><span class="o">.</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">only_return_true_labels</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">data_module</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">only_return_true_labels</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">case_ids</span> <span class="ow">in</span> <span class="n">data_module</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">case_id</span> <span class="ow">in</span> <span class="n">case_ids</span><span class="p">:</span>
@@ -383,7 +383,7 @@
                 <span class="n">labeled_case_ids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">image_id</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disable_interpolation</span><span class="p">:</span>
-            <span class="n">data_module</span><span class="o">.</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">only_return_true_labels</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">data_module</span><span class="o">.</span><span class="n">training_set</span><span class="o">.</span><span class="n">only_return_true_labels</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="n">block_uncertainties_without_pseudo_labels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">block_uncertainties_with_pseudo_labels</span> <span class="o">=</span> <span class="p">[]</span>
