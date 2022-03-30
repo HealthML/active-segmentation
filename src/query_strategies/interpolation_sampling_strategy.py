@@ -405,9 +405,10 @@ class InterpolationSamplingStrategy(QueryStrategy):
                         metric=self.kwargs.get("interpolation_quality_metric"),
                     )
 
-        assert num_selected_slices == items_to_label
-        assert len(selected_ids) >= items_to_label
-        assert len(selected_ids) == items_to_label + num_interpolated_slices
+        if data_module.unlabeled_set_size() >= items_to_label:
+            assert num_selected_slices == items_to_label
+            assert len(selected_ids) >= items_to_label
+            assert len(selected_ids) == items_to_label + num_interpolated_slices
 
         return selected_ids, pseudo_labels
 
