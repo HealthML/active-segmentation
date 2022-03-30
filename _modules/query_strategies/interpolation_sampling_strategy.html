@@ -590,9 +590,10 @@
                         <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation_quality_metric&quot;</span><span class="p">),</span>
                     <span class="p">)</span>
 
-        <span class="k">assert</span> <span class="n">num_selected_slices</span> <span class="o">==</span> <span class="n">items_to_label</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">items_to_label</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span> <span class="o">==</span> <span class="n">items_to_label</span> <span class="o">+</span> <span class="n">num_interpolated_slices</span>
+        <span class="k">if</span> <span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_set_size</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">items_to_label</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">num_selected_slices</span> <span class="o">==</span> <span class="n">items_to_label</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">items_to_label</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_ids</span><span class="p">)</span> <span class="o">==</span> <span class="n">items_to_label</span> <span class="o">+</span> <span class="n">num_interpolated_slices</span>
 
         <span class="k">return</span> <span class="n">selected_ids</span><span class="p">,</span> <span class="n">pseudo_labels</span></div>
 
