@@ -566,8 +566,8 @@ def morphological_contour_interpolation(
     """
 
     block = np.zeros((block_thickness, *top.shape))
-    block[0, :, :] = bottom
-    block[-1, :, :] = top
+    block[0, :, :] = top
+    block[-1, :, :] = bottom
     image_type = itk.Image[itk.UC, 3]
     itk_img = itk.image_from_array(block.astype(np.uint8), ttype=(image_type,))
     image = itk.morphological_contour_interpolator(itk_img)
