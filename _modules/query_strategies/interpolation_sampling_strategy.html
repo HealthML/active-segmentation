@@ -550,15 +550,16 @@
         <span class="k">for</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">top_slice_id</span><span class="p">),</span> <span class="n">thickness</span> <span class="ow">in</span> <span class="n">block_ids</span><span class="p">:</span>
             <span class="n">selected_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">image_id</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">top_slice_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">thickness</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disable_interpolation</span><span class="p">:</span>
-                <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;val/interpolation_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
-                        <span class="s2">&quot;val/mean_dice_score_interpolation&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-                        <span class="s2">&quot;val/interpolation_thickness&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="p">}</span>
-                <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">thickness</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disable_interpolation</span><span class="p">:</span>
+                    <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;val/interpolation_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+                            <span class="s2">&quot;val/mean_dice_score_interpolation&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                            <span class="s2">&quot;val/interpolation_thickness&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">continue</span>
 
             <span class="n">bottom_slice_id</span> <span class="o">=</span> <span class="n">top_slice_id</span> <span class="o">-</span> <span class="n">thickness</span> <span class="o">+</span> <span class="mi">1</span>
