@@ -312,7 +312,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">images</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">batch</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">images</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">batch</span>
+                <span class="n">images</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">batch</span>
 
             <span class="n">case_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
             <span class="n">feature_vectors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
