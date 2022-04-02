@@ -127,7 +127,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             if len(batch) == 2:
                 images, ids = batch
             else:
-                images, _, ids = batch
+                images, _, _, ids = batch
 
             case_ids.extend(ids)
             feature_vectors.extend(list(images.split(1)))
