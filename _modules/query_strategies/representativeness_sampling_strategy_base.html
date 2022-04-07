@@ -415,9 +415,10 @@
                 <span class="n">case_ids_unlabeled_set</span><span class="p">,</span>
             <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_image_feature_vectors</span><span class="p">(</span><span class="n">data_module</span><span class="o">.</span><span class="n">unlabeled_dataloader</span><span class="p">())</span>
 
-        <span class="n">all_feature_vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">feature_vectors_training_set</span><span class="p">,</span> <span class="n">feature_vectors_unlabeled_set</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="n">all_feature_vectors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">*</span><span class="n">feature_vectors_training_set</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">feature_vectors_unlabeled_set</span><span class="p">,</span>
+        <span class="p">]</span>
 
         <span class="n">max_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
             <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_vector</span><span class="p">)</span> <span class="k">for</span> <span class="n">feature_vector</span> <span class="ow">in</span> <span class="n">all_feature_vectors</span><span class="p">]</span>
