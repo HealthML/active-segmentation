@@ -365,15 +365,16 @@ class InterpolationSamplingStrategy(QueryStrategy):
         for (prefix, image_id, top_slice_id), thickness in block_ids:
             selected_ids.append(f"{prefix}_{image_id}-{top_slice_id}")
 
-            if thickness == 1 and not self.disable_interpolation:
-                wandb.log(
-                    {
-                        "val/interpolation_id": self.log_id,
-                        "val/mean_dice_score_interpolation": math.nan,
-                        "val/interpolation_thickness": 1,
-                    }
-                )
-                self.log_id += 1
+            if thickness == 1:
+                if not self.disable_interpolation:
+                    wandb.log(
+                        {
+                            "val/interpolation_id": self.log_id,
+                            "val/mean_dice_score_interpolation": math.nan,
+                            "val/interpolation_thickness": 1,
+                        }
+                    )
+                    self.log_id += 1
                 continue
 
             bottom_slice_id = top_slice_id - thickness + 1
@@ -565,8 +566,8 @@ def morphological_contour_interpolation(
     """
 
     block = np.zeros((block_thickness, *top.shape))
-    block[0, :, :] = bottom
-    block[-1, :, :] = top
+    block[0, :, :] = top
+    block[-1, :, :] = bottom
     image_type = itk.Image[itk.UC, 3]
     itk_img = itk.image_from_array(block.astype(np.uint8), ttype=(image_type,))
     image = itk.morphological_contour_interpolator(itk_img)

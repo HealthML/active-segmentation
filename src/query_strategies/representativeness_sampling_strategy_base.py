@@ -93,7 +93,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 if len(batch) == 2:
                     images, ids = batch
                 else:
-                    images, _, ids = batch
+                    images, _, _, ids = batch
 
                 model.predict(images.to(self.device))
 
@@ -127,7 +127,7 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
             if len(batch) == 2:
                 images, ids = batch
             else:
-                images, _, ids = batch
+                images, _, _, ids = batch
 
             case_ids.extend(ids)
             feature_vectors.extend(list(images.split(1)))
@@ -230,9 +230,10 @@ class RepresentativenessSamplingStrategyBase(QueryStrategy, ABC):
                 case_ids_unlabeled_set,
             ) = self._retrieve_image_feature_vectors(data_module.unlabeled_dataloader())
 
-        all_feature_vectors = np.concatenate(
-            [feature_vectors_training_set, feature_vectors_unlabeled_set]
-        )
+        all_feature_vectors = [
+            *feature_vectors_training_set,
+            *feature_vectors_unlabeled_set,
+        ]
 
         max_size = np.max(
             [len(feature_vector) for feature_vector in all_feature_vectors]
