@@ -1,4 +1,4 @@
-# Master Project "Medical Image Segmentation"
+# ActiveSegmentation: A Simulation Framework for Benchmarking Active Learning Strategies for 3D Medical Image Segmentation
 
 
 ## Project Documentation
