@@ -191,93 +191,8 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </section>
-<section id="module-functional.interpretation">
-<span id="functional-interpretation-module"></span><h2>functional.interpretation module<a class="headerlink" href="#module-functional.interpretation" title="Permalink to this headline">¶</a></h2>
-<p>Module to generate heat maps for trained model</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="functional.interpretation.HeatMaps">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.interpretation.</span></span><span class="sig-name descname"><span class="pre">HeatMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Generates heat maps for a trained model with respect to given layers.
-SegGradCam (Gradient Based Activation Methods) are used to calculate relevance values of individual pixels.
-Details can be found <a class="reference external" href="https://arxiv.org/abs/2002.11434">here</a> .</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – A trained segmentation model.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="functional.interpretation.HeatMaps.generate_grayscale_cam">
-<span class="sig-name descname"><span class="pre">generate_grayscale_cam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_layers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps.generate_grayscale_cam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps.generate_grayscale_cam" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the grayscale representation of the relevance of individual pixel values using GradCam.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_tensor</strong> (<em>torch.Tensor</em>) – The tensor to calculate the desired values for.</p></li>
-<li><p><strong>target_category</strong> (<em>int</em>) – The category or class of the predicted mask.</p></li>
-<li><p><strong>target_layers</strong> (<em>List</em><em>[</em><em>torch.nn.Module</em><em>]</em>) – A list of layers of the given model architecture.
-Used for calculating the gradient of the GradCam method.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An array with the grayscale pixel importance values.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="functional.interpretation.HeatMaps.generate_grayscale_logits">
-<span class="sig-name descname"><span class="pre">generate_grayscale_logits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_category</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps.generate_grayscale_logits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps.generate_grayscale_logits" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the grayscale representation of the relevance of individual pixel values using the model prediction.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_tensor</strong> (<em>torch.Tensor</em>) – The tensor to calculate the desired values for.</p></li>
-<li><p><strong>target_category</strong> (<em>int</em>) – The category or class of the predicted mask.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An array with the grayscale pixel importance values.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="functional.interpretation.HeatMaps.show_grayscale_heatmap_on_image">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">show_grayscale_heatmap_on_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grayscale_heatmap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#HeatMaps.show_grayscale_heatmap_on_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.HeatMaps.show_grayscale_heatmap_on_image" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maps the calculated grayscale relevance values to a given image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>image</strong> (<em>np.ndarray</em>) – The image to map the pixel relevance values against.</p></li>
-<li><p><strong>grayscale_heatmap</strong> (<em>np.ndarray</em>) – The calculated relevance values in grayscale format.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The input image in RGB format with mapped heatmap.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="functional.interpretation.SemanticSegmentationTarget">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">functional.interpretation.</span></span><span class="sig-name descname"><span class="pre">SemanticSegmentationTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functional/interpretation.html#SemanticSegmentationTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functional.interpretation.SemanticSegmentationTarget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Wraps the target for generating heat maps.
-All pixels belonging to the given prediction of the category will be summed up.
-More details can be found <a class="reference external" href="https://arxiv.org/abs/2002.11434">here</a> .</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>category</strong> (<em>int</em>) – The category or class of the predicted mask.</p></li>
-<li><p><strong>mask</strong> (<em>np.ndarray</em>) – The predicted mask as numpy array.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="functional-interpretation-module">
+<h2>functional.interpretation module<a class="headerlink" href="#functional-interpretation-module" title="Permalink to this headline">¶</a></h2>
 </section>
 <section id="module-functional.losses">
 <span id="functional-losses-module"></span><h2>functional.losses module<a class="headerlink" href="#module-functional.losses" title="Permalink to this headline">¶</a></h2>
@@ -500,7 +415,7 @@ formulated in:</p>
 <div><p><a class="reference external" href="https://arxiv.org/pdf/1606.04797.pdf">Fausto Milletari, Nassir Navab, and Seyed-Ahmad Ahmadi. V-net: Fully convolutional neural networks for
 volumetric medical image segmentation, 2016</a>.</p>
 </div></blockquote>
-<p>In this implementation an adapted version of the Dice loss is used that a includes an epsilon term :math:<a href="#id2"><span class="problematic" id="id3">`</span></a>epsilon`to
+<p>In this implementation an adapted version of the Dice loss is used that a includes an epsilon term :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>epsilon`to
 avoid divisions by zero and does not square the terms in the denominator. Additionally, the loss formulation is
 generalized to multi-class classification tasks by averaging dice losses over the class and batch dimension:</p>
 <blockquote>
@@ -1792,7 +1707,7 @@ one-hot encoding or not (default = <cite>True</cite>).</p></li>
               <ul>
 <li><a class="reference internal" href="#">functional package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-functional.interpretation">functional.interpretation module</a></li>
+<li><a class="reference internal" href="#functional-interpretation-module">functional.interpretation module</a></li>
 <li><a class="reference internal" href="#module-functional.losses">functional.losses module</a></li>
 <li><a class="reference internal" href="#module-functional.metrics">functional.metrics module</a></li>
 <li><a class="reference internal" href="#module-functional.utils">functional.utils module</a></li>
