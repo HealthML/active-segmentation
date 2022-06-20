@@ -1,0 +1,524 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>models.u_net &mdash; Active Segmentation 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/katex-math.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
+  <link rel="index" title="Index" href="../../genindex.html" />
+  <link rel="search" title="Search" href="../../search.html" /> 
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"
+    integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+</head>
+
+
+<div class="container-fluid header-holder docs-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active docs-active">
+            <a href="../../">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="sphinx-template-body">
+
+   
+
+  
+
+  <div class="table-of-contents-link-wrapper">
+    <span>Table of Contents</span>
+    <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+  </div>
+
+  <nav data-toggle="sphinx-template-nav-shift" class="sphinx-template-left-menu" id="sphinx-template-left-menu">
+    <div class="sphinx-template-side-scroll">
+      <div class="sphinx-template-menu sphinx-template-menu-vertical" data-spy="affix" role="navigation"
+        aria-label="main navigation">
+        <div class="sphinx-template-left-menu-search">
+          
+
+          
+          
+          
+          
+
+          
+
+
+<div role="search">
+  <form id="rtd-search-form" class="sphinx-template-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        
+        
+        
+        
+        
+        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../active_segmentation.html">Active Learning Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../run_experiments.html">run_experiments module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../active_learning.html">active_learning module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../inferencing.html">inferencing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../datasets.html">datasets package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../functional.html">functional package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../metric_tracking.html">metric_tracking package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../query_strategies.html">query_strategies package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brats.html">The BraTS Dataset</a></li>
+</ul>
+
+        
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="sphinx-template-container">
+    <div class="sphinx-template-page-level-bar" id="sphinx-template-page-level-bar">
+      <div class="sphinx-template-breadcrumbs-wrapper">
+        <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="sphinx-template-breadcrumbs">
+      <li><a href="../../index.html" class="fa fa-large fa-home">Docs</a> &gt;</li>
+          <li><a href="../index.html">Module code</a> &gt;</li>
+      <li>models.u_net</li>
+      <li class="sphinx-template-breadcrumbs-aside">
+      </li>
+  </ul>
+</div>
+      </div>
+
+      <div class="sphinx-template-shortcuts-wrapper" id="sphinx-template-shortcuts-wrapper">
+        Shortcuts
+      </div>
+    </div>
+
+    <section data-toggle="sphinx-template-nav-shift" id="sphinx-template-content-wrap" class="sphinx-template-content-wrap">
+      <div class="sphinx-template-content-left">
+        
+          <div class="rst-content">
+            
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+              <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
+                
+  <h1>Source code for models.u_net</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;U-Net architecture.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
+
+<div class="viewcode-block" id="UNet"><a class="viewcode-back" href="../../models.html#models.u_net.UNet">[docs]</a><span class="k">class</span> <span class="nc">UNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This U-Net implementation was originally taken from `this implementation</span>
+<span class="sd">    &lt;https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py&gt;`_</span>
+<span class="sd">    and adapted to a flexible number of levels and for optional 3d mode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        in_channels (int): Number of input channels.</span>
+<span class="sd">        out_channels (int): Number of output channels. Should be equal to the number of classes (for</span>
+<span class="sd">            multi-label segmentation tasks excluding the background class).</span>
+<span class="sd">        multi_label (bool, optional): Whether the model should produce single-label or multi-label outputs. If set to</span>
+<span class="sd">            `False`, the model&#39;s predictions are computed using a Softmax activation layer. to If set to `True`, sigmoid</span>
+<span class="sd">            activation layers are used to compute the model&#39;s predicitions. Defaults to False.</span>
+<span class="sd">        init_features (int, optional): Number of feature channels of the first U-Net block,</span>
+<span class="sd">            in each down-sampling block, the number of feature channels is doubled. Defaults to 32.</span>
+<span class="sd">        num_levels (int, optional): Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</span>
+<span class="sd">        dim (int, optional): The dimensionality of the U-Net. Defaults to 2.</span>
+<span class="sd">        p_dropout (float, optional): Probability of applying dropout to the outputs of the encoder layers. Defaults to</span>
+<span class="sd">            0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable-msg=too-many-instance-attributes</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">out_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">multi_label</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">init_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">num_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">p_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span> <span class="o">=</span> <span class="n">num_levels</span>
+
+        <span class="n">MaxPool</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool3d</span>
+        <span class="n">ConvTranspose</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose3d</span>
+        <span class="n">Conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv3d</span>
+
+        <span class="n">features</span> <span class="o">=</span> <span class="n">init_features</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoders</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">UNet</span><span class="o">.</span><span class="n">_block</span><span class="p">(</span>
+                    <span class="n">in_channels</span> <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">level</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;enc</span><span class="si">{</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span>
+                    <span class="n">p_dropout</span><span class="o">=</span><span class="n">p_dropout</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_levels</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pools</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">MaxPool</span><span class="p">(</span><span class="n">kernel_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_levels</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottleneck</span> <span class="o">=</span> <span class="n">UNet</span><span class="o">.</span><span class="n">_block</span><span class="p">(</span>
+            <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span>
+            <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">num_levels</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;bottleneck&quot;</span><span class="p">,</span>
+            <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">upconvs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">ConvTranspose</span><span class="p">(</span>
+                    <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">level</span><span class="p">),</span>
+                    <span class="n">kernel_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                    <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_levels</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoders</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">UNet</span><span class="o">.</span><span class="n">_block</span><span class="p">(</span>
+                    <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">features</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">level</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;dec</span><span class="si">{</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_levels</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv</span> <span class="o">=</span> <span class="n">Conv</span><span class="p">(</span><span class="n">in_channels</span><span class="o">=</span><span class="n">features</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="n">out_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prediction_layer</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">()</span> <span class="k">if</span> <span class="n">multi_label</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="UNet.forward"><a class="viewcode-back" href="../../models.html#models.u_net.UNet.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (Tensor): Batch of input images.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tensor: Segmentation masks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="c1"># individually store encoding results for skip connections</span>
+        <span class="n">encodings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">):</span>
+            <span class="n">encodings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">encoders</span><span class="p">[</span><span class="n">level</span><span class="p">](</span>
+                    <span class="n">x</span> <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">pools</span><span class="p">[</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">](</span><span class="n">encodings</span><span class="p">[</span><span class="n">level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">bottleneck</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottleneck</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pools</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">encodings</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">dec</span> <span class="o">=</span> <span class="n">bottleneck</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">)):</span>
+            <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upconvs</span><span class="p">[</span><span class="n">level</span><span class="p">](</span><span class="n">dec</span><span class="p">)</span>
+
+            <span class="c1"># for the relevant dimensions [0, 0] for even and [0, 1] for odd in reversed order flattened</span>
+            <span class="n">pad</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">p</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">encodings</span><span class="p">[</span><span class="n">level</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">2</span><span class="p">:])</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim</span> <span class="o">%</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="p">]</span>
+            <span class="n">dec</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pad</span><span class="p">),</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">dec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">dec</span><span class="p">,</span> <span class="n">encodings</span><span class="p">[</span><span class="n">level</span><span class="p">]),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoders</span><span class="p">[</span><span class="n">level</span><span class="p">](</span><span class="n">dec</span><span class="p">)</span>
+
+        <span class="n">decoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">dec</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_layer</span><span class="p">(</span><span class="n">decoded</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_block</span><span class="p">(</span>
+        <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">):</span>
+
+        <span class="n">Conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv3d</span>
+        <span class="n">BatchNorm</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm3d</span>
+
+        <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">OrderedDict</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">(</span>
+                        <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;conv1&quot;</span><span class="p">,</span>
+                        <span class="n">Conv</span><span class="p">(</span>
+                            <span class="n">in_channels</span><span class="o">=</span><span class="n">in_channels</span><span class="p">,</span>
+                            <span class="n">out_channels</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+                            <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                            <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">),</span>
+                    <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;norm1&quot;</span><span class="p">,</span> <span class="n">BatchNorm</span><span class="p">(</span><span class="n">num_features</span><span class="o">=</span><span class="n">features</span><span class="p">)),</span>
+                    <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;relu1&quot;</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+                    <span class="p">(</span>
+                        <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;conv2&quot;</span><span class="p">,</span>
+                        <span class="n">Conv</span><span class="p">(</span>
+                            <span class="n">in_channels</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+                            <span class="n">out_channels</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+                            <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                            <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">),</span>
+                    <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;norm2&quot;</span><span class="p">,</span> <span class="n">BatchNorm</span><span class="p">(</span><span class="n">num_features</span><span class="o">=</span><span class="n">features</span><span class="p">)),</span>
+                    <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;relu2&quot;</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+                    <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;dropout&quot;</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">p_dropout</span><span class="p">)),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+              </article>
+              
+            </div>
+            <footer>
+  
+  
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using <a href="https://github.com/ain-soph/trojanzoo_sphinx_theme">trojanzoo_sphinx_theme</a> (modified from  <a href="https://github.com/ain-soph/pytorch_sphinx_theme">pytorch_sphinx_theme</a>).
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="sphinx-template-content-right" id="sphinx-template-content-right">
+          <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
+            <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
+              
+            </div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  
+
+  
+
+  
+  <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+  <script src="../../_static/jquery.js"></script>
+  <script src="../../_static/underscore.js"></script>
+  <script src="../../_static/doctools.js"></script>
+  <script src="../../_static/clipboard.min.js"></script>
+  <script src="../../_static/copybutton.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
+  <script src="../../_static/katex_autorenderer.js"></script>
+  
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  <script type="text/javascript">
+    jQuery(function () {
+      $('.header-logo').css('background-image', 'url()');
+      $('.docs-header .header-logo').css('background-image', 'url()');
+      $('.footer-logo').css('background-image', 'url()');
+      });
+  </script>
+  <script script type="text/javascript">
+    var collapsedSections = [];
+  </script>
+  
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-resources" id="docs-resources">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <h2>Docs</h2>
+          <p>Access comprehensive developer documentation for Active Segmentation</p>
+          <a class="with-right-arrow" href="../../index.html">View Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-logo-wrapper">
+        <a href="/" class="footer-logo"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="/" aria-label="Active Segmentation"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+
+          <li>
+            <a href="/">Home</a>
+          </li>
+
+          <li class="active resources-mobile-menu-title">
+            <a href="../../">Docs</a>
+          </li>
+          <li>
+            <a href="https://github.com/HealthML/active-segmentation">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      trojanzooAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.sphinx-template-article a span.pre").each(function (e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+</body>
+
+</html>

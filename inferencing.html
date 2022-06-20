@@ -186,8 +186,45 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="inferencing-module">
-<h1>inferencing module<a class="headerlink" href="#inferencing-module" title="Permalink to this headline">¶</a></h1>
+  <section id="module-inferencing">
+<span id="inferencing-module"></span><h1>inferencing module<a class="headerlink" href="#module-inferencing" title="Permalink to this headline">¶</a></h1>
+<p>Module containing inferencing logic</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="inferencing.Inferencer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">inferencing.</span></span><span class="sig-name descname"><span class="pre">Inferencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inferencing.html#Inferencer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inferencing.Inferencer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The inferencer to use a given model for inferencing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – A model object to be used for inferencing.</p></li>
+<li><p><strong>dataset</strong> – Name of the dataset. E.g. ‘brats’</p></li>
+<li><p><strong>data_dir</strong> – Main directory with the dataset. E.g. ‘./data’</p></li>
+<li><p><strong>prediction_dir</strong> – Main directory with the predictions. E.g. ‘./predictions’</p></li>
+<li><p><strong>prediction_count</strong> – The amount of predictions to be generated.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="inferencing.Inferencer.inference">
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/inferencing.html#Inferencer.inference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inferencing.Inferencer.inference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps the inference execution for image and scan datasets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="inferencing.Inferencer.inference_image">
+<span class="sig-name descname"><span class="pre">inference_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/inferencing.html#Inferencer.inference_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inferencing.Inferencer.inference_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs inference for images.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="inferencing.Inferencer.inference_scan">
+<span class="sig-name descname"><span class="pre">inference_scan</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/inferencing.html#Inferencer.inference_scan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inferencing.Inferencer.inference_scan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the inferencing.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

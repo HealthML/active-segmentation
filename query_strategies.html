@@ -191,35 +191,754 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </section>
-<section id="query-strategies-interpolation-sampling-strategy-module">
-<h2>query_strategies.interpolation_sampling_strategy module<a class="headerlink" href="#query-strategies-interpolation-sampling-strategy-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.interpolation_sampling_strategy">
+<span id="query-strategies-interpolation-sampling-strategy-module"></span><h2>query_strategies.interpolation_sampling_strategy module<a class="headerlink" href="#module-query_strategies.interpolation_sampling_strategy" title="Permalink to this headline">¶</a></h2>
+<p>Module for interpolation sampling strategy</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.interpolation_sampling_strategy.</span></span><span class="sig-name descname"><span class="pre">InterpolationSamplingStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/interpolation_sampling_strategy.html#InterpolationSamplingStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#query_strategies.query_strategy.QueryStrategy" title="query_strategies.query_strategy.QueryStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">query_strategies.query_strategy.QueryStrategy</span></code></a></p>
+<p>Class for selecting blocks to label by highest uncertainty and then interpolating within those
+blocks to generate additional pseudo labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – <p>Optional keyword arguments:
+- | prefer_blocks_without_pseudo_labels (bool, optional): Whether blocks that do not contain</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">existing pseudo-labels should always be labeled before starting labeling of blocks that contain</div>
+<div class="line">pseudo-labels. Defaults to <cite>False</cite>.</div>
+</div>
+</div></blockquote>
+<ul>
+<li><p>block_selection (str): The selection strategy for the blocks to interpolate: <cite>“uncertainty”</cite> | <cite>“random”</cite>.</p></li>
+<li><p>block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.</p></li>
+<li><div class="line-block">
+<div class="line">calculation_method (str): Specification of the method used to calculate the uncertainty</div>
+<div class="line">values: <cite>“distance”</cite> |  <cite>“entropy”</cite>.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">exclude_background (bool): Whether to exclude the background dimension in calculating the</div>
+<div class="line">uncertainty value.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">epsilon (float): Small numerical value used for smoothing when using “entropy” as the uncertainty</div>
+<div class="line">metric.</div>
+</div>
+</li>
+<li><p>block_thickness (int): The thickness of the interpolation blocks. Defaults to 5.</p></li>
+<li><div class="line-block">
+<div class="line">interpolation_type (str): The interpolation algorithm to use.</div>
+<div class="line">values: <cite>“signed-distance”</cite> | <cite>“morph-contour”</cite>.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">interpolation_quality_metric (str): The metric used for evaluating the performance of the interpolation</div>
+<div class="line">e.g. “dice”</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">random_state (int, optional): Random state for selecting items to label. Pass an int for reproducible</div>
+<div class="line">outputs across multiple runs.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">disable_interpolation (bool, optional): Whether the block selection strategy should be run without</div>
+<div class="line">actually interpolating slices. Defaults to <cite>False</cite>.</div>
+</div>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy.select_items_to_label">
+<span class="sig-name descname"><span class="pre">select_items_to_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items_to_label</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/interpolation_sampling_strategy.html#InterpolationSamplingStrategy.select_items_to_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy.select_items_to_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses a sampling strategy to select blocks for labeling and generates pseudo labels by interpolation
+between the bottom and the top slice of a block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – Current models that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>items_to_label</strong> (<em>int</em>) – Number of items that should be selected for labeling.</p></li>
+<li><p><strong>**kwargs</strong> – Additional, strategy-specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of IDs of the data items to be labeled and a
+dictionary of pseudo labels with the corresponding IDs as keys.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[List[str], Dict[str, np.array]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="query_strategies.interpolation_sampling_strategy.morphological_contour_interpolation">
+<span class="sig-prename descclassname"><span class="pre">query_strategies.interpolation_sampling_strategy.</span></span><span class="sig-name descname"><span class="pre">morphological_contour_interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_thickness</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/interpolation_sampling_strategy.html#morphological_contour_interpolation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.interpolation_sampling_strategy.morphological_contour_interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolates between top and bottom slices using the <a class="reference external" href="https://www.researchgate.net/publication/307942551_ND_morphological_contour_interpolation">morphological_contour_interpolator</a> from ITK.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>top</strong> (<em>np.array</em>) – The top slice of the block.</p></li>
+<li><p><strong>bottom</strong> (<em>np.array</em>) – The bottom slice of the block.</p></li>
+<li><p><strong>block_thickness</strong> (<em>int</em>) – The thickness of the block.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The interpolated slices between top and bottom.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="query_strategies.interpolation_sampling_strategy.signed_distance_interpolation">
+<span class="sig-prename descclassname"><span class="pre">query_strategies.interpolation_sampling_strategy.</span></span><span class="sig-name descname"><span class="pre">signed_distance_interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_thickness</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/interpolation_sampling_strategy.html#signed_distance_interpolation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.interpolation_sampling_strategy.signed_distance_interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolates between top and bottom slices if possible. Uses a signed distance function to interpolate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>top</strong> (<em>np.array</em>) – The top slice of the block.</p></li>
+<li><p><strong>bottom</strong> (<em>np.array</em>) – The bottom slice of the block.</p></li>
+<li><p><strong>block_thickness</strong> (<em>int</em>) – The thickness of the block.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The interpolated slices between top and bottom.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="query-strategies-query-strategy-module">
-<h2>query_strategies.query_strategy module<a class="headerlink" href="#query-strategies-query-strategy-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.query_strategy">
+<span id="query-strategies-query-strategy-module"></span><h2>query_strategies.query_strategy module<a class="headerlink" href="#module-query_strategies.query_strategy" title="Permalink to this headline">¶</a></h2>
+<p>Module containing abstract superclass for query strategies.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.query_strategy.QueryStrategy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.query_strategy.</span></span><span class="sig-name descname"><span class="pre">QueryStrategy</span></span><a class="reference internal" href="_modules/query_strategies/query_strategy.html#QueryStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.query_strategy.QueryStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract superclass for query strategies.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.query_strategy.QueryStrategy.select_items_to_label">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">select_items_to_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items_to_label</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/query_strategy.html#QueryStrategy.select_items_to_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.query_strategy.QueryStrategy.select_items_to_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects subset of the unlabeled data that should be labeled next.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – Current models that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>dataloader</strong> – Pytorch dataloader representing the unlabeled dataset.</p></li>
+<li><p><strong>items_to_label</strong> – Number of items that should be selected for labeling.</p></li>
+<li><p><strong>**kwargs</strong> – Additional, strategy-specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of IDs of the data items to be labeled
+and an optional dictionary of pseudo labels with the corresponding IDs as keys.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[List[str], Optional[Dict[str, np.array]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="query-strategies-random-sampling-strategy-module">
-<h2>query_strategies.random_sampling_strategy module<a class="headerlink" href="#query-strategies-random-sampling-strategy-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.random_sampling_strategy">
+<span id="query-strategies-random-sampling-strategy-module"></span><h2>query_strategies.random_sampling_strategy module<a class="headerlink" href="#module-query_strategies.random_sampling_strategy" title="Permalink to this headline">¶</a></h2>
+<p>Module for random sampling strategy</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.random_sampling_strategy.RandomSamplingStrategy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.random_sampling_strategy.</span></span><span class="sig-name descname"><span class="pre">RandomSamplingStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/random_sampling_strategy.html#RandomSamplingStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.random_sampling_strategy.RandomSamplingStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#query_strategies.query_strategy.QueryStrategy" title="query_strategies.query_strategy.QueryStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">query_strategies.query_strategy.QueryStrategy</span></code></a></p>
+<p>Class for selecting items via a random sampling strategy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – Random state for selecting items to label. Pass an int for reproducible outputs
+across multiple runs.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.random_sampling_strategy.RandomSamplingStrategy.select_items_to_label">
+<span class="sig-name descname"><span class="pre">select_items_to_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items_to_label</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/random_sampling_strategy.html#RandomSamplingStrategy.select_items_to_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.random_sampling_strategy.RandomSamplingStrategy.select_items_to_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects random subset of the unlabeled data that should be labeled next. We are using
+the shuffling of the dataset for randomisation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – Current models that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>items_to_label</strong> (<em>int</em>) – Number of items that should be selected for labeling.</p></li>
+<li><p><strong>**kwargs</strong> – Additional, strategy-specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of IDs of the data items to be labeled and None because no pseudo labels are
+generated.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[List[str], None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="query-strategies-representativeness-sampling-clustering-module">
-<h2>query_strategies.representativeness_sampling_clustering module<a class="headerlink" href="#query-strategies-representativeness-sampling-clustering-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.representativeness_sampling_clustering">
+<span id="query-strategies-representativeness-sampling-clustering-module"></span><h2>query_strategies.representativeness_sampling_clustering module<a class="headerlink" href="#module-query_strategies.representativeness_sampling_clustering" title="Permalink to this headline">¶</a></h2>
+<p>Clustering-based representativeness sampling strategy</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.representativeness_sampling_clustering.</span></span><span class="sig-name descname"><span class="pre">ClusteringBasedRepresentativenessSamplingStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clustering_algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean_shift'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model_features'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_dimensionality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_clustering.html#ClusteringBasedRepresentativenessSamplingStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase" title="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase</span></code></a></p>
+<p>Representativeness sampling strategy that clusters the feature vectors and randomly selects items from the clusters
+least represented in the training set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clustering_algorithm</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>Clustering algorithm to be used: <cite>“mean_shift”</cite> | <cite>“k_means”</cite> |
+<cite>“scans”</cite>:</p>
+<blockquote>
+<div><ul>
+<li><p><cite>”mean_shift”</cite>: the mean shift clustering algorithm is used, allowing a variable number of clusters.</p></li>
+<li><p><cite>”k_means”</cite>: the k-means clustering algorithm is used, with a fixed number of clusters.</p></li>
+<li><p><cite>”scans”</cite>: all slices from one scan are considered to represent one cluster.</p></li>
+</ul>
+</div></blockquote>
+<p>Defaults to <cite>“mean_shift”</cite>.</p>
+</p></li>
+<li><p><strong>feature_type</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>Type of feature vectors to be used: <cite>“model_features”</cite> |
+<cite>“image_features”</cite>:</p>
+<blockquote>
+<div><ul>
+<li><p><cite>”model_features”</cite>: Feature vectors retrieved from the inner layers of the model are used.</p></li>
+<li><p><cite>”image_features”</cite>: The input images are used as feature vectors.</p></li>
+</ul>
+</div></blockquote>
+<p>Defaults to <cite>“model_features”</cite>.</p>
+</p></li>
+<li><p><strong>feature_dimensionality</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of dimensions the reduced feature vector should have.
+Defaults to 10.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Optional keyword arguments:</p>
+<ul>
+<li><div class="line-block">
+<div class="line">bandwidth (float, optional): Kernel bandwidth of the mean shift clustering algorithm. Defaults to 5.</div>
+<div class="line">Only used if <cite>clustering_algorithm = “mean_shift”</cite>.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">cluster_all (bool, optional): Whether all data items including outliers should be assigned to a cluster.</div>
+<div class="line">Defaults to <cite>False</cite>. Only used if <cite>clustering_algorithm = “mean_shift”</cite>.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">n_clusters (int, optional): Number of clusters. Defaults to 10.  Only used if</div>
+<div class="line"><cite>clustering_algorithm = “k_means”</cite>.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">random_state (int, optional): Random state for centroid initialization of k-means algorithm. Defaults to</div>
+<div class="line"><cite>None</cite>. Only used if <cite>clustering_algorithm = “k_means”</cite>.</div>
+</div>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.compute_representativeness_scores">
+<span class="sig-name descname"><span class="pre">compute_representativeness_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_unlabeled_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_unlabeled_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_clustering.html#ClusteringBasedRepresentativenessSamplingStrategy.compute_representativeness_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.compute_representativeness_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes representativeness scores for all unlabeled items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – Current model that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>feature_vectors_training_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the training set.</p></li>
+<li><p><strong>feature_vectors_unlabeled_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the unlabeled set.</p></li>
+<li><p><strong>case_ids_unlabeled_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the unlabeled set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Representativeness score for each item in the unlabeled set. Items that are underrepresented in
+the training receive higher scores.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.on_select_item">
+<span class="sig-name descname"><span class="pre">on_select_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_clustering.html#ClusteringBasedRepresentativenessSamplingStrategy.on_select_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.on_select_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback that is called when an item is selected for labeling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>case_id</strong> (<em>string</em>) – Case ID of the selected item.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.prepare_representativeness_computation">
+<span class="sig-name descname"><span class="pre">prepare_representativeness_computation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_vectors_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_unlabeled_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_unlabeled_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_clustering.html#ClusteringBasedRepresentativenessSamplingStrategy.prepare_representativeness_computation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.prepare_representativeness_computation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clusters the feature vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>feature_vectors_training_set</strong> (<em>numpy.ndarray</em>) – Feature vectors of the items in the training set.</p></li>
+<li><p><strong>case_ids_training_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the training set.</p></li>
+<li><p><strong>feature_vectors_unlabeled_set</strong> (<em>numpy.ndarray</em>) – Feature vectors of the items in the unlabeled set.</p></li>
+<li><p><strong>case_ids_unlabeled_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the unlabeled set.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="query-strategies-representativeness-sampling-distances-module">
-<h2>query_strategies.representativeness_sampling_distances module<a class="headerlink" href="#query-strategies-representativeness-sampling-distances-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.representativeness_sampling_distances">
+<span id="query-strategies-representativeness-sampling-distances-module"></span><h2>query_strategies.representativeness_sampling_distances module<a class="headerlink" href="#module-query_strategies.representativeness_sampling_distances" title="Permalink to this headline">¶</a></h2>
+<p>Distance-based representativeness sampling strategy</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_distances.DistanceBasedRepresentativenessSamplingStrategy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.representativeness_sampling_distances.</span></span><span class="sig-name descname"><span class="pre">DistanceBasedRepresentativenessSamplingStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model_features'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_dimensionality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_distances.html#DistanceBasedRepresentativenessSamplingStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_distances.DistanceBasedRepresentativenessSamplingStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase" title="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase</span></code></a></p>
+<p>Representativeness sampling strategy that selects the items with the highest average feature distance to the items
+in the training set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>feature_type</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>Type of feature vectors to be used: <cite>“model_features”</cite> |
+<cite>“image_features”</cite>:</p>
+<blockquote>
+<div><ul>
+<li><p><cite>”model_features”</cite>: Feature vectors retrieved from the inner layers of the model are used.</p></li>
+<li><p><cite>”image_features”</cite>: The input images are used as feature vectors.</p></li>
+</ul>
+</div></blockquote>
+<p>Defaults to <cite>“model_features”</cite>.</p>
+</p></li>
+<li><p><strong>feature_dimensionality</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of dimensions the reduced feature vector should have.
+Defaults to 10.</p></li>
+<li><p><strong>distance_metric</strong> (<em>string</em><em>, </em><em>optional</em>) – Metric to be used for calculation the distance between feature vectors:
+<cite>“euclidean”</cite> | <cite>“cosine”</cite> | <cite>“russellrao”</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_distances.DistanceBasedRepresentativenessSamplingStrategy.compute_representativeness_scores">
+<span class="sig-name descname"><span class="pre">compute_representativeness_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_unlabeled_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_unlabeled_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_distances.html#DistanceBasedRepresentativenessSamplingStrategy.compute_representativeness_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_distances.DistanceBasedRepresentativenessSamplingStrategy.compute_representativeness_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes representativeness scores for all unlabeled items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – Current model that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>feature_vectors_training_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the training set.</p></li>
+<li><p><strong>feature_vectors_unlabeled_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the unlabeled set.</p></li>
+<li><p><strong>case_ids_unlabeled_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the unlabeled set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Representativeness score for each item in the unlabeled set. Items that are underrepresented in
+the training receive higher scores.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="query-strategies-representativeness-sampling-strategy-base-module">
-<h2>query_strategies.representativeness_sampling_strategy_base module<a class="headerlink" href="#query-strategies-representativeness-sampling-strategy-base-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.representativeness_sampling_strategy_base">
+<span id="query-strategies-representativeness-sampling-strategy-base-module"></span><h2>query_strategies.representativeness_sampling_strategy_base module<a class="headerlink" href="#module-query_strategies.representativeness_sampling_strategy_base" title="Permalink to this headline">¶</a></h2>
+<p>Base class for implementing representativeness sampling strategies</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.representativeness_sampling_strategy_base.</span></span><span class="sig-name descname"><span class="pre">RepresentativenessSamplingStrategyBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model_features'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_dimensionality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_strategy_base.html#RepresentativenessSamplingStrategyBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#query_strategies.query_strategy.QueryStrategy" title="query_strategies.query_strategy.QueryStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">query_strategies.query_strategy.QueryStrategy</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base class for implementing representativeness sampling strategies</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>feature_dimensionality</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of dimensions the reduced feature vector should have.
+Defaults to 10.</p></li>
+<li><p><strong>feature_type</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>Type of feature vectors to be used: <cite>“model_features”</cite> |
+<cite>“image_features”</cite>:</p>
+<blockquote>
+<div><ul>
+<li><p><cite>”model_features”</cite>: Feature vectors retrieved from the inner layers of the model are used.</p></li>
+<li><p><cite>”image_features”</cite>: The input images are used as feature vectors.</p></li>
+</ul>
+</div></blockquote>
+<p>Defaults to <cite>“model_features”</cite>.</p>
+</p></li>
+<li><p><strong>feature_dimensionality</strong> – Number of dimensions the reduced feature vector should have.
+Defaults to 10.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.compute_representativeness_scores">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">compute_representativeness_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_unlabeled_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_unlabeled_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_strategy_base.html#RepresentativenessSamplingStrategyBase.compute_representativeness_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.compute_representativeness_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Must be overridden in subclasses to compute the representativeness scores for the items in the unlabeled set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – Current model that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>feature_vectors_training_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the training set.</p></li>
+<li><p><strong>feature_vectors_unlabeled_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the unlabeled set.</p></li>
+<li><p><strong>case_ids_unlabeled_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the unlabeled set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Representativeness score for each item in the unlabeled set. Items that are underrepresented in
+the training set should receive higher scores.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.on_select_item">
+<span class="sig-name descname"><span class="pre">on_select_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_strategy_base.html#RepresentativenessSamplingStrategyBase.on_select_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.on_select_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback that is called when an item is selected for labeling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>case_id</strong> (<em>string</em>) – Case ID of the selected item.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.prepare_representativeness_computation">
+<span class="sig-name descname"><span class="pre">prepare_representativeness_computation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_vectors_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_unlabeled_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_unlabeled_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_strategy_base.html#RepresentativenessSamplingStrategyBase.prepare_representativeness_computation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.prepare_representativeness_computation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be overridden in subclasses to perform global computations on all feature vectors before item selection
+starts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>feature_vectors_training_set</strong> (<em>numpy.ndarray</em>) – Feature vectors of the items in the training set.</p></li>
+<li><p><strong>case_ids_training_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the training set.</p></li>
+<li><p><strong>feature_vectors_unlabeled_set</strong> (<em>numpy.ndarray</em>) – Feature vectors of the items in the unlabeled set.</p></li>
+<li><p><strong>case_ids_unlabeled_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the unlabeled set.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.reduce_features">
+<span class="sig-name descname"><span class="pre">reduce_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_vectors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_strategy_base.html#RepresentativenessSamplingStrategyBase.reduce_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.reduce_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces the dimensionality of feature vectors using a principle component analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>feature_vectors</strong> (<em>numpy.array</em>) – Feature vectors to be reduced.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – Smoothing operator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Reduced feature vectors.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.select_items_to_label">
+<span class="sig-name descname"><span class="pre">select_items_to_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items_to_label</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_strategy_base.html#RepresentativenessSamplingStrategyBase.select_items_to_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.select_items_to_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects a subset of the unlabeled data that increases the representativeness of the training set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – Current models that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>items_to_label</strong> (<em>int</em>) – Number of items that should be selected for labeling.</p></li>
+<li><p><strong>**kwargs</strong> – Additional, strategy-specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of IDs of the data items to be labeled and None because no pseudo labels are
+generated.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[List[str], None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="query-strategies-representativeness-sampling-uncertainty-module">
-<h2>query_strategies.representativeness_sampling_uncertainty module<a class="headerlink" href="#query-strategies-representativeness-sampling-uncertainty-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.representativeness_sampling_uncertainty">
+<span id="query-strategies-representativeness-sampling-uncertainty-module"></span><h2>query_strategies.representativeness_sampling_uncertainty module<a class="headerlink" href="#module-query_strategies.representativeness_sampling_uncertainty" title="Permalink to this headline">¶</a></h2>
+<p>Combined representativeness and uncertainty sampling strategy</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.representativeness_sampling_uncertainty.</span></span><span class="sig-name descname"><span class="pre">UncertaintyRepresentativenessSamplingStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">representativeness_algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cluster_coverage'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculation_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'entropy'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_uncertainty.html#UncertaintyRepresentativenessSamplingStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase" title="query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase</span></code></a></p>
+<p>Sampling strategy that combines representativeness and uncertainty sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>representativeness_algorithm</strong> (<em>string</em><em>, </em><em>optional</em>) – <p>The algorithm to be used to select the most representative
+samples: <cite>“most_distant_sample”</cite> | <cite>“cluster_coverage”</cite>. Defaults to <cite>“cluster_coverage”</cite>.</p>
+<blockquote>
+<div><ul>
+<li><div class="line-block">
+<div class="line"><cite>”most_distant_sample”</cite>: The unlabeled item that has the highest feature distance to the labeled set</div>
+<div class="line">is selected for labeling.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line"><cite>”cluster_coverage”</cite>: The features of the unlabeled and labeled items are clustered and an item from</div>
+<div class="line">the most underrepresented cluster is selected for labeling.</div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>calculation_method</strong> (<em>string</em><em>, </em><em>optional</em>) – The algorithm to be used for computing the uncertainty: <cite>“distance”</cite> |
+“<cite>entropy</cite>”.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy.compute_representativeness_scores">
+<span class="sig-name descname"><span class="pre">compute_representativeness_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_unlabeled_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_unlabeled_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_uncertainty.html#UncertaintyRepresentativenessSamplingStrategy.compute_representativeness_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy.compute_representativeness_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes representativeness scores for all unlabeled items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – Current model that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>feature_vectors_training_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the training set.</p></li>
+<li><p><strong>feature_vectors_unlabeled_set</strong> (<em>np.ndarray</em>) – Feature vectors of the items in the unlabeled set.</p></li>
+<li><p><strong>case_ids_unlabeled_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the unlabeled set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Representativeness score for each item in the unlabeled set. Items that are underrepresented in
+the training receive higher scores.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy.prepare_representativeness_computation">
+<span class="sig-name descname"><span class="pre">prepare_representativeness_computation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_vectors_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_training_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_vectors_unlabeled_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_ids_unlabeled_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/representativeness_sampling_uncertainty.html#UncertaintyRepresentativenessSamplingStrategy.prepare_representativeness_computation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy.prepare_representativeness_computation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares computation of representativeness scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>feature_vectors_training_set</strong> (<em>numpy.ndarray</em>) – Feature vectors of the items in the training set.</p></li>
+<li><p><strong>case_ids_training_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the training set.</p></li>
+<li><p><strong>feature_vectors_unlabeled_set</strong> (<em>numpy.ndarray</em>) – Feature vectors of the items in the unlabeled set.</p></li>
+<li><p><strong>case_ids_unlabeled_set</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Case IDs of the items in the unlabeled set.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="query-strategies-uncertainty-sampling-strategy-module">
-<h2>query_strategies.uncertainty_sampling_strategy module<a class="headerlink" href="#query-strategies-uncertainty-sampling-strategy-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.uncertainty_sampling_strategy">
+<span id="query-strategies-uncertainty-sampling-strategy-module"></span><h2>query_strategies.uncertainty_sampling_strategy module<a class="headerlink" href="#module-query_strategies.uncertainty_sampling_strategy" title="Permalink to this headline">¶</a></h2>
+<p>Module for uncertainty sampling strategy</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">query_strategies.uncertainty_sampling_strategy.</span></span><span class="sig-name descname"><span class="pre">UncertaintySamplingStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/uncertainty_sampling_strategy.html#UncertaintySamplingStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#query_strategies.query_strategy.QueryStrategy" title="query_strategies.query_strategy.QueryStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">query_strategies.query_strategy.QueryStrategy</span></code></a></p>
+<p>Class for selecting items to label by highest uncertainty</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – <p>Optional keyword arguments:</p>
+<ul>
+<li><div class="line-block">
+<div class="line">calculation_method (str): Specification of the method used to calculate the uncertainty</div>
+<div class="line">values: <cite>“distance”</cite> |  <cite>“entropy”</cite>.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">exclude_background (bool): Whether to exclude the background dimension in calculating the</div>
+<div class="line">uncertainty value.</div>
+</div>
+</li>
+<li><div class="line-block">
+<div class="line">prefer_unique_scans (bool): Whether to prefer among the uncertain scan-slice combinations unique</div>
+<div class="line">scans, if possible. E.g. with items_to_label set to 2:
+<cite>[‘slice_1-32’, ‘slice_1-33’, ‘slice_2-50’] -&gt; [‘slice_1-32’, ‘slice_2-50’]</cite></div>
+</div>
+</li>
+<li><p>epsilon (float): Small numerical value used for smoothing when using “entropy” as the uncertainty metric.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy.compute_uncertainties">
+<span class="sig-name descname"><span class="pre">compute_uncertainties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/uncertainty_sampling_strategy.html#UncertaintySamplingStrategy.compute_uncertainties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy.compute_uncertainties" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><em>PytorchModel</em></a>) – Current model that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Model uncertainties and case IDs for all items in the unlabeled set.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[List[float], List[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy.select_items_to_label">
+<span class="sig-name descname"><span class="pre">select_items_to_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items_to_label</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/uncertainty_sampling_strategy.html#UncertaintySamplingStrategy.select_items_to_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy.select_items_to_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects subset of the unlabeled data with the highest uncertainty that should be labeled next.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – Current models that should be improved by selecting additional data for labeling.</p></li>
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>items_to_label</strong> (<em>int</em>) – Number of items that should be selected for labeling.</p></li>
+<li><p><strong>calculation_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Specification of the method used to calculate the uncertainty values.
+(default = ‘distance’)</p></li>
+<li><p><strong>**kwargs</strong> – Additional, strategy-specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of IDs of the data items to be labeled and None because no pseudo labels are
+generated.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[List[str], None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="query-strategies-utils-module">
-<h2>query_strategies.utils module<a class="headerlink" href="#query-strategies-utils-module" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies.utils">
+<span id="query-strategies-utils-module"></span><h2>query_strategies.utils module<a class="headerlink" href="#module-query_strategies.utils" title="Permalink to this headline">¶</a></h2>
+<p>Module containing functions used for different query strategies.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="query_strategies.utils.clean_duplicate_scans">
+<span class="sig-prename descclassname"><span class="pre">query_strategies.utils.</span></span><span class="sig-name descname"><span class="pre">clean_duplicate_scans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uncertainties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items_to_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/utils.html#clean_duplicate_scans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.utils.clean_duplicate_scans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cleans the list from duplicate scans if possible. If minimum number of samples can’t be reached without
+duplicates, duplicates are kept.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uncertainties</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>str</em><em>]</em><em>]</em>) – List with tuples of uncertainty value and case id.</p></li>
+<li><p><strong>items_to_label</strong> (<em>int</em>) – Number of items that should be selected for labeling.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A cleaned list of tuples.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="query_strategies.utils.distance_to_max_uncertainty">
+<span class="sig-prename descclassname"><span class="pre">query_strategies.utils.</span></span><span class="sig-name descname"><span class="pre">distance_to_max_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_uncertainty_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/utils.html#distance_to_max_uncertainty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.utils.distance_to_max_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the uncertainties based on the distance to a maximum uncertainty value:</p>
+<div class="math">
+\[\sum | max\_uncertainty\_value - predictions |
+
+\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predictions</strong> (<em>torch.Tensor</em>) – The predictions of the model.</p></li>
+<li><p><strong>max_uncertainty_value</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value of uncertainty in the predictions.
+(default = 0.5)</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments specific for this calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Uncertainty value for each image in the batch of predictions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="query_strategies.utils.entropy">
+<span class="sig-prename descclassname"><span class="pre">query_strategies.utils.</span></span><span class="sig-name descname"><span class="pre">entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_uncertainty_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/utils.html#entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.utils.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the uncertainties based on the entropy of the distance to a maximum uncertainty value:</p>
+<div class="math">
+\[- \sum | max\_uncertainty\_value - predictions | \cdot | \log({max\_uncertainty\_value - predictions}) |
+
+\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predictions</strong> (<em>torch.Tensor</em>) – The predictions of the model.</p></li>
+<li><p><strong>max_uncertainty_value</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value of uncertainty in the predictions.
+(default = 0.5)</p></li>
+<li><p><strong>**kwargs</strong> – <p>Keyword arguments specific for this calculation:</p>
+<ul>
+<li><p>epsilon (float): The smoothing value to avoid the magic number. (default = 1e-10)</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Uncertainty value for each image in the batch of predictions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="query_strategies.utils.select_uncertainty_calculation">
+<span class="sig-prename descclassname"><span class="pre">query_strategies.utils.</span></span><span class="sig-name descname"><span class="pre">select_uncertainty_calculation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calculation_method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/query_strategies/utils.html#select_uncertainty_calculation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#query_strategies.utils.select_uncertainty_calculation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects the calculation function based on the provided name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>calculation_method</strong> (<em>str</em>) – Name of the calculation method. Allowable values: <cite>“distance”</cite> |  <cite>“entropy”</cite>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A callable function to calculate uncertainty based on predictions.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<section id="module-query_strategies">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-query_strategies" title="Permalink to this headline">¶</a></h2>
 </section>
 </section>
 
@@ -264,16 +983,16 @@
               <ul>
 <li><a class="reference internal" href="#">query_strategies package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#query-strategies-interpolation-sampling-strategy-module">query_strategies.interpolation_sampling_strategy module</a></li>
-<li><a class="reference internal" href="#query-strategies-query-strategy-module">query_strategies.query_strategy module</a></li>
-<li><a class="reference internal" href="#query-strategies-random-sampling-strategy-module">query_strategies.random_sampling_strategy module</a></li>
-<li><a class="reference internal" href="#query-strategies-representativeness-sampling-clustering-module">query_strategies.representativeness_sampling_clustering module</a></li>
-<li><a class="reference internal" href="#query-strategies-representativeness-sampling-distances-module">query_strategies.representativeness_sampling_distances module</a></li>
-<li><a class="reference internal" href="#query-strategies-representativeness-sampling-strategy-base-module">query_strategies.representativeness_sampling_strategy_base module</a></li>
-<li><a class="reference internal" href="#query-strategies-representativeness-sampling-uncertainty-module">query_strategies.representativeness_sampling_uncertainty module</a></li>
-<li><a class="reference internal" href="#query-strategies-uncertainty-sampling-strategy-module">query_strategies.uncertainty_sampling_strategy module</a></li>
-<li><a class="reference internal" href="#query-strategies-utils-module">query_strategies.utils module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li><a class="reference internal" href="#module-query_strategies.interpolation_sampling_strategy">query_strategies.interpolation_sampling_strategy module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.query_strategy">query_strategies.query_strategy module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.random_sampling_strategy">query_strategies.random_sampling_strategy module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.representativeness_sampling_clustering">query_strategies.representativeness_sampling_clustering module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.representativeness_sampling_distances">query_strategies.representativeness_sampling_distances module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.representativeness_sampling_strategy_base">query_strategies.representativeness_sampling_strategy_base module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.representativeness_sampling_uncertainty">query_strategies.representativeness_sampling_uncertainty module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.uncertainty_sampling_strategy">query_strategies.uncertainty_sampling_strategy module</a></li>
+<li><a class="reference internal" href="#module-query_strategies.utils">query_strategies.utils module</a></li>
+<li><a class="reference internal" href="#module-query_strategies">Module contents</a></li>
 </ul>
 </li>
 </ul>

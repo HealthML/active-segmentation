@@ -186,8 +186,123 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="main-module">
-<h1>main module<a class="headerlink" href="#main-module" title="Permalink to this headline">¶</a></h1>
+  <section id="module-main">
+<span id="main-module"></span><h1>main module<a class="headerlink" href="#module-main" title="Permalink to this headline">¶</a></h1>
+<p>Main module to execute active learning pipeline from CLI</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="main.create_data_module">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">create_data_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_learning_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#create_data_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.create_data_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the correct data module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>string</em>) – Name of the dataset. E.g. ‘brats’</p></li>
+<li><p><strong>data_dir</strong> (<em>string</em><em>, </em><em>optional</em>) – Main directory with the dataset. E.g. ‘./data’</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of training examples passed in one training step.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of workers.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – Random constant for shuffling the data</p></li>
+<li><p><strong>active_learning_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em>) – Dictionary with active learning specific parameters.</p></li>
+<li><p><strong>dataset_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Dictionary with dataset specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The data module.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.create_model">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">create_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">architecture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_weight_scheduler_max_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#create_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.create_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the specified model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_module</strong> (<a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><em>ActiveLearningDataModule</em></a>) – A data module object providing data.</p></li>
+<li><p><strong>architecture</strong> (<em>string</em>) – Name of the desired model architecture. E.g. ‘u_net’.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – The step size at each iteration while moving towards a minimum of the loss.</p></li>
+<li><p><strong>lr_scheduler</strong> (<em>string</em><em>, </em><em>optional</em>) – Algorithm used for dynamically updating the learning rate during training.
+E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p></li>
+<li><p><strong>num_levels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</p></li>
+<li><p><strong>model_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Dictionary with model specific parameters.</p></li>
+<li><p><strong>loss_weight_scheduler_max_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of steps for pseudo-label loss weight scheduler.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.create_query_strategy">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">create_query_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#create_query_strategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.create_query_strategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialises the chosen query strategy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>strategy_config</strong> (<em>dict</em>) – Configuration of the query strategy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.run_active_learning_pipeline">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">run_active_learning_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">architecture</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selection_criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean_dice_score_0.5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_learning_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lr_scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./predictions'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wandb_project_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'active-segmentation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_model_every_epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_wandb_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#run_active_learning_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.run_active_learning_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function to execute an active learning pipeline run, or start an active learning simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>architecture</strong> (<em>string</em>) – Name of the desired model architecture. E.g. ‘u_net’.</p></li>
+<li><p><strong>dataset</strong> (<em>string</em>) – Name of the dataset. E.g. ‘brats’</p></li>
+<li><p><strong>strategy_config</strong> (<em>dict</em>) – Configuration of the query strategy.</p></li>
+<li><p><strong>experiment_name</strong> (<em>string</em>) – Name of the experiment.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of training examples passed in one training step.</p></li>
+<li><p><strong>checkpoint_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory where the model checkpoints are to be saved.</p></li>
+<li><p><strong>data_dir</strong> (<em>string</em><em>, </em><em>optional</em>) – Main directory with the dataset. E.g. ‘./data’</p></li>
+<li><p><strong>dataset_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Dictionary with dataset specific parameters.</p></li>
+<li><p><strong>model_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Dictionary with model specific parameters.</p></li>
+<li><p><strong>active_learning_config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>optional</em>) – Dictionary with active learning specific parameters.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of iterations with the full dataset.</p></li>
+<li><p><strong>experiment_tags</strong> (<em>Iterable</em><em>[</em><em>string</em><em>]</em><em>, </em><em>optional</em>) – Tags with which to label the experiment.</p></li>
+<li><p><strong>gpus</strong> (<em>int</em>) – Number of GPUS to use for model training.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of workers.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – The step size at each iteration while moving towards a minimum of the loss.</p></li>
+<li><p><strong>lr_scheduler</strong> (<em>string</em><em>, </em><em>optional</em>) – Algorithm used for dynamically updating the learning rate during training.
+E.g. ‘reduceLROnPlateau’ or ‘cosineAnnealingLR’</p></li>
+<li><p><strong>num_levels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number levels (encoder and decoder blocks) in the U-Net. Defaults to 4.</p></li>
+<li><p><strong>early_stopping</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable/Disable Early stopping when model
+is not learning anymore (default = False).</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – Random constant for shuffling the data</p></li>
+<li><p><strong>wandb_project_name</strong> (<em>string</em><em>, </em><em>optional</em>) – Name of the project that the W&amp;B runs are stored in.</p></li>
+<li><p><strong>deterministic_mode</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether only deterministic CUDA operations should be used. Defaults to
+<cite>True</cite>.</p></li>
+<li><p><strong>save_model_every_epoch</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the model files of all epochs are to be saved or only the
+model file of the best epoch. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>clear_wandb_cache</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the whole Weights and Biases cache should be deleted when the run
+is finished. Should only be used when no other runs are running in parallel. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.run_active_learning_pipeline_from_config">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">run_active_learning_pipeline_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hp_optimisation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#run_active_learning_pipeline_from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.run_active_learning_pipeline_from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the active learning pipeline based on a config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file_name</strong> – Name of or path to the config file.</p></li>
+<li><p><strong>hp_optimisation</strong> – If this flag is set, run the pipeline with different hyperparameters based
+on the configured sweep file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

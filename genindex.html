@@ -199,6 +199,7 @@
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -212,12 +213,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functional.html#functional.losses.AbstractDiceLoss">AbstractDiceLoss (class in functional.losses)</a>
 </li>
-      <li><a href="configuration.html#index-25"><strong>active_learning_mode</strong></a>
+      <li>
+    active_learning
+
+      <ul>
+        <li><a href="active_learning.html#module-active_learning">module</a>
 </li>
-      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule">ActiveLearningDataModule (class in datasets.data_module)</a>
+      </ul></li>
+      <li><a href="configuration.html#index-25"><strong>active_learning_mode</strong></a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule">ActiveLearningDataModule (class in datasets.data_module)</a>
+</li>
+      <li><a href="active_learning.html#active_learning.ActiveLearningPipeline">ActiveLearningPipeline (class in active_learning)</a>
+</li>
       <li><a href="datasets.html#datasets.bcss_dataset.BCSSDataset.add_image">add_image() (datasets.bcss_dataset.BCSSDataset method)</a>
 
       <ul>
@@ -258,6 +268,10 @@
 </li>
       <li><a href="configuration.html#index-3"><strong>checkpoint_dir</strong></a>
 </li>
+      <li><a href="query_strategies.html#query_strategies.utils.clean_duplicate_scans">clean_duplicate_scans() (in module query_strategies.utils)</a>
+</li>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy">ClusteringBasedRepresentativenessSamplingStrategy (class in query_strategies.representativeness_sampling_clustering)</a>
+</li>
       <li><a href="metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric">CombinedPerEpochMetric (class in metric_tracking.combined_per_epoch_metric)</a>
 </li>
       <li><a href="metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric">CombinedPerImageMetric (class in metric_tracking.combined_per_image_metric)</a>
@@ -276,17 +290,45 @@
         <li><a href="metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.compute">(metric_tracking.combined_per_image_metric.CombinedPerImageMetric method)</a>
 </li>
       </ul></li>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.compute_representativeness_scores">compute_representativeness_scores() (query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy method)</a>
+
+      <ul>
+        <li><a href="query_strategies.html#query_strategies.representativeness_sampling_distances.DistanceBasedRepresentativenessSamplingStrategy.compute_representativeness_scores">(query_strategies.representativeness_sampling_distances.DistanceBasedRepresentativenessSamplingStrategy method)</a>
+</li>
+        <li><a href="query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.compute_representativeness_scores">(query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase method)</a>
+</li>
+        <li><a href="query_strategies.html#query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy.compute_representativeness_scores">(query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="query_strategies.html#query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy.compute_uncertainties">compute_uncertainties() (query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.configure_loss">configure_loss() (models.pytorch_model.PytorchModel static method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.configure_metrics">configure_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.configure_optimizers">configure_optimizers() (models.pytorch_model.PytorchModel method)</a>
+</li>
       <li><a href="datasets.html#datasets.bcss_data_module.copy_test_set_to_separate_folder">copy_test_set_to_separate_folder() (in module datasets.bcss_data_module)</a>
 </li>
       <li><a href="run_experiments.html#run_experiments.create_config_files">create_config_files() (in module run_experiments)</a>
+</li>
+      <li><a href="main.html#main.create_data_module">create_data_module() (in module main)</a>
+</li>
+      <li><a href="main.html#main.create_model">create_model() (in module main)</a>
+</li>
+      <li><a href="main.html#main.create_query_strategy">create_query_strategy() (in module main)</a>
 </li>
       <li><a href="run_experiments.html#run_experiments.create_sbatch_jobs_from_config_files">create_sbatch_jobs_from_config_files() (in module run_experiments)</a>
 </li>
       <li><a href="functional.html#functional.losses.CrossEntropyDiceLoss">CrossEntropyDiceLoss (class in functional.losses)</a>
 </li>
       <li><a href="functional.html#functional.losses.CrossEntropyLoss">CrossEntropyLoss (class in functional.losses)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.current_epoch">current_epoch (models.pytorch_model.PytorchModel property)</a>
+</li>
+      <li><a href="models.html#models.loss_weight_scheduler.LossWeightScheduler.current_weight">current_weight() (models.loss_weight_scheduler.LossWeightScheduler method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -393,6 +435,10 @@
         <li><a href="datasets.html#datasets.decathlon_data_module.DecathlonDataModule.discover_paths">(datasets.decathlon_data_module.DecathlonDataModule static method)</a>
 </li>
       </ul></li>
+      <li><a href="query_strategies.html#query_strategies.utils.distance_to_max_uncertainty">distance_to_max_uncertainty() (in module query_strategies.utils)</a>
+</li>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_distances.DistanceBasedRepresentativenessSamplingStrategy">DistanceBasedRepresentativenessSamplingStrategy (class in query_strategies.representativeness_sampling_distances)</a>
+</li>
       <li><a href="datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset">DoublyShuffledNIfTIDataset (class in datasets.doubly_shuffled_nifti_dataset)</a>
 </li>
   </ul></td>
@@ -401,10 +447,14 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="query_strategies.html#query_strategies.utils.entropy">entropy() (in module query_strategies.utils)</a>
+</li>
       <li><a href="configuration.html#index-5"><strong>epochs</strong></a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.eval">eval() (models.pytorch_u_net.PytorchUNet method)</a>
+</li>
       <li><a href="configuration.html#index-1"><strong>experiment_name</strong></a>
 </li>
       <li><a href="configuration.html#index-2"><strong>experiment_tags</strong></a>
@@ -438,6 +488,10 @@
 </li>
         <li><a href="functional.html#functional.losses.GeneralizedDiceLoss.forward">(functional.losses.GeneralizedDiceLoss method)</a>
 </li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.forward">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+        <li><a href="models.html#models.u_net.UNet.forward">(models.u_net.UNet method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -446,6 +500,13 @@
 
       <ul>
         <li><a href="functional.html#module-functional">module</a>
+</li>
+      </ul></li>
+      <li>
+    functional.interpretation
+
+      <ul>
+        <li><a href="functional.html#module-functional.interpretation">module</a>
 </li>
       </ul></li>
       <li>
@@ -479,6 +540,10 @@
 </li>
       <li><a href="datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.generate_active_learning_split">generate_active_learning_split() (datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset static method)</a>
 </li>
+      <li><a href="functional.html#functional.interpretation.HeatMaps.generate_grayscale_cam">generate_grayscale_cam() (functional.interpretation.HeatMaps method)</a>
+</li>
+      <li><a href="functional.html#functional.interpretation.HeatMaps.generate_grayscale_logits">generate_grayscale_logits() (functional.interpretation.HeatMaps method)</a>
+</li>
       <li><a href="datasets.html#datasets.bcss_dataset.BCSSDataset.get_case_id">get_case_id() (datasets.bcss_dataset.BCSSDataset static method)</a>
 </li>
       <li><a href="functional.html#functional.losses.AbstractDiceLoss.get_dice_loss_module">get_dice_loss_module() (functional.losses.AbstractDiceLoss method)</a>
@@ -499,6 +564,12 @@
 </li>
       <li><a href="metric_tracking.html#metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric.get_metric_names">get_metric_names() (metric_tracking.combined_per_epoch_metric.CombinedPerEpochMetric method)</a>
 </li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_test_metrics">get_test_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_train_metrics">get_train_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.get_val_metrics">get_val_metrics() (models.pytorch_model.PytorchModel method)</a>
+</li>
       <li><a href="configuration.html#index-7"><strong>gpus</strong></a>
 </li>
   </ul></td>
@@ -509,9 +580,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functional.html#functional.metrics.hausdorff_distance">hausdorff_distance() (in module functional.metrics)</a>
 </li>
+      <li><a href="functional.html#functional.metrics.HausdorffDistance">HausdorffDistance (class in functional.metrics)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="functional.html#functional.metrics.HausdorffDistance">HausdorffDistance (class in functional.metrics)</a>
+      <li><a href="functional.html#functional.interpretation.HeatMaps">HeatMaps (class in functional.interpretation)</a>
 </li>
       <li><a href="configuration.html#index-31"><strong>heatmaps_per_iteration</strong></a>
 </li>
@@ -539,9 +612,32 @@
         <li><a href="datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.image_ids">(datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset method)</a>
 </li>
       </ul></li>
+      <li><a href="inferencing.html#inferencing.Inferencer.inference">inference() (inferencing.Inferencer method)</a>
+</li>
+      <li><a href="inferencing.html#inferencing.Inferencer.inference_image">inference_image() (inferencing.Inferencer method)</a>
+</li>
+      <li><a href="inferencing.html#inferencing.Inferencer.inference_scan">inference_scan() (inferencing.Inferencer method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="inferencing.html#inferencing.Inferencer">Inferencer (class in inferencing)</a>
+</li>
+      <li>
+    inferencing
+
+      <ul>
+        <li><a href="inferencing.html#module-inferencing">module</a>
+</li>
+      </ul></li>
       <li><a href="configuration.html#index-27"><strong>initial_training_set_size</strong></a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.input_dimensionality">input_dimensionality() (models.pytorch_model.PytorchModel method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.input_dimensionality">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
+      <li><a href="query_strategies.html#query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy">InterpolationSamplingStrategy (class in query_strategies.interpolation_sampling_strategy)</a>
 </li>
       <li><a href="functional.html#functional.utils.is_binary">is_binary() (in module functional.utils)</a>
 </li>
@@ -571,12 +667,23 @@
 </li>
       <li><a href="configuration.html#index-13"><strong>loss_config</strong></a>
 </li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.loss_weight_pseudo_labels">loss_weight_pseudo_labels (models.pytorch_model.PytorchModel property)</a>
+</li>
+      <li><a href="models.html#models.loss_weight_scheduler.LossWeightScheduler">LossWeightScheduler (class in models.loss_weight_scheduler)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    main
+
+      <ul>
+        <li><a href="main.html#module-main">module</a>
+</li>
+      </ul></li>
       <li><a href="functional.html#functional.utils.mask_tensor">mask_tensor() (in module functional.utils)</a>
 </li>
       <li>
@@ -603,9 +710,46 @@
       <li><a href="configuration.html#index-17"><strong>model_selection_criterion</strong></a>
 </li>
       <li>
+    models
+
+      <ul>
+        <li><a href="models.html#module-models">module</a>
+</li>
+      </ul></li>
+      <li>
+    models.loss_weight_scheduler
+
+      <ul>
+        <li><a href="models.html#module-models.loss_weight_scheduler">module</a>
+</li>
+      </ul></li>
+      <li>
+    models.pytorch_model
+
+      <ul>
+        <li><a href="models.html#module-models.pytorch_model">module</a>
+</li>
+      </ul></li>
+      <li>
+    models.pytorch_u_net
+
+      <ul>
+        <li><a href="models.html#module-models.pytorch_u_net">module</a>
+</li>
+      </ul></li>
+      <li>
+    models.u_net
+
+      <ul>
+        <li><a href="models.html#module-models.u_net">module</a>
+</li>
+      </ul></li>
+      <li>
     module
 
       <ul>
+        <li><a href="active_learning.html#module-active_learning">active_learning</a>
+</li>
         <li><a href="datasets.html#module-datasets">datasets</a>
 </li>
         <li><a href="datasets.html#module-datasets.bcss_data_module">datasets.bcss_data_module</a>
@@ -626,11 +770,17 @@
 </li>
         <li><a href="functional.html#module-functional">functional</a>
 </li>
+        <li><a href="functional.html#module-functional.interpretation">functional.interpretation</a>
+</li>
         <li><a href="functional.html#module-functional.losses">functional.losses</a>
 </li>
         <li><a href="functional.html#module-functional.metrics">functional.metrics</a>
 </li>
         <li><a href="functional.html#module-functional.utils">functional.utils</a>
+</li>
+        <li><a href="inferencing.html#module-inferencing">inferencing</a>
+</li>
+        <li><a href="main.html#module-main">main</a>
 </li>
         <li><a href="metric_tracking.html#module-metric_tracking">metric_tracking</a>
 </li>
@@ -638,11 +788,43 @@
 </li>
         <li><a href="metric_tracking.html#module-metric_tracking.combined_per_image_metric">metric_tracking.combined_per_image_metric</a>
 </li>
+        <li><a href="models.html#module-models">models</a>
+</li>
+        <li><a href="models.html#module-models.loss_weight_scheduler">models.loss_weight_scheduler</a>
+</li>
+        <li><a href="models.html#module-models.pytorch_model">models.pytorch_model</a>
+</li>
+        <li><a href="models.html#module-models.pytorch_u_net">models.pytorch_u_net</a>
+</li>
+        <li><a href="models.html#module-models.u_net">models.u_net</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies">query_strategies</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.interpolation_sampling_strategy">query_strategies.interpolation_sampling_strategy</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.query_strategy">query_strategies.query_strategy</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.random_sampling_strategy">query_strategies.random_sampling_strategy</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_clustering">query_strategies.representativeness_sampling_clustering</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_distances">query_strategies.representativeness_sampling_distances</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_strategy_base">query_strategies.representativeness_sampling_strategy_base</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_uncertainty">query_strategies.representativeness_sampling_uncertainty</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.uncertainty_sampling_strategy">query_strategies.uncertainty_sampling_strategy</a>
+</li>
+        <li><a href="query_strategies.html#module-query_strategies.utils">query_strategies.utils</a>
+</li>
         <li><a href="run_experiments.html#module-run_experiments">run_experiments</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="query_strategies.html#query_strategies.interpolation_sampling_strategy.morphological_contour_interpolation">morphological_contour_interpolation() (in module query_strategies.interpolation_sampling_strategy)</a>
+</li>
       <li><a href="datasets.html#datasets.bcss_data_module.BCSSDataModule.multi_label">multi_label() (datasets.bcss_data_module.BCSSDataModule method)</a>
 
       <ul>
@@ -687,10 +869,16 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="functional.html#functional.utils.one_hot_encode">one_hot_encode() (in module functional.utils)</a>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.on_select_item">on_select_item() (query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy method)</a>
+
+      <ul>
+        <li><a href="query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.on_select_item">(query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.utils.one_hot_encode">one_hot_encode() (in module functional.utils)</a>
+</li>
       <li><a href="configuration.html#index-12"><strong>optimizer</strong></a>
 </li>
   </ul></td>
@@ -699,13 +887,117 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.parameters">parameters() (models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.precision">precision (models.pytorch_u_net.PytorchUNet attribute)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.predict">predict() (models.pytorch_model.PytorchModel method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.predict_step">predict_step() (models.pytorch_model.PytorchModel method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.predict_step">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
       <li><a href="configuration.html#index-8"><strong>prediction_count</strong></a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="configuration.html#index-9"><strong>prediction_dir</strong></a>
 </li>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy.prepare_representativeness_computation">prepare_representativeness_computation() (query_strategies.representativeness_sampling_clustering.ClusteringBasedRepresentativenessSamplingStrategy method)</a>
+
+      <ul>
+        <li><a href="query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.prepare_representativeness_computation">(query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase method)</a>
+</li>
+        <li><a href="query_strategies.html#query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy.prepare_representativeness_computation">(query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy method)</a>
+</li>
+      </ul></li>
       <li><a href="functional.html#functional.utils.preprocess_metric_inputs">preprocess_metric_inputs() (in module functional.utils)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel">PytorchModel (class in models.pytorch_model)</a>
+</li>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet">PytorchUNet (class in models.pytorch_u_net)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    query_strategies
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.interpolation_sampling_strategy
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.interpolation_sampling_strategy">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.query_strategy
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.query_strategy">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.random_sampling_strategy
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.random_sampling_strategy">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.representativeness_sampling_clustering
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_clustering">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    query_strategies.representativeness_sampling_distances
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_distances">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.representativeness_sampling_strategy_base
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_strategy_base">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.representativeness_sampling_uncertainty
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.representativeness_sampling_uncertainty">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.uncertainty_sampling_strategy
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.uncertainty_sampling_strategy">module</a>
+</li>
+      </ul></li>
+      <li>
+    query_strategies.utils
+
+      <ul>
+        <li><a href="query_strategies.html#module-query_strategies.utils">module</a>
+</li>
+      </ul></li>
+      <li><a href="query_strategies.html#query_strategies.query_strategy.QueryStrategy">QueryStrategy (class in query_strategies.query_strategy)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -715,7 +1007,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="configuration.html#index-10"><strong>random_state</strong></a>
 </li>
+      <li><a href="query_strategies.html#query_strategies.random_sampling_strategy.RandomSamplingStrategy">RandomSamplingStrategy (class in query_strategies.random_sampling_strategy)</a>
+</li>
       <li><a href="datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.read_mask_for_image">read_mask_for_image() (datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset method)</a>
+</li>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.reduce_features">reduce_features() (query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase method)</a>
 </li>
       <li><a href="functional.html#functional.utils.reduce_metric">reduce_metric() (in module functional.utils)</a>
 </li>
@@ -731,9 +1027,13 @@
         <li><a href="datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.remove_image">(datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset method)</a>
 </li>
       </ul></li>
+      <li><a href="functional.html#functional.utils.remove_padding">remove_padding() (in module functional.utils)</a>
+</li>
+      <li><a href="active_learning.html#active_learning.ActiveLearningPipeline.remove_wandb_cache">remove_wandb_cache() (active_learning.ActiveLearningPipeline static method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="functional.html#functional.utils.remove_padding">remove_padding() (in module functional.utils)</a>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase">RepresentativenessSamplingStrategyBase (class in query_strategies.representativeness_sampling_strategy_base)</a>
 </li>
       <li><a href="functional.html#functional.metrics.HausdorffDistance.reset">reset() (functional.metrics.HausdorffDistance method)</a>
 
@@ -743,7 +1043,19 @@
         <li><a href="metric_tracking.html#metric_tracking.combined_per_image_metric.CombinedPerImageMetric.reset">(metric_tracking.combined_per_image_metric.CombinedPerImageMetric method)</a>
 </li>
       </ul></li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.reset_parameters">reset_parameters() (models.pytorch_model.PytorchModel method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.reset_parameters">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
       <li><a href="configuration.html#index-26"><strong>reset_weights</strong></a>
+</li>
+      <li><a href="active_learning.html#active_learning.ActiveLearningPipeline.run">run() (active_learning.ActiveLearningPipeline method)</a>
+</li>
+      <li><a href="main.html#main.run_active_learning_pipeline">run_active_learning_pipeline() (in module main)</a>
+</li>
+      <li><a href="main.html#main.run_active_learning_pipeline_from_config">run_active_learning_pipeline_from_config() (in module main)</a>
 </li>
       <li>
     run_experiments
@@ -762,11 +1074,39 @@
 </li>
       <li><a href="functional.html#functional.metrics.SegmentationMetric">SegmentationMetric (class in functional.metrics)</a>
 </li>
+      <li><a href="query_strategies.html#query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy.select_items_to_label">select_items_to_label() (query_strategies.interpolation_sampling_strategy.InterpolationSamplingStrategy method)</a>
+
+      <ul>
+        <li><a href="query_strategies.html#query_strategies.query_strategy.QueryStrategy.select_items_to_label">(query_strategies.query_strategy.QueryStrategy method)</a>
+</li>
+        <li><a href="query_strategies.html#query_strategies.random_sampling_strategy.RandomSamplingStrategy.select_items_to_label">(query_strategies.random_sampling_strategy.RandomSamplingStrategy method)</a>
+</li>
+        <li><a href="query_strategies.html#query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase.select_items_to_label">(query_strategies.representativeness_sampling_strategy_base.RepresentativenessSamplingStrategyBase method)</a>
+</li>
+        <li><a href="query_strategies.html#query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy.select_items_to_label">(query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy method)</a>
+</li>
+      </ul></li>
+      <li><a href="query_strategies.html#query_strategies.utils.select_uncertainty_calculation">select_uncertainty_calculation() (in module query_strategies.utils)</a>
+</li>
+      <li><a href="functional.html#functional.interpretation.SemanticSegmentationTarget">SemanticSegmentationTarget (class in functional.interpretation)</a>
+</li>
       <li><a href="functional.html#functional.metrics.Sensitivity">Sensitivity (class in functional.metrics)</a>
 </li>
       <li><a href="functional.html#functional.metrics.sensitivity">sensitivity() (in module functional.metrics)</a>
 </li>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.setup">setup() (datasets.data_module.ActiveLearningDataModule method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_model.PytorchModel.setup">(models.pytorch_model.PytorchModel method)</a>
+</li>
+      </ul></li>
+      <li><a href="active_learning.html#active_learning.ActiveLearningPipeline.setup_trainer">setup_trainer() (active_learning.ActiveLearningPipeline method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functional.html#functional.interpretation.HeatMaps.show_grayscale_heatmap_on_image">show_grayscale_heatmap_on_image() (functional.interpretation.HeatMaps static method)</a>
+</li>
+      <li><a href="query_strategies.html#query_strategies.interpolation_sampling_strategy.signed_distance_interpolation">signed_distance_interpolation() (in module query_strategies.interpolation_sampling_strategy)</a>
 </li>
       <li><a href="functional.html#functional.metrics.single_class_hausdorff_distance">single_class_hausdorff_distance() (in module functional.metrics)</a>
 </li>
@@ -778,8 +1118,6 @@
         <li><a href="datasets.html#datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset.size">(datasets.doubly_shuffled_nifti_dataset.DoublyShuffledNIfTIDataset method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets.html#datasets.bcss_dataset.BCSSDataset.slices_per_image">slices_per_image() (datasets.bcss_dataset.BCSSDataset method)</a>
 
       <ul>
@@ -794,6 +1132,10 @@
 </li>
       <li><a href="run_experiments.html#run_experiments.start_sbatch_runs">start_sbatch_runs() (in module run_experiments)</a>
 </li>
+      <li><a href="models.html#models.loss_weight_scheduler.LossWeightScheduler.step">step() (models.loss_weight_scheduler.LossWeightScheduler method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.step_loss_weight_pseudo_labels_scheduler">step_loss_weight_pseudo_labels_scheduler() (models.pytorch_model.PytorchModel method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -802,11 +1144,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.test_dataloader">test_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.test_epoch_end">test_epoch_end() (models.pytorch_model.PytorchModel method)</a>
+</li>
       <li><a href="configuration.html#index-21"><strong>test_metric_confidence_levels</strong></a>
 </li>
       <li><a href="configuration.html#index-20"><strong>test_metrics</strong></a>
 </li>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.test_set_size">test_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
+</li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.test_step">test_step() (models.pytorch_model.PytorchModel method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.test_step">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.train">train() (models.pytorch_u_net.PytorchUNet method)</a>
 </li>
       <li><a href="datasets.html#datasets.bcss_data_module.BCSSDataModule.train_dataloader">train_dataloader() (datasets.bcss_data_module.BCSSDataModule method)</a>
 
@@ -841,13 +1193,27 @@
 </li>
         <li><a href="functional.html#functional.losses.SegmentationLoss.training">(functional.losses.SegmentationLoss attribute)</a>
 </li>
+        <li><a href="models.html#models.pytorch_model.PytorchModel.training">(models.pytorch_model.PytorchModel attribute)</a>
+</li>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.training">(models.pytorch_u_net.PytorchUNet attribute)</a>
+</li>
+        <li><a href="models.html#models.u_net.UNet.training">(models.u_net.UNet attribute)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.training_epoch_end">training_epoch_end() (models.pytorch_model.PytorchModel method)</a>
+</li>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.training_set_num_pseudo_labels">training_set_num_pseudo_labels() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.training_set_size">training_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.training_step">training_step() (models.pytorch_model.PytorchModel method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.training_step">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
       <li><a href="configuration.html#index-32"><strong>type</strong></a>
 </li>
   </ul></td>
@@ -856,6 +1222,12 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="query_strategies.html#query_strategies.representativeness_sampling_uncertainty.UncertaintyRepresentativenessSamplingStrategy">UncertaintyRepresentativenessSamplingStrategy (class in query_strategies.representativeness_sampling_uncertainty)</a>
+</li>
+      <li><a href="query_strategies.html#query_strategies.uncertainty_sampling_strategy.UncertaintySamplingStrategy">UncertaintySamplingStrategy (class in query_strategies.uncertainty_sampling_strategy)</a>
+</li>
+      <li><a href="models.html#models.u_net.UNet">UNet (class in models.u_net)</a>
+</li>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.unlabeled_dataloader">unlabeled_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.unlabeled_set_size">unlabeled_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
@@ -875,6 +1247,10 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#models.pytorch_u_net.PytorchUNet.use_amp">use_amp (models.pytorch_u_net.PytorchUNet attribute)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
@@ -882,12 +1258,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.val_dataloader">val_dataloader() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functional.html#functional.utils.validate_metric_inputs">validate_metric_inputs() (in module functional.utils)</a>
 </li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.validation_epoch_end">validation_epoch_end() (models.pytorch_model.PytorchModel method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="datasets.html#datasets.data_module.ActiveLearningDataModule.validation_set_size">validation_set_size() (datasets.data_module.ActiveLearningDataModule method)</a>
 </li>
+      <li><a href="models.html#models.pytorch_model.PytorchModel.validation_step">validation_step() (models.pytorch_model.PytorchModel method)</a>
+
+      <ul>
+        <li><a href="models.html#models.pytorch_u_net.PytorchUNet.validation_step">(models.pytorch_u_net.PytorchUNet method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
