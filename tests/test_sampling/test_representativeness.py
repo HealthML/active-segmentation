@@ -51,6 +51,7 @@ class DataLoaderMock:
                         self.image_size,
                     )
                 ),
+                None,
                 case_id_batch,
             )
             for case_id_batch in case_id_batches
