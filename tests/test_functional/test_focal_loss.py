@@ -99,7 +99,7 @@ class TestFocalLoss(unittest.TestCase):
 
         return -1 * (
             np.log(prediction) * ((1 - prediction) ** gamma) * target
-            + np.log(1 - prediction) * (prediction ** gamma) * (1 - target)
+            + np.log(1 - prediction) * (prediction**gamma) * (1 - target)
         )
 
     def _test_loss(
