@@ -47,6 +47,7 @@ License
 
    configuration
    active_segmentation
+   extensions
 
 Indices and tables
 -------------------
