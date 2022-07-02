@@ -27,21 +27,6 @@ Issues
 Submit issues, feature requests or bugfixes on
 `github <https://github.com/HealthML/active-segmentation/issues>`__.
 
-
-How to Cite
------------
-
-If you use ``active segmentation`` in the context of academic or industry research, please
-consider citing the paper.
-
-`Paper <...>`_
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code:: bash
-
-    @...{
-    }
-
 License
 -------------------
 
