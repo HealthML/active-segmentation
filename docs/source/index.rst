@@ -3,19 +3,53 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Active Segmentation's documentation!
-===============================================
+Active Segmentation
+=======================================
+
+*An active learning benchmarking framework for scientists seeking comparability and reproducibility.*
+
+``active segmentation`` provides a flexible and expressive API for evaluating active learning strategies for
+medical image segmentation.
+
+With ``active segmentation``, you can:
+
+#. Define own segmentation models by implementing :py:meth:`models.pytorch_model.PytorchModel`, or use pre-configured :ref:`models<models>` like the U-Net.
+#. Add own datasets by implementing :py:meth:`datasets.data_module.ActiveLearningDataModule`, or use already added :ref:`datasets<datasets>` like the
+   `medical segmentation decathlon <http://medicaldecathlon.com>`_.
+#. Evaluate active learning :ref:`query strategies<query_strategies`, or define and test new strategies by implementing :py:meth:`query_strategies.query_strategy.QueryStrategy`.
+#. Train two-dimensional or three-dimensional segmentation models.
+#. Run fully reproducible experiments, with seeded random processes and only deterministic operations.
+#. Track various :ref:`metrics<metric_tracking>` with `Weights and Biases <https://wandb.ai/>`_.
+
+Issues
+------
+
+Submit issues, feature requests or bugfixes on
+`github <https://github.com/HealthML/active-segmentation/issues>`__.
+
+License
+-------------------
+
+``active segmentation`` is licensed under the `AGPL-3.0 license <https://github.com/HealthML/active-segmentation/blob/main/LICENSE>`_.
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Introduction
+   :hidden:
 
-   active_segmentation
+   self
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents
+   :hidden:
+
    configuration
-   brats
+   active_segmentation
 
 Indices and tables
-==================
+-------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

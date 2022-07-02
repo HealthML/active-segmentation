@@ -20,9 +20,9 @@ sys.path.insert(0, os.path.abspath("../../src"))
 
 project = "Active Segmentation"
 copyright = (
-    '2021, Masterprojekt "Medical Image Segmentation" (WS 2021/22, Prof. Lippert)'
+    '2022, Chair of Digital Health - Machine Learning @ Hasso-Plattner Institute'
 )
-author = 'Masterprojekt "Medical Image Segmentation" (WS 2021/22, Prof. Lippert)'
+author = 'Chair of Digital Health - Machine Learning @ Hasso-Plattner Institute'
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.1"
