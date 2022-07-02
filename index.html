@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to Active Segmentation’s documentation! &mdash; Active Segmentation 0.0.1 documentation</title>
+  <title>Active Segmentation &mdash; Active Segmentation 0.0.1 documentation</title>
   
 
   
@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css" type="text/css" />
   <link rel="index" title="Index" href="genindex.html" />
   <link rel="search" title="Search" href="search.html" />
-  <link rel="next" title="Active Learning Framework" href="active_segmentation.html" /> 
+  <link rel="next" title="Configuration" href="configuration.html" /> 
 
   <!-- Preload the theme fonts -->
 
@@ -133,8 +133,13 @@
         
         
         
-        <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+        <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Active Segmentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="run_experiments.html">run_experiments module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
@@ -147,8 +152,6 @@
 <li class="toctree-l2"><a class="reference internal" href="query_strategies.html">query_strategies package</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a></li>
 </ul>
 
         
@@ -163,7 +166,7 @@
         <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="sphinx-template-breadcrumbs">
       <li><a href="#" class="fa fa-large fa-home">Docs</a> &gt;</li>
-      <li>Welcome to Active Segmentation’s documentation!</li>
+      <li>Active Segmentation</li>
       <li class="sphinx-template-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"><img src="_static/images/view-page-source-icon.svg"></a>
       </li>
@@ -184,39 +187,42 @@
             <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
               <article itemprop="articleBody" id="sphinx-template-article" class="sphinx-template-article">
                 
-  <section id="welcome-to-active-segmentation-s-documentation">
-<h1>Welcome to Active Segmentation’s documentation!<a class="headerlink" href="#welcome-to-active-segmentation-s-documentation" title="Permalink to this headline">¶</a></h1>
+  <section id="active-segmentation">
+<h1>Active Segmentation<a class="headerlink" href="#active-segmentation" title="Permalink to this headline">¶</a></h1>
+<p><em>An active learning benchmarking framework for scientists seeking comparability and reproducibility.</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">active</span> <span class="pre">segmentation</span></code> provides a flexible and expressive API for evaluating active learning strategies for
+medical image segmentation.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">active</span> <span class="pre">segmentation</span></code>, you can:</p>
+<ol class="arabic simple">
+<li><p>Define own segmentation models by implementing <a class="reference internal" href="models.html#models.pytorch_model.PytorchModel" title="models.pytorch_model.PytorchModel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">models.pytorch_model.PytorchModel()</span></code></a>, or use pre-configured <span class="xref std std-ref">models</span> like the U-Net.</p></li>
+<li><p>Add own datasets by implementing <a class="reference internal" href="datasets.html#datasets.data_module.ActiveLearningDataModule" title="datasets.data_module.ActiveLearningDataModule"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datasets.data_module.ActiveLearningDataModule()</span></code></a>, or use already added <span class="xref std std-ref">datasets</span> like the
+<a class="reference external" href="http://medicaldecathlon.com">medical segmentation decathlon</a>.</p></li>
+<li><p>Evaluate active learning <span class="xref std std-ref">query strategies&lt;query_strategies</span>, or define and test new strategies by implementing <a class="reference internal" href="query_strategies.html#query_strategies.query_strategy.QueryStrategy" title="query_strategies.query_strategy.QueryStrategy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query_strategies.query_strategy.QueryStrategy()</span></code></a>.</p></li>
+<li><p>Train two-dimensional or three-dimensional segmentation models.</p></li>
+<li><p>Run fully reproducible experiments, with seeded random processes and only deterministic operations.</p></li>
+<li><p>Track various <span class="xref std std-ref">metrics</span> with <a class="reference external" href="https://wandb.ai/">Weights and Biases</a>.</p></li>
+</ol>
+<section id="issues">
+<h2>Issues<a class="headerlink" href="#issues" title="Permalink to this headline">¶</a></h2>
+<p>Submit issues, feature requests or bugfixes on
+<a class="reference external" href="https://github.com/HealthML/active-segmentation/issues">github</a>.</p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">active</span> <span class="pre">segmentation</span></code> is licensed under the <a class="reference external" href="https://github.com/HealthML/active-segmentation/blob/main/LICENSE">AGPL-3.0 license</a>.</p>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="active_segmentation.html">Active Learning Framework</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="active_segmentation.html#subpackages">Subpackages</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#general">General</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#model-config-section">[model_config] section</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#dataset-config-section">[dataset_config] section</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#active-learning-config-section">[active_learning_config] section</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#strategy-config-section">[strategy_config] section</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="brats.html">The BraTS Dataset</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="brats.html#general-information">General Information</a></li>
-<li class="toctree-l2"><a class="reference internal" href="brats.html#sample-size-and-data-split">Sample Size and Data Split</a></li>
-<li class="toctree-l2"><a class="reference internal" href="brats.html#details">Details</a></li>
-</ul>
-</li>
-</ul>
+</div>
+<div class="toctree-wrapper compound">
 </div>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+</section>
 </section>
 
 
@@ -227,7 +233,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="active_segmentation.html" class="btn btn-neutral float-right" title="Active Learning Framework" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="configuration.html" class="btn btn-neutral float-right" title="Configuration" accesskey="n" rel="next">Next <img src="_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
     </div>
@@ -237,7 +243,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2021, Masterprojekt &#34;Medical Image Segmentation&#34; (WS 2021/22, Prof. Lippert).
+        &copy; Copyright 2022, Chair of Digital Health - Machine Learning @ Hasso-Plattner Institute.
 
     </p>
   </div>
@@ -256,8 +262,14 @@
           <div class="sphinx-template-right-menu" id="sphinx-template-right-menu">
             <div class="sphinx-template-side-scroll" id="sphinx-template-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">Welcome to Active Segmentation’s documentation!</a></li>
+<li><a class="reference internal" href="#">Active Segmentation</a><ul>
+<li><a class="reference internal" href="#issues">Issues</a></li>
+<li><a class="reference internal" href="#license">License</a><ul>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
 </ul>
 
             </div>
