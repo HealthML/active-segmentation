@@ -27,6 +27,28 @@ Issues
 Submit issues, feature requests or bugfixes on
 `github <https://github.com/HealthML/active-segmentation/issues>`__.
 
+How to Cite
+-----------
+
+If you use ``active segmentation`` in the context of academic or industry research, please
+consider citing the paper.
+
+`Paper <https://arxiv.org/abs/2207.00845>`_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    @misc{https://doi.org/10.48550/arxiv.2207.00845,
+          doi = {10.48550/ARXIV.2207.00845},
+          url = {https://arxiv.org/abs/2207.00845},
+          author = {Burmeister, Josafat-Mattias and Fernandez Rosas, Marcel and Hagemann, Johannes and Kordt, Jonas and Blum, Jasper and Shabo, Simon and Bergner, Benjamin and Lippert, Christoph},
+          keywords = {Computer Vision and Pattern Recognition (cs.CV), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences, I.4.6; I.2.10; J.3},
+          title = {Less Is More: A Comparison of Active Learning Strategies for 3D Medical Image Segmentation},
+          publisher = {arXiv},
+          year = {2022},
+          copyright = {arXiv.org perpetual, non-exclusive license}
+         }
+
 License
 -------------------
 
